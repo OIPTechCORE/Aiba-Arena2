@@ -60,6 +60,16 @@
         "external": false
       },
       "mode": "full"
+    },
+    {
+      "name": "BrokerMarketplaceEscrow",
+      "path": "contracts/broker_marketplace_escrow.tact",
+      "output": "build\\BrokerMarketplaceEscrow",
+      "options": {
+        "debug": false,
+        "external": false
+      },
+      "mode": "full"
     }
   ]
 }
