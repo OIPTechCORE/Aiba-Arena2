@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const crypto = require('crypto');
-const requireTelegram = require('../middleware/requireTelegram');
+const { requireTelegram } = require('../middleware/requireTelegram');
 const Referral = require('../models/Referral');
 
 router.use(requireTelegram);
@@ -11,7 +11,7 @@ function makeCode() {
 
 // POST /api/referrals/create
 router.post('/create', async (req, res) => {
-    const telegramId = String(req.telegramId);
+    const telegramId = String(req.telegramId || '');
 
     const existing = await Referral.findOne({ ownerTelegramId: telegramId, active: true }).lean();
     if (existing) return res.json(existing);
@@ -32,7 +32,7 @@ router.post('/create', async (req, res) => {
 
 // POST /api/referrals/use
 router.post('/use', async (req, res) => {
-    const telegramId = String(req.telegramId);
+    const telegramId = String(req.telegramId || '');
     const code = String(req.body?.code || '').trim().toLowerCase();
     if (!code) return res.status(400).json({ error: 'code required' });
 

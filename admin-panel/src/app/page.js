@@ -7,7 +7,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:500
 
 export default function AdminHome() {
     const [token, setToken] = useState("");
-    const [tab, setTab] = useState("tasks"); // tasks | ads | modes
+    const [tab, setTab] = useState("tasks"); // tasks | ads | modes | economy | mod
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -194,12 +194,97 @@ export default function AdminHome() {
         }
     };
 
+    // ----- Moderation -----
+    const [modError, setModError] = useState("");
+    const [flaggedBrokers, setFlaggedBrokers] = useState([]);
+    const [anomalies, setAnomalies] = useState([]);
+    const [banUserTelegramId, setBanUserTelegramId] = useState("");
+    const [banUserMinutes, setBanUserMinutes] = useState("1440");
+    const [banUserReason, setBanUserReason] = useState("banned");
+    const [banBrokerId, setBanBrokerId] = useState("");
+    const [banBrokerReason, setBanBrokerReason] = useState("broker banned");
+
+    const fetchFlaggedBrokers = async () => {
+        setModError("");
+        try {
+            const res = await api.get("/api/admin/mod/flagged-brokers", { params: { minFlags: 1, limit: 100 } });
+            setFlaggedBrokers(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setModError("Failed to load flagged brokers (missing/invalid admin token?)");
+        }
+    };
+
+    const fetchAnomalies = async () => {
+        setModError("");
+        try {
+            const res = await api.get("/api/admin/mod/recent-anomalies", { params: { limit: 100 } });
+            setAnomalies(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setModError("Failed to load recent anomalies (missing/invalid admin token?)");
+        }
+    };
+
+    const banUser = async () => {
+        setModError("");
+        const telegramId = banUserTelegramId.trim();
+        if (!telegramId) return;
+        try {
+            await api.post("/api/admin/mod/ban-user", {
+                telegramId,
+                minutes: Number(banUserMinutes || 0),
+                reason: banUserReason,
+            });
+            await fetchAnomalies();
+        } catch {
+            setModError("Ban user failed.");
+        }
+    };
+
+    const unbanUser = async () => {
+        setModError("");
+        const telegramId = banUserTelegramId.trim();
+        if (!telegramId) return;
+        try {
+            await api.post("/api/admin/mod/unban-user", { telegramId });
+        } catch {
+            setModError("Unban user failed.");
+        }
+    };
+
+    const banBroker = async () => {
+        setModError("");
+        const brokerId = banBrokerId.trim();
+        if (!brokerId) return;
+        try {
+            await api.post("/api/admin/mod/ban-broker", { brokerId, reason: banBrokerReason });
+            await fetchFlaggedBrokers();
+        } catch {
+            setModError("Ban broker failed.");
+        }
+    };
+
+    const unbanBroker = async () => {
+        setModError("");
+        const brokerId = banBrokerId.trim();
+        if (!brokerId) return;
+        try {
+            await api.post("/api/admin/mod/unban-broker", { brokerId });
+            await fetchFlaggedBrokers();
+        } catch {
+            setModError("Unban broker failed.");
+        }
+    };
+
     useEffect(() => {
         if (!token) return;
         if (tab === "tasks") fetchTasks();
         if (tab === "ads") fetchAds();
         if (tab === "modes") fetchModes();
         if (tab === "economy") fetchEconomy();
+        if (tab === "mod") {
+            fetchFlaggedBrokers();
+            fetchAnomalies();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, tab]);
 
@@ -245,6 +330,9 @@ export default function AdminHome() {
                         </button>
                         <button onClick={() => setTab("economy")} style={{ padding: "8px 12px" }}>
                             Economy
+                        </button>
+                        <button onClick={() => setTab("mod")} style={{ padding: "8px 12px" }}>
+                            Moderation
                         </button>
                         <div style={{ flex: 1 }} />
                         <button onClick={logout} style={{ padding: "8px 12px" }}>

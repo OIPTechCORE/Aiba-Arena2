@@ -1,9 +1,10 @@
 const router = require('express').Router();
 const GameMode = require('../models/GameMode');
+const { requireTelegram } = require('../middleware/requireTelegram');
 
 // Public listing for miniapp
 // GET /api/game-modes?arena=prediction&league=rookie
-router.get('/', async (req, res) => {
+router.get('/', requireTelegram, async (req, res) => {
     try {
         const arena = req.query?.arena ? String(req.query.arena).trim() : null;
         const league = req.query?.league ? String(req.query.league).trim() : null;

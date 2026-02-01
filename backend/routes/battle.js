@@ -8,9 +8,10 @@ const Guild = require('../models/Guild');
 const GameMode = require('../models/GameMode');
 const { hmacSha256Hex, seedFromHex } = require('../engine/deterministicRandom');
 const { simulateBattle } = require('../engine/battleEngine');
-const { getConfig, tryEmitAiba } = require('../engine/economy');
+const { getConfig, tryEmitAiba, tryEmitNeur } = require('../engine/economy');
 const { createSignedClaim } = require('../ton/signRewardClaim');
 const { getVaultLastSeqno } = require('../ton/vaultRead');
+const { rateLimit } = require('../middleware/rateLimit');
 
 const ARENAS = new Set(['prediction', 'simulation', 'strategyWars', 'guildWars']);
 
@@ -39,9 +40,13 @@ function applyEnergyRegen(brokerDoc, now) {
 // - brokerId: string
 // - arena: string ("prediction" | "arbitrage" | ...)
 // - league: string
-router.post('/run', requireTelegram, async (req, res) => {
+router.post(
+    '/run',
+    requireTelegram,
+    rateLimit({ windowMs: 60_000, max: 25, keyFn: (req) => `battle:${req.telegramId || 'unknown'}` }),
+    async (req, res) => {
     try {
-        const telegramId = req.telegramUser?.id ? String(req.telegramUser.id) : '';
+        const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
 
         const requestId = String(req.body?.requestId ?? '').trim();
@@ -55,7 +60,7 @@ router.post('/run', requireTelegram, async (req, res) => {
         if (!ARENAS.has(arena)) return res.status(400).json({ error: 'invalid arena' });
 
         // Ban enforcement
-        const user = await User.findOne({ telegramId }).lean();
+        const user = req.user || (await User.findOne({ telegramId }).lean());
         if (user?.bannedUntil && new Date(user.bannedUntil).getTime() > Date.now()) {
             return res.status(403).json({ error: 'banned', reason: user.bannedReason || 'banned', until: user.bannedUntil });
         }
@@ -120,9 +125,24 @@ router.post('/run', requireTelegram, async (req, res) => {
         const proposedAiba = Math.max(0, Math.floor(score * cfg.baseRewardAibaPerScore * multAiba));
 
         let rewardAiba = 0;
-        const emitResult = await tryEmitAiba(proposedAiba);
+        const emitResult = await tryEmitAiba(proposedAiba, { arena });
         if (emitResult.ok) rewardAiba = proposedAiba;
-        // else: cap hit -> rewardAiba stays 0 (you can fallback to NEUR here)
+
+        // NEUR off-chain ledger (server-authoritative)
+        let rewardNeur = 0;
+        const multNeur = Number(mode?.rewardMultiplierNeur ?? 1) || 1;
+        const proposedNeur = Math.max(0, Math.floor(score * cfg.baseRewardNeurPerScore * multNeur));
+        if (proposedNeur > 0) {
+            const neurEmit = await tryEmitNeur(proposedNeur, { arena });
+            if (neurEmit.ok) {
+                rewardNeur = proposedNeur;
+                await User.updateOne(
+                    { telegramId },
+                    { $inc: { neurBalance: rewardNeur }, $setOnInsert: { telegramId } },
+                    { upsert: true, setDefaultsOnInsert: true }
+                );
+            }
+        }
 
         // Create signature claim payload if configured
         let claim = {};
@@ -193,7 +213,7 @@ router.post('/run', requireTelegram, async (req, res) => {
                 seedHex,
                 score,
                 rewardAiba,
-                rewardNeur: 0,
+                rewardNeur,
                 anomaly,
                 anomalyReason,
                 claim,
@@ -213,7 +233,8 @@ router.post('/run', requireTelegram, async (req, res) => {
         console.error('Error in /api/battle/run:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    }
+);
 
 module.exports = router;
 

@@ -4,9 +4,18 @@ const UserSchema = new mongoose.Schema(
     {
         telegramId: { type: String, index: true },
         username: { type: String, default: '', trim: true },
+        telegram: {
+            username: { type: String, default: '', trim: true },
+            firstName: { type: String, default: '', trim: true },
+            lastName: { type: String, default: '', trim: true },
+            languageCode: { type: String, default: '', trim: true },
+            photoUrl: { type: String, default: '', trim: true },
+        },
+        lastSeenAt: { type: Date, default: null },
         wallet: { type: String, default: '', trim: true },
         aibaBalance: { type: Number, default: 0 },
         pendingAIBA: { type: Number, default: 0 },
+        neurBalance: { type: Number, default: 0 },
 
         // Moderation
         bannedUntil: { type: Date, default: null },

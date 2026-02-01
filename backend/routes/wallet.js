@@ -4,9 +4,9 @@ const { requireTelegram } = require('../middleware/requireTelegram');
 
 router.post('/connect', requireTelegram, async (req, res) => {
     try {
-        const telegramId = req.telegramUser?.id ? String(req.telegramUser.id) : '';
+        const telegramId = req.telegramId ? String(req.telegramId) : '';
         const username =
-            req.telegramUser?.username !== undefined ? String(req.telegramUser.username || '') : String(req.body?.username || '');
+            req.telegramUser?.username !== undefined ? String(req.telegramUser.username || '') : '';
         const address = req.body?.address === undefined ? '' : String(req.body.address).trim();
 
         if (!telegramId) return res.status(400).json({ error: 'telegramId required' });

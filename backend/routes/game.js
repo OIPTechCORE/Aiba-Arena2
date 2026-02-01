@@ -1,10 +1,11 @@
 const router = require('express').Router();
 const User = require('../models/User');
+const { requireTelegram } = require('../middleware/requireTelegram');
 
 // Exported handler for easier testing
 async function postScoreHandler(req, res) {
     try {
-        const telegramId = req.body?.telegramId === undefined ? '' : String(req.body.telegramId).trim();
+        const telegramId = req.telegramId ? String(req.telegramId).trim() : '';
         if (!telegramId) return res.status(400).json({ error: 'telegramId required' });
 
         const numericScore = Number(req.body?.score);
@@ -32,7 +33,7 @@ async function postScoreHandler(req, res) {
     }
 }
 
-router.post('/score', postScoreHandler);
+router.post('/score', requireTelegram, postScoreHandler);
 
 module.exports = router;
 module.exports.postScoreHandler = postScoreHandler;

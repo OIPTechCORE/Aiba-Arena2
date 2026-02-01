@@ -49,14 +49,8 @@ export default function HomePage() {
     useEffect(() => {
         if (!wallet?.account?.address) return;
 
-        const user = getTelegramUserUnsafe();
-        const telegramId = user?.id ? String(user.id) : "local-dev";
-        const username = user?.username ? String(user.username) : "local";
-
         setStatus("Saving wallet…");
         api.post("/api/wallet/connect", {
-            telegramId,
-            username,
             address: wallet.account.address,
         })
             .then(() => setStatus("Wallet connected."))
@@ -85,7 +79,6 @@ export default function HomePage() {
                 brokerId: selectedBrokerId,
                 arena: "prediction",
                 league: "rookie",
-                telegramId: getTelegramUserUnsafe()?.id ? String(getTelegramUserUnsafe().id) : "local-dev",
             });
             setBattle(res.data);
         } catch {

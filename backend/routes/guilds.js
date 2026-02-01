@@ -1,12 +1,12 @@
 const router = require('express').Router();
-const requireTelegram = require('../middleware/requireTelegram');
+const { requireTelegram } = require('../middleware/requireTelegram');
 const Guild = require('../models/Guild');
 
 router.use(requireTelegram);
 
 // POST /api/guilds/create
 router.post('/create', async (req, res) => {
-    const telegramId = String(req.telegramId);
+    const telegramId = String(req.telegramId || '');
     const name = String(req.body?.name || '').trim();
     const bio = String(req.body?.bio || '').trim();
 
@@ -30,7 +30,7 @@ router.post('/create', async (req, res) => {
 
 // POST /api/guilds/join
 router.post('/join', async (req, res) => {
-    const telegramId = String(req.telegramId);
+    const telegramId = String(req.telegramId || '');
     const guildId = String(req.body?.guildId || '').trim();
     if (!guildId) return res.status(400).json({ error: 'guildId required' });
 
@@ -47,7 +47,7 @@ router.post('/join', async (req, res) => {
 
 // POST /api/guilds/leave
 router.post('/leave', async (req, res) => {
-    const telegramId = String(req.telegramId);
+    const telegramId = String(req.telegramId || '');
     const guildId = String(req.body?.guildId || '').trim();
     if (!guildId) return res.status(400).json({ error: 'guildId required' });
 
@@ -61,7 +61,7 @@ router.post('/leave', async (req, res) => {
 
 // GET /api/guilds/mine
 router.get('/mine', async (req, res) => {
-    const telegramId = String(req.telegramId);
+    const telegramId = String(req.telegramId || '');
     const guilds = await Guild.find({ 'members.telegramId': telegramId, active: true }).sort({ createdAt: -1 }).lean();
     res.json(guilds);
 });

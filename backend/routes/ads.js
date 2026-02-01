@@ -1,9 +1,10 @@
 const router = require('express').Router();
 const Ad = require('../models/Ad');
+const { requireTelegram } = require('../middleware/requireTelegram');
 
 // Public ads endpoint for miniapp
 // GET /api/ads?placement=between_battles
-router.get('/', async (req, res) => {
+router.get('/', requireTelegram, async (req, res) => {
     try {
         const placement = String(req.query?.placement || 'between_battles').trim();
         const now = new Date();

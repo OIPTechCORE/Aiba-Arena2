@@ -9,6 +9,10 @@ function verifyTelegramInitData(initData, botToken) {
     const hash = params.get('hash');
     if (!hash) return { ok: false, error: 'missing hash' };
 
+    const authDateRaw = params.get('auth_date');
+    const authDate = authDateRaw ? Number(authDateRaw) : null;
+    const queryId = params.get('query_id') ? String(params.get('query_id')) : null;
+
     params.delete('hash');
 
     // data_check_string is sorted by key, joined with '\n' as `key=value`
@@ -30,7 +34,7 @@ function verifyTelegramInitData(initData, botToken) {
         user = null;
     }
 
-    return { ok: true, user };
+    return { ok: true, user, authDate, queryId };
 }
 
 module.exports = { verifyTelegramInitData };

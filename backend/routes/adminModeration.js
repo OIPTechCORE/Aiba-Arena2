@@ -2,8 +2,48 @@ const router = require('express').Router();
 const { requireAdmin } = require('../middleware/requireAdmin');
 const User = require('../models/User');
 const Broker = require('../models/Broker');
+const Battle = require('../models/Battle');
 
 router.use(requireAdmin());
+
+function clampInt(n, min, max) {
+    const x = Number(n);
+    if (!Number.isFinite(x)) return min;
+    return Math.max(min, Math.min(max, Math.floor(x)));
+}
+
+// GET /api/admin/mod/flagged-brokers?minFlags=1&limit=100
+router.get('/flagged-brokers', async (req, res) => {
+    try {
+        const minFlags = clampInt(req.query?.minFlags ?? 1, 0, 1_000_000);
+        const limit = clampInt(req.query?.limit ?? 100, 1, 500);
+
+        const brokers = await Broker.find({ anomalyFlags: { $gte: minFlags } })
+            .sort({ anomalyFlags: -1, updatedAt: -1 })
+            .limit(limit)
+            .lean();
+
+        res.json(brokers);
+    } catch (err) {
+        console.error('Error fetching flagged brokers:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// GET /api/admin/mod/recent-anomalies?limit=100
+router.get('/recent-anomalies', async (req, res) => {
+    try {
+        const limit = clampInt(req.query?.limit ?? 100, 1, 500);
+        const battles = await Battle.find({ anomaly: true })
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .lean();
+        res.json(battles);
+    } catch (err) {
+        console.error('Error fetching anomalies:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
 
 // POST /api/admin/mod/ban-user
 router.post('/ban-user', async (req, res) => {

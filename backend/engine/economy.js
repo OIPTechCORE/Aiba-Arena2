@@ -15,30 +15,90 @@ async function getConfig() {
     return created.toObject();
 }
 
-async function tryEmitAiba(amount) {
+function mapGet(m, key) {
+    if (!m) return undefined;
+    if (typeof m.get === 'function') return m.get(key);
+    return m[key];
+}
+
+async function tryEmitAiba(amount, { arena = '' } = {}) {
     const cfg = await getConfig();
     const day = utcDayKey();
 
-    // Atomic cap check: only update if emittedAiba <= cap-amount
-    const updated = await EconomyDay.findOneAndUpdate(
-        { day, emittedAiba: { $lte: cfg.dailyCapAiba - amount } },
-        { $inc: { emittedAiba: amount } },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
-    ).lean();
+    const capAll = Number(cfg.dailyCapAiba ?? 0);
+    const capArenaRaw = mapGet(cfg.dailyCapAibaByArena, arena);
+    const capArena = capArenaRaw === undefined ? null : Number(capArenaRaw);
+
+    const update = { $inc: { emittedAiba: amount } };
+    const query = { day, emittedAiba: { $lte: capAll - amount } };
+
+    if (arena && capArena !== null && Number.isFinite(capArena)) {
+        const path = `emittedAibaByArena.${arena}`;
+        update.$inc[path] = amount;
+        query.$and = [
+            {
+                $or: [{ [path]: { $exists: false } }, { [path]: { $lte: capArena - amount } }],
+            },
+        ];
+    }
+
+    // Atomic cap check: update only if day totals are within caps
+    const updated = await EconomyDay.findOneAndUpdate(query, update, {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true,
+    }).lean();
 
     return { ok: Boolean(updated), cfg, day };
 }
 
-async function emitNeur(amount) {
+async function tryEmitNeur(amount, { arena = '' } = {}) {
     const cfg = await getConfig();
     const day = utcDayKey();
-    await EconomyDay.findOneAndUpdate(
-        { day },
-        { $inc: { emittedNeur: amount } },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
-    ).lean();
-    return { ok: true, cfg, day };
+
+    const capAll = Number(cfg.dailyCapNeur ?? 0);
+    const capArenaRaw = mapGet(cfg.dailyCapNeurByArena, arena);
+    const capArena = capArenaRaw === undefined ? null : Number(capArenaRaw);
+
+    const update = { $inc: { emittedNeur: amount } };
+    const query = { day, emittedNeur: { $lte: capAll - amount } };
+
+    if (arena && capArena !== null && Number.isFinite(capArena)) {
+        const path = `emittedNeurByArena.${arena}`;
+        update.$inc[path] = amount;
+        query.$and = [
+            {
+                $or: [{ [path]: { $exists: false } }, { [path]: { $lte: capArena - amount } }],
+            },
+        ];
+    }
+
+    const updated = await EconomyDay.findOneAndUpdate(query, update, {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true,
+    }).lean();
+
+    return { ok: Boolean(updated), cfg, day };
 }
 
-module.exports = { utcDayKey, getConfig, tryEmitAiba, emitNeur };
+async function recordSpendNeur(amount, { reason = 'unknown', arena = '' } = {}) {
+    const day = utcDayKey();
+    const inc = { spentNeur: amount };
+    if (reason) inc[`spentNeurByReason.${reason}`] = amount;
+    if (arena) inc[`spentNeurByArena.${arena}`] = amount;
+    await EconomyDay.findOneAndUpdate({ day }, { $inc: inc }, { upsert: true, new: true, setDefaultsOnInsert: true }).lean();
+    return { ok: true, day };
+}
+
+async function recordBurnAiba(amount, { reason = 'unknown', arena = '' } = {}) {
+    const day = utcDayKey();
+    const inc = { burnedAiba: amount };
+    if (reason) inc[`burnedAibaByReason.${reason}`] = amount;
+    if (arena) inc[`burnedAibaByArena.${arena}`] = amount;
+    await EconomyDay.findOneAndUpdate({ day }, { $inc: inc }, { upsert: true, new: true, setDefaultsOnInsert: true }).lean();
+    return { ok: true, day };
+}
+
+module.exports = { utcDayKey, getConfig, tryEmitAiba, tryEmitNeur, recordSpendNeur, recordBurnAiba };
 
