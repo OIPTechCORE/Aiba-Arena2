@@ -1,6 +1,6 @@
 {
-  "url": "http://localhost:5173",
+  "url": "http://localhost:3000",
   "name": "AIBA Arena",
-  "iconUrl": "http://localhost:5173/icon.png"
+  "iconUrl": "http://localhost:3000/icon.svg"
 }
 

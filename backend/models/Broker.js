@@ -16,7 +16,14 @@ const BrokerSchema = new mongoose.Schema(
 
         // Battle resources / anti-spam
         energy: { type: Number, default: 10 },
+        energyUpdatedAt: { type: Date, default: () => new Date() },
         lastBattleAt: { type: Date, default: null },
+        cooldowns: { type: Map, of: Date, default: {} }, // arenaKey -> lastBattleAt
+
+        // Flags / moderation
+        anomalyFlags: { type: Number, default: 0 },
+        banned: { type: Boolean, default: false },
+        banReason: { type: String, default: '', trim: true },
 
         // Idempotency / replay protection
         lastRequestId: { type: String, default: '', trim: true },

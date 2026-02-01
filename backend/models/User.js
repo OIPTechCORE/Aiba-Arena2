@@ -8,6 +8,10 @@ const UserSchema = new mongoose.Schema(
         aibaBalance: { type: Number, default: 0 },
         pendingAIBA: { type: Number, default: 0 },
 
+        // Moderation
+        bannedUntil: { type: Date, default: null },
+        bannedReason: { type: String, default: '', trim: true },
+
         // On-chain claim replay protection (matches ArenaRewardVault per-recipient seqno)
         vaultClaimSeqno: { type: Number, default: 0 },
     },

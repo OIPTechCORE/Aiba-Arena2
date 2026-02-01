@@ -34,6 +34,7 @@ app.use('/api/admin/auth', require('./routes/adminAuth'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/admin/ads', require('./routes/adminAds'));
 app.use('/api/admin/game-modes', require('./routes/adminGameModes'));
+app.use('/api/admin/mod', require('./routes/adminModeration'));
 app.use('/api/battle', require('./routes/battle'));
 app.use('/api/brokers', require('./routes/brokers'));
 app.use('/api/vault', require('./routes/vault'));

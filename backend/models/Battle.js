@@ -9,12 +9,16 @@ const BattleSchema = new mongoose.Schema(
 
         arena: { type: String, required: true, trim: true },
         league: { type: String, default: 'rookie', trim: true },
+        modeKey: { type: String, default: '', trim: true },
 
         seedHex: { type: String, required: true, trim: true },
 
         score: { type: Number, required: true },
         rewardAiba: { type: Number, default: 0 },
         rewardNeur: { type: Number, default: 0 },
+
+        anomaly: { type: Boolean, default: false },
+        anomalyReason: { type: String, default: '', trim: true },
 
         // Claim payload returned to client (signature-based)
         claim: {
