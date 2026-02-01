@@ -527,6 +527,133 @@ export default function AdminHome() {
                                 </div>
                             </>
                         ) : null}
+
+                        {tab === "mod" ? (
+                            <>
+                                <div style={{ display: "grid", gap: 12, maxWidth: 980 }}>
+                                    <div style={{ padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Ban / unban user</div>
+                                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                            <input
+                                                value={banUserTelegramId}
+                                                onChange={(e) => setBanUserTelegramId(e.target.value)}
+                                                placeholder="Telegram ID"
+                                                style={{ padding: 10, minWidth: 220 }}
+                                            />
+                                            <input
+                                                value={banUserMinutes}
+                                                onChange={(e) => setBanUserMinutes(e.target.value)}
+                                                placeholder="Minutes"
+                                                style={{ padding: 10, width: 120 }}
+                                            />
+                                            <input
+                                                value={banUserReason}
+                                                onChange={(e) => setBanUserReason(e.target.value)}
+                                                placeholder="Reason"
+                                                style={{ padding: 10, minWidth: 260 }}
+                                            />
+                                            <button onClick={banUser} style={{ padding: "8px 12px" }}>
+                                                Ban
+                                            </button>
+                                            <button onClick={unbanUser} style={{ padding: "8px 12px" }}>
+                                                Unban
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Ban / unban broker</div>
+                                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                            <input
+                                                value={banBrokerId}
+                                                onChange={(e) => setBanBrokerId(e.target.value)}
+                                                placeholder="Broker ID"
+                                                style={{ padding: 10, minWidth: 300 }}
+                                            />
+                                            <input
+                                                value={banBrokerReason}
+                                                onChange={(e) => setBanBrokerReason(e.target.value)}
+                                                placeholder="Reason"
+                                                style={{ padding: 10, minWidth: 300 }}
+                                            />
+                                            <button onClick={banBroker} style={{ padding: "8px 12px" }}>
+                                                Ban
+                                            </button>
+                                            <button onClick={unbanBroker} style={{ padding: "8px 12px" }}>
+                                                Unban
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                                        <button onClick={fetchFlaggedBrokers} style={{ padding: "8px 12px" }}>
+                                            Refresh flagged brokers
+                                        </button>
+                                        <button onClick={fetchAnomalies} style={{ padding: "8px 12px" }}>
+                                            Refresh anomalies
+                                        </button>
+                                    </div>
+
+                                    {modError ? <p style={{ color: "crimson" }}>{modError}</p> : null}
+
+                                    <div style={{ padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Flagged brokers</div>
+                                        {flaggedBrokers.length === 0 ? (
+                                            <div style={{ color: "#666" }}>No flagged brokers.</div>
+                                        ) : (
+                                            <div style={{ display: "grid", gap: 8 }}>
+                                                {flaggedBrokers.map((b) => (
+                                                    <div
+                                                        key={b._id}
+                                                        style={{ padding: 10, border: "1px solid #f2f2f2", borderRadius: 8 }}
+                                                    >
+                                                        <div style={{ fontWeight: 600 }}>
+                                                            {b._id} — owner {b.ownerTelegramId}
+                                                        </div>
+                                                        <div style={{ color: "#666", fontSize: 12, marginTop: 4 }}>
+                                                            flags: {b.anomalyFlags} | banned: {String(Boolean(b.banned))} | energy: {b.energy}
+                                                        </div>
+                                                        {b.banReason ? (
+                                                            <div style={{ color: "#b45309", fontSize: 12, marginTop: 4 }}>
+                                                                reason: {b.banReason}
+                                                            </div>
+                                                        ) : null}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div style={{ padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Recent anomalies</div>
+                                        {anomalies.length === 0 ? (
+                                            <div style={{ color: "#666" }}>No anomalies.</div>
+                                        ) : (
+                                            <div style={{ display: "grid", gap: 8 }}>
+                                                {anomalies.map((a) => (
+                                                    <div
+                                                        key={a._id}
+                                                        style={{ padding: 10, border: "1px solid #f2f2f2", borderRadius: 8 }}
+                                                    >
+                                                        <div style={{ fontWeight: 600 }}>
+                                                            {a.arena} / {a.league} — score {a.score}
+                                                        </div>
+                                                        <div style={{ color: "#666", fontSize: 12, marginTop: 4 }}>
+                                                            owner: {a.ownerTelegramId} | broker: {a.brokerId} | requestId: {a.requestId}
+                                                        </div>
+                                                        {a.anomalyReason ? (
+                                                            <div style={{ color: "#b45309", fontSize: 12, marginTop: 4 }}>
+                                                                {a.anomalyReason}
+                                                            </div>
+                                                        ) : null}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        ) : null}
                     </div>
                 </>
             )}

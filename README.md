@@ -96,6 +96,12 @@ Set these in `backend/.env`:
 - `ADMIN_EMAIL`
 - `ADMIN_PASSWORD_HASH` (bcrypt) or `ADMIN_PASSWORD` (dev only)
 
+## Deployment / Ops
+
+- Deployment guide: `docs/deployment.md`
+- Ops runbook: `docs/runbook.md`
+- Monitoring notes: `docs/monitoring.md`
+
 ## Git auto-commit (optional)
 
 This repo may be used without git. If you want quick local commits:
