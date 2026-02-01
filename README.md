@@ -88,6 +88,14 @@ Optional (recommended for debugging):
 
 Both apps use `NEXT_PUBLIC_BACKEND_URL` (default `http://localhost:5000`).
 
+### Admin auth (required for admin panel)
+
+Set these in `backend/.env`:
+
+- `ADMIN_JWT_SECRET`
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD_HASH` (bcrypt) or `ADMIN_PASSWORD` (dev only)
+
 ## Git auto-commit (optional)
 
 This repo may be used without git. If you want quick local commits:
