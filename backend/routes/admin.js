@@ -1,10 +1,11 @@
 const router = require('express').Router();
 const Task = require('../models/Task');
+const { requireAdmin } = require('../middleware/requireAdmin');
 
 // Minimal endpoints for the admin panel
 
 // GET /api/admin/tasks
-router.get('/tasks', async (_req, res) => {
+router.get('/tasks', requireAdmin(), async (_req, res) => {
     try {
         const tasks = await Task.find().sort({ createdAt: -1 }).lean();
         res.json(tasks);
@@ -15,7 +16,7 @@ router.get('/tasks', async (_req, res) => {
 });
 
 // POST /api/admin/tasks
-router.post('/tasks', async (req, res) => {
+router.post('/tasks', requireAdmin(), async (req, res) => {
     try {
         const title = String(req.body?.title ?? '').trim();
         const description = String(req.body?.description ?? '').trim();
@@ -32,7 +33,7 @@ router.post('/tasks', async (req, res) => {
 });
 
 // PATCH /api/admin/tasks/:id
-router.patch('/tasks/:id', async (req, res) => {
+router.patch('/tasks/:id', requireAdmin(), async (req, res) => {
     try {
         const { id } = req.params;
         const update = {};
@@ -55,7 +56,7 @@ router.patch('/tasks/:id', async (req, res) => {
 });
 
 // DELETE /api/admin/tasks/:id
-router.delete('/tasks/:id', async (req, res) => {
+router.delete('/tasks/:id', requireAdmin(), async (req, res) => {
     try {
         const { id } = req.params;
         const deleted = await Task.findByIdAndDelete(id).lean();

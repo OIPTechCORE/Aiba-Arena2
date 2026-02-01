@@ -24,7 +24,16 @@ mongoose
 
 app.use('/api/wallet', require('./routes/wallet'));
 app.use('/api/game', require('./routes/game'));
+app.use('/api/tasks', require('./routes/tasks'));
+app.use('/api/ads', require('./routes/ads'));
+app.use('/api/game-modes', require('./routes/gameModes'));
+app.use('/api/guilds', require('./routes/guilds'));
+app.use('/api/referrals', require('./routes/referrals'));
+
+app.use('/api/admin/auth', require('./routes/adminAuth'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/admin/ads', require('./routes/adminAds'));
+app.use('/api/admin/game-modes', require('./routes/adminGameModes'));
 app.use('/api/battle', require('./routes/battle'));
 app.use('/api/brokers', require('./routes/brokers'));
 app.use('/api/vault', require('./routes/vault'));
