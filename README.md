@@ -86,7 +86,7 @@ Optional (recommended for debugging):
 
 ## Frontends
 
-Both apps use `VITE_BACKEND_URL` (default `http://localhost:5000`).
+Both apps use `NEXT_PUBLIC_BACKEND_URL` (default `http://localhost:5000`).
 
 ## Git auto-commit (optional)
 
