@@ -13,4 +13,3 @@ function buildBattleSeedMessage({
 }
 
 module.exports = { buildBattleSeedMessage };
-

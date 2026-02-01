@@ -57,4 +57,3 @@ test('applyEnergyRegen falls back to updatedAt if energyUpdatedAt missing', () =
     assert.equal(broker.energy, 5);
     assert.equal(broker.energyUpdatedAt.toISOString(), new Date(Date.UTC(2026, 0, 1, 0, 10, 0)).toISOString());
 });
-

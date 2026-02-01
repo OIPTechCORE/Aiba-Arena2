@@ -12,4 +12,3 @@ function getIdempotencyKey(req) {
 }
 
 module.exports = { getIdempotencyKey };
-

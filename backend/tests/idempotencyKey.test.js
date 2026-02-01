@@ -29,4 +29,3 @@ test('getIdempotencyKey falls back to req.requestId when body and header missing
 test('getIdempotencyKey returns empty string if none present', () => {
     assert.equal(getIdempotencyKey({}), '');
 });
-

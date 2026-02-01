@@ -61,4 +61,3 @@ test('sanitizeEmissionWindowsUtc allows * plus allowed arenas and arena:league',
         'prediction:rookie': { startHourUtc: 10, endHourUtc: 11 },
     });
 });
-

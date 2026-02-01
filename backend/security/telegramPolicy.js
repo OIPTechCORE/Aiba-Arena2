@@ -12,4 +12,3 @@ function getTelegramInitDataMaxAgeSeconds(env = process.env) {
 }
 
 module.exports = { getTelegramInitDataMaxAgeSeconds };
-

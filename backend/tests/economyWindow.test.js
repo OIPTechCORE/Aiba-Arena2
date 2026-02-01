@@ -36,11 +36,7 @@ test('isEmissionOpenAt supports per-arena and arena:league overrides', () => {
         false,
     );
     assert.equal(
-        isEmissionOpenAt(
-            cfg,
-            { arena: 'prediction', league: 'rookie' },
-            new Date(Date.UTC(2026, 0, 1, 10, 30, 0)),
-        ),
+        isEmissionOpenAt(cfg, { arena: 'prediction', league: 'rookie' }, new Date(Date.UTC(2026, 0, 1, 10, 30, 0))),
         true,
     );
 

@@ -5,4 +5,3 @@ function getBattleCooldownKey({ modeKey = '', arena = '' } = {}) {
 }
 
 module.exports = { getBattleCooldownKey };
-

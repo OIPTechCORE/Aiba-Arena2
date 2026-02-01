@@ -11,4 +11,3 @@ test('getBattleCooldownKey falls back to arena when modeKey missing', () => {
     assert.equal(getBattleCooldownKey({ modeKey: '', arena: 'prediction' }), 'prediction');
     assert.equal(getBattleCooldownKey({ arena: 'prediction' }), 'prediction');
 });
-

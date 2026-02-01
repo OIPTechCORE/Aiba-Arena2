@@ -75,4 +75,3 @@ module.exports = {
     sanitizeCapMap,
     sanitizeEmissionWindowsUtc,
 };
-

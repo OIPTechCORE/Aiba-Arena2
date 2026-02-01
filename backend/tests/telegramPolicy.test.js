@@ -18,4 +18,3 @@ test('getTelegramInitDataMaxAgeSeconds clamps negative to 0 (disable)', () => {
 test('getTelegramInitDataMaxAgeSeconds falls back on NaN', () => {
     assert.equal(getTelegramInitDataMaxAgeSeconds({ TELEGRAM_INITDATA_MAX_AGE_SECONDS: 'nope' }), 900);
 });
-

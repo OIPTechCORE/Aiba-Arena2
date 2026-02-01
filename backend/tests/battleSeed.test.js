@@ -37,4 +37,3 @@ test('battle seed changes when modeKey changes (prevents cross-mode replay)', ()
 
     assert.notEqual(seedA, seedB);
 });
-

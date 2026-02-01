@@ -22,4 +22,3 @@ function applyEnergyRegen(brokerDoc, now, cfg) {
 }
 
 module.exports = { clampInt, applyEnergyRegen };
-

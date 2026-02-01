@@ -2,6 +2,7 @@ const EconomyDay = require('../models/EconomyDay');
 const EconomyConfig = require('../models/EconomyConfig');
 const User = require('../models/User');
 const LedgerEntry = require('../models/LedgerEntry');
+const mongoose = require('mongoose');
 const { metrics } = require('../metrics');
 
 function utcDayKey(date = new Date()) {
@@ -89,10 +90,45 @@ function ledgerIdentityQuery({ telegramId, currency, direction, reason, sourceTy
     };
 }
 
-async function safeCreateLedgerEntry(entry) {
+function isTransactionNotSupportedError(err) {
+    const msg = String(err?.message || '');
+    return (
+        msg.includes('Transaction numbers are only allowed') ||
+        msg.includes('replica set member') ||
+        msg.includes('mongos') ||
+        msg.includes('Transaction is not supported')
+    );
+}
+
+async function withMongoTransaction(fn) {
+    const session = await mongoose.startSession();
     try {
-        const created = await LedgerEntry.create(entry);
-        return { ok: true, created: created.toObject() };
+        session.startTransaction();
+        const result = await fn(session);
+        await session.commitTransaction();
+        return { ok: true, result };
+    } catch (err) {
+        try {
+            await session.abortTransaction();
+        } catch {
+            // ignore
+        }
+        if (isTransactionNotSupportedError(err)) return { ok: false, unsupported: true, error: err };
+        return { ok: false, error: err };
+    } finally {
+        try {
+            await session.endSession();
+        } catch {
+            // ignore
+        }
+    }
+}
+
+async function safeCreateLedgerEntry(entry, { session = null } = {}) {
+    try {
+        const created = await LedgerEntry.create([entry], session ? { session } : undefined);
+        const doc = Array.isArray(created) ? created[0] : created;
+        return { ok: true, created: doc?.toObject ? doc.toObject() : doc };
     } catch (err) {
         // Duplicate key => idempotent replay; treat as success
         if (String(err?.code) === '11000') return { ok: true, duplicate: true };
@@ -380,6 +416,41 @@ async function creditNeurNoCap(
         sourceId,
     });
     if (ident) {
+        // Prefer MongoDB transactions for crash-safe idempotency.
+        const tx = await withMongoTransaction(async (session) => {
+            const created = await safeCreateLedgerEntry(
+                {
+                    telegramId,
+                    currency: 'NEUR',
+                    direction: 'credit',
+                    amount: amt,
+                    reason,
+                    arena,
+                    league,
+                    sourceType,
+                    sourceId,
+                    requestId,
+                    battleId,
+                    applied: true,
+                    meta,
+                },
+                { session },
+            );
+            if (created?.duplicate) return { ok: true, duplicate: true };
+            if (!created?.ok) throw created.error;
+
+            await User.updateOne(
+                { telegramId },
+                { $inc: { neurBalance: amt }, $setOnInsert: { telegramId } },
+                { upsert: true, setDefaultsOnInsert: true, session },
+            );
+            return { ok: true };
+        });
+
+        if (tx.ok) return tx.result;
+        if (!tx.unsupported) return { ok: false, error: tx.error };
+
+        // Fallback (no transactions): best-effort apply + mark applied.
         const created = await safeCreateLedgerEntry({
             telegramId,
             currency: 'NEUR',
@@ -395,7 +466,17 @@ async function creditNeurNoCap(
             applied: false,
             meta,
         });
-        if (created?.duplicate) return { ok: true, duplicate: true };
+        if (created?.duplicate) {
+            const existing = await LedgerEntry.findOne(ident).lean();
+            if (existing?.applied) return { ok: true, duplicate: true };
+            await User.updateOne(
+                { telegramId },
+                { $inc: { neurBalance: amt }, $setOnInsert: { telegramId } },
+                { upsert: true, setDefaultsOnInsert: true },
+            );
+            await LedgerEntry.updateOne(ident, { $set: { applied: true } }).catch(() => {});
+            return { ok: true, repaired: true };
+        }
         if (!created?.ok) return created;
 
         await User.updateOne(
@@ -459,6 +540,39 @@ async function creditAibaNoCap(
         sourceId,
     });
     if (ident) {
+        const tx = await withMongoTransaction(async (session) => {
+            const created = await safeCreateLedgerEntry(
+                {
+                    telegramId,
+                    currency: 'AIBA',
+                    direction: 'credit',
+                    amount: amt,
+                    reason,
+                    arena,
+                    league,
+                    sourceType,
+                    sourceId,
+                    requestId,
+                    battleId,
+                    applied: true,
+                    meta,
+                },
+                { session },
+            );
+            if (created?.duplicate) return { ok: true, duplicate: true };
+            if (!created?.ok) throw created.error;
+
+            await User.updateOne(
+                { telegramId },
+                { $inc: { aibaBalance: amt }, $setOnInsert: { telegramId } },
+                { upsert: true, setDefaultsOnInsert: true, session },
+            );
+            return { ok: true };
+        });
+
+        if (tx.ok) return tx.result;
+        if (!tx.unsupported) return { ok: false, error: tx.error };
+
         const created = await safeCreateLedgerEntry({
             telegramId,
             currency: 'AIBA',
@@ -474,7 +588,17 @@ async function creditAibaNoCap(
             applied: false,
             meta,
         });
-        if (created?.duplicate) return { ok: true, duplicate: true };
+        if (created?.duplicate) {
+            const existing = await LedgerEntry.findOne(ident).lean();
+            if (existing?.applied) return { ok: true, duplicate: true };
+            await User.updateOne(
+                { telegramId },
+                { $inc: { aibaBalance: amt }, $setOnInsert: { telegramId } },
+                { upsert: true, setDefaultsOnInsert: true },
+            );
+            await LedgerEntry.updateOne(ident, { $set: { applied: true } }).catch(() => {});
+            return { ok: true, repaired: true };
+        }
         if (!created?.ok) return created;
 
         await User.updateOne(
@@ -538,6 +662,66 @@ async function debitNeurFromUser(
         sourceId,
     });
     if (ident) {
+        const tx = await withMongoTransaction(async (session) => {
+            const created = await safeCreateLedgerEntry(
+                {
+                    telegramId,
+                    currency: 'NEUR',
+                    direction: 'debit',
+                    amount: amt,
+                    reason,
+                    arena,
+                    league,
+                    sourceType,
+                    sourceId,
+                    requestId,
+                    battleId,
+                    applied: true,
+                    meta,
+                },
+                { session },
+            );
+            if (created?.duplicate) {
+                const user = await User.findOne({ telegramId }).session(session).lean();
+                return { ok: true, duplicate: true, user };
+            }
+            if (!created?.ok) throw created.error;
+
+            const user = await User.findOneAndUpdate(
+                { telegramId, neurBalance: { $gte: amt } },
+                { $inc: { neurBalance: -amt }, $setOnInsert: { telegramId } },
+                { new: true, upsert: true, setDefaultsOnInsert: true, session },
+            ).lean();
+            if (!user) {
+                const e = new Error('insufficient');
+                e.code = 'INSUFFICIENT';
+                throw e;
+            }
+
+            const day = utcDayKey();
+            const inc = { spentNeur: amt };
+            if (reason) inc[`spentNeurByReason.${reason}`] = amt;
+            if (arena) inc[`spentNeurByArena.${arena}`] = amt;
+            await EconomyDay.findOneAndUpdate(
+                { day },
+                { $inc: inc },
+                { upsert: true, new: true, setDefaultsOnInsert: true, session },
+            ).lean();
+
+            return { ok: true, user };
+        });
+
+        if (tx.ok) {
+            if (tx.result?.ok && tx.result?.user) {
+                metrics?.economySinksTotal?.inc?.({ currency: 'NEUR', reason, arena, league }, Number(amt) || 0);
+            }
+            return tx.result;
+        }
+
+        if (tx.error?.code === 'INSUFFICIENT') return { ok: false, reason: 'insufficient' };
+        if (!tx.unsupported) return { ok: false, error: tx.error };
+
+        // Fallback (no transactions)
         const created = await safeCreateLedgerEntry({
             telegramId,
             currency: 'NEUR',
@@ -554,8 +738,32 @@ async function debitNeurFromUser(
             meta,
         });
         if (created?.duplicate) {
-            const user = await User.findOne({ telegramId }).lean();
-            return { ok: true, duplicate: true, user };
+            const existing = await LedgerEntry.findOne(ident).lean();
+            if (existing?.applied) {
+                const user = await User.findOne({ telegramId }).lean();
+                return { ok: true, duplicate: true, user };
+            }
+            const user = await User.findOneAndUpdate(
+                { telegramId, neurBalance: { $gte: amt } },
+                { $inc: { neurBalance: -amt }, $setOnInsert: { telegramId } },
+                { new: true, upsert: true, setDefaultsOnInsert: true },
+            ).lean();
+            if (!user) {
+                await LedgerEntry.deleteOne({ _id: existing?._id, applied: false }).catch(() => {});
+                return { ok: false, reason: 'insufficient' };
+            }
+            const day = utcDayKey();
+            const inc = { spentNeur: amt };
+            if (reason) inc[`spentNeurByReason.${reason}`] = amt;
+            if (arena) inc[`spentNeurByArena.${arena}`] = amt;
+            await EconomyDay.findOneAndUpdate(
+                { day },
+                { $inc: inc },
+                { upsert: true, new: true, setDefaultsOnInsert: true },
+            ).lean();
+            await LedgerEntry.updateOne(ident, { $set: { applied: true } }).catch(() => {});
+            metrics?.economySinksTotal?.inc?.({ currency: 'NEUR', reason, arena, league }, Number(amt) || 0);
+            return { ok: true, user, repaired: true };
         }
         if (!created?.ok) return created;
 
@@ -568,8 +776,6 @@ async function debitNeurFromUser(
             await LedgerEntry.deleteOne({ _id: created.created?._id, applied: false }).catch(() => {});
             return { ok: false, reason: 'insufficient' };
         }
-
-        // Count spend once.
         const day = utcDayKey();
         const inc = { spentNeur: amt };
         if (reason) inc[`spentNeurByReason.${reason}`] = amt;
@@ -579,9 +785,8 @@ async function debitNeurFromUser(
             { $inc: inc },
             { upsert: true, new: true, setDefaultsOnInsert: true },
         ).lean();
-        metrics?.economySinksTotal?.inc?.({ currency: 'NEUR', reason, arena, league }, Number(amt) || 0);
-
         await LedgerEntry.updateOne({ _id: created.created?._id }, { $set: { applied: true } }).catch(() => {});
+        metrics?.economySinksTotal?.inc?.({ currency: 'NEUR', reason, arena, league }, Number(amt) || 0);
         return { ok: true, user };
     }
 
@@ -624,6 +829,65 @@ async function debitAibaFromUser(
         sourceId,
     });
     if (ident) {
+        const tx = await withMongoTransaction(async (session) => {
+            const created = await safeCreateLedgerEntry(
+                {
+                    telegramId,
+                    currency: 'AIBA',
+                    direction: 'debit',
+                    amount: amt,
+                    reason,
+                    arena,
+                    league,
+                    sourceType,
+                    sourceId,
+                    requestId,
+                    battleId,
+                    applied: true,
+                    meta,
+                },
+                { session },
+            );
+            if (created?.duplicate) {
+                const user = await User.findOne({ telegramId }).session(session).lean();
+                return { ok: true, duplicate: true, user };
+            }
+            if (!created?.ok) throw created.error;
+
+            const user = await User.findOneAndUpdate(
+                { telegramId, aibaBalance: { $gte: amt } },
+                { $inc: { aibaBalance: -amt }, $setOnInsert: { telegramId } },
+                { new: true, upsert: true, setDefaultsOnInsert: true, session },
+            ).lean();
+            if (!user) {
+                const e = new Error('insufficient');
+                e.code = 'INSUFFICIENT';
+                throw e;
+            }
+
+            const day = utcDayKey();
+            const inc = { burnedAiba: amt };
+            if (reason) inc[`burnedAibaByReason.${reason}`] = amt;
+            if (arena) inc[`burnedAibaByArena.${arena}`] = amt;
+            await EconomyDay.findOneAndUpdate(
+                { day },
+                { $inc: inc },
+                { upsert: true, new: true, setDefaultsOnInsert: true, session },
+            ).lean();
+
+            return { ok: true, user };
+        });
+
+        if (tx.ok) {
+            if (tx.result?.ok && tx.result?.user) {
+                metrics?.economySinksTotal?.inc?.({ currency: 'AIBA', reason, arena, league }, Number(amt) || 0);
+            }
+            return tx.result;
+        }
+
+        if (tx.error?.code === 'INSUFFICIENT') return { ok: false, reason: 'insufficient' };
+        if (!tx.unsupported) return { ok: false, error: tx.error };
+
         const created = await safeCreateLedgerEntry({
             telegramId,
             currency: 'AIBA',
@@ -640,8 +904,32 @@ async function debitAibaFromUser(
             meta,
         });
         if (created?.duplicate) {
-            const user = await User.findOne({ telegramId }).lean();
-            return { ok: true, duplicate: true, user };
+            const existing = await LedgerEntry.findOne(ident).lean();
+            if (existing?.applied) {
+                const user = await User.findOne({ telegramId }).lean();
+                return { ok: true, duplicate: true, user };
+            }
+            const user = await User.findOneAndUpdate(
+                { telegramId, aibaBalance: { $gte: amt } },
+                { $inc: { aibaBalance: -amt }, $setOnInsert: { telegramId } },
+                { new: true, upsert: true, setDefaultsOnInsert: true },
+            ).lean();
+            if (!user) {
+                await LedgerEntry.deleteOne({ _id: existing?._id, applied: false }).catch(() => {});
+                return { ok: false, reason: 'insufficient' };
+            }
+            const day = utcDayKey();
+            const inc = { burnedAiba: amt };
+            if (reason) inc[`burnedAibaByReason.${reason}`] = amt;
+            if (arena) inc[`burnedAibaByArena.${arena}`] = amt;
+            await EconomyDay.findOneAndUpdate(
+                { day },
+                { $inc: inc },
+                { upsert: true, new: true, setDefaultsOnInsert: true },
+            ).lean();
+            await LedgerEntry.updateOne(ident, { $set: { applied: true } }).catch(() => {});
+            metrics?.economySinksTotal?.inc?.({ currency: 'AIBA', reason, arena, league }, Number(amt) || 0);
+            return { ok: true, user, repaired: true };
         }
         if (!created?.ok) return created;
 
@@ -654,7 +942,6 @@ async function debitAibaFromUser(
             await LedgerEntry.deleteOne({ _id: created.created?._id, applied: false }).catch(() => {});
             return { ok: false, reason: 'insufficient' };
         }
-
         const day = utcDayKey();
         const inc = { burnedAiba: amt };
         if (reason) inc[`burnedAibaByReason.${reason}`] = amt;
@@ -664,9 +951,8 @@ async function debitAibaFromUser(
             { $inc: inc },
             { upsert: true, new: true, setDefaultsOnInsert: true },
         ).lean();
-        metrics?.economySinksTotal?.inc?.({ currency: 'AIBA', reason, arena, league }, Number(amt) || 0);
-
         await LedgerEntry.updateOne({ _id: created.created?._id }, { $set: { applied: true } }).catch(() => {});
+        metrics?.economySinksTotal?.inc?.({ currency: 'AIBA', reason, arena, league }, Number(amt) || 0);
         return { ok: true, user };
     }
 
@@ -709,6 +995,48 @@ async function debitAibaFromUserNoBurn(
         sourceId,
     });
     if (ident) {
+        const tx = await withMongoTransaction(async (session) => {
+            const created = await safeCreateLedgerEntry(
+                {
+                    telegramId,
+                    currency: 'AIBA',
+                    direction: 'debit',
+                    amount: amt,
+                    reason,
+                    arena,
+                    league,
+                    sourceType,
+                    sourceId,
+                    requestId,
+                    battleId,
+                    applied: true,
+                    meta,
+                },
+                { session },
+            );
+            if (created?.duplicate) {
+                const user = await User.findOne({ telegramId }).session(session).lean();
+                return { ok: true, duplicate: true, user };
+            }
+            if (!created?.ok) throw created.error;
+
+            const user = await User.findOneAndUpdate(
+                { telegramId, aibaBalance: { $gte: amt } },
+                { $inc: { aibaBalance: -amt }, $setOnInsert: { telegramId } },
+                { new: true, upsert: true, setDefaultsOnInsert: true, session },
+            ).lean();
+            if (!user) {
+                const e = new Error('insufficient');
+                e.code = 'INSUFFICIENT';
+                throw e;
+            }
+            return { ok: true, user };
+        });
+
+        if (tx.ok) return tx.result;
+        if (tx.error?.code === 'INSUFFICIENT') return { ok: false, reason: 'insufficient' };
+        if (!tx.unsupported) return { ok: false, error: tx.error };
+
         const created = await safeCreateLedgerEntry({
             telegramId,
             currency: 'AIBA',
@@ -725,8 +1053,22 @@ async function debitAibaFromUserNoBurn(
             meta,
         });
         if (created?.duplicate) {
-            const user = await User.findOne({ telegramId }).lean();
-            return { ok: true, duplicate: true, user };
+            const existing = await LedgerEntry.findOne(ident).lean();
+            if (existing?.applied) {
+                const user = await User.findOne({ telegramId }).lean();
+                return { ok: true, duplicate: true, user };
+            }
+            const user = await User.findOneAndUpdate(
+                { telegramId, aibaBalance: { $gte: amt } },
+                { $inc: { aibaBalance: -amt }, $setOnInsert: { telegramId } },
+                { new: true, upsert: true, setDefaultsOnInsert: true },
+            ).lean();
+            if (!user) {
+                await LedgerEntry.deleteOne({ _id: existing?._id, applied: false }).catch(() => {});
+                return { ok: false, reason: 'insufficient' };
+            }
+            await LedgerEntry.updateOne(ident, { $set: { applied: true } }).catch(() => {});
+            return { ok: true, user, repaired: true };
         }
         if (!created?.ok) return created;
 
