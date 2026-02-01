@@ -65,6 +65,8 @@ npm start
 
 Health check: `GET /health` on `http://localhost:5000/health`
 
+Metrics: `GET /metrics` on `http://localhost:5000/metrics` (Prometheus)
+
 ### Battle + on-chain claim (optional)
 
 The end-to-end flow is:
@@ -101,6 +103,7 @@ Set these in `backend/.env`:
 - Deployment guide: `docs/deployment.md`
 - Ops runbook: `docs/runbook.md`
 - Monitoring notes: `docs/monitoring.md`
+- Mainnet readiness checklist: `docs/mainnet-readiness.md`
 
 ## Git auto-commit (optional)
 

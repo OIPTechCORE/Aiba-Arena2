@@ -8,8 +8,7 @@ const ReferralSchema = new mongoose.Schema(
         maxUses: { type: Number, default: 1000 },
         active: { type: Boolean, default: true },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 module.exports = mongoose.model('Referral', ReferralSchema);
-

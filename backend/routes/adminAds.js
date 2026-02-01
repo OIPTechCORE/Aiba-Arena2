@@ -38,7 +38,8 @@ router.patch('/:id', async (req, res) => {
     if (req.body?.startsAt !== undefined) update.startsAt = req.body.startsAt ? new Date(req.body.startsAt) : null;
     if (req.body?.endsAt !== undefined) update.endsAt = req.body.endsAt ? new Date(req.body.endsAt) : null;
 
-    if (update.imageUrl !== undefined && !update.imageUrl) return res.status(400).json({ error: 'imageUrl cannot be empty' });
+    if (update.imageUrl !== undefined && !update.imageUrl)
+        return res.status(400).json({ error: 'imageUrl cannot be empty' });
     if (update.weight !== undefined && (Number.isNaN(update.weight) || update.weight <= 0))
         return res.status(400).json({ error: 'weight must be > 0' });
 
@@ -55,4 +56,3 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
-

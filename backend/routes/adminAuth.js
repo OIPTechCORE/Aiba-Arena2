@@ -5,10 +5,14 @@ const { requireAdmin } = require('../middleware/requireAdmin');
 
 router.post('/login', async (req, res) => {
     try {
-        const email = String(req.body?.email || '').trim().toLowerCase();
+        const email = String(req.body?.email || '')
+            .trim()
+            .toLowerCase();
         const password = String(req.body?.password || '');
 
-        const adminEmail = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+        const adminEmail = String(process.env.ADMIN_EMAIL || '')
+            .trim()
+            .toLowerCase();
         const passwordHash = String(process.env.ADMIN_PASSWORD_HASH || '').trim();
         const passwordPlain = String(process.env.ADMIN_PASSWORD || '');
         const secret = String(process.env.ADMIN_JWT_SECRET || '').trim();
@@ -37,4 +41,3 @@ router.get('/me', requireAdmin(), async (req, res) => {
 });
 
 module.exports = router;
-

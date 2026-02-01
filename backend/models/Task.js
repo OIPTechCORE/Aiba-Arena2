@@ -6,8 +6,7 @@ const TaskSchema = new mongoose.Schema(
         description: { type: String, default: '', trim: true },
         enabled: { type: Boolean, default: true },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 module.exports = mongoose.model('Task', TaskSchema);
-

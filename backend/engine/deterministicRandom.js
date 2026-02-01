@@ -21,4 +21,3 @@ function mulberry32(seed) {
 }
 
 module.exports = { hmacSha256Hex, seedFromHex, mulberry32 };
-

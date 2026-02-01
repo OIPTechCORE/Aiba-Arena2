@@ -4,8 +4,11 @@
     "scripts": {
         "bp": "blueprint",
         "start": "blueprint run",
-        "build": "blueprint build",
-        "test": "jest --verbose",
+        "build:contracts": "blueprint build AibaJetton && blueprint build AibaJettonSupply && blueprint build ArenaVault && blueprint build AibaToken && blueprint build ArenaRewardVault && blueprint build BrokerNFT && blueprint build BrokerMarketplaceEscrow",
+        "build": "npm run build:contracts",
+        "test": "npm run build:contracts && jest --verbose",
+        "lint": "prettier --check .",
+        "format": "prettier --write .",
         "release": "blueprint pack && npm publish --access public"
     },
     "dependencies": {

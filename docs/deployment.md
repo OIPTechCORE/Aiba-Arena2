@@ -17,14 +17,20 @@
 
 - `MONGO_URI`
 - `TELEGRAM_BOT_TOKEN` (production Telegram auth)
+- `TELEGRAM_INITDATA_MAX_AGE_SECONDS` (default 900; set explicitly for mainnet)
 - `BATTLE_SEED_SECRET`
 - `ADMIN_JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`
 - Vault/claim reads:
-  - `TON_PROVIDER_URL`
-  - `TON_API_KEY`
-  - `ARENA_VAULT_ADDRESS`
-  - `AIBA_JETTON_MASTER`
-  - `ORACLE_PRIVATE_KEY_HEX`
+    - `TON_PROVIDER_URL`
+    - `TON_API_KEY`
+    - `ARENA_VAULT_ADDRESS`
+    - `AIBA_JETTON_MASTER`
+    - `ORACLE_PRIVATE_KEY_HEX`
+
+### Monitoring hooks
+
+- Uptime: `GET /health`
+- Metrics (Prometheus): `GET /metrics`
 
 ## Miniapp + Admin panel (Vercel)
 
@@ -35,4 +41,3 @@
 
 - `NEXT_PUBLIC_BACKEND_URL` (both miniapp + admin-panel)
 - Optional: `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL` (miniapp; defaults to `/api/tonconnect-manifest`)
-

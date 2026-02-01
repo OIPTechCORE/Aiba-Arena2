@@ -5,8 +5,7 @@ const { requireTelegram } = require('../middleware/requireTelegram');
 router.post('/connect', requireTelegram, async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
-        const username =
-            req.telegramUser?.username !== undefined ? String(req.telegramUser.username || '') : '';
+        const username = req.telegramUser?.username !== undefined ? String(req.telegramUser.username || '') : '';
         const address = req.body?.address === undefined ? '' : String(req.body.address).trim();
 
         if (!telegramId) return res.status(400).json({ error: 'telegramId required' });
@@ -15,7 +14,7 @@ router.post('/connect', requireTelegram, async (req, res) => {
         const user = await User.findOneAndUpdate(
             { telegramId },
             { $set: { telegramId, username, wallet: address } },
-            { new: true, upsert: true, setDefaultsOnInsert: true }
+            { new: true, upsert: true, setDefaultsOnInsert: true },
         ).lean();
 
         res.json({ status: 'connected', user });

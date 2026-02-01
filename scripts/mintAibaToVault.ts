@@ -27,9 +27,8 @@ export async function run(provider: NetworkProvider, args: string[]) {
             $$type: 'Mint',
             to: vaultAddress,
             amount,
-        }
+        },
     );
 
     ui.write(`Mint sent. Vault should now have Jettons in its Jetton wallet.`);
 }
-

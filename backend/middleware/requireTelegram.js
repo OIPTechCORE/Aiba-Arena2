@@ -1,4 +1,5 @@
 const { verifyTelegramInitData } = require('../security/telegram');
+const { getTelegramInitDataMaxAgeSeconds } = require('../security/telegramPolicy');
 const User = require('../models/User');
 
 function normalizeTelegramUser(raw) {
@@ -43,7 +44,7 @@ async function requireTelegram(req, res, next) {
                         },
                         $setOnInsert: { telegramId: req.telegramId },
                     },
-                    { new: true, upsert: true, setDefaultsOnInsert: true }
+                    { new: true, upsert: true, setDefaultsOnInsert: true },
                 ).lean();
             } catch {
                 // If DB is down, still allow dev to proceed with req.telegramUser.
@@ -59,8 +60,8 @@ async function requireTelegram(req, res, next) {
         const result = verifyTelegramInitData(String(initData || ''), String(botToken || ''));
         if (!result.ok) return res.status(401).json({ error: 'telegram auth failed', detail: result.error });
 
-        // Optional replay/age protection (default 24h) in production.
-        const maxAgeSec = Number(process.env.TELEGRAM_INITDATA_MAX_AGE_SECONDS ?? 24 * 60 * 60);
+        // Optional replay/age protection. For mainnet, keep this conservative (default 15 minutes).
+        const maxAgeSec = getTelegramInitDataMaxAgeSeconds(process.env);
         if (Number.isFinite(maxAgeSec) && maxAgeSec > 0 && result.authDate) {
             const ageSec = Math.floor(Date.now() / 1000) - Number(result.authDate);
             if (ageSec > maxAgeSec) return res.status(401).json({ error: 'telegram auth expired' });
@@ -90,7 +91,7 @@ async function requireTelegram(req, res, next) {
                 },
                 $setOnInsert: { telegramId: req.telegramId },
             },
-            { new: true, upsert: true, setDefaultsOnInsert: true }
+            { new: true, upsert: true, setDefaultsOnInsert: true },
         ).lean();
 
         return next();
@@ -101,4 +102,3 @@ async function requireTelegram(req, res, next) {
 }
 
 module.exports = { requireTelegram };
-

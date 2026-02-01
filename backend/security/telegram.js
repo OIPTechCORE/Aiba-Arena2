@@ -38,4 +38,3 @@ function verifyTelegramInitData(initData, botToken) {
 }
 
 module.exports = { verifyTelegramInitData };
-

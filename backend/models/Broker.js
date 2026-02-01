@@ -33,11 +33,13 @@ const BrokerSchema = new mongoose.Schema(
         nftItemAddress: { type: String, default: '', trim: true },
         nftItemIndex: { type: Number, default: null },
         metadataUri: { type: String, default: '', trim: true },
+
+        // Guild pool (optional)
+        guildId: { type: mongoose.Schema.Types.ObjectId, ref: 'Guild', default: null, index: true },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 BrokerSchema.index({ ownerTelegramId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Broker', BrokerSchema);
-

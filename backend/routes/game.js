@@ -23,7 +23,7 @@ async function postScoreHandler(req, res) {
         const user = await User.findOneAndUpdate(
             { telegramId },
             { $inc: { pendingAIBA: reward }, $setOnInsert: { telegramId } },
-            { new: true, upsert: true, setDefaultsOnInsert: true }
+            { new: true, upsert: true, setDefaultsOnInsert: true },
         ).lean();
 
         res.json({ reward, pendingAIBA: user?.pendingAIBA ?? reward });

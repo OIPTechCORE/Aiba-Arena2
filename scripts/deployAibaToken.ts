@@ -16,10 +16,9 @@ export async function run(provider: NetworkProvider) {
         {
             value: toNano('0.07'),
         },
-        null
+        null,
     );
 
     await provider.waitForDeploy(aibaToken.address);
     ui.write(`AibaToken deployed at: ${aibaToken.address.toString()}`);
 }
-

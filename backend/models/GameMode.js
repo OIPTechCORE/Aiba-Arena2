@@ -12,15 +12,18 @@ const GameModeSchema = new mongoose.Schema(
         energyCost: { type: Number, default: 10 },
         cooldownSeconds: { type: Number, default: 30 },
 
+        // Entry sinks (off-chain). Useful for low-tier entry fees, tournaments, etc.
+        entryNeurCost: { type: Number, default: 0 },
+        entryAibaCost: { type: Number, default: 0 },
+
         rewardMultiplierAiba: { type: Number, default: 1.0 },
         rewardMultiplierNeur: { type: Number, default: 1.0 },
 
         rules: { type: Object, default: {} },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 GameModeSchema.index({ enabled: 1, arena: 1, league: 1 });
 
 module.exports = mongoose.model('GameMode', GameModeSchema);
-

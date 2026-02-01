@@ -34,13 +34,28 @@ router.get('/flagged-brokers', async (req, res) => {
 router.get('/recent-anomalies', async (req, res) => {
     try {
         const limit = clampInt(req.query?.limit ?? 100, 1, 500);
-        const battles = await Battle.find({ anomaly: true })
-            .sort({ createdAt: -1 })
-            .limit(limit)
-            .lean();
+        const battles = await Battle.find({ anomaly: true }).sort({ createdAt: -1 }).limit(limit).lean();
         res.json(battles);
     } catch (err) {
         console.error('Error fetching anomalies:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// GET /api/admin/mod/flagged-users?minFlags=1&limit=100
+router.get('/flagged-users', async (req, res) => {
+    try {
+        const minFlags = clampInt(req.query?.minFlags ?? 1, 0, 1_000_000);
+        const limit = clampInt(req.query?.limit ?? 100, 1, 500);
+
+        const users = await User.find({ anomalyFlags: { $gte: minFlags } })
+            .sort({ anomalyFlags: -1, updatedAt: -1 })
+            .limit(limit)
+            .lean();
+
+        res.json(users);
+    } catch (err) {
+        console.error('Error fetching flagged users:', err);
         res.status(500).json({ error: 'internal server error' });
     }
 });
@@ -59,7 +74,7 @@ router.post('/ban-user', async (req, res) => {
     const user = await User.findOneAndUpdate(
         { telegramId },
         { $set: { bannedUntil, bannedReason: reason } },
-        { new: true, upsert: true }
+        { new: true, upsert: true },
     ).lean();
 
     res.json(user);
@@ -73,7 +88,7 @@ router.post('/unban-user', async (req, res) => {
     const user = await User.findOneAndUpdate(
         { telegramId },
         { $set: { bannedUntil: null, bannedReason: '' } },
-        { new: true }
+        { new: true },
     ).lean();
     res.json(user || { ok: true });
 });
@@ -84,7 +99,11 @@ router.post('/ban-broker', async (req, res) => {
     const reason = String(req.body?.reason || 'broker banned').trim();
     if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
-    const broker = await Broker.findByIdAndUpdate(brokerId, { $set: { banned: true, banReason: reason } }, { new: true }).lean();
+    const broker = await Broker.findByIdAndUpdate(
+        brokerId,
+        { $set: { banned: true, banReason: reason } },
+        { new: true },
+    ).lean();
     if (!broker) return res.status(404).json({ error: 'not found' });
     res.json(broker);
 });
@@ -94,10 +113,13 @@ router.post('/unban-broker', async (req, res) => {
     const brokerId = String(req.body?.brokerId || '').trim();
     if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
-    const broker = await Broker.findByIdAndUpdate(brokerId, { $set: { banned: false, banReason: '' } }, { new: true }).lean();
+    const broker = await Broker.findByIdAndUpdate(
+        brokerId,
+        { $set: { banned: false, banReason: '' } },
+        { new: true },
+    ).lean();
     if (!broker) return res.status(404).json({ error: 'not found' });
     res.json(broker);
 });
 
 module.exports = router;
-

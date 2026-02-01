@@ -1,51 +1,57 @@
 name: ci
 
 on:
-  push:
-  pull_request:
+    push:
+    pull_request:
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        node: [20]
-    steps:
-      - uses: actions/checkout@v4
+    build-and-test:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                node: [20]
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-          cache: npm
+            - name: Use Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node }}
+                  cache: npm
 
-      - name: Install root deps
-        run: npm ci
+            - name: Install root deps
+              run: npm ci
 
-      - name: Blueprint build (Tact compile)
-        run: npm run build
+            - name: Lint (prettier)
+              run: npm run lint
 
-      - name: Contract tests
-        run: npm test
+            - name: Blueprint build (Tact compile)
+              run: npm run build
 
-      - name: Install backend deps
-        working-directory: backend
-        run: npm ci
+            - name: Contract tests
+              run: npm test
 
-      - name: Install miniapp deps
-        working-directory: miniapp
-        run: npm ci
+            - name: Install backend deps
+              working-directory: backend
+              run: npm ci
 
-      - name: Build miniapp
-        working-directory: miniapp
-        run: npm run build
+            - name: Backend tests
+              working-directory: backend
+              run: npm test
 
-      - name: Install admin deps
-        working-directory: admin-panel
-        run: npm ci
+            - name: Install miniapp deps
+              working-directory: miniapp
+              run: npm ci
 
-      - name: Build admin panel
-        working-directory: admin-panel
-        run: npm run build
+            - name: Build miniapp
+              working-directory: miniapp
+              run: npm run build
 
+            - name: Install admin deps
+              working-directory: admin-panel
+              run: npm ci
+
+            - name: Build admin panel
+              working-directory: admin-panel
+              run: npm run build

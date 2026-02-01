@@ -30,11 +30,10 @@ export async function run(provider: NetworkProvider, args: string[]) {
         {
             value: toNano('0.08'),
         },
-        null
+        null,
     );
 
     await provider.waitForDeploy(vault.address);
     ui.write(`ArenaRewardVault deployed at: ${vault.address.toString()}`);
     ui.write(`Vault Jetton wallet (computed in contract): call getVaultJettonWallet() after deploy`);
 }
-

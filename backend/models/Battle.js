@@ -17,6 +17,11 @@ const BattleSchema = new mongoose.Schema(
         rewardAiba: { type: Number, default: 0 },
         rewardNeur: { type: Number, default: 0 },
 
+        // Guild wars (optional)
+        guildId: { type: mongoose.Schema.Types.ObjectId, ref: 'Guild', default: null, index: true },
+        opponentGuildId: { type: mongoose.Schema.Types.ObjectId, ref: 'Guild', default: null },
+        guildShareNeur: { type: Number, default: 0 },
+
         anomaly: { type: Boolean, default: false },
         anomalyReason: { type: String, default: '', trim: true },
 
@@ -31,8 +36,7 @@ const BattleSchema = new mongoose.Schema(
             payloadBocBase64: { type: String, default: '', trim: true },
         },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 module.exports = mongoose.model('Battle', BattleSchema);
-

@@ -10,10 +10,9 @@ const AdSchema = new mongoose.Schema(
         startsAt: { type: Date, default: null },
         endsAt: { type: Date, default: null },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 AdSchema.index({ active: 1, placement: 1, startsAt: 1, endsAt: 1 });
 
 module.exports = mongoose.model('Ad', AdSchema);
-

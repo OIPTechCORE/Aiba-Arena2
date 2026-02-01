@@ -50,4 +50,3 @@ function createSignedClaim({ vaultAddress, jettonMaster, to, amount, seqno, vali
 }
 
 module.exports = { createSignedClaim };
-

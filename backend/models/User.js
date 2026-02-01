@@ -20,11 +20,12 @@ const UserSchema = new mongoose.Schema(
         // Moderation
         bannedUntil: { type: Date, default: null },
         bannedReason: { type: String, default: '', trim: true },
+        anomalyFlags: { type: Number, default: 0 },
 
         // On-chain claim replay protection (matches ArenaRewardVault per-recipient seqno)
         vaultClaimSeqno: { type: Number, default: 0 },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 UserSchema.index({ telegramId: 1 }, { unique: true, sparse: true });

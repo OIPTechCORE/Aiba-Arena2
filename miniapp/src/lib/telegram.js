@@ -13,4 +13,3 @@ export function getTelegramUserUnsafe() {
         return null;
     }
 }
-

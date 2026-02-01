@@ -7,8 +7,9 @@ function requireAdmin(requiredRole = null) {
             if (!secret) return res.status(500).json({ error: 'ADMIN_JWT_SECRET not configured' });
 
             const auth = String(req.headers.authorization || '');
-            const token =
-                auth.startsWith('Bearer ') ? auth.slice('Bearer '.length).trim() : String(req.headers['x-admin-token'] || '');
+            const token = auth.startsWith('Bearer ')
+                ? auth.slice('Bearer '.length).trim()
+                : String(req.headers['x-admin-token'] || '');
 
             if (!token) return res.status(401).json({ error: 'admin auth required' });
 
@@ -30,4 +31,3 @@ function requireAdmin(requiredRole = null) {
 }
 
 module.exports = { requireAdmin };
-

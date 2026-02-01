@@ -18,8 +18,7 @@ const EconomyDaySchema = new mongoose.Schema(
         burnedAibaByArena: { type: Map, of: Number, default: {} },
         spentNeurByArena: { type: Map, of: Number, default: {} },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 module.exports = mongoose.model('EconomyDay', EconomyDaySchema);
-

@@ -1,8 +1,8 @@
-import "./globals.css";
+import './globals.css';
 
 export const metadata = {
-    title: "AIBA Admin",
-    description: "AIBA Arena Admin OS",
+    title: 'AIBA Admin',
+    description: 'AIBA Arena Admin OS',
 };
 
 export default function RootLayout({ children }) {
@@ -12,4 +12,3 @@ export default function RootLayout({ children }) {
         </html>
     );
 }
-

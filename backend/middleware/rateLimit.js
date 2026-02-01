@@ -47,4 +47,3 @@ function rateLimit(options = {}) {
 }
 
 module.exports = { rateLimit };
-

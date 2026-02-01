@@ -28,4 +28,3 @@ export function buildRewardClaimPayload({
 
     return cell.toBoc().toString('base64');
 }
-

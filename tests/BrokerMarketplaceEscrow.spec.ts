@@ -3,8 +3,8 @@ import { beginCell, toNano } from '@ton/core';
 import '@ton/test-utils';
 
 import { AibaToken } from '../build/AibaToken/AibaToken_AibaToken';
-import { BrokerNftCollection } from '../build/BrokerNFT/BrokerNftCollection_BrokerNftCollection';
-import { BrokerNftItem } from '../build/BrokerNFT/BrokerNftItem_BrokerNftItem';
+import { BrokerNftCollection } from '../build/BrokerNFT/BrokerNFT_BrokerNftCollection';
+import { BrokerNftItem } from '../build/BrokerNFT/BrokerNFT_BrokerNftItem';
 import { BrokerMarketplaceEscrow } from '../build/BrokerMarketplaceEscrow/BrokerMarketplaceEscrow_BrokerMarketplaceEscrow';
 
 describe('BrokerMarketplaceEscrow (happy path)', () => {
@@ -21,11 +21,7 @@ describe('BrokerMarketplaceEscrow (happy path)', () => {
     it('lists a broker NFT (escrow receives and validates item)', async () => {
         // Deploy AIBA token
         const token = blockchain.openContract(await AibaToken.fromInit(deployer.address, null));
-        await token.send(
-            deployer.getSender(),
-            { value: toNano('0.2') },
-            null
-        );
+        await token.send(deployer.getSender(), { value: toNano('0.2') }, { $$type: 'Deploy', queryId: 0n });
 
         // Deploy broker NFT collection
         const royalty = {
@@ -35,7 +31,7 @@ describe('BrokerMarketplaceEscrow (happy path)', () => {
         };
         const collectionContent = beginCell().endCell();
         const collection = blockchain.openContract(
-            await BrokerNftCollection.fromInit(deployer.address, collectionContent, royalty)
+            await BrokerNftCollection.fromInit(deployer.address, collectionContent, royalty),
         );
         await collection.send(deployer.getSender(), { value: toNano('0.3') }, null);
 
@@ -46,8 +42,9 @@ describe('BrokerMarketplaceEscrow (happy path)', () => {
                 collection.address,
                 token.address,
                 deployer.address,
-                300n
-            )
+                300n,
+                0n,
+            ),
         );
         await escrow.send(deployer.getSender(), { value: toNano('0.3') }, null);
 
@@ -56,7 +53,7 @@ describe('BrokerMarketplaceEscrow (happy path)', () => {
         await collection.send(
             deployer.getSender(),
             { value: toNano('0.4') },
-            { $$type: 'MintBroker', to: seller.address, metadata }
+            { $$type: 'MintBroker', to: seller.address, metadata },
         );
 
         const item = blockchain.openContract(await BrokerNftItem.fromInit(collection.address, 0n));
@@ -75,13 +72,12 @@ describe('BrokerMarketplaceEscrow (happy path)', () => {
                 custom_payload: null,
                 forward_amount: 1n, // triggers OwnershipAssigned to escrow
                 forward_payload: forwardPayload,
-            }
+            },
         );
 
         // Listing should exist and be active
-        const listing = await escrow.getListing(1n);
+        const listing = await escrow.getGetListing(1n);
         expect(listing?.active).toBe(true);
         expect(listing?.price).toBe(price);
     });
 });
-

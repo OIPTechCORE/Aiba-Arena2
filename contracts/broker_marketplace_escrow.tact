@@ -15,6 +15,12 @@ message FinalizePurchase {
     listingId: Int as uint64;
 }
 
+// Buyer can reclaim their jettons if a purchase finalization failed (e.g. NFT transfer bounced)
+// and the listing is active again.
+message RefundPayment {
+    listingId: Int as uint64;
+}
+
 // Seller -> NFT item Transfer forward_payload: storeCoins(price)
 struct PendingListing {
     seller: Address;
@@ -47,6 +53,7 @@ contract BrokerMarketplaceEscrow with Ownable {
     jettonMaster: Address;
     treasury: Address;
     feeBps: Int as uint16; // e.g. 300 = 3%
+    burnBps: Int as uint16; // portion of price to burn (<= feeBps)
 
     nextListingId: Int as uint64;
     listings: map<Int as uint64, Listing>;
@@ -57,12 +64,14 @@ contract BrokerMarketplaceEscrow with Ownable {
     // buyer payments
     payments: map<Address, PaymentMap>;
 
-    init(owner: Address, brokerCollection: Address, jettonMaster: Address, treasury: Address, feeBps: Int) {
+    init(owner: Address, brokerCollection: Address, jettonMaster: Address, treasury: Address, feeBps: Int, burnBps: Int) {
         self.owner = owner;
         self.brokerCollection = brokerCollection;
         self.jettonMaster = jettonMaster;
         self.treasury = treasury;
         self.feeBps = feeBps;
+        require(burnBps <= feeBps, "burnBps must be <= feeBps");
+        self.burnBps = burnBps;
         self.nextListingId = 1;
     }
 
@@ -135,16 +144,15 @@ contract BrokerMarketplaceEscrow with Ownable {
 
         let buyer = msg.from;
 
-        let p = self.payments.get(buyer);
-        if (p == null) {
-            p = PaymentMap{ unbox: emptyMap() };
-            self.payments.set(buyer, p!!);
-        }
+        let pMaybe = self.payments.get(buyer);
+        let p = (pMaybe != null) ? pMaybe!! : PaymentMap{ unbox: emptyMap() };
+        let unbox = p.unbox;
 
-        let prev = p!!.unbox.get(listingId);
+        let prev = unbox.get(listingId);
         let next = (prev != null ? prev!! : 0) + msg.amount;
-        p!!.unbox.set(listingId, next);
-        self.payments.set(buyer, p!!);
+        unbox.set(listingId, next);
+        p.unbox = unbox;
+        self.payments.set(buyer, p);
 
         cashback(sender());
     }
@@ -164,8 +172,9 @@ contract BrokerMarketplaceEscrow with Ownable {
         require(paid!! >= listing!!.price, "Insufficient payment");
 
         // Lock listing (best-effort)
-        listing!!.active = false;
-        self.listings.set(msg.listingId, listing!!);
+        let locked = listing!!;
+        locked.active = false;
+        self.listings.set(msg.listingId, locked);
 
         // Transfer NFT to buyer
         send(SendParameters{
@@ -183,13 +192,22 @@ contract BrokerMarketplaceEscrow with Ownable {
         });
 
         // Pay seller from escrow jetton wallet
-        // Fee in bps (fee = price * feeBps / 10000)
-        let fee = (listing!!.price * self.feeBps) / 10000;
-        let sellerAmount = listing!!.price - fee;
+        // Fee/burn in bps:
+        // - total fee = price * feeBps / 10000
+        // - burn = price * burnBps / 10000
+        // - treasuryFee = totalFee - burn
+        let totalFee = (listing!!.price * self.feeBps) / 10000;
+        let burn = (listing!!.price * self.burnBps) / 10000;
+        require(burn <= totalFee, "burn exceeds total fee");
+        let treasuryFee = totalFee - burn;
+        let sellerAmount = listing!!.price - totalFee;
 
         let escrowJettonWallet = contractAddress(initOf JettonDefaultWallet(self.jettonMaster, myAddress()));
 
-        require(myBalance() >= 2 * self.jettonTransferGas, "Not enough TON for jetton transfers");
+        let transfers: Int = 1;
+        if (treasuryFee > 0) { transfers += 1; }
+        if (burn > 0) { transfers += 1; }
+        require(myBalance() >= transfers * self.jettonTransferGas, "Not enough TON for jetton ops");
 
         // seller payout
         send(SendParameters{
@@ -208,14 +226,14 @@ contract BrokerMarketplaceEscrow with Ownable {
         });
 
         // treasury fee
-        if (fee > 0) {
+        if (treasuryFee > 0) {
             send(SendParameters{
                 to: escrowJettonWallet,
                 value: self.jettonTransferGas,
                 bounce: true,
                 body: TokenTransfer{
                     queryId: msg.listingId,
-                    amount: fee,
+                    amount: treasuryFee,
                     destination: self.treasury,
                     responseDestination: self.treasury,
                     customPayload: null,
@@ -225,9 +243,78 @@ contract BrokerMarketplaceEscrow with Ownable {
             });
         }
 
-        // Clear payment record for this listing (keep any excess for now)
-        p!!.unbox.set(msg.listingId, 0);
-        self.payments.set(buyer, p!!);
+        // burn (best-effort): request master to burn from escrow (SafeTokenBurn -> TokenBurnConfirmation to escrow wallet)
+        if (burn > 0) {
+            send(SendParameters{
+                to: self.jettonMaster,
+                value: self.jettonTransferGas,
+                bounce: true,
+                body: SafeTokenBurn{
+                    queryId: msg.listingId,
+                    amount: burn,
+                    owner: myAddress(),
+                    responseAddress: myAddress(),
+                }.toCell(),
+            });
+        }
+    }
+
+    // Buyer refund path (for stuck payments)
+    receive(msg: RefundPayment) {
+        let buyer = sender();
+        let listing = self.listings.get(msg.listingId);
+        require(listing != null, "Listing not found");
+        require(listing!!.active, "Listing inactive");
+
+        let p = self.payments.get(buyer);
+        require(p != null, "No payment found");
+        let paid = p!!.unbox.get(msg.listingId);
+        require(paid != null, "No payment found");
+        require(paid!! > 0, "Nothing to refund");
+
+        // Zero out payment first (best-effort safety against re-entrancy patterns)
+        let pm = p!!;
+        let unbox = pm.unbox;
+        unbox.set(msg.listingId, 0);
+        pm.unbox = unbox;
+        self.payments.set(buyer, pm);
+
+        // Refund jettons from escrow jetton wallet back to buyer
+        let escrowJettonWallet = contractAddress(initOf JettonDefaultWallet(self.jettonMaster, myAddress()));
+        require(myBalance() >= self.jettonTransferGas, "Not enough TON for jetton ops");
+        send(SendParameters{
+            to: escrowJettonWallet,
+            value: self.jettonTransferGas,
+            bounce: true,
+            body: TokenTransfer{
+                queryId: msg.listingId,
+                amount: paid!!,
+                destination: buyer,
+                responseDestination: buyer,
+                customPayload: null,
+                forwardTonAmount: 0,
+                forwardPayload: emptySlice(),
+            }.toCell(),
+        });
+    }
+
+    // Bounce handling: if NFT transfer to buyer fails, re-activate listing so buyer can retry or refund.
+    bounced(msg: Slice) {
+        // Parse bounced message header
+        msg.skipBits(32); // 0xFFFFFFFF
+        let op: Int = msg.loadUint(32);
+
+        // Broker NFT Transfer op (TEP-62): 0x5fcc3d14
+        if (op == 0x5fcc3d14) {
+            let listingId: Int = msg.loadUint(64); // query_id
+            let listing = self.listings.get(listingId);
+            if (listing != null) {
+                // If it was locked (inactive), re-open it so buyer can retry/refund.
+                let reopened = listing!!;
+                reopened.active = true;
+                self.listings.set(listingId, reopened);
+            }
+        }
     }
 
     // --- Getters ---

@@ -143,4 +143,3 @@ module.exports = {
     getVaultJettonWalletAddress,
     getVaultInventory,
 };
-

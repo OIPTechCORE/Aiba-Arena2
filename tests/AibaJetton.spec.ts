@@ -59,7 +59,7 @@ describe('AibaJetton', () => {
                 {
                     $$type: 'Add',
                     amount: increaseBy,
-                }
+                },
             );
 
             expect(increaseResult.transactions).toHaveTransaction({

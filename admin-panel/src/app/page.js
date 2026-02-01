@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import axios from 'axios';
+import { useEffect, useMemo, useState } from 'react';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
 export default function AdminHome() {
-    const [token, setToken] = useState("");
-    const [tab, setTab] = useState("tasks"); // tasks | ads | modes | economy | mod
+    const [token, setToken] = useState('');
+    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [authError, setAuthError] = useState("");
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [authError, setAuthError] = useState('');
 
     const api = useMemo(() => {
         const a = axios.create({ baseURL: BACKEND_URL });
@@ -24,7 +24,7 @@ export default function AdminHome() {
 
     useEffect(() => {
         try {
-            const saved = localStorage.getItem("aiba_admin_token");
+            const saved = localStorage.getItem('aiba_admin_token');
             if (saved) setToken(saved);
         } catch {
             // ignore
@@ -32,22 +32,22 @@ export default function AdminHome() {
     }, []);
 
     const login = async () => {
-        setAuthError("");
+        setAuthError('');
         try {
             const res = await axios.post(`${BACKEND_URL}/api/admin/auth/login`, { email, password });
-            const t = String(res.data?.token || "");
-            if (!t) throw new Error("no token");
+            const t = String(res.data?.token || '');
+            if (!t) throw new Error('no token');
             setToken(t);
-            localStorage.setItem("aiba_admin_token", t);
+            localStorage.setItem('aiba_admin_token', t);
         } catch {
-            setAuthError("Login failed (check ADMIN_EMAIL / password).");
+            setAuthError('Login failed (check ADMIN_EMAIL / password).');
         }
     };
 
     const logout = () => {
-        setToken("");
+        setToken('');
         try {
-            localStorage.removeItem("aiba_admin_token");
+            localStorage.removeItem('aiba_admin_token');
         } catch {
             // ignore
         }
@@ -55,19 +55,19 @@ export default function AdminHome() {
 
     // ----- Tasks -----
     const [tasks, setTasks] = useState([]);
-    const [newTaskTitle, setNewTaskTitle] = useState("");
-    const [newTaskDescription, setNewTaskDescription] = useState("");
+    const [newTaskTitle, setNewTaskTitle] = useState('');
+    const [newTaskDescription, setNewTaskDescription] = useState('');
     const [loadingTasks, setLoadingTasks] = useState(false);
-    const [tasksError, setTasksError] = useState("");
+    const [tasksError, setTasksError] = useState('');
 
     const fetchTasks = async () => {
         setLoadingTasks(true);
-        setTasksError("");
+        setTasksError('');
         try {
-            const res = await api.get("/api/admin/tasks");
+            const res = await api.get('/api/admin/tasks');
             setTasks(Array.isArray(res.data) ? res.data : []);
         } catch {
-            setTasksError("Failed to load tasks (missing/invalid admin token?)");
+            setTasksError('Failed to load tasks (missing/invalid admin token?)');
         } finally {
             setLoadingTasks(false);
         }
@@ -75,9 +75,13 @@ export default function AdminHome() {
 
     const createTask = async () => {
         if (!newTaskTitle.trim()) return;
-        await api.post("/api/admin/tasks", { title: newTaskTitle.trim(), description: newTaskDescription.trim(), enabled: true });
-        setNewTaskTitle("");
-        setNewTaskDescription("");
+        await api.post('/api/admin/tasks', {
+            title: newTaskTitle.trim(),
+            description: newTaskDescription.trim(),
+            enabled: true,
+        });
+        setNewTaskTitle('');
+        setNewTaskDescription('');
         await fetchTasks();
     };
 
@@ -89,18 +93,18 @@ export default function AdminHome() {
     // ----- Ads -----
     const [ads, setAds] = useState([]);
     const [loadingAds, setLoadingAds] = useState(false);
-    const [adsError, setAdsError] = useState("");
-    const [newAdImageUrl, setNewAdImageUrl] = useState("");
-    const [newAdLinkUrl, setNewAdLinkUrl] = useState("");
+    const [adsError, setAdsError] = useState('');
+    const [newAdImageUrl, setNewAdImageUrl] = useState('');
+    const [newAdLinkUrl, setNewAdLinkUrl] = useState('');
 
     const fetchAds = async () => {
         setLoadingAds(true);
-        setAdsError("");
+        setAdsError('');
         try {
-            const res = await api.get("/api/admin/ads");
+            const res = await api.get('/api/admin/ads');
             setAds(Array.isArray(res.data) ? res.data : []);
         } catch {
-            setAdsError("Failed to load ads (missing/invalid admin token?)");
+            setAdsError('Failed to load ads (missing/invalid admin token?)');
         } finally {
             setLoadingAds(false);
         }
@@ -108,15 +112,15 @@ export default function AdminHome() {
 
     const createAd = async () => {
         if (!newAdImageUrl.trim()) return;
-        await api.post("/api/admin/ads", {
+        await api.post('/api/admin/ads', {
             imageUrl: newAdImageUrl.trim(),
             linkUrl: newAdLinkUrl.trim(),
-            placement: "between_battles",
+            placement: 'between_battles',
             weight: 1,
             active: true,
         });
-        setNewAdImageUrl("");
-        setNewAdLinkUrl("");
+        setNewAdImageUrl('');
+        setNewAdLinkUrl('');
         await fetchAds();
     };
 
@@ -128,19 +132,19 @@ export default function AdminHome() {
     // ----- Game Modes -----
     const [modes, setModes] = useState([]);
     const [loadingModes, setLoadingModes] = useState(false);
-    const [modesError, setModesError] = useState("");
-    const [newModeKey, setNewModeKey] = useState("");
-    const [newModeName, setNewModeName] = useState("");
-    const [newModeArena, setNewModeArena] = useState("prediction");
+    const [modesError, setModesError] = useState('');
+    const [newModeKey, setNewModeKey] = useState('');
+    const [newModeName, setNewModeName] = useState('');
+    const [newModeArena, setNewModeArena] = useState('prediction');
 
     const fetchModes = async () => {
         setLoadingModes(true);
-        setModesError("");
+        setModesError('');
         try {
-            const res = await api.get("/api/admin/game-modes");
+            const res = await api.get('/api/admin/game-modes');
             setModes(Array.isArray(res.data) ? res.data : []);
         } catch {
-            setModesError("Failed to load game modes (missing/invalid admin token?)");
+            setModesError('Failed to load game modes (missing/invalid admin token?)');
         } finally {
             setLoadingModes(false);
         }
@@ -148,15 +152,15 @@ export default function AdminHome() {
 
     const createMode = async () => {
         if (!newModeKey.trim() || !newModeName.trim() || !newModeArena.trim()) return;
-        await api.post("/api/admin/game-modes", {
+        await api.post('/api/admin/game-modes', {
             key: newModeKey.trim(),
             name: newModeName.trim(),
             arena: newModeArena.trim(),
-            league: "rookie",
+            league: 'rookie',
             enabled: true,
         });
-        setNewModeKey("");
-        setNewModeName("");
+        setNewModeKey('');
+        setNewModeName('');
         await fetchModes();
     };
 
@@ -166,122 +170,122 @@ export default function AdminHome() {
     };
 
     // ----- Economy config -----
-    const [economyJson, setEconomyJson] = useState("");
+    const [economyJson, setEconomyJson] = useState('');
     const [loadingEconomy, setLoadingEconomy] = useState(false);
-    const [economyError, setEconomyError] = useState("");
+    const [economyError, setEconomyError] = useState('');
 
     const fetchEconomy = async () => {
         setLoadingEconomy(true);
-        setEconomyError("");
+        setEconomyError('');
         try {
-            const res = await api.get("/api/admin/economy/config");
+            const res = await api.get('/api/admin/economy/config');
             setEconomyJson(JSON.stringify(res.data || {}, null, 2));
         } catch {
-            setEconomyError("Failed to load economy config (missing/invalid admin token?)");
+            setEconomyError('Failed to load economy config (missing/invalid admin token?)');
         } finally {
             setLoadingEconomy(false);
         }
     };
 
     const saveEconomy = async () => {
-        setEconomyError("");
+        setEconomyError('');
         try {
-            const parsed = JSON.parse(economyJson || "{}");
-            await api.patch("/api/admin/economy/config", parsed);
+            const parsed = JSON.parse(economyJson || '{}');
+            await api.patch('/api/admin/economy/config', parsed);
             await fetchEconomy();
         } catch {
-            setEconomyError("Failed to save (invalid JSON or backend error).");
+            setEconomyError('Failed to save (invalid JSON or backend error).');
         }
     };
 
     // ----- Moderation -----
-    const [modError, setModError] = useState("");
+    const [modError, setModError] = useState('');
     const [flaggedBrokers, setFlaggedBrokers] = useState([]);
     const [anomalies, setAnomalies] = useState([]);
-    const [banUserTelegramId, setBanUserTelegramId] = useState("");
-    const [banUserMinutes, setBanUserMinutes] = useState("1440");
-    const [banUserReason, setBanUserReason] = useState("banned");
-    const [banBrokerId, setBanBrokerId] = useState("");
-    const [banBrokerReason, setBanBrokerReason] = useState("broker banned");
+    const [banUserTelegramId, setBanUserTelegramId] = useState('');
+    const [banUserMinutes, setBanUserMinutes] = useState('1440');
+    const [banUserReason, setBanUserReason] = useState('banned');
+    const [banBrokerId, setBanBrokerId] = useState('');
+    const [banBrokerReason, setBanBrokerReason] = useState('broker banned');
 
     const fetchFlaggedBrokers = async () => {
-        setModError("");
+        setModError('');
         try {
-            const res = await api.get("/api/admin/mod/flagged-brokers", { params: { minFlags: 1, limit: 100 } });
+            const res = await api.get('/api/admin/mod/flagged-brokers', { params: { minFlags: 1, limit: 100 } });
             setFlaggedBrokers(Array.isArray(res.data) ? res.data : []);
         } catch {
-            setModError("Failed to load flagged brokers (missing/invalid admin token?)");
+            setModError('Failed to load flagged brokers (missing/invalid admin token?)');
         }
     };
 
     const fetchAnomalies = async () => {
-        setModError("");
+        setModError('');
         try {
-            const res = await api.get("/api/admin/mod/recent-anomalies", { params: { limit: 100 } });
+            const res = await api.get('/api/admin/mod/recent-anomalies', { params: { limit: 100 } });
             setAnomalies(Array.isArray(res.data) ? res.data : []);
         } catch {
-            setModError("Failed to load recent anomalies (missing/invalid admin token?)");
+            setModError('Failed to load recent anomalies (missing/invalid admin token?)');
         }
     };
 
     const banUser = async () => {
-        setModError("");
+        setModError('');
         const telegramId = banUserTelegramId.trim();
         if (!telegramId) return;
         try {
-            await api.post("/api/admin/mod/ban-user", {
+            await api.post('/api/admin/mod/ban-user', {
                 telegramId,
                 minutes: Number(banUserMinutes || 0),
                 reason: banUserReason,
             });
             await fetchAnomalies();
         } catch {
-            setModError("Ban user failed.");
+            setModError('Ban user failed.');
         }
     };
 
     const unbanUser = async () => {
-        setModError("");
+        setModError('');
         const telegramId = banUserTelegramId.trim();
         if (!telegramId) return;
         try {
-            await api.post("/api/admin/mod/unban-user", { telegramId });
+            await api.post('/api/admin/mod/unban-user', { telegramId });
         } catch {
-            setModError("Unban user failed.");
+            setModError('Unban user failed.');
         }
     };
 
     const banBroker = async () => {
-        setModError("");
+        setModError('');
         const brokerId = banBrokerId.trim();
         if (!brokerId) return;
         try {
-            await api.post("/api/admin/mod/ban-broker", { brokerId, reason: banBrokerReason });
+            await api.post('/api/admin/mod/ban-broker', { brokerId, reason: banBrokerReason });
             await fetchFlaggedBrokers();
         } catch {
-            setModError("Ban broker failed.");
+            setModError('Ban broker failed.');
         }
     };
 
     const unbanBroker = async () => {
-        setModError("");
+        setModError('');
         const brokerId = banBrokerId.trim();
         if (!brokerId) return;
         try {
-            await api.post("/api/admin/mod/unban-broker", { brokerId });
+            await api.post('/api/admin/mod/unban-broker', { brokerId });
             await fetchFlaggedBrokers();
         } catch {
-            setModError("Unban broker failed.");
+            setModError('Unban broker failed.');
         }
     };
 
     useEffect(() => {
         if (!token) return;
-        if (tab === "tasks") fetchTasks();
-        if (tab === "ads") fetchAds();
-        if (tab === "modes") fetchModes();
-        if (tab === "economy") fetchEconomy();
-        if (tab === "mod") {
+        if (tab === 'tasks') fetchTasks();
+        if (tab === 'ads') fetchAds();
+        if (tab === 'modes') fetchModes();
+        if (tab === 'economy') fetchEconomy();
+        if (tab === 'mod') {
             fetchFlaggedBrokers();
             fetchAnomalies();
         }
@@ -291,12 +295,12 @@ export default function AdminHome() {
     return (
         <div style={{ padding: 16 }}>
             <h1 style={{ marginTop: 0 }}>Admin Panel</h1>
-            <div style={{ color: "#666", marginBottom: 12 }}>Backend: {BACKEND_URL}</div>
+            <div style={{ color: '#666', marginBottom: 12 }}>Backend: {BACKEND_URL}</div>
 
             {!token ? (
-                <div style={{ maxWidth: 420, border: "1px solid #eee", borderRadius: 8, padding: 12 }}>
+                <div style={{ maxWidth: 420, border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Admin login</div>
-                    <div style={{ display: "grid", gap: 8 }}>
+                    <div style={{ display: 'grid', gap: 8 }}>
                         <input
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -310,42 +314,46 @@ export default function AdminHome() {
                             type="password"
                             style={{ padding: 10 }}
                         />
-                        <button onClick={login} style={{ padding: "10px 12px" }}>
+                        <button onClick={login} style={{ padding: '10px 12px' }}>
                             Login
                         </button>
-                        {authError ? <div style={{ color: "crimson" }}>{authError}</div> : null}
+                        {authError ? <div style={{ color: 'crimson' }}>{authError}</div> : null}
                     </div>
                 </div>
             ) : (
                 <>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                        <button onClick={() => setTab("tasks")} style={{ padding: "8px 12px" }}>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <button onClick={() => setTab('tasks')} style={{ padding: '8px 12px' }}>
                             Tasks
                         </button>
-                        <button onClick={() => setTab("ads")} style={{ padding: "8px 12px" }}>
+                        <button onClick={() => setTab('ads')} style={{ padding: '8px 12px' }}>
                             Ads
                         </button>
-                        <button onClick={() => setTab("modes")} style={{ padding: "8px 12px" }}>
+                        <button onClick={() => setTab('modes')} style={{ padding: '8px 12px' }}>
                             Game modes
                         </button>
-                        <button onClick={() => setTab("economy")} style={{ padding: "8px 12px" }}>
+                        <button onClick={() => setTab('economy')} style={{ padding: '8px 12px' }}>
                             Economy
                         </button>
-                        <button onClick={() => setTab("mod")} style={{ padding: "8px 12px" }}>
+                        <button onClick={() => setTab('mod')} style={{ padding: '8px 12px' }}>
                             Moderation
                         </button>
                         <div style={{ flex: 1 }} />
-                        <button onClick={logout} style={{ padding: "8px 12px" }}>
+                        <button onClick={logout} style={{ padding: '8px 12px' }}>
                             Logout
                         </button>
                     </div>
 
                     <div style={{ marginTop: 12 }}>
-                        {tab === "tasks" ? (
+                        {tab === 'tasks' ? (
                             <>
-                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                                    <button onClick={fetchTasks} disabled={loadingTasks} style={{ padding: "8px 12px" }}>
-                                        {loadingTasks ? "Loading…" : "Refresh"}
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <button
+                                        onClick={fetchTasks}
+                                        disabled={loadingTasks}
+                                        style={{ padding: '8px 12px' }}
+                                    >
+                                        {loadingTasks ? 'Loading…' : 'Refresh'}
                                     </button>
                                     <input
                                         value={newTaskTitle}
@@ -359,29 +367,36 @@ export default function AdminHome() {
                                         placeholder="Description (optional)"
                                         style={{ padding: 10, minWidth: 260 }}
                                     />
-                                    <button onClick={createTask} style={{ padding: "8px 12px" }}>
+                                    <button onClick={createTask} style={{ padding: '8px 12px' }}>
                                         Create
                                     </button>
                                 </div>
-                                {tasksError ? <p style={{ color: "crimson" }}>{tasksError}</p> : null}
+                                {tasksError ? <p style={{ color: 'crimson' }}>{tasksError}</p> : null}
                                 <div style={{ marginTop: 12 }}>
                                     {tasks.map((t) => (
                                         <div
                                             key={t._id}
-                                            style={{ padding: 12, border: "1px solid #eee", borderRadius: 8, marginTop: 8 }}
+                                            style={{
+                                                padding: 12,
+                                                border: '1px solid #eee',
+                                                borderRadius: 8,
+                                                marginTop: 8,
+                                            }}
                                         >
-                                            <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
                                                 <div>
                                                     <div style={{ fontWeight: 600 }}>{t.title}</div>
                                                     {t.description ? (
-                                                        <div style={{ color: "#444", marginTop: 4 }}>{t.description}</div>
+                                                        <div style={{ color: '#444', marginTop: 4 }}>
+                                                            {t.description}
+                                                        </div>
                                                     ) : null}
                                                     {t.enabled === false ? (
-                                                        <div style={{ color: "#b45309", marginTop: 6 }}>Disabled</div>
+                                                        <div style={{ color: '#b45309', marginTop: 6 }}>Disabled</div>
                                                     ) : null}
                                                 </div>
-                                                <button onClick={() => toggleTask(t)} style={{ padding: "8px 12px" }}>
-                                                    {t.enabled ? "Disable" : "Enable"}
+                                                <button onClick={() => toggleTask(t)} style={{ padding: '8px 12px' }}>
+                                                    {t.enabled ? 'Disable' : 'Enable'}
                                                 </button>
                                             </div>
                                         </div>
@@ -390,11 +405,11 @@ export default function AdminHome() {
                             </>
                         ) : null}
 
-                        {tab === "ads" ? (
+                        {tab === 'ads' ? (
                             <>
-                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                                    <button onClick={fetchAds} disabled={loadingAds} style={{ padding: "8px 12px" }}>
-                                        {loadingAds ? "Loading…" : "Refresh"}
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <button onClick={fetchAds} disabled={loadingAds} style={{ padding: '8px 12px' }}>
+                                        {loadingAds ? 'Loading…' : 'Refresh'}
                                     </button>
                                     <input
                                         value={newAdImageUrl}
@@ -408,32 +423,45 @@ export default function AdminHome() {
                                         placeholder="Link URL (optional)"
                                         style={{ padding: 10, minWidth: 280 }}
                                     />
-                                    <button onClick={createAd} style={{ padding: "8px 12px" }}>
+                                    <button onClick={createAd} style={{ padding: '8px 12px' }}>
                                         Create
                                     </button>
                                 </div>
-                                {adsError ? <p style={{ color: "crimson" }}>{adsError}</p> : null}
+                                {adsError ? <p style={{ color: 'crimson' }}>{adsError}</p> : null}
                                 <div style={{ marginTop: 12 }}>
                                     {ads.map((a) => (
                                         <div
                                             key={a._id}
-                                            style={{ padding: 12, border: "1px solid #eee", borderRadius: 8, marginTop: 8 }}
+                                            style={{
+                                                padding: 12,
+                                                border: '1px solid #eee',
+                                                borderRadius: 8,
+                                                marginTop: 8,
+                                            }}
                                         >
-                                            <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
                                                 <div style={{ minWidth: 0 }}>
-                                                    <div style={{ fontWeight: 600, wordBreak: "break-all" }}>{a.imageUrl}</div>
+                                                    <div style={{ fontWeight: 600, wordBreak: 'break-all' }}>
+                                                        {a.imageUrl}
+                                                    </div>
                                                     {a.linkUrl ? (
-                                                        <div style={{ color: "#444", marginTop: 4, wordBreak: "break-all" }}>
+                                                        <div
+                                                            style={{
+                                                                color: '#444',
+                                                                marginTop: 4,
+                                                                wordBreak: 'break-all',
+                                                            }}
+                                                        >
                                                             {a.linkUrl}
                                                         </div>
                                                     ) : null}
-                                                    <div style={{ color: "#666", marginTop: 6, fontSize: 12 }}>
-                                                        placement: {a.placement} | weight: {a.weight} |{" "}
-                                                        {a.active ? "active" : "inactive"}
+                                                    <div style={{ color: '#666', marginTop: 6, fontSize: 12 }}>
+                                                        placement: {a.placement} | weight: {a.weight} |{' '}
+                                                        {a.active ? 'active' : 'inactive'}
                                                     </div>
                                                 </div>
-                                                <button onClick={() => toggleAd(a)} style={{ padding: "8px 12px" }}>
-                                                    {a.active ? "Disable" : "Enable"}
+                                                <button onClick={() => toggleAd(a)} style={{ padding: '8px 12px' }}>
+                                                    {a.active ? 'Disable' : 'Enable'}
                                                 </button>
                                             </div>
                                         </div>
@@ -442,11 +470,15 @@ export default function AdminHome() {
                             </>
                         ) : null}
 
-                        {tab === "modes" ? (
+                        {tab === 'modes' ? (
                             <>
-                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                                    <button onClick={fetchModes} disabled={loadingModes} style={{ padding: "8px 12px" }}>
-                                        {loadingModes ? "Loading…" : "Refresh"}
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <button
+                                        onClick={fetchModes}
+                                        disabled={loadingModes}
+                                        style={{ padding: '8px 12px' }}
+                                    >
+                                        {loadingModes ? 'Loading…' : 'Refresh'}
                                     </button>
                                     <input
                                         value={newModeKey}
@@ -466,28 +498,34 @@ export default function AdminHome() {
                                         placeholder="arena"
                                         style={{ padding: 10, minWidth: 180 }}
                                     />
-                                    <button onClick={createMode} style={{ padding: "8px 12px" }}>
+                                    <button onClick={createMode} style={{ padding: '8px 12px' }}>
                                         Create
                                     </button>
                                 </div>
-                                {modesError ? <p style={{ color: "crimson" }}>{modesError}</p> : null}
+                                {modesError ? <p style={{ color: 'crimson' }}>{modesError}</p> : null}
                                 <div style={{ marginTop: 12 }}>
                                     {modes.map((m) => (
                                         <div
                                             key={m._id}
-                                            style={{ padding: 12, border: "1px solid #eee", borderRadius: 8, marginTop: 8 }}
+                                            style={{
+                                                padding: 12,
+                                                border: '1px solid #eee',
+                                                borderRadius: 8,
+                                                marginTop: 8,
+                                            }}
                                         >
-                                            <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
                                                 <div style={{ minWidth: 0 }}>
                                                     <div style={{ fontWeight: 600 }}>
                                                         {m.key} — {m.name}
                                                     </div>
-                                                    <div style={{ color: "#666", marginTop: 6, fontSize: 12 }}>
-                                                        arena: {m.arena} | league: {m.league} | {m.enabled ? "enabled" : "disabled"}
+                                                    <div style={{ color: '#666', marginTop: 6, fontSize: 12 }}>
+                                                        arena: {m.arena} | league: {m.league} |{' '}
+                                                        {m.enabled ? 'enabled' : 'disabled'}
                                                     </div>
                                                 </div>
-                                                <button onClick={() => toggleMode(m)} style={{ padding: "8px 12px" }}>
-                                                    {m.enabled ? "Disable" : "Enable"}
+                                                <button onClick={() => toggleMode(m)} style={{ padding: '8px 12px' }}>
+                                                    {m.enabled ? 'Disable' : 'Enable'}
                                                 </button>
                                             </div>
                                         </div>
@@ -496,44 +534,49 @@ export default function AdminHome() {
                             </>
                         ) : null}
 
-                        {tab === "economy" ? (
+                        {tab === 'economy' ? (
                             <>
-                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                                    <button onClick={fetchEconomy} disabled={loadingEconomy} style={{ padding: "8px 12px" }}>
-                                        {loadingEconomy ? "Loading…" : "Refresh"}
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <button
+                                        onClick={fetchEconomy}
+                                        disabled={loadingEconomy}
+                                        style={{ padding: '8px 12px' }}
+                                    >
+                                        {loadingEconomy ? 'Loading…' : 'Refresh'}
                                     </button>
-                                    <button onClick={saveEconomy} style={{ padding: "8px 12px" }}>
+                                    <button onClick={saveEconomy} style={{ padding: '8px 12px' }}>
                                         Save
                                     </button>
                                 </div>
-                                {economyError ? <p style={{ color: "crimson" }}>{economyError}</p> : null}
+                                {economyError ? <p style={{ color: 'crimson' }}>{economyError}</p> : null}
                                 <textarea
                                     value={economyJson}
                                     onChange={(e) => setEconomyJson(e.target.value)}
                                     spellCheck={false}
                                     style={{
                                         marginTop: 12,
-                                        width: "100%",
+                                        width: '100%',
                                         minHeight: 420,
                                         padding: 12,
-                                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
                                         fontSize: 12,
-                                        border: "1px solid #eee",
+                                        border: '1px solid #eee',
                                         borderRadius: 8,
                                     }}
                                 />
-                                <div style={{ color: "#666", fontSize: 12, marginTop: 8 }}>
-                                    Tip: edit `baseRewardAibaPerScore`, `baseRewardNeurPerScore`, caps, and `dailyCap*ByArena` maps.
+                                <div style={{ color: '#666', fontSize: 12, marginTop: 8 }}>
+                                    Tip: edit `baseRewardAibaPerScore`, `baseRewardNeurPerScore`, caps, and
+                                    `dailyCap*ByArena` maps.
                                 </div>
                             </>
                         ) : null}
 
-                        {tab === "mod" ? (
+                        {tab === 'mod' ? (
                             <>
-                                <div style={{ display: "grid", gap: 12, maxWidth: 980 }}>
-                                    <div style={{ padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
+                                <div style={{ display: 'grid', gap: 12, maxWidth: 980 }}>
+                                    <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Ban / unban user</div>
-                                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                             <input
                                                 value={banUserTelegramId}
                                                 onChange={(e) => setBanUserTelegramId(e.target.value)}
@@ -552,18 +595,18 @@ export default function AdminHome() {
                                                 placeholder="Reason"
                                                 style={{ padding: 10, minWidth: 260 }}
                                             />
-                                            <button onClick={banUser} style={{ padding: "8px 12px" }}>
+                                            <button onClick={banUser} style={{ padding: '8px 12px' }}>
                                                 Ban
                                             </button>
-                                            <button onClick={unbanUser} style={{ padding: "8px 12px" }}>
+                                            <button onClick={unbanUser} style={{ padding: '8px 12px' }}>
                                                 Unban
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div style={{ padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
+                                    <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Ban / unban broker</div>
-                                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                             <input
                                                 value={banBrokerId}
                                                 onChange={(e) => setBanBrokerId(e.target.value)}
@@ -576,45 +619,52 @@ export default function AdminHome() {
                                                 placeholder="Reason"
                                                 style={{ padding: 10, minWidth: 300 }}
                                             />
-                                            <button onClick={banBroker} style={{ padding: "8px 12px" }}>
+                                            <button onClick={banBroker} style={{ padding: '8px 12px' }}>
                                                 Ban
                                             </button>
-                                            <button onClick={unbanBroker} style={{ padding: "8px 12px" }}>
+                                            <button onClick={unbanBroker} style={{ padding: '8px 12px' }}>
                                                 Unban
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                                        <button onClick={fetchFlaggedBrokers} style={{ padding: "8px 12px" }}>
+                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                        <button onClick={fetchFlaggedBrokers} style={{ padding: '8px 12px' }}>
                                             Refresh flagged brokers
                                         </button>
-                                        <button onClick={fetchAnomalies} style={{ padding: "8px 12px" }}>
+                                        <button onClick={fetchAnomalies} style={{ padding: '8px 12px' }}>
                                             Refresh anomalies
                                         </button>
                                     </div>
 
-                                    {modError ? <p style={{ color: "crimson" }}>{modError}</p> : null}
+                                    {modError ? <p style={{ color: 'crimson' }}>{modError}</p> : null}
 
-                                    <div style={{ padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
+                                    <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Flagged brokers</div>
                                         {flaggedBrokers.length === 0 ? (
-                                            <div style={{ color: "#666" }}>No flagged brokers.</div>
+                                            <div style={{ color: '#666' }}>No flagged brokers.</div>
                                         ) : (
-                                            <div style={{ display: "grid", gap: 8 }}>
+                                            <div style={{ display: 'grid', gap: 8 }}>
                                                 {flaggedBrokers.map((b) => (
                                                     <div
                                                         key={b._id}
-                                                        style={{ padding: 10, border: "1px solid #f2f2f2", borderRadius: 8 }}
+                                                        style={{
+                                                            padding: 10,
+                                                            border: '1px solid #f2f2f2',
+                                                            borderRadius: 8,
+                                                        }}
                                                     >
                                                         <div style={{ fontWeight: 600 }}>
                                                             {b._id} — owner {b.ownerTelegramId}
                                                         </div>
-                                                        <div style={{ color: "#666", fontSize: 12, marginTop: 4 }}>
-                                                            flags: {b.anomalyFlags} | banned: {String(Boolean(b.banned))} | energy: {b.energy}
+                                                        <div style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
+                                                            flags: {b.anomalyFlags} | banned:{' '}
+                                                            {String(Boolean(b.banned))} | energy: {b.energy}
                                                         </div>
                                                         {b.banReason ? (
-                                                            <div style={{ color: "#b45309", fontSize: 12, marginTop: 4 }}>
+                                                            <div
+                                                                style={{ color: '#b45309', fontSize: 12, marginTop: 4 }}
+                                                            >
                                                                 reason: {b.banReason}
                                                             </div>
                                                         ) : null}
@@ -624,25 +674,32 @@ export default function AdminHome() {
                                         )}
                                     </div>
 
-                                    <div style={{ padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
+                                    <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Recent anomalies</div>
                                         {anomalies.length === 0 ? (
-                                            <div style={{ color: "#666" }}>No anomalies.</div>
+                                            <div style={{ color: '#666' }}>No anomalies.</div>
                                         ) : (
-                                            <div style={{ display: "grid", gap: 8 }}>
+                                            <div style={{ display: 'grid', gap: 8 }}>
                                                 {anomalies.map((a) => (
                                                     <div
                                                         key={a._id}
-                                                        style={{ padding: 10, border: "1px solid #f2f2f2", borderRadius: 8 }}
+                                                        style={{
+                                                            padding: 10,
+                                                            border: '1px solid #f2f2f2',
+                                                            borderRadius: 8,
+                                                        }}
                                                     >
                                                         <div style={{ fontWeight: 600 }}>
                                                             {a.arena} / {a.league} — score {a.score}
                                                         </div>
-                                                        <div style={{ color: "#666", fontSize: 12, marginTop: 4 }}>
-                                                            owner: {a.ownerTelegramId} | broker: {a.brokerId} | requestId: {a.requestId}
+                                                        <div style={{ color: '#666', fontSize: 12, marginTop: 4 }}>
+                                                            owner: {a.ownerTelegramId} | broker: {a.brokerId} |
+                                                            requestId: {a.requestId}
                                                         </div>
                                                         {a.anomalyReason ? (
-                                                            <div style={{ color: "#b45309", fontSize: 12, marginTop: 4 }}>
+                                                            <div
+                                                                style={{ color: '#b45309', fontSize: 12, marginTop: 4 }}
+                                                            >
                                                                 {a.anomalyReason}
                                                             </div>
                                                         ) : null}
@@ -660,4 +717,3 @@ export default function AdminHome() {
         </div>
     );
 }
-

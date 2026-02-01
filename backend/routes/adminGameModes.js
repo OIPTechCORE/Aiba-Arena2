@@ -18,13 +18,20 @@ router.post('/', async (req, res) => {
     const league = String(req.body?.league || 'rookie').trim();
     const energyCost = Number(req.body?.energyCost ?? 10);
     const cooldownSeconds = Number(req.body?.cooldownSeconds ?? 30);
+    const entryNeurCost = Number(req.body?.entryNeurCost ?? 0);
+    const entryAibaCost = Number(req.body?.entryAibaCost ?? 0);
     const rewardMultiplierAiba = Number(req.body?.rewardMultiplierAiba ?? 1);
     const rewardMultiplierNeur = Number(req.body?.rewardMultiplierNeur ?? 1);
     const rules = req.body?.rules && typeof req.body.rules === 'object' ? req.body.rules : {};
 
     if (!key || !name || !arena) return res.status(400).json({ error: 'key, name, arena required' });
     if (Number.isNaN(energyCost) || energyCost < 0) return res.status(400).json({ error: 'energyCost invalid' });
-    if (Number.isNaN(cooldownSeconds) || cooldownSeconds < 0) return res.status(400).json({ error: 'cooldownSeconds invalid' });
+    if (Number.isNaN(cooldownSeconds) || cooldownSeconds < 0)
+        return res.status(400).json({ error: 'cooldownSeconds invalid' });
+    if (Number.isNaN(entryNeurCost) || entryNeurCost < 0)
+        return res.status(400).json({ error: 'entryNeurCost invalid' });
+    if (Number.isNaN(entryAibaCost) || entryAibaCost < 0)
+        return res.status(400).json({ error: 'entryAibaCost invalid' });
 
     const mode = await GameMode.create({
         key,
@@ -35,6 +42,8 @@ router.post('/', async (req, res) => {
         league,
         energyCost,
         cooldownSeconds,
+        entryNeurCost,
+        entryAibaCost,
         rewardMultiplierAiba,
         rewardMultiplierNeur,
         rules,
@@ -54,9 +63,14 @@ router.patch('/:id', async (req, res) => {
     if (req.body?.league !== undefined) setStr('league');
     if (req.body?.energyCost !== undefined) update.energyCost = Number(req.body.energyCost);
     if (req.body?.cooldownSeconds !== undefined) update.cooldownSeconds = Number(req.body.cooldownSeconds);
-    if (req.body?.rewardMultiplierAiba !== undefined) update.rewardMultiplierAiba = Number(req.body.rewardMultiplierAiba);
-    if (req.body?.rewardMultiplierNeur !== undefined) update.rewardMultiplierNeur = Number(req.body.rewardMultiplierNeur);
-    if (req.body?.rules !== undefined) update.rules = req.body.rules && typeof req.body.rules === 'object' ? req.body.rules : {};
+    if (req.body?.entryNeurCost !== undefined) update.entryNeurCost = Number(req.body.entryNeurCost);
+    if (req.body?.entryAibaCost !== undefined) update.entryAibaCost = Number(req.body.entryAibaCost);
+    if (req.body?.rewardMultiplierAiba !== undefined)
+        update.rewardMultiplierAiba = Number(req.body.rewardMultiplierAiba);
+    if (req.body?.rewardMultiplierNeur !== undefined)
+        update.rewardMultiplierNeur = Number(req.body.rewardMultiplierNeur);
+    if (req.body?.rules !== undefined)
+        update.rules = req.body.rules && typeof req.body.rules === 'object' ? req.body.rules : {};
 
     const mode = await GameMode.findByIdAndUpdate(req.params.id, update, { new: true }).lean();
     if (!mode) return res.status(404).json({ error: 'not found' });
@@ -70,4 +84,3 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
-

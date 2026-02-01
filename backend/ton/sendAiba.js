@@ -34,11 +34,7 @@ async function sendAIBA(to, amount) {
     const jettonAmount = parseJettonAmountToBigInt(amount);
 
     // In CI or local dev, allow stub to avoid real transfers
-    if (
-        process.env.APP_ENV === 'test' ||
-        process.env.NODE_ENV === 'test' ||
-        ADMIN_SIGNER_TYPE === 'stub'
-    ) {
+    if (process.env.APP_ENV === 'test' || process.env.NODE_ENV === 'test' || ADMIN_SIGNER_TYPE === 'stub') {
         console.log(`[sendAIBA] STUB MODE: would send ${jettonAmount.toString()} to ${toAddress}`);
         return { stub: true };
     }
@@ -47,8 +43,8 @@ async function sendAIBA(to, amount) {
     if (!TON_PROVIDER_URL) throw new Error('TON_PROVIDER_URL is not configured');
     if (!ADMIN_WALLET) throw new Error('ADMIN_WALLET is not configured');
 
-  // Amount handling: expect amount in smallest jetton unit (integer).
-  // If you store token amounts in decimal then convert to smallest unit here.
+    // Amount handling: expect amount in smallest jetton unit (integer).
+    // If you store token amounts in decimal then convert to smallest unit here.
 
     try {
         if (ADMIN_SIGNER_TYPE === 'mnemonic') {
@@ -104,7 +100,7 @@ async function sendAIBA(to, amount) {
             const pk = String(process.env.ADMIN_PRIVATE_KEY || '').trim();
             if (!pk) throw new Error('ADMIN_PRIVATE_KEY must be set for private_key signer');
             throw new Error(
-                'private_key signer path is not implemented. Use ADMIN_SIGNER_TYPE=mnemonic or implement key parsing.'
+                'private_key signer path is not implemented. Use ADMIN_SIGNER_TYPE=mnemonic or implement key parsing.',
             );
         }
 

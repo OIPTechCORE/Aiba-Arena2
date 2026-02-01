@@ -44,7 +44,7 @@ export async function run(provider: NetworkProvider) {
             $$type: 'Mint',
             to: vault.address,
             amount,
-        }
+        },
     );
 
     ui.write('Mint message sent.');
@@ -54,4 +54,3 @@ export async function run(provider: NetworkProvider) {
     ui.write(`ARENA_VAULT_ADDRESS=${vault.address.toString()}`);
     ui.write(`ORACLE_PRIVATE_KEY_HEX=<keep same seed you entered>`);
 }
-

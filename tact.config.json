@@ -1,75 +1,75 @@
 {
-  "$schema": "https://raw.githubusercontent.com/tact-lang/tact/main/src/config/configSchema.json",
-  "projects": [
-    {
-      "name": "AibaJetton",
-      "path": "contracts/aiba_jetton.tact",
-      "output": "build\\AibaJetton",
-      "options": {
-        "debug": false,
-        "external": false
-      },
-      "mode": "full"
-    },
-    {
-      "name": "AibaJettonSupply",
-      "path": "contracts/AibaJetton.tact",
-      "output": "build\\AibaJettonSupply",
-      "options": {
-        "debug": false,
-        "external": false
-      },
-      "mode": "full"
-    },
-    {
-      "name": "ArenaVault",
-      "path": "contracts/ArenaVault.tact",
-      "output": "build\\ArenaVault",
-      "options": {
-        "debug": false,
-        "external": false
-      },
-      "mode": "full"
-    },
-    {
-      "name": "AibaToken",
-      "path": "contracts/aiba_token.tact",
-      "output": "build\\AibaToken",
-      "options": {
-        "debug": false,
-        "external": false
-      },
-      "mode": "full"
-    },
-    {
-      "name": "ArenaRewardVault",
-      "path": "contracts/arena_reward_vault.tact",
-      "output": "build\\ArenaRewardVault",
-      "options": {
-        "debug": false,
-        "external": false
-      },
-      "mode": "full"
-    },
-    {
-      "name": "BrokerNFT",
-      "path": "contracts/broker_nft.tact",
-      "output": "build\\BrokerNFT",
-      "options": {
-        "debug": false,
-        "external": false
-      },
-      "mode": "full"
-    },
-    {
-      "name": "BrokerMarketplaceEscrow",
-      "path": "contracts/broker_marketplace_escrow.tact",
-      "output": "build\\BrokerMarketplaceEscrow",
-      "options": {
-        "debug": false,
-        "external": false
-      },
-      "mode": "full"
-    }
-  ]
+    "$schema": "https://raw.githubusercontent.com/tact-lang/tact/main/src/config/configSchema.json",
+    "projects": [
+        {
+            "name": "AibaJetton",
+            "path": "contracts/aiba_jetton.tact",
+            "output": "build\\AibaJetton",
+            "options": {
+                "debug": false,
+                "external": false
+            },
+            "mode": "full"
+        },
+        {
+            "name": "AibaJettonSupply",
+            "path": "contracts/AibaJetton.tact",
+            "output": "build\\AibaJettonSupply",
+            "options": {
+                "debug": false,
+                "external": false
+            },
+            "mode": "full"
+        },
+        {
+            "name": "ArenaVault",
+            "path": "contracts/ArenaVault.tact",
+            "output": "build\\ArenaVault",
+            "options": {
+                "debug": false,
+                "external": false
+            },
+            "mode": "full"
+        },
+        {
+            "name": "AibaToken",
+            "path": "contracts/aiba_token.tact",
+            "output": "build\\AibaToken",
+            "options": {
+                "debug": false,
+                "external": false
+            },
+            "mode": "full"
+        },
+        {
+            "name": "ArenaRewardVault",
+            "path": "contracts/arena_reward_vault.tact",
+            "output": "build\\ArenaRewardVault",
+            "options": {
+                "debug": false,
+                "external": false
+            },
+            "mode": "full"
+        },
+        {
+            "name": "BrokerNFT",
+            "path": "contracts/broker_nft.tact",
+            "output": "build\\BrokerNFT",
+            "options": {
+                "debug": false,
+                "external": false
+            },
+            "mode": "full"
+        },
+        {
+            "name": "BrokerMarketplaceEscrow",
+            "path": "contracts/broker_marketplace_escrow.tact",
+            "output": "build\\BrokerMarketplaceEscrow",
+            "options": {
+                "debug": false,
+                "external": false
+            },
+            "mode": "full"
+        }
+    ]
 }

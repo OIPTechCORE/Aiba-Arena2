@@ -14,4 +14,3 @@ router.get('/', requireTelegram, async (_req, res) => {
 });
 
 module.exports = router;
-
