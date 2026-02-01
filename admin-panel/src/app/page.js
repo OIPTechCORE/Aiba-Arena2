@@ -165,11 +165,41 @@ export default function AdminHome() {
         await fetchModes();
     };
 
+    // ----- Economy config -----
+    const [economyJson, setEconomyJson] = useState("");
+    const [loadingEconomy, setLoadingEconomy] = useState(false);
+    const [economyError, setEconomyError] = useState("");
+
+    const fetchEconomy = async () => {
+        setLoadingEconomy(true);
+        setEconomyError("");
+        try {
+            const res = await api.get("/api/admin/economy/config");
+            setEconomyJson(JSON.stringify(res.data || {}, null, 2));
+        } catch {
+            setEconomyError("Failed to load economy config (missing/invalid admin token?)");
+        } finally {
+            setLoadingEconomy(false);
+        }
+    };
+
+    const saveEconomy = async () => {
+        setEconomyError("");
+        try {
+            const parsed = JSON.parse(economyJson || "{}");
+            await api.patch("/api/admin/economy/config", parsed);
+            await fetchEconomy();
+        } catch {
+            setEconomyError("Failed to save (invalid JSON or backend error).");
+        }
+    };
+
     useEffect(() => {
         if (!token) return;
         if (tab === "tasks") fetchTasks();
         if (tab === "ads") fetchAds();
         if (tab === "modes") fetchModes();
+        if (tab === "economy") fetchEconomy();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, tab]);
 
@@ -212,6 +242,9 @@ export default function AdminHome() {
                         </button>
                         <button onClick={() => setTab("modes")} style={{ padding: "8px 12px" }}>
                             Game modes
+                        </button>
+                        <button onClick={() => setTab("economy")} style={{ padding: "8px 12px" }}>
+                            Economy
                         </button>
                         <div style={{ flex: 1 }} />
                         <button onClick={logout} style={{ padding: "8px 12px" }}>
@@ -371,6 +404,38 @@ export default function AdminHome() {
                                             </div>
                                         </div>
                                     ))}
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === "economy" ? (
+                            <>
+                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                                    <button onClick={fetchEconomy} disabled={loadingEconomy} style={{ padding: "8px 12px" }}>
+                                        {loadingEconomy ? "Loading…" : "Refresh"}
+                                    </button>
+                                    <button onClick={saveEconomy} style={{ padding: "8px 12px" }}>
+                                        Save
+                                    </button>
+                                </div>
+                                {economyError ? <p style={{ color: "crimson" }}>{economyError}</p> : null}
+                                <textarea
+                                    value={economyJson}
+                                    onChange={(e) => setEconomyJson(e.target.value)}
+                                    spellCheck={false}
+                                    style={{
+                                        marginTop: 12,
+                                        width: "100%",
+                                        minHeight: 420,
+                                        padding: 12,
+                                        fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                                        fontSize: 12,
+                                        border: "1px solid #eee",
+                                        borderRadius: 8,
+                                    }}
+                                />
+                                <div style={{ color: "#666", fontSize: 12, marginTop: 8 }}>
+                                    Tip: edit `baseRewardAibaPerScore`, `baseRewardNeurPerScore`, caps, and `dailyCap*ByArena` maps.
                                 </div>
                             </>
                         ) : null}
