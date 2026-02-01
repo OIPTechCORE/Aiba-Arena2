@@ -1,0 +1,112 @@
+# Aiba-Arena2
+
+## Project structure
+
+- `contracts` - Tact smart contracts (TON).
+- `scripts` - deployment / interaction scripts for contracts (Blueprint).
+- `tests` - contract tests (TON sandbox + Jest).
+- `backend` - Express + MongoDB API server (wallet connect, game score rewards, admin tasks).
+- `miniapp` - React miniapp (TonConnect + Telegram WebApp integration).
+- `admin-panel` - React admin panel (tasks UI).
+
+## How to use
+
+## Smart contracts (Blueprint)
+
+### Build
+
+`npx blueprint build` or `yarn blueprint build`
+
+### Test
+
+`npx blueprint test` or `yarn blueprint test`
+
+### Deploy or run another script
+
+`npx blueprint run` or `yarn blueprint run`
+
+### Deploy AIBA token + reward vault (testnet)
+
+After building, you can deploy:
+
+```bash
+npx blueprint build
+npx blueprint run deployAibaArena
+npx blueprint run deployAibaToken
+npx blueprint run deployArenaRewardVault <AIBA_TOKEN_ADDRESS>
+npx blueprint run mintAibaToVault <AIBA_TOKEN_ADDRESS> <VAULT_ADDRESS> <AMOUNT>
+```
+
+Notes:
+
+- `deployAibaArena` does the full flow (token + vault + mint) and prints the env snippet you need.
+- `deployArenaRewardVault` will prompt for `ORACLE_PRIVATE_KEY_HEX` and prints the public key (you’ll need the private key in backend for signing).
+- For claims to work, the **miniapp user must have connected a wallet** so backend knows the `toAddress`.
+
+### Add a new contract
+
+`npx blueprint create ContractName` or `yarn blueprint create ContractName`
+
+## Backend (API)
+
+Create an env file:
+
+- Copy `backend/.env.example` to `backend/.env`
+- Set `MONGO_URI`
+- For local dev, set `APP_ENV=dev` (skips Telegram signature verification)
+
+Run:
+
+```bash
+cd backend
+npm install
+npm start
+```
+
+Health check: `GET /health` on `http://localhost:5000/health`
+
+### Battle + on-chain claim (optional)
+
+The end-to-end flow is:
+
+- Miniapp calls `POST /api/battle/run` → backend returns a `claim` (if configured)
+- Miniapp uses TonConnect to send an internal message to `ArenaRewardVault` with the `RewardClaim` body (includes signature)
+
+To enable claims you must configure in `backend/.env`:
+
+- `ARENA_VAULT_ADDRESS`
+- `AIBA_JETTON_MASTER`
+- `ORACLE_PRIVATE_KEY_HEX` (32-byte seed, hex)
+- `TON_PROVIDER_URL` (TonCenter testnet endpoint is fine)
+- `TON_API_KEY` (recommended to avoid rate limits)
+
+Optional (recommended for debugging):
+
+- `GET /api/vault/inventory` shows vault TON balance + Jetton wallet balance
+
+## Frontends
+
+Both apps use `VITE_BACKEND_URL` (default `http://localhost:5000`).
+
+## Git auto-commit (optional)
+
+This repo may be used without git. If you want quick local commits:
+
+- PowerShell: `scripts/autocommit.ps1 "message"`
+- Bash: `scripts/autocommit.sh "message"`
+
+### Miniapp
+
+```bash
+cd miniapp
+npm install
+npm run dev
+```
+
+### Admin panel
+
+```bash
+cd admin-panel
+npm install
+npm run dev
+```
