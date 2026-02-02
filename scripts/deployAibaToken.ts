@@ -16,7 +16,7 @@ export async function run(provider: NetworkProvider) {
         {
             value: toNano('0.07'),
         },
-        null,
+        { $$type: 'Deploy', queryId: 0n },
     );
 
     await provider.waitForDeploy(aibaToken.address);

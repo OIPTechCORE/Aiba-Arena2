@@ -18,7 +18,7 @@ export async function run(provider: NetworkProvider) {
 
     ui.write('Deploying AibaToken…');
     const token = provider.open(await AibaToken.fromInit(owner, null));
-    await token.send(provider.sender(), { value: toNano('0.07') }, null);
+    await token.send(provider.sender(), { value: toNano('0.07') }, { $$type: 'Deploy', queryId: 0n });
     await provider.waitForDeploy(token.address);
     ui.write(`AibaToken deployed: ${token.address.toString()}`);
 
