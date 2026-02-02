@@ -53,7 +53,7 @@ Create an env file:
 
 - Copy `backend/.env.example` to `backend/.env`
 - Set `MONGO_URI`
-- For local dev, set `APP_ENV=dev` (skips Telegram signature verification)
+- For local dev, ensure `APP_ENV=dev` (skips Telegram signature verification)
 
 Run:
 
@@ -90,6 +90,11 @@ Optional (recommended for debugging):
 
 Both apps use `NEXT_PUBLIC_BACKEND_URL` (default `http://localhost:5000`).
 
+To override locally:
+
+- Copy `miniapp/.env.local.example` to `miniapp/.env.local`
+- Copy `admin-panel/.env.local.example` to `admin-panel/.env.local`
+
 ### Admin auth (required for admin panel)
 
 Set these in `backend/.env`:
@@ -116,6 +121,8 @@ This repo may be used without git. If you want quick local commits:
 
 ```bash
 cd miniapp
+# optional: copy env template if you want to override the backend URL
+# cp .env.local.example .env.local
 npm install
 npm run dev
 ```
@@ -124,6 +131,8 @@ npm run dev
 
 ```bash
 cd admin-panel
+# optional: copy env template if you want to override the backend URL
+# cp .env.local.example .env.local
 npm install
 npm run dev
 ```
