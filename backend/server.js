@@ -118,19 +118,15 @@ app.get('/metrics', metricsHandler);
 
 // Legacy auto-dispatch (deprecated): the mainnet/hardened flow uses AIBA credits + signed vault claims.
 // Keep this OFF by default; only enable for legacy migrations/debugging.
-const enableLegacyPendingAibaDispatch = String(process.env.ENABLE_LEGACY_PENDING_AIBA_DISPATCH || '').toLowerCase() === 'true';
-if (enableLegacyPendingAibaDispatch) {
-    const sendAIBA = require('./ton/sendAiba');
-    const User = require('./models/User');
-
-// Legacy on-chain dispatch (pendingAIBA) — disabled by default.
-// Production flow should use signed claims; enable only for development/testing.
 const enableLegacyPendingAibaDispatch =
     String(process.env.ENABLE_LEGACY_PENDING_AIBA_DISPATCH ?? '')
         .trim()
         .toLowerCase() === 'true';
 
 if (enableLegacyPendingAibaDispatch) {
+    const sendAIBA = require('./ton/sendAiba');
+    const User = require('./models/User');
+
     // Run hourly, process each user safely, per-user try/catch and retries
     cron.schedule('0 * * * *', async () => {
         console.log('Cron: starting pendingAIBA dispatch');
@@ -172,7 +168,6 @@ if (enableLegacyPendingAibaDispatch) {
     });
 } else {
     console.log('Legacy pendingAIBA dispatch disabled (set ENABLE_LEGACY_PENDING_AIBA_DISPATCH=true to enable).');
-}
 }
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
