@@ -5,6 +5,7 @@ const Broker = require('../models/Broker');
 const Battle = require('../models/Battle');
 const User = require('../models/User');
 const BattleRunKey = require('../models/BattleRunKey');
+const ActionRunKey = require('../models/ActionRunKey');
 const Guild = require('../models/Guild');
 const GameMode = require('../models/GameMode');
 const { hmacSha256Hex, seedFromHex } = require('../engine/deterministicRandom');
@@ -26,6 +27,65 @@ const { metrics } = require('../metrics');
 const { clampInt, applyEnergyRegen } = require('../engine/battleEnergy');
 const { buildBattleSeedMessage } = require('../engine/battleSeed');
 const { getBattleCooldownKey } = require('../engine/battleCooldown');
+
+function safeVaultClaimSeqno(user) {
+    const n = Math.floor(Number(user?.vaultClaimSeqno ?? 0));
+    if (!Number.isFinite(n) || n < 0) return 0n;
+    return BigInt(n);
+}
+
+async function acquireClaimMutex({ telegramId }) {
+    const scope = 'aiba_claim_mutex';
+    const requestId = 'mutex';
+    const lockTtlMs = 60 * 1000;
+
+    const now = Date.now();
+    try {
+        const created = await ActionRunKey.create({
+            scope,
+            requestId,
+            ownerTelegramId: telegramId,
+            status: 'in_progress',
+            expiresAt: new Date(now + lockTtlMs),
+        });
+        return { ok: true, lockId: String(created._id) };
+    } catch (err) {
+        if (String(err?.code) !== '11000') throw err;
+    }
+
+    const updated = await ActionRunKey.findOneAndUpdate(
+        { scope, requestId, ownerTelegramId: telegramId, status: { $ne: 'in_progress' } },
+        {
+            $set: {
+                status: 'in_progress',
+                errorCode: '',
+                errorMessage: '',
+                response: null,
+                expiresAt: new Date(now + lockTtlMs),
+            },
+        },
+        { new: true },
+    ).lean();
+
+    if (!updated) return { ok: false, inProgress: true };
+    return { ok: true, lockId: String(updated._id) };
+}
+
+async function releaseClaimMutex(lockId) {
+    if (!lockId) return;
+    await ActionRunKey.updateOne(
+        { _id: lockId },
+        {
+            $set: {
+                status: 'completed',
+                response: { released: true },
+                errorCode: '',
+                errorMessage: '',
+                expiresAt: new Date(Date.now() + 10 * 1000),
+            },
+        },
+    ).catch(() => {});
+}
 
 // POST /api/battle/run
 // Body:
@@ -393,51 +453,66 @@ router.post(
             if (autoClaim && vaultAddress && jettonMaster && toAddress && rewardAiba > 0) {
                 // IMPORTANT: derive seqno from on-chain vault state so failed claims don't desync.
                 // If the backend can't read on-chain state, we fail safe and return no claim.
-                try {
-                    const lastOnchain = await getVaultLastSeqno(vaultAddress, toAddress);
-                    const nextSeqno = lastOnchain + 1n;
-                    const validUntil = Math.floor(Date.now() / 1000) + 10 * 60; // 10 minutes
-                    const amount = String(rewardAiba); // smallest units (MVP: 1 token == 1 unit)
-
-                    const signed = createSignedClaim({
-                        vaultAddress,
-                        jettonMaster,
-                        to: toAddress,
-                        amount,
-                        seqno: nextSeqno.toString(),
-                        validUntil,
-                    });
-
-                    const deb = await debitAibaFromUserNoBurn(rewardAiba, {
-                        telegramId,
-                        reason: 'withdraw_to_chain',
-                        arena,
-                        league,
-                        sourceType: 'battle_auto_claim',
-                        sourceId: requestId,
-                        requestId,
-                        meta: {
-                            brokerId,
-                            modeKey,
-                            claim: { vaultAddress, toAddress, amount, seqno: Number(nextSeqno), validUntil },
-                        },
-                    });
-
-                    if (deb.ok) {
-                        claim = {
-                            vaultAddress,
-                            toAddress,
-                            amount,
-                            seqno: Number(nextSeqno),
-                            validUntil,
-                            ...signed,
-                        };
-                        await User.updateOne({ telegramId }, { $max: { vaultClaimSeqno: Number(nextSeqno) } }).catch(
-                            () => {},
-                        );
-                    }
-                } catch {
+                const mutex = await acquireClaimMutex({ telegramId });
+                if (!mutex.ok && mutex.inProgress) {
+                    // Another claim is being prepared; keep credits and let user claim later.
                     claim = {};
+                } else if (mutex.ok) {
+                    const mutexId = mutex?.lockId || '';
+                    try {
+                        const lastOnchain = await getVaultLastSeqno(vaultAddress, toAddress);
+                        const lastIssued = safeVaultClaimSeqno(user);
+                        // If there's an outstanding unconfirmed claim, do not create another one (it would collide or gap).
+                        if (lastIssued > lastOnchain) {
+                            claim = {};
+                        } else {
+                            const nextSeqno = (lastIssued > lastOnchain ? lastIssued : lastOnchain) + 1n;
+                            const validUntil = Math.floor(Date.now() / 1000) + 10 * 60; // 10 minutes
+                            const amount = String(rewardAiba); // smallest units (MVP: 1 token == 1 unit)
+
+                            const signed = createSignedClaim({
+                                vaultAddress,
+                                jettonMaster,
+                                to: toAddress,
+                                amount,
+                                seqno: nextSeqno.toString(),
+                                validUntil,
+                            });
+
+                            const deb = await debitAibaFromUserNoBurn(rewardAiba, {
+                                telegramId,
+                                reason: 'withdraw_to_chain',
+                                arena,
+                                league,
+                                sourceType: 'battle_auto_claim',
+                                sourceId: requestId,
+                                requestId,
+                                meta: {
+                                    brokerId,
+                                    modeKey,
+                                    claim: { vaultAddress, toAddress, amount, seqno: Number(nextSeqno), validUntil },
+                                },
+                            });
+
+                            if (deb.ok) {
+                                claim = {
+                                    vaultAddress,
+                                    toAddress,
+                                    amount,
+                                    seqno: Number(nextSeqno),
+                                    validUntil,
+                                    ...signed,
+                                };
+                                await User.updateOne({ telegramId }, { $max: { vaultClaimSeqno: Number(nextSeqno) } }).catch(
+                                    () => {},
+                                );
+                            }
+                        }
+                    } catch {
+                        claim = {};
+                    } finally {
+                        await releaseClaimMutex(mutexId);
+                    }
                 }
             }
 

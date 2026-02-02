@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cron = require('node-cron');
 
+const { enforceProductionReadiness } = require('./security/productionReadiness');
 const { requestId } = require('./middleware/requestId');
 const { rateLimit } = require('./middleware/rateLimit');
 const { metricsMiddleware, metricsHandler } = require('./metrics');
@@ -23,6 +24,14 @@ app.use(express.json());
 
 // Basic global rate limit (IP-based). More specific per-route limits can be layered on top.
 app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.RATE_LIMIT_PER_MINUTE || 600) || 600 }));
+
+// Fail fast in production if critical env/security settings are missing or unsafe.
+try {
+    enforceProductionReadiness(process.env);
+} catch (err) {
+    console.error('Startup blocked by production readiness checks:', err?.message || err);
+    process.exit(1);
+}
 
 async function ensureDefaultGameModes() {
     // Idempotent: only inserts missing keys, never overwrites admin-tuned settings.
@@ -107,49 +116,53 @@ app.use('/api/vault', require('./routes/vault'));
 // Prometheus metrics endpoint (for monitoring/alerting)
 app.get('/metrics', metricsHandler);
 
-// Ton transfer helper
-const sendAIBA = require('./ton/sendAiba');
-const User = require('./models/User');
+// Legacy auto-dispatch (deprecated): the mainnet/hardened flow uses AIBA credits + signed vault claims.
+// Keep this OFF by default; only enable for legacy migrations/debugging.
+const enableLegacyPendingAibaDispatch = String(process.env.ENABLE_LEGACY_PENDING_AIBA_DISPATCH || '').toLowerCase() === 'true';
+if (enableLegacyPendingAibaDispatch) {
+    const sendAIBA = require('./ton/sendAiba');
+    const User = require('./models/User');
 
-// Run hourly, process each user safely, per-user try/catch and retries
-cron.schedule('0 * * * *', async () => {
-    console.log('Cron: starting pendingAIBA dispatch');
-    try {
-        const users = await User.find({ pendingAIBA: { $gt: 0 } });
-        for (const user of users) {
-            if (!user.wallet) {
-                console.warn(`Skipping user ${user._id} — no wallet set`);
-                continue;
-            }
+    // Run hourly, process each user safely, per-user try/catch and retries
+    cron.schedule('0 * * * *', async () => {
+        console.log('Cron: starting pendingAIBA dispatch');
+        try {
+            const users = await User.find({ pendingAIBA: { $gt: 0 } });
+            for (const user of users) {
+                if (!user.wallet) {
+                    console.warn(`Skipping user ${user._id} — no wallet set`);
+                    continue;
+                }
 
-            const amount = user.pendingAIBA;
-            let attempts = 0;
-            const maxAttempts = 3;
-            let sent = false;
+                const amount = user.pendingAIBA;
+                let attempts = 0;
+                const maxAttempts = 3;
+                let sent = false;
 
-            while (attempts < maxAttempts && !sent) {
-                attempts++;
-                try {
-                    console.log(`Sending ${amount} to ${user.wallet} (user ${user._id}), attempt ${attempts}`);
-                    await sendAIBA(user.wallet, amount);
-                    user.pendingAIBA = 0;
-                    await user.save();
-                    sent = true;
-                    console.log(`Sent AIBA to ${user._id}`);
-                } catch (err) {
-                    console.error(`Failed to send AIBA to ${user._id} (attempt ${attempts}):`, err);
-                    await new Promise((r) => setTimeout(r, 2000 * attempts));
+                while (attempts < maxAttempts && !sent) {
+                    attempts++;
+                    try {
+                        console.log(`Sending ${amount} to ${user.wallet} (user ${user._id}), attempt ${attempts}`);
+                        await sendAIBA(user.wallet, amount);
+                        user.pendingAIBA = 0;
+                        await user.save();
+                        sent = true;
+                        console.log(`Sent AIBA to ${user._id}`);
+                    } catch (err) {
+                        console.error(`Failed to send AIBA to ${user._id} (attempt ${attempts}):`, err);
+                        await new Promise((r) => setTimeout(r, 2000 * attempts));
+                    }
+                }
+
+                if (!sent) {
+                    console.error(`Giving up sending to ${user._id} after ${maxAttempts} attempts`);
                 }
             }
-
-            if (!sent) {
-                console.error(`Giving up sending to ${user._id} after ${maxAttempts} attempts`);
-            }
+        } catch (err) {
+            console.error('Cron: unexpected error:', err);
         }
-    } catch (err) {
-        console.error('Cron: unexpected error:', err);
-    }
-});
+    });
+}
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 

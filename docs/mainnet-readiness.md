@@ -50,6 +50,27 @@ This checklist is the minimum bar before deploying Aiba Arena contracts and back
     - `ORACLE_PRIVATE_KEY_HEX`
     - TON reads: `TON_PROVIDER_URL`, `TON_API_KEY`
 
+## Checklist enforcement (fail-fast)
+
+When `APP_ENV=prod` or `NODE_ENV=production`, the backend performs startup checks and **exits non-zero** if unsafe or missing configuration is detected (see `backend/security/productionReadiness.js`).
+
+Enforced today:
+
+- **No dev shortcuts in prod**
+    - Blocks `APP_ENV=dev|test` when `NODE_ENV=production`
+- **Pinned CORS allow-list**
+    - Requires `CORS_ORIGIN` (unset defaults to allow-all)
+- **Telegram replay/age protection**
+    - Requires `TELEGRAM_INITDATA_MAX_AGE_SECONDS` to be set explicitly and \(> 0\)
+- **Admin auth hardening**
+    - Requires `ADMIN_PASSWORD_HASH` (disallows relying on plaintext `ADMIN_PASSWORD`)
+    - Blocks weak/placeholder `ADMIN_JWT_SECRET`
+- **Deterministic battle secret**
+    - Blocks dev/weak `BATTLE_SEED_SECRET`
+- **Vault/claims config sanity**
+    - Requires vault env to be “all-or-nothing” (`ARENA_VAULT_ADDRESS`, `AIBA_JETTON_MASTER`, `ORACLE_PRIVATE_KEY_HEX`)
+    - Requires explicit `TON_PROVIDER_URL` and blocks obvious testnet endpoints when vault/claims are configured
+
 ## Security review steps
 
 - **Contract review**

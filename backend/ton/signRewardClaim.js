@@ -1,17 +1,17 @@
 const nacl = require('tweetnacl');
 const { beginCell, Address, Cell } = require('@ton/core');
 
-function parsePrivateKey() {
+function parsePrivateKey(env = process.env) {
     // Expect 32-byte seed as hex in ORACLE_PRIVATE_KEY_HEX
-    const hex = String(process.env.ORACLE_PRIVATE_KEY_HEX || '').trim();
+    const hex = String(env?.ORACLE_PRIVATE_KEY_HEX || '').trim();
     if (!hex) throw new Error('ORACLE_PRIVATE_KEY_HEX missing');
     const seed = Buffer.from(hex, 'hex');
     if (seed.length !== 32) throw new Error('ORACLE_PRIVATE_KEY_HEX must be 32 bytes (64 hex chars)');
     return seed;
 }
 
-function getKeyPair() {
-    const seed = parsePrivateKey();
+function getKeyPair(env = process.env) {
+    const seed = parsePrivateKey(env);
     return nacl.sign.keyPair.fromSeed(new Uint8Array(seed));
 }
 
@@ -32,16 +32,16 @@ function buildClaimPayload({ vaultAddress, jettonMaster, to, amount, seqno, vali
     return c;
 }
 
-function signClaimHash(cell) {
-    const kp = getKeyPair();
+function signClaimHash(cell, env = process.env) {
+    const kp = getKeyPair(env);
     const hash = cell.hash(); // Buffer(32)
     const sig = nacl.sign.detached(new Uint8Array(hash), kp.secretKey);
     return Buffer.from(sig);
 }
 
-function createSignedClaim({ vaultAddress, jettonMaster, to, amount, seqno, validUntil }) {
+function createSignedClaim({ vaultAddress, jettonMaster, to, amount, seqno, validUntil }, env = process.env) {
     const payloadCell = buildClaimPayload({ vaultAddress, jettonMaster, to, amount, seqno, validUntil });
-    const signature = signClaimHash(payloadCell);
+    const signature = signClaimHash(payloadCell, env);
 
     return {
         payloadBocBase64: payloadCell.toBoc().toString('base64'),
@@ -49,4 +49,4 @@ function createSignedClaim({ vaultAddress, jettonMaster, to, amount, seqno, vali
     };
 }
 
-module.exports = { createSignedClaim };
+module.exports = { createSignedClaim, buildClaimPayload, parsePrivateKey };

@@ -57,6 +57,66 @@ async function acquireActionLock({ scope, requestId, telegramId }) {
     return { ok: true, completed: false, lockId: String(runKey._id) };
 }
 
+function safeVaultClaimSeqno(user) {
+    const n = Math.floor(Number(user?.vaultClaimSeqno ?? 0));
+    if (!Number.isFinite(n) || n < 0) return 0n;
+    return BigInt(n);
+}
+
+async function acquireClaimMutex({ telegramId }) {
+    const scope = 'aiba_claim_mutex';
+    const requestId = 'mutex';
+    const lockTtlMs = 60 * 1000;
+
+    const now = Date.now();
+    try {
+        const created = await ActionRunKey.create({
+            scope,
+            requestId,
+            ownerTelegramId: telegramId,
+            status: 'in_progress',
+            expiresAt: new Date(now + lockTtlMs),
+        });
+        return { ok: true, lockId: String(created._id) };
+    } catch (err) {
+        if (String(err?.code) !== '11000') throw err;
+    }
+
+    // Reuse the same mutex row across claims; only one request may flip it to in_progress.
+    const updated = await ActionRunKey.findOneAndUpdate(
+        { scope, requestId, ownerTelegramId: telegramId, status: { $ne: 'in_progress' } },
+        {
+            $set: {
+                status: 'in_progress',
+                errorCode: '',
+                errorMessage: '',
+                response: null,
+                expiresAt: new Date(now + lockTtlMs),
+            },
+        },
+        { new: true },
+    ).lean();
+
+    if (!updated) return { ok: false, inProgress: true };
+    return { ok: true, lockId: String(updated._id) };
+}
+
+async function releaseClaimMutex(lockId) {
+    if (!lockId) return;
+    await ActionRunKey.updateOne(
+        { _id: lockId },
+        {
+            $set: {
+                status: 'completed',
+                response: { released: true },
+                errorCode: '',
+                errorMessage: '',
+                expiresAt: new Date(Date.now() + 10 * 1000),
+            },
+        },
+    ).catch(() => {});
+}
+
 // GET /api/economy/me
 router.get('/me', async (req, res) => {
     const telegramId = req.telegramId ? String(req.telegramId) : '';
@@ -82,6 +142,7 @@ router.get('/me', async (req, res) => {
 // Body: { requestId?: string, amount?: number|string }
 // Withdraw AIBA credits to an on-chain claim (signature-based vault).
 router.post('/claim-aiba', async (req, res) => {
+    let claimMutexId = '';
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -133,6 +194,11 @@ router.post('/claim-aiba', async (req, res) => {
             return res.status(500).json({ error: 'vault not configured' });
         }
 
+        // Serialize claim creation per-user to prevent concurrent requests generating the same seqno.
+        const mutex = await acquireClaimMutex({ telegramId });
+        if (!mutex.ok && mutex.inProgress) return res.status(409).json({ error: 'in_progress', retryAfterMs: 1500 });
+        claimMutexId = mutex.lockId || '';
+
         const rawAmount = req.body?.amount;
         const amt =
             rawAmount === undefined || rawAmount === null
@@ -141,7 +207,30 @@ router.post('/claim-aiba', async (req, res) => {
         if (!Number.isFinite(amt) || amt <= 0) return res.status(400).json({ error: 'amount must be > 0' });
 
         const lastOnchain = await getVaultLastSeqno(vaultAddress, toAddress);
-        const nextSeqno = lastOnchain + 1n;
+        const lastIssued = safeVaultClaimSeqno(user);
+        if (lastIssued > lastOnchain) {
+            // There's an outstanding unconfirmed claim for this recipient. Issuing another claim would either
+            // collide (same seqno) or create an unusable gap (seqno > last+1), so block and ask the client
+            // to finalize/check the previous claim first.
+            const latest = await LedgerEntry.findOne({
+                telegramId,
+                currency: 'AIBA',
+                direction: 'debit',
+                reason: 'withdraw_to_chain',
+                $or: [{ sourceType: 'aiba_claim' }, { sourceType: 'battle_auto_claim' }],
+            })
+                .sort({ createdAt: -1 })
+                .lean();
+            const claim = latest?.meta?.claim || null;
+            return res.status(409).json({
+                error: 'pending_claim',
+                lastOnchainSeqno: lastOnchain.toString(),
+                lastIssuedSeqno: lastIssued.toString(),
+                claim,
+            });
+        }
+
+        const nextSeqno = (lastIssued > lastOnchain ? lastIssued : lastOnchain) + 1n;
         const validUntil = Math.floor(Date.now() / 1000) + 10 * 60; // 10 minutes
         const amount = String(amt);
 
@@ -216,6 +305,8 @@ router.post('/claim-aiba', async (req, res) => {
         console.error('Error in /api/economy/claim-aiba:', err);
         metrics?.economyWithdrawalsTotal?.inc?.({ result: 'error' });
         res.status(500).json({ error: 'internal server error' });
+    } finally {
+        await releaseClaimMutex(claimMutexId);
     }
 });
 

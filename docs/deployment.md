@@ -17,9 +17,9 @@
 
 - `MONGO_URI`
 - `TELEGRAM_BOT_TOKEN` (production Telegram auth)
-- `TELEGRAM_INITDATA_MAX_AGE_SECONDS` (default 900; set explicitly for mainnet)
+- `TELEGRAM_INITDATA_MAX_AGE_SECONDS` (recommended 300–900; set explicitly for mainnet)
 - `BATTLE_SEED_SECRET`
-- `ADMIN_JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`
+- `ADMIN_JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` (required for production readiness checks; do not use plaintext password)
 - Vault/claim reads:
     - `TON_PROVIDER_URL`
     - `TON_API_KEY`
