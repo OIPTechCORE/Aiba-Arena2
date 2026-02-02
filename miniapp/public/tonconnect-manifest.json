@@ -1,5 +1,5 @@
 {
-    "url": "http://localhost:3000",
+    "url": "https://aiba-arena2-miniapp.vercel.app",
     "name": "AIBA Arena",
-    "iconUrl": "http://localhost:3000/icon.svg"
+    "iconUrl": "https://aiba-arena2-miniapp.vercel.app/icon.svg"
 }
