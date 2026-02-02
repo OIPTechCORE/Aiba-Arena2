@@ -67,6 +67,30 @@ Health check: `GET /health` on `http://localhost:5000/health`
 
 Metrics: `GET /metrics` on `http://localhost:5000/metrics` (Prometheus)
 
+### Deploy backend on Vercel
+
+This backend can run on Vercel as a serverless Express API.
+
+- Create a **new Vercel project** for the backend
+- Set **Root Directory** to `backend`
+- Vercel will deploy the API using `backend/vercel.json`
+
+After deploy, your backend domain will look like:
+
+- `https://<your-backend-project>.vercel.app`
+
+Example endpoints:
+
+- `GET https://<your-backend-project>.vercel.app/health`
+- `GET https://<your-backend-project>.vercel.app/metrics`
+- `POST https://<your-backend-project>.vercel.app/api/admin/auth/login`
+
+Required Vercel env vars (set in the backend project):
+
+- `MONGO_URI`
+- `CORS_ORIGIN=https://aiba-arena2-miniapp.vercel.app,https://aiba-arena2-admin-panel.vercel.app`
+- `ADMIN_JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` (or `ADMIN_PASSWORD` for dev only)
+
 ### Battle + on-chain claim (optional)
 
 The end-to-end flow is:
