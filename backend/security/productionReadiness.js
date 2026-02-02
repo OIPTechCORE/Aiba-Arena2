@@ -7,7 +7,14 @@ function isProduction(env = process.env) {
     const nodeEnv = String(env?.NODE_ENV || '')
         .trim()
         .toLowerCase();
-    return appEnv === 'prod' || nodeEnv === 'production';
+
+    // Allow explicit APP_ENV override even when NODE_ENV=production (e.g. Vercel).
+    // - APP_ENV=dev/test => not production
+    // - APP_ENV=prod => production
+    // - otherwise fall back to NODE_ENV
+    if (appEnv === 'dev' || appEnv === 'test') return false;
+    if (appEnv === 'prod') return true;
+    return nodeEnv === 'production';
 }
 
 function requireNonEmpty(name, env) {
