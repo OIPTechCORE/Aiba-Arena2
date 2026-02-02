@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema(
     {
-        telegramId: { type: String, index: true },
+        telegramId: { type: String },
         username: { type: String, default: '', trim: true },
         telegram: {
             username: { type: String, default: '', trim: true },

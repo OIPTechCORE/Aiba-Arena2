@@ -123,6 +123,14 @@ if (enableLegacyPendingAibaDispatch) {
     const sendAIBA = require('./ton/sendAiba');
     const User = require('./models/User');
 
+// Legacy on-chain dispatch (pendingAIBA) — disabled by default.
+// Production flow should use signed claims; enable only for development/testing.
+const enableLegacyPendingAibaDispatch =
+    String(process.env.ENABLE_LEGACY_PENDING_AIBA_DISPATCH ?? '')
+        .trim()
+        .toLowerCase() === 'true';
+
+if (enableLegacyPendingAibaDispatch) {
     // Run hourly, process each user safely, per-user try/catch and retries
     cron.schedule('0 * * * *', async () => {
         console.log('Cron: starting pendingAIBA dispatch');
@@ -162,6 +170,9 @@ if (enableLegacyPendingAibaDispatch) {
             console.error('Cron: unexpected error:', err);
         }
     });
+} else {
+    console.log('Legacy pendingAIBA dispatch disabled (set ENABLE_LEGACY_PENDING_AIBA_DISPATCH=true to enable).');
+}
 }
 
 app.get('/health', (_req, res) => res.json({ ok: true }));

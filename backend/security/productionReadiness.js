@@ -121,6 +121,11 @@ function enforceProductionReadiness(env = process.env, { logger = console } = {}
         }
     }
 
+    // Legacy auto-dispatch is dangerous on mainnet; the production flow uses signed claims.
+    if (String(env?.ENABLE_LEGACY_PENDING_AIBA_DISPATCH ?? '').trim().toLowerCase() === 'true') {
+        errors.push('ENABLE_LEGACY_PENDING_AIBA_DISPATCH must not be enabled in production');
+    }
+
     if (errors.length > 0) {
         const err = new Error(`Production readiness checks failed:\n- ${errors.join('\n- ')}`);
         err.code = 'PROD_READINESS_FAILED';
