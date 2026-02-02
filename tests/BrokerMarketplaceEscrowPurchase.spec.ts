@@ -37,7 +37,12 @@ describe('BrokerMarketplaceEscrow (purchase flow)', () => {
         );
 
         // Deploy broker NFT collection
-        const royalty = { numerator: 0n, denominator: 1n, destination: deployer.address };
+        const royalty = {
+            $$type: 'RoyaltyParams' as const,
+            numerator: 0n,
+            denominator: 1n,
+            destination: deployer.address,
+        };
         const collectionContent = beginCell().endCell();
         const collection = blockchain.openContract(
             await BrokerNftCollection.fromInit(deployer.address, collectionContent, royalty),
@@ -79,7 +84,7 @@ describe('BrokerMarketplaceEscrow (purchase flow)', () => {
                 new_owner: escrow.address,
                 response_destination: seller.address,
                 custom_payload: null,
-                forward_amount: 1n,
+                forward_amount: toNano('0.1'),
                 forward_payload: forwardPayload,
             },
         );
@@ -102,7 +107,8 @@ describe('BrokerMarketplaceEscrow (purchase flow)', () => {
                 destination: escrow.address,
                 responseDestination: buyer.address,
                 customPayload: null,
-                forwardTonAmount: 0n,
+                // Must be > 0 so the recipient wallet sends TokenNotification to escrow (the wallet owner).
+                forwardTonAmount: toNano('0.05'),
                 forwardPayload: listingIdPayload,
             },
         );
@@ -138,7 +144,7 @@ describe('BrokerMarketplaceEscrow (purchase flow)', () => {
     it('buyer can refund payment if listing is active', async () => {
         // Deploy AIBA token
         const token = blockchain.openContract(await AibaToken.fromInit(deployer.address, null));
-        await token.send(deployer.getSender(), { value: toNano('0.2') }, null);
+        await token.send(deployer.getSender(), { value: toNano('0.2') }, { $$type: 'Deploy', queryId: 0n });
 
         // Mint jettons to buyer
         const price = 1000n;
@@ -149,7 +155,12 @@ describe('BrokerMarketplaceEscrow (purchase flow)', () => {
         );
 
         // Deploy broker NFT collection
-        const royalty = { numerator: 0n, denominator: 1n, destination: deployer.address };
+        const royalty = {
+            $$type: 'RoyaltyParams' as const,
+            numerator: 0n,
+            denominator: 1n,
+            destination: deployer.address,
+        };
         const collectionContent = beginCell().endCell();
         const collection = blockchain.openContract(
             await BrokerNftCollection.fromInit(deployer.address, collectionContent, royalty),
@@ -188,7 +199,7 @@ describe('BrokerMarketplaceEscrow (purchase flow)', () => {
                 new_owner: escrow.address,
                 response_destination: seller.address,
                 custom_payload: null,
-                forward_amount: 1n,
+                forward_amount: toNano('0.1'),
                 forward_payload: forwardPayload,
             },
         );
@@ -211,7 +222,7 @@ describe('BrokerMarketplaceEscrow (purchase flow)', () => {
                 destination: escrow.address,
                 responseDestination: buyer.address,
                 customPayload: null,
-                forwardTonAmount: 0n,
+                forwardTonAmount: toNano('0.05'),
                 forwardPayload: listingIdPayload,
             },
         );

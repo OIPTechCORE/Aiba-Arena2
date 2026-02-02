@@ -12,7 +12,7 @@
         "release": "blueprint pack && npm publish --access public"
     },
     "dependencies": {
-        "@ton/core": "~0"
+        "@ton/core": "^0.63.0"
     },
     "devDependencies": {
         "@ton/blueprint": ">=0.40.0",

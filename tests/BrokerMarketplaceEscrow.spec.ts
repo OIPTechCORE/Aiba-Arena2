@@ -25,6 +25,7 @@ describe('BrokerMarketplaceEscrow (happy path)', () => {
 
         // Deploy broker NFT collection
         const royalty = {
+            $$type: 'RoyaltyParams' as const,
             numerator: 0n,
             denominator: 1n,
             destination: deployer.address,
@@ -70,7 +71,8 @@ describe('BrokerMarketplaceEscrow (happy path)', () => {
                 new_owner: escrow.address,
                 response_destination: seller.address,
                 custom_payload: null,
-                forward_amount: 1n, // triggers OwnershipAssigned to escrow
+                // Must be enough to cover forwarding fees so the escrow actually receives OwnershipAssigned.
+                forward_amount: toNano('0.1'),
                 forward_payload: forwardPayload,
             },
         );
