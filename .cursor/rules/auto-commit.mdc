@@ -1,0 +1,15 @@
+---
+description: Auto-commit file updates after making changes (stage and commit with descriptive message)
+alwaysApply: true
+---
+
+# Auto-Commit Updates
+
+**After making file changes, automatically commit them.**
+
+- When you add, edit, or delete files in the project, stage and commit the changes.
+- Use a clear, descriptive commit message that summarizes what was changed (e.g. "Add University plan section", "Fix lint in page.js").
+- Request `git_write` permission when running `git add` and `git commit`.
+- Do not push to remote unless the user explicitly asks to push.
+
+This keeps the repo up to date with every update you make.
