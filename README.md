@@ -13,6 +13,25 @@
 - `miniapp` - React miniapp (TonConnect + Telegram WebApp integration).
 - `admin-panel` - React admin panel (tasks UI).
 
+## Run on localhost
+
+To run the full stack (backend + miniapp + admin panel) on your machine:
+
+1. **Prerequisites:** Node.js 18+, MongoDB (local or [Atlas](https://www.mongodb.com/cloud/atlas)).
+2. **Backend:** Copy `backend/.env.example` to `backend/.env`, set `MONGO_URI` and `APP_ENV=dev`, then run:
+   ```bash
+   cd backend && npm install && npm start
+   ```
+   Backend runs at **http://localhost:5000**.
+3. **Miniapp:** `cd miniapp && npm install && npm run dev` → **http://localhost:3000**
+4. **Admin panel:** `cd admin-panel && npm install && npm run dev` → **http://localhost:3001** (log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `backend/.env`).
+
+Optional: from repo root, run **`npm run dev`** to start all three at once (see [docs/RUN-LOCALHOST.md](docs/RUN-LOCALHOST.md)).
+
+Full step-by-step, troubleshooting, and env details: **[docs/RUN-LOCALHOST.md](docs/RUN-LOCALHOST.md)**.
+
+---
+
 ## How to use
 
 ## Smart contracts (Blueprint)
