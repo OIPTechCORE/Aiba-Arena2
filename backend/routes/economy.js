@@ -129,11 +129,23 @@ router.get('/me', async (req, res) => {
         wallet: user?.wallet || '',
         neurBalance: user?.neurBalance ?? 0,
         aibaBalance: user?.aibaBalance ?? 0,
+        starsBalance: user?.starsBalance ?? 0,
+        diamondsBalance: user?.diamondsBalance ?? 0,
+        badges: Array.isArray(user?.badges) ? user.badges : [],
         economy: {
             baseRewardAibaPerScore: cfg.baseRewardAibaPerScore,
             baseRewardNeurPerScore: cfg.baseRewardNeurPerScore,
             trainNeurCost: cfg.trainNeurCost,
             upgradeAibaCost: cfg.upgradeAibaCost,
+            combineNeurCost: cfg.combineNeurCost,
+            mintAibaCost: cfg.mintAibaCost,
+            createGroupCostTonNano: cfg.createGroupCostTonNano,
+            boostGroupCostTonNano: cfg.boostGroupCostTonNano,
+            leaderboardTopFreeCreate: cfg.leaderboardTopFreeCreate,
+            starRewardPerBattle: cfg.starRewardPerBattle,
+            diamondRewardFirstWin: cfg.diamondRewardFirstWin,
+            courseCompletionBadgeMintCostTonNano: cfg.courseCompletionBadgeMintCostTonNano,
+            fullCourseCompletionCertificateMintCostTonNano: cfg.fullCourseCompletionCertificateMintCostTonNano,
         },
     });
 });

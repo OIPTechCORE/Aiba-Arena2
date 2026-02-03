@@ -4,7 +4,7 @@ const { requireTelegram } = require('../middleware/requireTelegram');
 const Referral = require('../models/Referral');
 const ReferralUse = require('../models/ReferralUse');
 const User = require('../models/User');
-const { getConfig, tryEmitNeur, creditNeurNoCap } = require('../engine/economy');
+const { getConfig, tryEmitNeur, creditNeurNoCap, tryEmitAiba, creditAibaNoCap } = require('../engine/economy');
 
 router.use(requireTelegram);
 
@@ -117,10 +117,49 @@ router.post('/use', async (req, res) => {
         }
     }
 
+    // AIBA referral bonuses (vision: Referrals → AIBA bonuses)
+    const aReferrer = Math.max(0, Math.floor(Number(cfg.referralRewardAibaReferrer ?? 0)));
+    const aReferee = Math.max(0, Math.floor(Number(cfg.referralRewardAibaReferee ?? 0)));
+    let creditedAibaReferrer = 0;
+    let creditedAibaReferee = 0;
+    const totalAiba = aReferrer + aReferee;
+    if (totalAiba > 0) {
+        const emitAiba = await tryEmitAiba(totalAiba, { arena: 'referrals', league: 'global' });
+        if (emitAiba.ok) {
+            creditedAibaReferrer = aReferrer;
+            creditedAibaReferee = aReferee;
+            if (creditedAibaReferrer > 0) {
+                await creditAibaNoCap(creditedAibaReferrer, {
+                    telegramId: String(ref.ownerTelegramId),
+                    reason: 'referral_reward_referrer',
+                    arena: 'referrals',
+                    league: 'global',
+                    sourceType: 'referral',
+                    sourceId: use?._id ? String(use._id) : null,
+                    requestId: req.requestId ? String(req.requestId) : null,
+                    meta: { code },
+                });
+            }
+            if (creditedAibaReferee > 0) {
+                await creditAibaNoCap(creditedAibaReferee, {
+                    telegramId,
+                    reason: 'referral_reward_referee',
+                    arena: 'referrals',
+                    league: 'global',
+                    sourceType: 'referral',
+                    sourceId: use?._id ? String(use._id) : null,
+                    requestId: req.requestId ? String(req.requestId) : null,
+                    meta: { code },
+                });
+            }
+        }
+    }
+
     res.json({
         ok: true,
         referrerTelegramId: ref.ownerTelegramId,
         neurReward: { referrer: creditedReferrer, referee: creditedReferee },
+        aibaReward: { referrer: creditedAibaReferrer, referee: creditedAibaReferee },
     });
 });
 

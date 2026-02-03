@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { enforceProductionReadiness } = require('../security/productionReadiness');
+const { enforceProductionReadiness, isProduction } = require('../security/productionReadiness');
 
 function baseProdEnv(overrides = {}) {
     return {
@@ -23,11 +23,10 @@ test('enforceProductionReadiness is a no-op outside production', () => {
     assert.deepEqual(res, { ok: true, prod: false, warnings: [] });
 });
 
-test('enforceProductionReadiness blocks APP_ENV dev/test when NODE_ENV=production', () => {
-    assert.throws(
-        () => enforceProductionReadiness({ APP_ENV: 'dev', NODE_ENV: 'production' }),
-        /APP_ENV must not be "dev" in production/,
-    );
+test('enforceProductionReadiness skips prod checks when APP_ENV=dev (no throw)', () => {
+    const res = enforceProductionReadiness({ APP_ENV: 'dev', NODE_ENV: 'production' });
+    assert.equal(res.prod, false);
+    assert.equal(res.ok, true);
 });
 
 test('enforceProductionReadiness requires TELEGRAM_INITDATA_MAX_AGE_SECONDS explicitly in production', () => {
@@ -95,4 +94,32 @@ test('enforceProductionReadiness passes for a sane production env', () => {
     const res = enforceProductionReadiness(env, { logger: { warn() {} } });
     assert.equal(res.ok, true);
     assert.equal(res.prod, true);
+});
+
+test('enforceProductionReadiness requires CORS_ORIGIN in production', () => {
+    const env = baseProdEnv({ CORS_ORIGIN: '' });
+    assert.throws(() => enforceProductionReadiness(env), /CORS_ORIGIN must be set/);
+});
+
+test('enforceProductionReadiness blocks ENABLE_LEGACY_PENDING_AIBA_DISPATCH in production', () => {
+    const env = baseProdEnv({
+        TON_PROVIDER_URL: 'https://toncenter.com/api/v2/jsonRPC',
+        ARENA_VAULT_ADDRESS: '0:' + '11'.repeat(32),
+        AIBA_JETTON_MASTER: '0:' + '22'.repeat(32),
+        ORACLE_PRIVATE_KEY_HEX: 'aa'.repeat(32),
+        ENABLE_LEGACY_PENDING_AIBA_DISPATCH: 'true',
+    });
+    assert.throws(() => enforceProductionReadiness(env), /ENABLE_LEGACY_PENDING_AIBA_DISPATCH must not be enabled/);
+});
+
+test('isProduction returns false for APP_ENV=dev or APP_ENV=test', () => {
+    assert.equal(isProduction({ APP_ENV: 'dev' }), false);
+    assert.equal(isProduction({ APP_ENV: 'test' }), false);
+    assert.equal(isProduction({ APP_ENV: 'dev', NODE_ENV: 'production' }), false);
+});
+
+test('isProduction returns true for APP_ENV=prod or NODE_ENV=production', () => {
+    assert.equal(isProduction({ APP_ENV: 'prod' }), true);
+    assert.equal(isProduction({ NODE_ENV: 'production' }), true);
+    assert.equal(isProduction({ APP_ENV: '', NODE_ENV: 'production' }), true);
 });

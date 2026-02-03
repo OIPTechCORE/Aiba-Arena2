@@ -1,5 +1,18 @@
 # Ops Runbook
 
+## Key management summary
+
+| Purpose | Env / asset | Notes |
+|--------|-------------|--------|
+| Contract deploy | (wallet/mnemonic used by Blueprint) | Separate from runtime; never in backend env |
+| Reward-claim signer | `ORACLE_PRIVATE_KEY_HEX` | 32-byte seed (64 hex chars); rotate via vault `set_oracle` + backend secret |
+| Admin JWT | `ADMIN_JWT_SECRET` | ≥ 32 chars; rotate invalidates existing tokens |
+| Admin login | `ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH` | Prefer bcrypt hash; no plaintext in prod |
+| Telegram bot | `TELEGRAM_BOT_TOKEN` | Rotate in BotFather; update backend secret |
+| Battle determinism | `BATTLE_SEED_SECRET` | ≥ 32 chars; changing changes battle seeds |
+
+**Validation defaults:** When env vars are unset, backend uses defaults (e.g. Telegram initData age 900s, CORS allow-all). Production readiness checks **require** explicit values for CORS, Telegram age, admin hash, battle seed, and (when vault/claims are used) vault env and TON provider. See `docs/mainnet-readiness.md` (“Validation defaults” and “Checklist enforcement”).
+
 ## Incident response (quick checklist)
 
 - Verify backend health: `GET /health`
@@ -14,7 +27,7 @@
 
 ## Production safety checks (startup)
 
-When `APP_ENV=prod` or `NODE_ENV=production`, the backend will **refuse to start** if critical security settings are missing or unsafe (see `backend/security/productionReadiness.js`). If a prod deploy is crashing at boot, check the logs for “Production readiness checks failed”.
+When `APP_ENV=prod` or `NODE_ENV=production`, the backend will **refuse to start** if critical security settings are missing or unsafe (see `backend/security/productionReadiness.js`). If a prod deploy is crashing at boot, check the logs for “Production readiness checks failed” or “PROD_READINESS_FAILED”. Enforced items include: CORS, Telegram token and initData max age, admin JWT/password hash, battle seed, vault/claim env (all-or-nothing + non-testnet TON URL), and no legacy pending-AIBA dispatch. When `APP_ENV=dev` or `APP_ENV=test`, these checks are skipped.
 
 ## Key rotation
 
@@ -66,3 +79,11 @@ When `APP_ENV=prod` or `NODE_ENV=production`, the backend will **refuse to start
 - Prefer additive schema changes (new fields with defaults)
 - Add indexes explicitly when introducing new lookup paths
 - Backfill jobs should be idempotent and batched
+
+## Security checklist (pre-mainnet)
+
+- [ ] All keys separated by purpose (see Key management summary); no secrets in repo
+- [ ] Production readiness enforced: `APP_ENV=prod` or `NODE_ENV=production` with full env (see `docs/mainnet-readiness.md`)
+- [ ] CORS, Telegram initData age, admin hash, battle seed, vault/TON env set explicitly
+- [ ] `ENABLE_LEGACY_PENDING_AIBA_DISPATCH` not set to `true` in production
+- [ ] Monitoring and backups configured per `docs/monitoring.md` and runbook

@@ -65,6 +65,12 @@ if (enableLegacyPendingAibaDispatch) {
         await initDb();
         console.log('MongoDB Connected');
 
+        const { syncTopLeaderBadges } = require('./jobs/syncTopLeaderBadges');
+        syncTopLeaderBadges().catch((err) => console.error('Initial top-leader badge sync failed:', err));
+        cron.schedule('0 */6 * * *', () => {
+            syncTopLeaderBadges().catch((err) => console.error('Cron top-leader badge sync failed:', err));
+        });
+
         app.listen(process.env.PORT || 5000, () => console.log('Server listening'));
     } catch (err) {
         console.error('Backend startup failed:', err?.message || err);

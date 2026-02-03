@@ -32,6 +32,14 @@ const GuildSchema = new mongoose.Schema(
         // Simple off-chain guild treasury (NEUR for now; AIBA can be wired later)
         vaultNeur: { type: Number, default: 0 },
         vaultAiba: { type: Number, default: 0 },
+
+        // Paid create: if user was not in top leaders, they paid TON to create (stored for idempotency/audit)
+        paidCreateTxHash: { type: String, default: '', trim: true },
+
+        // Group boost: any member (or anyone) can pay TON to boost the group. Paid TON goes to BOOST_GROUP_WALLET.
+        boostCount: { type: Number, default: 0 },
+        boostedUntil: { type: Date, default: null }, // optional visibility/benefit period
+        boostTxHashes: { type: [String], default: [] }, // idempotency: each txHash used only once per guild
     },
     { timestamps: true },
 );

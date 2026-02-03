@@ -42,9 +42,28 @@ function createApp() {
     app.use('/api/admin/game-modes', require('./routes/adminGameModes'));
     app.use('/api/admin/economy', require('./routes/adminEconomy'));
     app.use('/api/admin/mod', require('./routes/adminModeration'));
+    app.use('/api/admin/treasury', require('./routes/adminTreasury'));
+    app.use('/api/admin/stats', require('./routes/adminStats'));
     app.use('/api/battle', require('./routes/battle'));
     app.use('/api/brokers', require('./routes/brokers'));
     app.use('/api/vault', require('./routes/vault'));
+    app.use('/api/leaderboard', require('./routes/leaderboard'));
+    app.use('/api/marketplace', require('./routes/marketplace'));
+    app.use('/api/boosts', require('./routes/boosts'));
+    app.use('/api/staking', require('./routes/staking'));
+    app.use('/api/dao', require('./routes/dao'));
+    app.use('/api/daily', require('./routes/daily'));
+    app.use('/api/oracle', require('./routes/oracle'));
+    app.use('/api/treasury', require('./routes/treasury'));
+    app.use('/api/charity', require('./routes/charity'));
+    app.use('/api/admin/charity', require('./routes/adminCharity'));
+    app.use('/api/announcements', require('./routes/announcements'));
+    app.use('/api/admin/announcements', require('./routes/adminAnnouncements'));
+    app.use('/api/university', require('./routes/university'));
+    app.use('/api/admin/university', require('./routes/adminUniversity'));
+
+    app.get('/api/comms/status', (_req, res) =>
+        res.json({ status: 'operational', updatedAt: new Date().toISOString() }));
 
     // Prometheus metrics endpoint (for monitoring/alerting)
     app.get('/metrics', metricsHandler);

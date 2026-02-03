@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { requireAdmin } = require('../middleware/requireAdmin');
 const Broker = require('../models/Broker');
+const BrokerMintJob = require('../models/BrokerMintJob');
 
 router.use(requireAdmin());
 
@@ -52,6 +53,50 @@ router.post('/:id/link-nft', async (req, res) => {
         res.json(broker);
     } catch (err) {
         console.error('Error linking broker NFT:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// GET /api/admin/brokers/mint-jobs?status=pending
+router.get('/mint-jobs', async (req, res) => {
+    try {
+        const status = String(req.query?.status || '').trim();
+        const q = status ? { status } : {};
+        const jobs = await BrokerMintJob.find(q).sort({ createdAt: -1 }).limit(100).lean();
+        res.json(jobs);
+    } catch (err) {
+        console.error('Error listing mint jobs:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// POST /api/admin/brokers/mint-jobs/:id/complete — mark job completed and link NFT to broker
+router.post('/mint-jobs/:id/complete', async (req, res) => {
+    try {
+        const job = await BrokerMintJob.findById(req.params.id);
+        if (!job) return res.status(404).json({ error: 'mint job not found' });
+        if (job.status === 'completed') return res.status(400).json({ error: 'already completed' });
+
+        const nftCollectionAddress = String(req.body?.nftCollectionAddress || '').trim();
+        const nftItemAddress = String(req.body?.nftItemAddress || '').trim();
+        const nftItemIndex = req.body?.nftItemIndex != null ? Number(req.body.nftItemIndex) : null;
+        if (!nftCollectionAddress || !nftItemAddress) return res.status(400).json({ error: 'nftCollectionAddress and nftItemAddress required' });
+
+        await Broker.findByIdAndUpdate(job.brokerId, {
+            $set: {
+                nftCollectionAddress,
+                nftItemAddress,
+                ...(nftItemIndex != null && Number.isFinite(nftItemIndex) ? { nftItemIndex } : {}),
+            },
+        });
+        job.status = 'completed';
+        job.nftItemAddress = nftItemAddress;
+        job.nftCollectionAddress = nftCollectionAddress;
+        job.completedAt = new Date();
+        await job.save();
+        res.json(job);
+    } catch (err) {
+        console.error('Error completing mint job:', err);
         res.status(500).json({ error: 'internal server error' });
     }
 });

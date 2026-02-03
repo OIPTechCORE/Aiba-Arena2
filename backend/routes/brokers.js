@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { requireTelegram } = require('../middleware/requireTelegram');
 const Broker = require('../models/Broker');
+const BrokerMintJob = require('../models/BrokerMintJob');
 const ActionRunKey = require('../models/ActionRunKey');
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
 const { getConfig, debitNeurFromUser, debitAibaFromUser } = require('../engine/economy');
@@ -333,6 +334,158 @@ router.post('/upgrade', requireTelegram, async (req, res) => {
         res.json(response);
     } catch (err) {
         console.error('Error upgrading broker:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// Combine two brokers: base absorbs sacrifice (blended stats + XP), sacrifice is deleted. Costs NEUR.
+// POST /api/brokers/combine { requestId?, baseBrokerId, sacrificeBrokerId }
+router.post('/combine', requireTelegram, async (req, res) => {
+    try {
+        const telegramId = req.telegramId ? String(req.telegramId) : '';
+        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+
+        const requestId = getIdempotencyKey(req);
+        if (!requestId) return res.status(400).json({ error: 'requestId required' });
+
+        const lock = await acquireActionLock({ scope: 'broker_combine', requestId, telegramId });
+        if (!lock.ok && lock.inProgress) return res.status(409).json({ error: 'in_progress', retryAfterMs: 1500 });
+        if (lock.ok && lock.completed) return res.json(lock.response);
+
+        const baseId = String(req.body?.baseBrokerId || '').trim();
+        const sacrificeId = String(req.body?.sacrificeBrokerId || '').trim();
+        if (!baseId || !sacrificeId) return res.status(400).json({ error: 'baseBrokerId and sacrificeBrokerId required' });
+        if (baseId === sacrificeId) return res.status(400).json({ error: 'base and sacrifice must be different brokers' });
+
+        const [base, sacrifice] = await Promise.all([
+            Broker.findById(baseId),
+            Broker.findById(sacrificeId),
+        ]);
+        if (!base) return res.status(404).json({ error: 'base broker not found' });
+        if (!sacrifice) return res.status(404).json({ error: 'sacrifice broker not found' });
+        if (String(base.ownerTelegramId) !== telegramId) return res.status(403).json({ error: 'not your broker' });
+        if (String(sacrifice.ownerTelegramId) !== telegramId) return res.status(403).json({ error: 'not your broker' });
+
+        const cfg = await getConfig();
+        const cost = Math.max(0, Math.floor(Number(cfg.combineNeurCost ?? 50)));
+        if (cost <= 0) return res.status(500).json({ error: 'combineNeurCost not configured' });
+
+        const spend = await debitNeurFromUser(cost, {
+            telegramId,
+            reason: 'combine',
+            arena: 'combine',
+            league: 'global',
+            sourceType: 'broker_combine',
+            sourceId: requestId,
+            requestId,
+            meta: { baseBrokerId: baseId, sacrificeBrokerId: sacrificeId },
+        });
+        if (!spend.ok) {
+            if (lock.lockId) {
+                await ActionRunKey.updateOne(
+                    { _id: lock.lockId },
+                    {
+                        $set: {
+                            status: 'failed',
+                            errorCode: 'insufficient_neur',
+                            errorMessage: 'insufficient NEUR',
+                            expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+                        },
+                    },
+                );
+            }
+            return res.status(403).json({ error: 'insufficient NEUR' });
+        }
+
+        const blend = (a, b) => Math.max(0, Math.min(100, Math.round((Number(a ?? 50) + Number(b ?? 50)) / 2)));
+        base.risk = blend(base.risk, sacrifice.risk);
+        base.intelligence = blend(base.intelligence, sacrifice.intelligence);
+        base.speed = blend(base.speed, sacrifice.speed);
+        base.xp = Number(base.xp ?? 0) + Number(sacrifice.xp ?? 0) + 20;
+        base.level = Math.max(1, Math.floor(Number(base.level ?? 1)));
+        await base.save();
+        await Broker.deleteOne({ _id: sacrificeId });
+
+        const response = {
+            ok: true,
+            broker: base.toObject(),
+            neurBalance: spend.user?.neurBalance ?? 0,
+            requestId,
+        };
+        if (lock.lockId) {
+            await ActionRunKey.updateOne(
+                { _id: lock.lockId },
+                {
+                    $set: {
+                        status: 'completed',
+                        response,
+                        errorCode: '',
+                        errorMessage: '',
+                        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                    },
+                },
+            );
+        }
+        res.json(response);
+    } catch (err) {
+        console.error('Error combining brokers:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// In-app NFT mint: pay AIBA, create pending mint job (admin or worker completes actual mint and links broker).
+// POST /api/brokers/mint-nft { requestId?, brokerId }
+router.post('/mint-nft', requireTelegram, async (req, res) => {
+    try {
+        const telegramId = req.telegramId ? String(req.telegramId) : '';
+        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+
+        const requestId = getIdempotencyKey(req);
+        if (!requestId) return res.status(400).json({ error: 'requestId required' });
+
+        const brokerId = String(req.body?.brokerId || '').trim();
+        if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
+
+        const broker = await Broker.findById(brokerId);
+        if (!broker) return res.status(404).json({ error: 'broker not found' });
+        if (String(broker.ownerTelegramId) !== telegramId) return res.status(403).json({ error: 'not your broker' });
+        if (broker.nftItemAddress) return res.status(400).json({ error: 'broker already has NFT' });
+
+        const existingJob = await BrokerMintJob.findOne({ brokerId, status: { $in: ['pending', 'minting'] } });
+        if (existingJob) return res.status(409).json({ error: 'mint already in progress' });
+
+        const cfg = await getConfig();
+        const cost = Math.max(0, Math.floor(Number(cfg.mintAibaCost ?? 100)));
+        if (cost <= 0) return res.status(500).json({ error: 'mintAibaCost not configured' });
+
+        const burn = await debitAibaFromUser(cost, {
+            telegramId,
+            reason: 'broker_mint_nft',
+            arena: 'mint',
+            league: 'global',
+            sourceType: 'broker_mint_nft',
+            sourceId: requestId,
+            requestId,
+            meta: { brokerId },
+        });
+        if (!burn.ok) return res.status(403).json({ error: 'insufficient AIBA' });
+
+        const job = await BrokerMintJob.create({
+            brokerId: broker._id,
+            telegramId,
+            status: 'pending',
+            aibaPaid: cost,
+        });
+        res.status(201).json({
+            ok: true,
+            jobId: job._id,
+            brokerId,
+            aibaPaid: cost,
+            aibaBalance: burn.user?.aibaBalance ?? 0,
+            message: 'Mint job created. NFT will be minted and linked to your broker soon.',
+        });
+    } catch (err) {
+        console.error('Broker mint-nft error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
 });

@@ -57,9 +57,26 @@ router.patch('/config', async (req, res) => {
         'battleAutoBanBrokerAnomalyFlags',
         'battleAutoBanUserAnomalyFlags',
         'battleAutoBanUserMinutes',
+        'boostCostNeur',
+        'boostDurationHours',
+        'boostMultiplier',
+        'stakingApyPercent',
+        'combineNeurCost',
+        'referralRewardAibaReferrer',
+        'referralRewardAibaReferee',
+        'dailyRewardNeur',
+        'mintAibaCost',
+        'boostCostTonNano',
+        'oracleAibaPerTon',
+        'oracleNeurPerAiba',
         'dailyCapAibaByArena',
         'dailyCapNeurByArena',
         'emissionWindowsUtc',
+        'starRewardPerBattle',
+        'diamondRewardFirstWin',
+        'topLeaderBadgeTopN',
+        'courseCompletionBadgeMintCostTonNano',
+        'fullCourseCompletionCertificateMintCostTonNano',
     ]);
     const bodyKeys = req.body && typeof req.body === 'object' ? Object.keys(req.body) : [];
     const unknown = bodyKeys.filter((k) => !allowedTopLevel.has(k));
@@ -90,6 +107,26 @@ router.patch('/config', async (req, res) => {
     maybeNum('battleAutoBanBrokerAnomalyFlags');
     maybeNum('battleAutoBanUserAnomalyFlags');
     maybeNum('battleAutoBanUserMinutes');
+    maybeNum('boostCostNeur');
+    maybeNum('boostDurationHours');
+    maybeNum('boostMultiplier');
+    maybeNum('stakingApyPercent');
+    maybeNum('combineNeurCost');
+    maybeNum('referralRewardAibaReferrer');
+    maybeNum('referralRewardAibaReferee');
+    maybeNum('dailyRewardNeur');
+    maybeNum('mintAibaCost');
+    maybeNum('boostCostTonNano');
+    maybeNum('createGroupCostTonNano');
+    maybeNum('boostGroupCostTonNano');
+    maybeNum('leaderboardTopFreeCreate');
+    maybeNum('oracleAibaPerTon');
+    maybeNum('oracleNeurPerAiba');
+    maybeNum('starRewardPerBattle');
+    maybeNum('diamondRewardFirstWin');
+    maybeNum('topLeaderBadgeTopN');
+    maybeNum('courseCompletionBadgeMintCostTonNano');
+    maybeNum('fullCourseCompletionCertificateMintCostTonNano');
 
     const allowed = await getAllowedArenaKeys();
 
@@ -208,6 +245,45 @@ router.get('/ledger', async (req, res) => {
         res.json(rows);
     } catch (err) {
         console.error('Error in /api/admin/economy/ledger:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// GET /api/admin/economy/simulate?days=30 — token economy simulator
+router.get('/simulate', async (req, res) => {
+    try {
+        const days = Math.max(1, Math.min(365, parseInt(req.query?.days, 10) || 30));
+        const cfg = await getConfig();
+        const baseAiba = Number(cfg.baseRewardAibaPerScore ?? 0);
+        const baseNeur = Number(cfg.baseRewardNeurPerScore ?? 0);
+        const capAiba = Number(cfg.dailyCapAiba ?? 0);
+        const capNeur = Number(cfg.dailyCapNeur ?? 0);
+        const avgScore = 80;
+        const battlesPerDay = 5000;
+        const dailyEmitAiba = Math.min(capAiba, battlesPerDay * avgScore * baseAiba);
+        const dailyEmitNeur = Math.min(capNeur, battlesPerDay * avgScore * baseNeur);
+        const projection = [];
+        let totalAiba = 0;
+        let totalNeur = 0;
+        for (let d = 0; d < days; d++) {
+            totalAiba += dailyEmitAiba;
+            totalNeur += dailyEmitNeur;
+            projection.push({
+                day: d + 1,
+                emittedAiba: dailyEmitAiba,
+                emittedNeur: dailyEmitNeur,
+                cumulativeAiba: totalAiba,
+                cumulativeNeur: totalNeur,
+            });
+        }
+        res.json({
+            days,
+            params: { avgScore, battlesPerDay, baseAiba, baseNeur, capAiba, capNeur },
+            projection,
+            summary: { totalEmittedAiba: totalAiba, totalEmittedNeur: totalNeur },
+        });
+    } catch (err) {
+        console.error('Economy simulate error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
 });

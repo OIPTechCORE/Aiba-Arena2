@@ -12,10 +12,19 @@ const UserSchema = new mongoose.Schema(
             photoUrl: { type: String, default: '', trim: true },
         },
         lastSeenAt: { type: Date, default: null },
+        lastDailyClaimAt: { type: Date, default: null },
         wallet: { type: String, default: '', trim: true },
         aibaBalance: { type: Number, default: 0 },
         pendingAIBA: { type: Number, default: 0 },
         neurBalance: { type: Number, default: 0 },
+
+        // Stars (Telegram Stars–style in-app recognition / tips)
+        starsBalance: { type: Number, default: 0 },
+        // Diamonds (TON/Telegram premium; rare, e.g. first win)
+        diamondsBalance: { type: Number, default: 0 },
+        firstWinDiamondAwardedAt: { type: Date, default: null },
+        // Profile badges (X-style: verified, early_adopter, top_donor, etc.)
+        badges: { type: [String], default: [] },
 
         // Moderation
         bannedUntil: { type: Date, default: null },

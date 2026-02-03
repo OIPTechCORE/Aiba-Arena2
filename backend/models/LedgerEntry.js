@@ -4,7 +4,7 @@ const LedgerEntrySchema = new mongoose.Schema(
     {
         telegramId: { type: String, index: true, required: true },
 
-        currency: { type: String, enum: ['NEUR', 'AIBA'], required: true, index: true },
+        currency: { type: String, enum: ['NEUR', 'AIBA', 'STARS', 'DIAMONDS'], required: true, index: true },
         direction: { type: String, enum: ['credit', 'debit'], required: true, index: true },
         amount: { type: Number, required: true, min: 0 },
 

@@ -1,5 +1,9 @@
 # Aiba-Arena2
 
+- **Game explanation:** [docs/GAME-EXPLAINED.md](docs/GAME-EXPLAINED.md) — what the game is, brokers, arenas, battles, economy, claims, guilds, referrals.
+- **User guide:** [docs/USER-GUIDE.md](docs/USER-GUIDE.md) — how to play: connect wallet, create broker, run battles, earn NEUR/AIBA, withdraw AIBA on-chain, guilds, referrals, troubleshooting.
+- **Vision vs codebase:** [docs/VISION-VS-CODEBASE-CHECK.md](docs/VISION-VS-CODEBASE-CHECK.md) — deep check of the AI Broker Battle Arena vision/spec against the repo (implemented, partial, not implemented, misalignments).
+
 ## Project structure
 
 - `contracts` - Tact smart contracts (TON).

@@ -7,7 +7,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:500
 
 export default function AdminHome() {
     const [token, setToken] = useState('');
-    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod
+    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod | stats | treasury | comms
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -135,7 +135,8 @@ export default function AdminHome() {
     const [modesError, setModesError] = useState('');
     const [newModeKey, setNewModeKey] = useState('');
     const [newModeName, setNewModeName] = useState('');
-    const [newModeArena, setNewModeArena] = useState('prediction');
+    const [newModeArena, setNewModeArena] = useState('arbitrage');
+    const [newModeLeague, setNewModeLeague] = useState('rookie');
 
     const fetchModes = async () => {
         setLoadingModes(true);
@@ -156,7 +157,7 @@ export default function AdminHome() {
             key: newModeKey.trim(),
             name: newModeName.trim(),
             arena: newModeArena.trim(),
-            league: 'rookie',
+            league: newModeLeague.trim() || 'rookie',
             enabled: true,
         });
         setNewModeKey('');
@@ -171,6 +172,8 @@ export default function AdminHome() {
 
     // ----- Economy config -----
     const [economyJson, setEconomyJson] = useState('');
+    const [economyConfigObj, setEconomyConfigObj] = useState(null);
+    const [economyDay, setEconomyDay] = useState(null);
     const [loadingEconomy, setLoadingEconomy] = useState(false);
     const [economyError, setEconomyError] = useState('');
 
@@ -179,11 +182,23 @@ export default function AdminHome() {
         setEconomyError('');
         try {
             const res = await api.get('/api/admin/economy/config');
-            setEconomyJson(JSON.stringify(res.data || {}, null, 2));
+            const cfg = res.data || {};
+            setEconomyConfigObj(cfg);
+            setEconomyJson(JSON.stringify(cfg, null, 2));
         } catch {
             setEconomyError('Failed to load economy config (missing/invalid admin token?)');
         } finally {
             setLoadingEconomy(false);
+        }
+    };
+
+    const fetchEconomyDay = async () => {
+        const today = new Date().toISOString().slice(0, 10);
+        try {
+            const res = await api.get('/api/admin/economy/day', { params: { day: today } });
+            setEconomyDay(res.data || null);
+        } catch {
+            setEconomyDay(null);
         }
     };
 
@@ -207,6 +222,27 @@ export default function AdminHome() {
     const [banUserReason, setBanUserReason] = useState('banned');
     const [banBrokerId, setBanBrokerId] = useState('');
     const [banBrokerReason, setBanBrokerReason] = useState('broker banned');
+    const [badgeTelegramId, setBadgeTelegramId] = useState('');
+    const [badgeList, setBadgeList] = useState('verified,early_adopter');
+    const [badgeMsg, setBadgeMsg] = useState('');
+    const [userDetailTelegramId, setUserDetailTelegramId] = useState('');
+    const [userDetail, setUserDetail] = useState(null);
+    const [userDetailError, setUserDetailError] = useState('');
+    const [syncTopLeaderMsg, setSyncTopLeaderMsg] = useState('');
+    const [syncingTopLeader, setSyncingTopLeader] = useState(false);
+
+    const setUserBadges = async () => {
+        setBadgeMsg('');
+        const telegramId = badgeTelegramId.trim();
+        if (!telegramId) return;
+        const badges = badgeList.split(/[\s,]+/).map((s) => s.trim()).filter(Boolean);
+        try {
+            await api.post('/api/admin/mod/user-badges', { telegramId, badges });
+            setBadgeMsg('Badges updated.');
+        } catch {
+            setBadgeMsg('Failed to set badges.');
+        }
+    };
 
     const fetchFlaggedBrokers = async () => {
         setModError('');
@@ -279,16 +315,228 @@ export default function AdminHome() {
         }
     };
 
+    const fetchUserDetail = async () => {
+        const telegramId = userDetailTelegramId.trim();
+        setUserDetailError('');
+        setUserDetail(null);
+        if (!telegramId) return;
+        try {
+            const res = await api.get('/api/admin/mod/user', { params: { telegramId } });
+            setUserDetail(res.data);
+        } catch (e) {
+            setUserDetailError(e?.response?.data?.error === 'user not found' ? 'User not found.' : 'Failed to load user.');
+        }
+    };
+
+    const syncTopLeaderBadges = async () => {
+        setSyncTopLeaderMsg('');
+        setSyncingTopLeader(true);
+        try {
+            const res = await api.post('/api/admin/mod/sync-top-leader-badges');
+            setSyncTopLeaderMsg(`Done. Removed: ${res.data?.removed ?? '-'}, Granted: ${res.data?.granted ?? '-'}.`);
+        } catch {
+            setSyncTopLeaderMsg('Sync failed.');
+        } finally {
+            setSyncingTopLeader(false);
+        }
+    };
+
+    const [announcements, setAnnouncements] = useState([]);
+    const [announcementTitle, setAnnouncementTitle] = useState('');
+    const [announcementBody, setAnnouncementBody] = useState('');
+    const [announcementType, setAnnouncementType] = useState('announcement');
+    const [announcementLink, setAnnouncementLink] = useState('');
+    const [announcementActive, setAnnouncementActive] = useState(true);
+    const [commsMsg, setCommsMsg] = useState('');
+    const [broadcastingId, setBroadcastingId] = useState('');
+    const fetchAnnouncements = async () => {
+        try {
+            const res = await api.get('/api/admin/announcements', { params: { limit: 50 } });
+            setAnnouncements(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setAnnouncements([]);
+        }
+    };
+    const createAnnouncement = async () => {
+        if (!announcementTitle.trim()) return;
+        setCommsMsg('');
+        try {
+            await api.post('/api/admin/announcements', {
+                title: announcementTitle.trim(),
+                body: announcementBody.trim(),
+                type: announcementType,
+                link: announcementLink.trim(),
+                active: announcementActive,
+            });
+            setCommsMsg('Created.');
+            setAnnouncementTitle('');
+            setAnnouncementBody('');
+            setAnnouncementLink('');
+            await fetchAnnouncements();
+        } catch (e) {
+            setCommsMsg(e?.response?.data?.error || 'Create failed.');
+        }
+    };
+    const broadcastAnnouncement = async (id) => {
+        setCommsMsg('');
+        setBroadcastingId(id);
+        try {
+            const res = await api.post(`/api/admin/announcements/${id}/broadcast`);
+            setCommsMsg(`Broadcast sent to ${res.data?.sent ?? 0} users.`);
+            setBroadcastingId('');
+        } catch (e) {
+            setCommsMsg(e?.response?.data?.error || 'Broadcast failed.');
+            setBroadcastingId('');
+        }
+    };
+
+    const [adminStats, setAdminStats] = useState(null);
+    const [charityCampaigns, setCharityCampaigns] = useState([]);
+    const [charityStats, setCharityStats] = useState(null);
+    const [charityDonations, setCharityDonations] = useState([]);
+    const [charityNewName, setCharityNewName] = useState('');
+    const [charityNewDesc, setCharityNewDesc] = useState('');
+    const [charityNewCause, setCharityNewCause] = useState('community');
+    const [charityNewGoalNeur, setCharityNewGoalNeur] = useState('0');
+    const [charityNewGoalAiba, setCharityNewGoalAiba] = useState('0');
+    const [charityNewStatus, setCharityNewStatus] = useState('draft');
+    const [charityMsg, setCharityMsg] = useState('');
+    const [treasuryData, setTreasuryData] = useState(null);
+    const [reserveData, setReserveData] = useState(null);
+    const [buybackData, setBuybackData] = useState(null);
+    const fetchAdminStats = async () => {
+        try {
+            const res = await api.get('/api/admin/stats');
+            setAdminStats(res.data);
+        } catch {
+            setAdminStats(null);
+        }
+    };
+    const fetchTreasury = async () => {
+        try {
+            const [t, r, b] = await Promise.all([
+                api.get('/api/admin/treasury'),
+                api.get('/api/admin/treasury/reserve'),
+                api.get('/api/admin/treasury/buyback'),
+            ]);
+            setTreasuryData(t.data);
+            setReserveData(r.data);
+            setBuybackData(b.data);
+        } catch {
+            setTreasuryData(null);
+            setReserveData(null);
+            setBuybackData(null);
+        }
+    };
+    const fundTreasury = async (aibaDelta, neurDelta) => {
+        try {
+            await api.post('/api/admin/treasury/fund', { aibaDelta: aibaDelta || 0, neurDelta: neurDelta || 0 });
+            await fetchTreasury();
+        } catch {
+            // ignore
+        }
+    };
+
+    const fetchCharityCampaigns = async () => {
+        try {
+            const res = await api.get('/api/admin/charity/campaigns');
+            setCharityCampaigns(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setCharityCampaigns([]);
+        }
+    };
+    const fetchCharityStats = async () => {
+        try {
+            const res = await api.get('/api/admin/charity/stats');
+            setCharityStats(res.data || null);
+        } catch {
+            setCharityStats(null);
+        }
+    };
+    const fetchCharityDonations = async () => {
+        try {
+            const res = await api.get('/api/admin/charity/donations', { params: { limit: 200 } });
+            setCharityDonations(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setCharityDonations([]);
+        }
+    };
+    const createCharityCampaign = async () => {
+        if (!charityNewName.trim()) return;
+        setCharityMsg('');
+        try {
+            await api.post('/api/admin/charity/campaigns', {
+                name: charityNewName.trim(),
+                description: charityNewDesc.trim(),
+                cause: charityNewCause,
+                goalNeur: Number(charityNewGoalNeur) || 0,
+                goalAiba: Number(charityNewGoalAiba) || 0,
+                status: charityNewStatus,
+            });
+            setCharityMsg('Campaign created.');
+            setCharityNewName('');
+            setCharityNewDesc('');
+            setCharityNewGoalNeur('0');
+            setCharityNewGoalAiba('0');
+            await fetchCharityCampaigns();
+            await fetchCharityStats();
+        } catch (e) {
+            setCharityMsg(e?.response?.data?.error || 'Create failed.');
+        }
+    };
+    const updateCharityCampaign = async (id, patch) => {
+        setCharityMsg('');
+        try {
+            await api.patch(`/api/admin/charity/campaigns/${id}`, patch);
+            setCharityMsg('Updated.');
+            await fetchCharityCampaigns();
+        } catch (e) {
+            setCharityMsg(e?.response?.data?.error || 'Update failed.');
+        }
+    };
+    const closeCharityCampaign = async (id) => {
+        setCharityMsg('');
+        try {
+            await api.post(`/api/admin/charity/campaigns/${id}/close`);
+            setCharityMsg('Campaign closed.');
+            await fetchCharityCampaigns();
+            await fetchCharityStats();
+        } catch (e) {
+            setCharityMsg(e?.response?.data?.error || 'Close failed.');
+        }
+    };
+    const disburseCharityCampaign = async (id) => {
+        setCharityMsg('');
+        try {
+            await api.post(`/api/admin/charity/campaigns/${id}/disburse`);
+            setCharityMsg('Marked as disbursed.');
+            await fetchCharityCampaigns();
+            await fetchCharityStats();
+        } catch (e) {
+            setCharityMsg(e?.response?.data?.error || 'Disburse failed.');
+        }
+    };
+
     useEffect(() => {
         if (!token) return;
         if (tab === 'tasks') fetchTasks();
         if (tab === 'ads') fetchAds();
         if (tab === 'modes') fetchModes();
-        if (tab === 'economy') fetchEconomy();
+        if (tab === 'economy') {
+            fetchEconomy();
+            fetchEconomyDay();
+        }
         if (tab === 'mod') {
             fetchFlaggedBrokers();
             fetchAnomalies();
         }
+        if (tab === 'stats') fetchAdminStats();
+        if (tab === 'treasury') fetchTreasury();
+        if (tab === 'charity') {
+            fetchCharityCampaigns();
+            fetchCharityStats();
+        }
+        if (tab === 'comms') fetchAnnouncements();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, tab]);
 
@@ -337,6 +585,21 @@ export default function AdminHome() {
                         </button>
                         <button onClick={() => setTab('mod')} style={{ padding: '8px 12px' }}>
                             Moderation
+                        </button>
+                        <button onClick={() => setTab('stats')} style={{ padding: '8px 12px' }}>
+                            Stats
+                        </button>
+                        <button onClick={() => setTab('treasury')} style={{ padding: '8px 12px' }}>
+                            Treasury
+                        </button>
+                        <button onClick={() => setTab('charity')} style={{ padding: '8px 12px' }}>
+                            Charity
+                        </button>
+                        <button onClick={() => setTab('comms')} style={{ padding: '8px 12px' }}>
+                            Comms
+                        </button>
+                        <button onClick={() => setTab('university')} style={{ padding: '8px 12px' }}>
+                            University
                         </button>
                         <div style={{ flex: 1 }} />
                         <button onClick={logout} style={{ padding: '8px 12px' }}>
@@ -492,16 +755,33 @@ export default function AdminHome() {
                                         placeholder="name"
                                         style={{ padding: 10, minWidth: 220 }}
                                     />
-                                    <input
+                                    <select
                                         value={newModeArena}
                                         onChange={(e) => setNewModeArena(e.target.value)}
-                                        placeholder="arena"
                                         style={{ padding: 10, minWidth: 180 }}
-                                    />
+                                    >
+                                        <option value="prediction">prediction</option>
+                                        <option value="simulation">simulation</option>
+                                        <option value="strategyWars">strategyWars</option>
+                                        <option value="guildWars">guildWars</option>
+                                        <option value="arbitrage">arbitrage</option>
+                                    </select>
+                                    <select
+                                        value={newModeLeague}
+                                        onChange={(e) => setNewModeLeague(e.target.value)}
+                                        style={{ padding: 10, minWidth: 120 }}
+                                    >
+                                        <option value="rookie">rookie</option>
+                                        <option value="pro">pro</option>
+                                        <option value="elite">elite</option>
+                                    </select>
                                     <button onClick={createMode} style={{ padding: '8px 12px' }}>
                                         Create
                                     </button>
                                 </div>
+                                <p style={{ color: '#666', fontSize: 12, marginTop: 6 }}>
+                                    Arena <strong>arbitrage</strong> is available; defaults also seed arbitrage/rookie, arbitrage-pro, arbitrage-elite on first DB connect.
+                                </p>
                                 {modesError ? <p style={{ color: 'crimson' }}>{modesError}</p> : null}
                                 <div style={{ marginTop: 12 }}>
                                     {modes.map((m) => (
@@ -538,7 +818,7 @@ export default function AdminHome() {
                             <>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                                     <button
-                                        onClick={fetchEconomy}
+                                        onClick={() => { fetchEconomy(); fetchEconomyDay(); }}
                                         disabled={loadingEconomy}
                                         style={{ padding: '8px 12px' }}
                                     >
@@ -549,6 +829,52 @@ export default function AdminHome() {
                                     </button>
                                 </div>
                                 {economyError ? <p style={{ color: 'crimson' }}>{economyError}</p> : null}
+                                {economyDay && economyConfigObj ? (
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #e0e0e0',
+                                            borderRadius: 8,
+                                            background: '#fafafa',
+                                        }}
+                                    >
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Emission dashboard (today UTC)</div>
+                                        <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+                                            Day: {economyDay.day} · Window: {economyConfigObj.emissionStartHourUtc ?? 0}:00–{economyConfigObj.emissionEndHourUtc ?? 24}:00 UTC
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+                                            <div>
+                                                <div style={{ fontWeight: 600 }}>AIBA</div>
+                                                <div style={{ fontSize: 13 }}>
+                                                    {economyDay.emittedAiba ?? 0} / {economyConfigObj.dailyCapAiba ?? 0}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 600 }}>NEUR</div>
+                                                <div style={{ fontSize: 13 }}>
+                                                    {economyDay.emittedNeur ?? 0} / {economyConfigObj.dailyCapNeur ?? 0}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 600 }}>Burned AIBA</div>
+                                                <div style={{ fontSize: 13 }}>{economyDay.burnedAiba ?? 0}</div>
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 600 }}>Spent NEUR</div>
+                                                <div style={{ fontSize: 13 }}>{economyDay.spentNeur ?? 0}</div>
+                                            </div>
+                                        </div>
+                                        {economyDay.emittedAibaByArena && Object.keys(economyDay.emittedAibaByArena).length > 0 ? (
+                                            <div style={{ marginTop: 10, fontSize: 12 }}>
+                                                <div style={{ fontWeight: 600 }}>AIBA by arena</div>
+                                                <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+                                                    {JSON.stringify(economyDay.emittedAibaByArena, null, 2)}
+                                                </pre>
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                ) : null}
                                 <textarea
                                     value={economyJson}
                                     onChange={(e) => setEconomyJson(e.target.value)}
@@ -565,8 +891,12 @@ export default function AdminHome() {
                                     }}
                                 />
                                 <div style={{ color: '#666', fontSize: 12, marginTop: 8 }}>
-                                    Tip: edit `baseRewardAibaPerScore`, `baseRewardNeurPerScore`, caps, and
-                                    `dailyCap*ByArena` maps.
+                                    Tip: edit <code>baseRewardAibaPerScore</code>, <code>baseRewardNeurPerScore</code>, caps,
+                                    <code>dailyCap*ByArena</code> maps, <code>starRewardPerBattle</code> (Stars per battle),
+                                    <code>diamondRewardFirstWin</code> (Diamonds on first win),
+                                    <code>topLeaderBadgeTopN</code> (top N by score get &quot;top_leader&quot; badge; synced every 6h or via Moderation),
+                                    <code>courseCompletionBadgeMintCostTonNano</code> (Course completion badge mint cost in TON; value in nanoTON, e.g. 10000000000 = 10 TON; default 10 TON),
+                                    and <code>fullCourseCompletionCertificateMintCostTonNano</code> (Full course completion certificate mint cost in TON; value in nanoTON, e.g. 15000000000 = 15 TON; default 15 TON).
                                 </div>
                             </>
                         ) : null}
@@ -626,6 +956,64 @@ export default function AdminHome() {
                                                 Unban
                                             </button>
                                         </div>
+                                    </div>
+
+                                    <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>User detail (lookup)</div>
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                            <input
+                                                value={userDetailTelegramId}
+                                                onChange={(e) => setUserDetailTelegramId(e.target.value)}
+                                                placeholder="Telegram ID"
+                                                style={{ padding: 10, minWidth: 220 }}
+                                            />
+                                            <button onClick={fetchUserDetail} style={{ padding: '8px 12px' }}>
+                                                Look up
+                                            </button>
+                                        </div>
+                                        {userDetailError ? <p style={{ marginTop: 8, color: 'crimson' }}>{userDetailError}</p> : null}
+                                        {userDetail ? (
+                                            <div style={{ marginTop: 10, padding: 10, background: '#f9f9f9', borderRadius: 8, fontSize: 13 }}>
+                                                <div><strong>Username</strong>: {userDetail.username || '—'}</div>
+                                                <div><strong>Stars</strong>: {userDetail.starsBalance ?? 0} · <strong>Diamonds</strong>: {userDetail.diamondsBalance ?? 0}</div>
+                                                <div><strong>Badges</strong>: {Array.isArray(userDetail.badges) && userDetail.badges.length ? userDetail.badges.join(', ') : '—'}</div>
+                                                {userDetail.firstWinDiamondAwardedAt ? <div style={{ color: '#666' }}>First-win diamond awarded at: {new Date(userDetail.firstWinDiamondAwardedAt).toISOString()}</div> : null}
+                                                {userDetail.bannedUntil ? <div style={{ color: '#b45309' }}>Banned until: {new Date(userDetail.bannedUntil).toISOString()} — {userDetail.bannedReason || ''}</div> : null}
+                                            </div>
+                                        ) : null}
+                                    </div>
+
+                                    <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>User profile badges (X-style)</div>
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                            <input
+                                                value={badgeTelegramId}
+                                                onChange={(e) => setBadgeTelegramId(e.target.value)}
+                                                placeholder="Telegram ID"
+                                                style={{ padding: 10, minWidth: 220 }}
+                                            />
+                                            <input
+                                                value={badgeList}
+                                                onChange={(e) => setBadgeList(e.target.value)}
+                                                placeholder="Badges: verified, early_adopter, top_donor, ..."
+                                                style={{ padding: 10, minWidth: 320 }}
+                                            />
+                                            <button onClick={setUserBadges} style={{ padding: '8px 12px' }}>
+                                                Set badges
+                                            </button>
+                                        </div>
+                                        {badgeMsg ? <p style={{ marginTop: 8, color: badgeMsg.startsWith('Failed') ? 'crimson' : '#333' }}>{badgeMsg}</p> : null}
+                                    </div>
+
+                                    <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Top leader badge sync</div>
+                                        <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>
+                                            Awards &quot;top_leader&quot; badge to top N users by total score (N = economy config <code>topLeaderBadgeTopN</code>). Also runs every 6 hours.
+                                        </p>
+                                        <button onClick={syncTopLeaderBadges} disabled={syncingTopLeader} style={{ padding: '8px 12px' }}>
+                                            {syncingTopLeader ? 'Syncing…' : 'Sync now'}
+                                        </button>
+                                        {syncTopLeaderMsg ? <span style={{ marginLeft: 8, color: '#333' }}>{syncTopLeaderMsg}</span> : null}
                                     </div>
 
                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -708,6 +1096,219 @@ export default function AdminHome() {
                                             </div>
                                         )}
                                     </div>
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === 'stats' ? (
+                            <>
+                                <button onClick={fetchAdminStats} style={{ padding: '8px 12px' }}>Refresh</button>
+                                {adminStats ? (
+                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8, maxWidth: 480 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Dashboard stats</div>
+                                        <div style={{ display: 'grid', gap: 8, fontSize: 14 }}>
+                                            <div>DAU (today): <strong>{adminStats.dau ?? 0}</strong></div>
+                                            <div>Total users: <strong>{adminStats.totalUsers ?? 0}</strong></div>
+                                            <div>Total battles: <strong>{adminStats.totalBattles ?? 0}</strong></div>
+                                            <div>Battles today: <strong>{adminStats.battlesToday ?? 0}</strong></div>
+                                            <div>Today emitted AIBA: <strong>{adminStats.todayEmittedAiba ?? 0}</strong></div>
+                                            <div>Today emitted NEUR: <strong>{adminStats.todayEmittedNeur ?? 0}</strong></div>
+                                            <div style={{ color: '#666', fontSize: 12 }}>Day: {adminStats.day}</div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div style={{ marginTop: 12, color: '#666' }}>Load stats.</div>
+                                )}
+                                <div style={{ marginTop: 12, fontSize: 12 }}>
+                                    <a href={`${BACKEND_URL}/api/admin/economy/simulate?days=30`} target="_blank" rel="noopener noreferrer">Economy simulator (30 days)</a>
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === 'treasury' ? (
+                            <>
+                                <button onClick={fetchTreasury} style={{ padding: '8px 12px' }}>Refresh</button>
+                                {treasuryData ? (
+                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>DAO Treasury</div>
+                                        <div>Balance AIBA: {treasuryData.balanceAiba ?? 0} | NEUR: {treasuryData.balanceNeur ?? 0}</div>
+                                        <div style={{ fontSize: 12, color: '#666' }}>Paid out AIBA: {treasuryData.totalPaidOutAiba ?? 0} | NEUR: {treasuryData.totalPaidOutNeur ?? 0}</div>
+                                        <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+                                            <input type="number" id="treasury-aiba" placeholder="AIBA to add" style={{ padding: 8, width: 120 }} />
+                                            <input type="number" id="treasury-neur" placeholder="NEUR to add" style={{ padding: 8, width: 120 }} />
+                                            <button onClick={() => fundTreasury(Number(document.getElementById('treasury-aiba')?.value || 0), Number(document.getElementById('treasury-neur')?.value || 0))} style={{ padding: '8px 12px' }}>Fund</button>
+                                        </div>
+                                    </div>
+                                ) : null}
+                                {reserveData ? (
+                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Stability reserve</div>
+                                        <div>AIBA: {reserveData.aibaBalance ?? 0} | NEUR: {reserveData.neurBalance ?? 0}</div>
+                                    </div>
+                                ) : null}
+                                {buybackData ? (
+                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Buyback pool</div>
+                                        <div>AIBA: {buybackData.aibaBalance ?? 0} | NEUR: {buybackData.neurBalance ?? 0} | Total bought back: {buybackData.totalBoughtBackAiba ?? 0}</div>
+                                    </div>
+                                ) : null}
+                            </>
+                        ) : null}
+
+                        {tab === 'charity' ? (
+                            <>
+                                <button onClick={fetchCharityCampaigns} style={{ padding: '8px 12px' }}>Refresh campaigns</button>
+                                <button onClick={fetchCharityStats} style={{ padding: '8px 12px' }}>Refresh stats</button>
+                                <button onClick={fetchCharityDonations} style={{ padding: '8px 12px' }}>List donations</button>
+                                {charityMsg ? <span style={{ marginLeft: 12, color: '#066' }}>{charityMsg}</span> : null}
+                                {charityStats ? (
+                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Charity stats</div>
+                                        <div>Total raised NEUR: {charityStats.totalRaisedNeur ?? 0} | AIBA: {charityStats.totalRaisedAiba ?? 0}</div>
+                                        <div>Total donors: {charityStats.totalDonors ?? 0} | Campaigns: {charityStats.campaignCount ?? 0}</div>
+                                    </div>
+                                ) : null}
+                                <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Create campaign</div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                                        <input value={charityNewName} onChange={(e) => setCharityNewName(e.target.value)} placeholder="Name" style={{ padding: 8, minWidth: 160 }} />
+                                        <input value={charityNewDesc} onChange={(e) => setCharityNewDesc(e.target.value)} placeholder="Description" style={{ padding: 8, minWidth: 200 }} />
+                                        <select value={charityNewCause} onChange={(e) => setCharityNewCause(e.target.value)} style={{ padding: 8 }}>
+                                            <option value="education">education</option>
+                                            <option value="environment">environment</option>
+                                            <option value="health">health</option>
+                                            <option value="emergency">emergency</option>
+                                            <option value="community">community</option>
+                                            <option value="other">other</option>
+                                        </select>
+                                        <input type="number" value={charityNewGoalNeur} onChange={(e) => setCharityNewGoalNeur(e.target.value)} placeholder="Goal NEUR" style={{ padding: 8, width: 100 }} />
+                                        <input type="number" value={charityNewGoalAiba} onChange={(e) => setCharityNewGoalAiba(e.target.value)} placeholder="Goal AIBA" style={{ padding: 8, width: 100 }} />
+                                        <select value={charityNewStatus} onChange={(e) => setCharityNewStatus(e.target.value)} style={{ padding: 8 }}>
+                                            <option value="draft">draft</option>
+                                            <option value="active">active</option>
+                                        </select>
+                                        <button onClick={createCharityCampaign} style={{ padding: '8px 12px' }}>Create</button>
+                                    </div>
+                                </div>
+                                <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Campaigns</div>
+                                    {charityCampaigns.map((c) => (
+                                        <div key={c._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8, marginTop: 8 }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                                                <div>
+                                                    <strong>{c.name}</strong> — {c.cause} · status: {c.status}
+                                                    <div style={{ fontSize: 12, color: '#666' }}>Raised: {c.raisedNeur ?? 0} NEUR, {c.raisedAiba ?? 0} AIBA · {c.donorCount ?? 0} donors</div>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                                    {c.status === 'active' ? (
+                                                        <button onClick={() => closeCharityCampaign(c._id)} style={{ padding: '6px 10px' }}>Close</button>
+                                                    ) : null}
+                                                    {c.status === 'ended' || c.status === 'funded' ? (
+                                                        <button onClick={() => disburseCharityCampaign(c._id)} style={{ padding: '6px 10px' }}>Mark disbursed</button>
+                                                    ) : null}
+                                                    <button onClick={() => updateCharityCampaign(c._id, { status: 'active' })} style={{ padding: '6px 10px' }} disabled={c.status === 'active'}>Set active</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {charityCampaigns.length === 0 ? <div style={{ color: '#666' }}>No campaigns. Create one above.</div> : null}
+                                </div>
+                                {charityDonations.length > 0 ? (
+                                    <div style={{ marginTop: 12 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Recent donations</div>
+                                        {charityDonations.slice(0, 50).map((d) => (
+                                            <div key={d._id} style={{ fontSize: 12, padding: 6, borderBottom: '1px solid #eee' }}>
+                                                {d.telegramId} → {typeof d.campaignId === 'object' && d.campaignId?.name ? d.campaignId.name : d.campaignId} · {d.amountNeur ?? 0} NEUR, {d.amountAiba ?? 0} AIBA · {d.donatedAt ? new Date(d.donatedAt).toISOString().slice(0, 19) : ''}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : null}
+                            </>
+                        ) : null}
+
+                        {tab === 'comms' ? (
+                            <>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <button onClick={fetchAnnouncements} style={{ padding: '8px 12px' }}>Refresh</button>
+                                    {commsMsg ? <span style={{ color: '#066' }}>{commsMsg}</span> : null}
+                                </div>
+                                <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Create announcement</div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                                        <input value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} placeholder="Title" style={{ padding: 8, minWidth: 200 }} />
+                                        <select value={announcementType} onChange={(e) => setAnnouncementType(e.target.value)} style={{ padding: 8 }}>
+                                            <option value="announcement">announcement</option>
+                                            <option value="maintenance">maintenance</option>
+                                            <option value="status">status</option>
+                                        </select>
+                                        <input value={announcementLink} onChange={(e) => setAnnouncementLink(e.target.value)} placeholder="Link (optional)" style={{ padding: 8, minWidth: 220 }} />
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                            <input type="checkbox" checked={announcementActive} onChange={(e) => setAnnouncementActive(e.target.checked)} />
+                                            Active
+                                        </label>
+                                        <button onClick={createAnnouncement} style={{ padding: '8px 12px' }} disabled={!announcementTitle.trim()}>Create</button>
+                                    </div>
+                                    <textarea value={announcementBody} onChange={(e) => setAnnouncementBody(e.target.value)} placeholder="Body (optional)" rows={3} style={{ marginTop: 8, width: '100%', padding: 8 }} />
+                                </div>
+                                <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Announcements</div>
+                                    {announcements.length === 0 ? <div style={{ color: '#666' }}>No announcements.</div> : (
+                                        <div style={{ display: 'grid', gap: 8 }}>
+                                            {announcements.map((a) => (
+                                                <div key={a._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                                    <div style={{ fontWeight: 600 }}>{a.title}</div>
+                                                    <div style={{ fontSize: 12, color: '#666' }}>{a.type} · active: {String(a.active)} · {a.publishedAt ? new Date(a.publishedAt).toLocaleString() : '—'}</div>
+                                                    {a.body ? <div style={{ marginTop: 6, fontSize: 13 }}>{a.body.slice(0, 200)}{a.body.length > 200 ? '…' : ''}</div> : null}
+                                                    <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+                                                        <button onClick={() => broadcastAnnouncement(a._id)} disabled={!!broadcastingId} style={{ padding: '6px 10px' }}>
+                                                            {broadcastingId === a._id ? 'Sending…' : 'Broadcast to Telegram'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === 'university' ? (
+                            <>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <button onClick={fetchUniversityAll} style={{ padding: '8px 12px' }}>Refresh</button>
+                                </div>
+                                {universityStats ? (
+                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>University stats</div>
+                                        <div>Total courses: {universityStats.totalCourses ?? 0} · Total modules: {universityStats.totalModules ?? 0}</div>
+                                        <div>Users with progress: {universityStats.usersWithProgress ?? 0} · Graduates (badge): {universityStats.graduates ?? 0}</div>
+                                    </div>
+                                ) : null}
+                                <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Courses (read-only)</div>
+                                    {universityCourses.length === 0 ? <div style={{ color: '#666' }}>No courses loaded.</div> : (
+                                        <div style={{ display: 'grid', gap: 8 }}>
+                                            {universityCourses.map((c) => (
+                                                <div key={c.id} style={{ padding: 10, border: '1px solid #eee', borderRadius: 8 }}>
+                                                    <strong>{c.title}</strong> — {c.moduleCount ?? 0} modules
+                                                    {Array.isArray(c.modules) ? <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{c.modules.map((m) => m.title).join(' · ')}</div> : null}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Graduates (users with university_graduate badge)</div>
+                                    {universityGraduates.length === 0 ? <div style={{ color: '#666' }}>No graduates yet.</div> : (
+                                        <div style={{ display: 'grid', gap: 6 }}>
+                                            {universityGraduates.slice(0, 50).map((u, i) => (
+                                                <div key={u.telegramId || i} style={{ fontSize: 13, padding: 6, borderBottom: '1px solid #eee' }}>
+                                                    {u.telegramId} · {u.username || '—'} {u.graduatedAt ? ` · ${new Date(u.graduatedAt).toISOString().slice(0, 10)}` : ''}
+                                                </div>
+                                            ))}
+                                            {universityGraduates.length > 50 ? <div style={{ color: '#666', fontSize: 12 }}>… and {universityGraduates.length - 50} more</div> : null}
+                                        </div>
+                                    )}
                                 </div>
                             </>
                         ) : null}

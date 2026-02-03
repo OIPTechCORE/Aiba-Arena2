@@ -8,6 +8,7 @@ const BattleRunKey = require('../models/BattleRunKey');
 const ActionRunKey = require('../models/ActionRunKey');
 const Guild = require('../models/Guild');
 const GameMode = require('../models/GameMode');
+const Boost = require('../models/Boost');
 const { hmacSha256Hex, seedFromHex } = require('../engine/deterministicRandom');
 const { simulateBattle } = require('../engine/battleEngine');
 const {
@@ -19,6 +20,7 @@ const {
     debitNeurFromUser,
     debitAibaFromUser,
     debitAibaFromUserNoBurn,
+    safeCreateLedgerEntry,
 } = require('../engine/economy');
 const { createSignedClaim } = require('../ton/signRewardClaim');
 const { getVaultLastSeqno } = require('../ton/vaultRead');
@@ -374,12 +376,26 @@ router.post(
 
             // Reward issuance with emission caps
             const multAiba = Number(mode?.rewardMultiplierAiba ?? 1) || 1;
-            const proposedAiba = Math.max(0, Math.floor(score * cfg.baseRewardAibaPerScore * multAiba));
+            let proposedAiba = Math.max(0, Math.floor(score * cfg.baseRewardAibaPerScore * multAiba));
 
             // NEUR off-chain ledger (server-authoritative)
             let rewardNeur = 0;
             const multNeur = Number(mode?.rewardMultiplierNeur ?? 1) || 1;
-            const proposedNeur = Math.max(0, Math.floor(score * cfg.baseRewardNeurPerScore * multNeur));
+            let proposedNeur = Math.max(0, Math.floor(score * cfg.baseRewardNeurPerScore * multNeur));
+
+            // Boost: active boost multiplies rewards
+            const nowBoost = new Date();
+            const activeBoost = await Boost.findOne({
+                telegramId,
+                expiresAt: { $gt: nowBoost },
+            })
+                .sort({ expiresAt: -1 })
+                .lean();
+            const boostMul = activeBoost && Number(activeBoost.multiplier) > 0 ? Number(activeBoost.multiplier) : 1;
+            if (boostMul > 1) {
+                proposedAiba = Math.max(0, Math.floor(proposedAiba * boostMul));
+                proposedNeur = Math.max(0, Math.floor(proposedNeur * boostMul));
+            }
             let guildShareNeur = 0;
             if (proposedNeur > 0) {
                 const neurEmit = await tryEmitNeur(proposedNeur, { arena, league });
@@ -441,6 +457,56 @@ router.post(
                         requestId,
                         meta: { brokerId, modeKey },
                     });
+                }
+            }
+
+            // Stars: per battle *win* only (Telegram Stars–style); ledger for audit
+            const starReward = score > 0 ? Math.max(0, Math.floor(Number(cfg.starRewardPerBattle ?? 0))) : 0;
+            if (starReward > 0) {
+                await User.updateOne({ telegramId }, { $inc: { starsBalance: starReward } }).catch(() => {});
+                await safeCreateLedgerEntry({
+                    telegramId,
+                    currency: 'STARS',
+                    direction: 'credit',
+                    amount: starReward,
+                    reason: 'battle_reward',
+                    arena,
+                    league,
+                    sourceType: 'battle',
+                    sourceId: requestId,
+                    requestId,
+                    meta: { brokerId, score },
+                }).catch(() => {});
+            }
+
+            // Diamonds: one-time first win (TON/Telegram premium); ledger for audit
+            let firstWinDiamondAwarded = 0;
+            const diamondReward = Math.max(0, Math.floor(Number(cfg.diamondRewardFirstWin ?? 0)));
+            if (score > 0 && diamondReward > 0) {
+                const firstWinUpdate = await User.findOneAndUpdate(
+                    { telegramId, firstWinDiamondAwardedAt: null },
+                    {
+                        $set: { firstWinDiamondAwardedAt: new Date() },
+                        $inc: { diamondsBalance: diamondReward },
+                    },
+                    { new: true },
+                ).lean();
+                if (firstWinUpdate) {
+                    firstWinDiamondAwarded = diamondReward;
+                    metrics?.battleRunsTotal?.inc?.({ ...metricLabels, first_win_diamond: 'yes' });
+                    await safeCreateLedgerEntry({
+                        telegramId,
+                        currency: 'DIAMONDS',
+                        direction: 'credit',
+                        amount: diamondReward,
+                        reason: 'first_win',
+                        arena,
+                        league,
+                        sourceType: 'battle',
+                        sourceId: requestId,
+                        requestId,
+                        meta: { brokerId, score, firstWin: true },
+                    }).catch(() => {});
                 }
             }
 
@@ -634,7 +700,21 @@ router.post(
                     mode_key: metricLabels.mode_key,
                 });
 
-            res.json(battle.toObject());
+            // Push notification: "Your AI just won" (fire-and-forget)
+            if (score > 0) {
+                const { notifyBattleWin } = require('../services/telegramNotify');
+                notifyBattleWin(telegramId, {
+                    score,
+                    arena,
+                    rewardAiba,
+                    rewardNeur,
+                    starsGranted: starReward,
+                    firstWinDiamond: firstWinDiamondAwarded,
+                }).catch(() => {});
+            }
+
+            const battlePayload = { ...battle.toObject(), starsGranted: starReward, firstWinDiamond: firstWinDiamondAwarded };
+            res.json(battlePayload);
         } catch (err) {
             console.error('Error in /api/battle/run:', err);
             metrics?.battleRunsTotal?.inc?.({ ...metricFallback, result: 'error' });

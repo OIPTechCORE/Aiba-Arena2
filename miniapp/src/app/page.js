@@ -7,6 +7,139 @@ import { getTelegramUserUnsafe } from '../lib/telegram';
 import { buildRewardClaimPayload } from '../lib/tonRewardClaim';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+const IS_DEV = BACKEND_URL.includes('localhost');
+
+/* Futuristic 24×24 icons (stroke, bold) for tabs and buttons */
+const IconHome = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M4 12l8-8 8 8" /><path d="M6 10v10h4v-6h4v6h4V10" />
+    </svg>
+);
+const IconBrokers = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+);
+const IconArena = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <polygon points="5 3 19 12 5 21 5 3" />
+    </svg>
+);
+const IconGuilds = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <circle cx="9" cy="7" r="4" /><circle cx="15" cy="7" r="4" />
+        <path d="M4 20c0-3 2.5-5 5-5s5 2 5 5" /><path d="M14 20c0-3 2.5-5 5-5s5 2 5 5" />
+    </svg>
+);
+const IconMarket = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 01-8 0" />
+    </svg>
+);
+const IconWallet = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /><path d="M16 14h.01" />
+    </svg>
+);
+const IconRun = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M8 5v14l11-7z" />
+    </svg>
+);
+const IconRefresh = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M23 4v6h-6" /><path d="M1 20v-6h6" /><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+    </svg>
+);
+const IconClaim = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+    </svg>
+);
+const IconMint = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M12 2l3 3-3 3-3-3z" /><path d="M12 14l3 3-3 3-3-3z" /><path d="M6 8l3 3-3 3-3-3z" /><path d="M18 8l3 3-3 3-3-3z" />
+    </svg>
+);
+const IconStake = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><path d="M9 22V12h6v10" />
+    </svg>
+);
+const IconList = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" /><path d="M3.27 6.96L12 12.01l8.73-5.05" />
+    </svg>
+);
+const IconBuy = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" /><path d="M16 10a4 4 0 01-8 0" />
+    </svg>
+);
+const IconShare = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" /><path d="M12 2v13" /><path d="M8 7l4-4 4 4" />
+    </svg>
+);
+const IconVault = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
+    </svg>
+);
+const IconHeart = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+    </svg>
+);
+const IconUpdates = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13 13a2 2 0 01-3.41 1.41" />
+    </svg>
+);
+const IconUniversity = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+    </svg>
+);
+/* Futuristic Stars (Telegram Stars–style) */
+const IconStar = () => (
+    <svg className="icon-svg icon-svg--star" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+    </svg>
+);
+/* Premium TON/Telegram Diamonds */
+const IconDiamond = () => (
+    <svg className="icon-svg icon-svg--diamond" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M12 2L2 8l4 14h12l4-14L12 2z" /><path d="M12 2v20" /><path d="M2 8h20" /><path d="M6 22l6-14 6 14" />
+    </svg>
+);
+
+/* X-style profile badges: id → { label, color, title (tooltip) } */
+const BADGE_LABELS = {
+    verified: { label: 'Verified', color: 'var(--accent-cyan)', title: 'Verified identity' },
+    early_adopter: { label: 'Early Adopter', color: 'var(--accent-gold)', title: 'Joined in early phase' },
+    top_donor: { label: 'Top Donor', color: 'var(--accent-magenta)', title: 'Top charity donor' },
+    guild_leader: { label: 'Guild Leader', color: 'var(--accent-green)', title: 'Leads a guild' },
+    top_leader: { label: 'Top Leader', color: 'var(--accent-gold)', title: 'Top by total score' },
+    champion: { label: 'Champion', color: 'var(--accent-magenta)', title: 'Champion status' },
+    diamond_holder: { label: 'Diamond Holder', color: 'var(--accent-cyan)', title: 'Holds TON ecosystem Diamonds' },
+    university_graduate: { label: 'University Graduate', color: 'var(--accent-cyan)', title: 'Completed all University modules' },
+    course_completion: { label: 'Course Completion', color: 'var(--accent-green)', title: 'Minted after completing at least one course' },
+    full_course_completion_certificate: { label: 'Full Course Certificate', color: 'var(--accent-gold)', title: 'Minted after completing all courses' },
+};
+
+const TAB_LIST = [
+    { id: 'home', label: 'Home', Icon: IconHome },
+    { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
+    { id: 'arenas', label: 'Arenas', Icon: IconArena },
+    { id: 'guilds', label: 'Guilds', Icon: IconGuilds },
+    { id: 'market', label: 'Market', Icon: IconMarket },
+    { id: 'charity', label: 'Charity', Icon: IconHeart },
+    { id: 'university', label: 'University', Icon: IconUniversity },
+    { id: 'updates', label: 'Updates', Icon: IconUpdates },
+    { id: 'wallet', label: 'Wallet', Icon: IconWallet },
+];
 
 function uuid() {
     try {
@@ -24,6 +157,9 @@ export default function HomePage() {
     const [status, setStatus] = useState('');
     const [brokers, setBrokers] = useState([]);
     const [selectedBrokerId, setSelectedBrokerId] = useState('');
+    const [combineBaseId, setCombineBaseId] = useState('');
+    const [combineSacrificeId, setCombineSacrificeId] = useState('');
+    const [combineMsg, setCombineMsg] = useState('');
     const [arena, setArena] = useState('prediction');
     const [battle, setBattle] = useState(null);
     const [busy, setBusy] = useState(false);
@@ -34,6 +170,206 @@ export default function HomePage() {
     const [vaultInfo, setVaultInfo] = useState(null);
     const [ad, setAd] = useState(null);
     const [economyMe, setEconomyMe] = useState(null);
+    const [tutorialStep, setTutorialStep] = useState(0);
+    const [tab, setTab] = useState('home');
+    const [dailyStatus, setDailyStatus] = useState(null);
+    const [showCinematicIntro, setShowCinematicIntro] = useState(false);
+    const [mintNftMsg, setMintNftMsg] = useState('');
+
+    // Leaderboard
+    const [leaderboard, setLeaderboard] = useState([]);
+    const [leaderboardBy, setLeaderboardBy] = useState('score');
+    async function refreshLeaderboard() {
+        setBusy(true);
+        try {
+            const res = await api.get('/api/leaderboard', { params: { by: leaderboardBy, limit: 100 } });
+            setLeaderboard(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setLeaderboard([]);
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // Marketplace
+    const [listings, setListings] = useState([]);
+    const [listPriceAIBA, setListPriceAIBA] = useState('');
+    const [listBrokerId, setListBrokerId] = useState('');
+    const [marketMsg, setMarketMsg] = useState('');
+    async function refreshListings() {
+        setBusy(true);
+        try {
+            const res = await api.get('/api/marketplace/listings');
+            setListings(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setListings([]);
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function listBroker() {
+        if (!listBrokerId || !listPriceAIBA.trim()) return;
+        setBusy(true);
+        setMarketMsg('');
+        try {
+            await api.post('/api/marketplace/list', { brokerId: listBrokerId, priceAIBA: Number(listPriceAIBA) });
+            setMarketMsg('Listed.');
+            setListPriceAIBA('');
+            setListBrokerId('');
+            await refreshListings();
+            await refreshBrokers();
+        } catch {
+            setMarketMsg('List failed (already listed? withdraw from guild first?).');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function buyListing(listingId) {
+        setBusy(true);
+        setMarketMsg('');
+        try {
+            await api.post('/api/marketplace/buy', { requestId: uuid(), listingId });
+            setMarketMsg('Purchased.');
+            await refreshListings();
+            await refreshBrokers();
+            await refreshEconomy();
+        } catch (e) {
+            setMarketMsg(e?.response?.data?.error || 'Buy failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // Boosts
+    const [boosts, setBoosts] = useState([]);
+    const [boostMsg, setBoostMsg] = useState('');
+    async function refreshBoosts() {
+        try {
+            const res = await api.get('/api/boosts/mine');
+            setBoosts(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setBoosts([]);
+        }
+    }
+    async function buyBoost() {
+        setBusy(true);
+        setBoostMsg('');
+        try {
+            await api.post('/api/boosts/buy', { requestId: uuid() });
+            setBoostMsg('Boost activated.');
+            await refreshBoosts();
+            await refreshEconomy();
+        } catch {
+            setBoostMsg('Buy failed (insufficient NEUR?).');
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // Staking
+    const [stakingSummary, setStakingSummary] = useState(null);
+    const [stakeAmount, setStakeAmount] = useState('');
+    const [unstakeAmount, setUnstakeAmount] = useState('');
+    const [stakeMsg, setStakeMsg] = useState('');
+    async function refreshStaking() {
+        try {
+            const res = await api.get('/api/staking/summary');
+            setStakingSummary(res.data || null);
+        } catch {
+            setStakingSummary(null);
+        }
+    }
+    async function stake() {
+        const amt = Number(stakeAmount);
+        if (!Number.isFinite(amt) || amt <= 0) return;
+        setBusy(true);
+        setStakeMsg('');
+        try {
+            await api.post('/api/staking/stake', { requestId: uuid(), amount: amt });
+            setStakeMsg('Staked.');
+            setStakeAmount('');
+            await refreshStaking();
+            await refreshEconomy();
+        } catch {
+            setStakeMsg('Stake failed (insufficient AIBA?).');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function unstake() {
+        const amt = Number(unstakeAmount);
+        if (!Number.isFinite(amt) || amt <= 0) return;
+        setBusy(true);
+        setStakeMsg('');
+        try {
+            await api.post('/api/staking/unstake', { requestId: uuid(), amount: amt });
+            setStakeMsg('Unstaked.');
+            setUnstakeAmount('');
+            await refreshStaking();
+            await refreshEconomy();
+        } catch {
+            setStakeMsg('Unstake failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function claimStaking() {
+        setBusy(true);
+        setStakeMsg('');
+        try {
+            const res = await api.post('/api/staking/claim', { requestId: uuid() });
+            setStakeMsg(res.data?.claimed ? `Claimed ${res.data.claimed} AIBA.` : 'No reward yet.');
+            await refreshStaking();
+            await refreshEconomy();
+        } catch {
+            setStakeMsg('Claim failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // DAO
+    const [proposals, setProposals] = useState([]);
+    const [daoMsg, setDaoMsg] = useState('');
+    const [newProposalTitle, setNewProposalTitle] = useState('');
+    const [newProposalDesc, setNewProposalDesc] = useState('');
+    async function refreshProposals() {
+        setBusy(true);
+        try {
+            const res = await api.get('/api/dao/proposals');
+            setProposals(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setProposals([]);
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function voteProposal(proposalId, support) {
+        setDaoMsg('');
+        try {
+            await api.post('/api/dao/vote', { proposalId, support });
+            setDaoMsg('Vote recorded.');
+            await refreshProposals();
+        } catch {
+            setDaoMsg('Vote failed.');
+        }
+    }
+    async function createProposal() {
+        if (!newProposalTitle.trim()) return;
+        setBusy(true);
+        setDaoMsg('');
+        try {
+            await api.post('/api/dao/proposals', { title: newProposalTitle.trim(), description: newProposalDesc.trim() });
+            setDaoMsg('Proposal created.');
+            setNewProposalTitle('');
+            setNewProposalDesc('');
+            await refreshProposals();
+        } catch {
+            setDaoMsg('Create failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
 
     function pickWeightedAd(list) {
         const items = Array.isArray(list) ? list : [];
@@ -79,11 +415,65 @@ export default function HomePage() {
         }
     }
 
+    async function refreshDailyStatus() {
+        try {
+            const res = await api.get('/api/daily/status');
+            setDailyStatus(res.data || null);
+        } catch {
+            setDailyStatus(null);
+        }
+    }
+    async function claimDaily() {
+        setBusy(true);
+        try {
+            const res = await api.post('/api/daily/claim');
+            await refreshDailyStatus();
+            await refreshEconomy();
+            if (res.data?.neurReward) setStatus(`Daily claimed: ${res.data.neurReward} NEUR.`);
+        } catch {
+            setStatus('Daily claim failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function mintNftBroker() {
+        if (!selectedBrokerId) return;
+        setBusy(true);
+        setMintNftMsg('');
+        try {
+            await api.post('/api/brokers/mint-nft', { requestId: uuid(), brokerId: selectedBrokerId });
+            setMintNftMsg('Mint job queued. NFT will be linked when ready.');
+            await refreshEconomy();
+        } catch (e) {
+            setMintNftMsg(e?.response?.data?.error || 'Mint failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
     useEffect(() => {
         refreshBrokers().catch(() => {});
         refreshEconomy().catch(() => {});
+        refreshDailyStatus().catch(() => {});
+        try {
+            if (typeof localStorage !== 'undefined' && !localStorage.getItem('aiba_cinematic_seen')) {
+                setShowCinematicIntro(true);
+            } else if (!localStorage.getItem('aiba_tutorial_done')) {
+                setTutorialStep(1);
+            }
+        } catch {
+            // ignore
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (tab === 'guilds') refreshMyRank().catch(() => {});
+        if (tab === 'charity') refreshCharityAll();
+        if (tab === 'university') refreshUniversity();
+        if (tab === 'updates') refreshUpdatesAll();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tab]);
 
     useEffect(() => {
         if (!battle) return;
@@ -107,6 +497,28 @@ export default function HomePage() {
         try {
             await api.post('/api/brokers/starter', {});
             await refreshBrokers();
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function combineBrokers() {
+        if (!combineBaseId || !combineSacrificeId) return;
+        setBusy(true);
+        setCombineMsg('');
+        try {
+            await api.post('/api/brokers/combine', {
+                requestId: uuid(),
+                baseBrokerId: combineBaseId,
+                sacrificeBrokerId: combineSacrificeId,
+            });
+            setCombineMsg('Brokers combined.');
+            setCombineBaseId('');
+            setCombineSacrificeId('');
+            await refreshBrokers();
+            await refreshEconomy();
+        } catch (e) {
+            setCombineMsg(e?.response?.data?.error || 'Combine failed (insufficient NEUR?).');
         } finally {
             setBusy(false);
         }
@@ -138,13 +550,40 @@ export default function HomePage() {
         }
     }
 
-    // ----- Guilds -----
+    // ----- Guilds (Groups) -----
     const [guilds, setGuilds] = useState([]);
+    const [allGroups, setAllGroups] = useState([]);
     const [selectedGuildId, setSelectedGuildId] = useState('');
     const [newGuildName, setNewGuildName] = useState('');
     const [newGuildBio, setNewGuildBio] = useState('');
+    const [createGroupTxHash, setCreateGroupTxHash] = useState('');
     const [joinGuildId, setJoinGuildId] = useState('');
     const [guildMsg, setGuildMsg] = useState('');
+    const [myRank, setMyRank] = useState(null);
+    const [boostGuildId, setBoostGuildId] = useState('');
+    const [boostTxHash, setBoostTxHash] = useState('');
+    const [boostGroupMsg, setBoostGroupMsg] = useState('');
+
+    async function refreshMyRank() {
+        try {
+            const res = await api.get('/api/leaderboard/my-rank');
+            setMyRank(res.data || null);
+        } catch {
+            setMyRank(null);
+        }
+    }
+
+    async function refreshAllGroups() {
+        setBusy(true);
+        try {
+            const res = await api.get('/api/guilds/list', { params: { limit: 200 } });
+            setAllGroups(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setAllGroups([]);
+        } finally {
+            setBusy(false);
+        }
+    }
 
     async function refreshGuilds() {
         setBusy(true);
@@ -161,18 +600,40 @@ export default function HomePage() {
     }
 
     async function createGuild() {
+        if (!newGuildName.trim()) return;
         setBusy(true);
         setGuildMsg('');
         try {
-            const res = await api.post('/api/guilds/create', { name: newGuildName, bio: newGuildBio });
-            setGuildMsg(`Created guild ${res.data?.name || ''}`);
+            const topFree = Number(economyMe?.economy?.leaderboardTopFreeCreate ?? 50);
+            const needPayment = myRank && myRank.rank > topFree;
+            const body = { name: newGuildName.trim(), bio: newGuildBio.trim() };
+            if (needPayment && createGroupTxHash.trim()) body.txHash = createGroupTxHash.trim();
+            const res = await api.post('/api/guilds/create', body);
+            setGuildMsg(`Created group ${res.data?.name || ''}`);
             setNewGuildName('');
             setNewGuildBio('');
+            setCreateGroupTxHash('');
             await refreshGuilds();
-        } catch {
-            setGuildMsg('Create guild failed (name taken? too short?).');
+            await refreshAllGroups();
+        } catch (e) {
+            setGuildMsg(e?.response?.data?.error || 'Create failed (name taken? pay TON if not top leader?).');
         } finally {
             setBusy(false);
+        }
+    }
+
+    async function boostGuild(guildId, txHash) {
+        if (!guildId || !txHash?.trim()) return;
+        setBoostGroupMsg('');
+        try {
+            await api.post(`/api/guilds/${guildId}/boost`, { txHash: txHash.trim() });
+            setBoostGroupMsg('Group boosted.');
+            setBoostGuildId('');
+            setBoostTxHash('');
+            await refreshAllGroups();
+            await refreshGuilds();
+        } catch (e) {
+            setBoostGroupMsg(e?.response?.data?.error || 'Boost failed.');
         }
     }
 
@@ -221,6 +682,202 @@ export default function HomePage() {
         }
     }
 
+    // ----- Charity (Unite for Good) -----
+    const [charityCampaigns, setCharityCampaigns] = useState([]);
+    const [charityStats, setCharityStats] = useState(null);
+    const [charityMyImpact, setCharityMyImpact] = useState(null);
+    const [charityLeaderboard, setCharityLeaderboard] = useState([]);
+    const [charityLeaderboardBy, setCharityLeaderboardBy] = useState('impact');
+    const [donateCampaignId, setDonateCampaignId] = useState('');
+    const [donateNeur, setDonateNeur] = useState('');
+    const [donateAiba, setDonateAiba] = useState('');
+    const [donateMessage, setDonateMessage] = useState('');
+    const [donateAnonymous, setDonateAnonymous] = useState(false);
+    const [charityMsg, setCharityMsg] = useState('');
+    async function refreshCharityCampaigns() {
+        try {
+            const res = await api.get('/api/charity/campaigns', { params: { limit: 50 } });
+            setCharityCampaigns(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setCharityCampaigns([]);
+        }
+    }
+    async function refreshCharityStats() {
+        try {
+            const res = await api.get('/api/charity/stats');
+            setCharityStats(res.data || null);
+        } catch {
+            setCharityStats(null);
+        }
+    }
+    async function refreshCharityMyImpact() {
+        try {
+            const res = await api.get('/api/charity/my-impact');
+            setCharityMyImpact(res.data || null);
+        } catch {
+            setCharityMyImpact(null);
+        }
+    }
+    async function refreshCharityLeaderboard() {
+        setBusy(true);
+        try {
+            const res = await api.get('/api/charity/leaderboard', { params: { by: charityLeaderboardBy, limit: 30 } });
+            setCharityLeaderboard(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setCharityLeaderboard([]);
+        } finally {
+            setBusy(false);
+        }
+    }
+    function refreshCharityAll() {
+        refreshCharityCampaigns();
+        refreshCharityStats();
+        refreshCharityMyImpact();
+        refreshCharityLeaderboard();
+    }
+
+    // ----- Updates (Unified Comms) -----
+    const [announcements, setAnnouncements] = useState([]);
+    const [commsStatus, setCommsStatus] = useState(null);
+    async function refreshAnnouncements() {
+        try {
+            const res = await api.get('/api/announcements', { params: { limit: 20 } });
+            setAnnouncements(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setAnnouncements([]);
+        }
+    }
+    async function refreshCommsStatus() {
+        try {
+            const res = await api.get('/api/comms/status');
+            setCommsStatus(res.data || null);
+        } catch {
+            setCommsStatus(null);
+        }
+    }
+    function refreshUpdatesAll() {
+        refreshAnnouncements();
+        refreshCommsStatus();
+    }
+
+    const [universityCourses, setUniversityCourses] = useState([]);
+    const [universityTotalModules, setUniversityTotalModules] = useState(0);
+    const [universityProgress, setUniversityProgress] = useState(null);
+    const [universityMintInfo, setUniversityMintInfo] = useState(null);
+    const [universityExpandedCourseId, setUniversityExpandedCourseId] = useState('');
+    const [universityExpandedModuleKey, setUniversityExpandedModuleKey] = useState('');
+    const [universityBadgeTxHash, setUniversityBadgeTxHash] = useState('');
+    const [universityCertificateTxHash, setUniversityCertificateTxHash] = useState('');
+    const [universityMintMsg, setUniversityMintMsg] = useState('');
+    async function refreshUniversity() {
+        try {
+            const res = await api.get('/api/university/courses');
+            const data = res.data;
+            const list = Array.isArray(data?.courses) ? data.courses : (Array.isArray(data) ? data : []);
+            setUniversityCourses(list);
+            setUniversityTotalModules(Number(data?.totalModules) || list.reduce((n, c) => n + (c.modules?.length || 0), 0));
+        } catch {
+            setUniversityCourses([]);
+            setUniversityTotalModules(0);
+        }
+        try {
+            const prog = await api.get('/api/university/progress');
+            setUniversityProgress(prog.data || null);
+        } catch {
+            setUniversityProgress(null);
+        }
+        try {
+            const mintRes = await api.get('/api/university/mint-course-badge-info');
+            setUniversityMintInfo(mintRes.data || null);
+        } catch {
+            setUniversityMintInfo(null);
+        }
+    }
+    async function mintCourseBadge() {
+        const tx = universityBadgeTxHash.trim();
+        if (!tx) { setUniversityMintMsg('Enter TON transaction hash.'); return; }
+        setUniversityMintMsg('');
+        setBusy(true);
+        try {
+            await api.post('/api/university/mint-course-badge', { txHash: tx });
+            setUniversityMintMsg('Course Completion badge minted.');
+            setUniversityBadgeTxHash('');
+            await refreshUniversity();
+            await refreshEconomy();
+        } catch (e) {
+            setUniversityMintMsg(e?.response?.data?.error || 'Mint failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function mintFullCertificate() {
+        const tx = universityCertificateTxHash.trim();
+        if (!tx) { setUniversityMintMsg('Enter TON transaction hash.'); return; }
+        setUniversityMintMsg('');
+        setBusy(true);
+        try {
+            await api.post('/api/university/mint-full-certificate', { txHash: tx });
+            setUniversityMintMsg('Full Course Completion Certificate minted.');
+            setUniversityCertificateTxHash('');
+            await refreshUniversity();
+            await refreshEconomy();
+        } catch (e) {
+            setUniversityMintMsg(e?.response?.data?.error || 'Mint failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    function toggleUniversityCourse(courseId) {
+        setUniversityExpandedCourseId((prev) => (prev === courseId ? '' : courseId));
+        if (universityExpandedCourseId === courseId) setUniversityExpandedModuleKey('');
+    }
+    async function toggleUniversityModule(courseId, moduleId, key) {
+        setUniversityExpandedModuleKey((prev) => (prev === key ? '' : key));
+        const isOpening = universityExpandedModuleKey !== key;
+        if (isOpening && courseId && moduleId) {
+            try {
+                await api.post('/api/university/progress', { courseId, moduleId });
+                const prog = await api.get('/api/university/progress');
+                setUniversityProgress(prog.data || null);
+                if (prog.data?.graduate) await refreshEconomyMe();
+            } catch {
+                // ignore
+            }
+        }
+    }
+
+    async function donateCharity() {
+        const cId = donateCampaignId.trim();
+        const neur = Math.floor(Number(donateNeur) || 0);
+        const aiba = Math.floor(Number(donateAiba) || 0);
+        if (!cId || (neur <= 0 && aiba <= 0)) {
+            setCharityMsg('Select a campaign and enter NEUR and/or AIBA.');
+            return;
+        }
+        setBusy(true);
+        setCharityMsg('');
+        try {
+            await api.post('/api/charity/donate', {
+                campaignId: cId,
+                amountNeur: neur,
+                amountAiba: aiba,
+                message: donateMessage.trim().slice(0, 500),
+                anonymous: donateAnonymous,
+                requestId: uuid(),
+            });
+            setCharityMsg('Thank you! Your donation was recorded.');
+            setDonateNeur('');
+            setDonateAiba('');
+            setDonateMessage('');
+            await refreshCharityAll();
+            await refreshEconomy();
+        } catch (e) {
+            setCharityMsg(e?.response?.data?.detail || e?.response?.data?.error || 'Donation failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
     // ----- Referrals -----
     const [myReferral, setMyReferral] = useState(null);
     const [refCodeInput, setRefCodeInput] = useState('');
@@ -246,8 +903,10 @@ export default function HomePage() {
         try {
             const res = await api.post('/api/referrals/use', { code: refCodeInput });
             const r = res.data?.neurReward;
-            const bonus = r ? ` NEUR bonus: you ${r.referee || 0}, referrer ${r.referrer || 0}.` : '';
-            setRefMsg(`Referral applied.${bonus}`);
+            const a = res.data?.aibaReward;
+            const bonus = r ? ` NEUR: you ${r.referee || 0}, referrer ${r.referrer || 0}.` : '';
+            const aibaBonus = a ? ` AIBA: you ${a.referee || 0}, referrer ${a.referrer || 0}.` : '';
+            setRefMsg(`Referral applied.${bonus}${aibaBonus}`);
         } catch {
             setRefMsg('Referral failed (already used? wallet required? invalid code?).');
         } finally {
@@ -456,319 +1115,780 @@ export default function HomePage() {
         }
     }
 
+    const tutorialSteps = [
+        { title: 'Welcome', text: 'Pick a broker (or create one). Then choose an arena and run a battle.' },
+        { title: 'Arena', text: 'Prediction, simulation, arbitrage, guild wars—each has different rewards.' },
+        { title: 'Battle', text: 'Run battle to compete. You earn NEUR and AIBA.' },
+        { title: 'Next', text: 'Stake AIBA, mint NFTs, join groups, claim on-chain. Good luck!' },
+    ];
+
     return (
-        <div style={{ padding: 16 }}>
-            <h1 style={{ marginTop: 0 }}>AIBA Arena</h1>
-            <div style={{ color: '#666', marginBottom: 12 }}>Backend: {BACKEND_URL}</div>
-            <TonConnectButton />
-            {status ? <p style={{ marginTop: 12 }}>{status}</p> : null}
-
-            <hr style={{ margin: '16px 0' }} />
-
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <button onClick={createStarterBroker} disabled={busy} style={{ padding: '8px 12px' }}>
-                    Create starter broker
-                </button>
-                <button onClick={refreshBrokers} disabled={busy} style={{ padding: '8px 12px' }}>
-                    Refresh brokers
-                </button>
-                <button onClick={runBattle} disabled={busy || !selectedBrokerId} style={{ padding: '8px 12px' }}>
-                    Run battle
-                </button>
-                <button onClick={refreshVaultInventory} disabled={busy} style={{ padding: '8px 12px' }}>
-                    Vault inventory
-                </button>
-            </div>
-
-            <div style={{ marginTop: 10, color: '#666', fontSize: 12 }}>
-                <div>
-                    Balances — NEUR: {Number(economyMe?.neurBalance ?? 0)} | AIBA credits:{' '}
-                    {Number(economyMe?.aibaBalance ?? 0)}
+        <div className="aiba-app">
+            {showCinematicIntro ? (
+                <div className="cinematic">
+                    <h1 className="cinematic__title">AI BROKER ARENA</h1>
+                    <p className="cinematic__sub">Own AI brokers. Compete in 3D arenas. Earn NEUR & AIBA.</p>
+                    <button
+                        type="button"
+                        className="cinematic__enter"
+                        onClick={() => {
+                            try {
+                                localStorage.setItem('aiba_cinematic_seen', '1');
+                            } catch {}
+                            setShowCinematicIntro(false);
+                            if (typeof localStorage !== 'undefined' && !localStorage.getItem('aiba_tutorial_done')) {
+                                setTutorialStep(1);
+                            }
+                        }}
+                    >
+                        Enter
+                    </button>
                 </div>
-                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-                    <input
-                        type="checkbox"
-                        checked={autoClaimOnBattle}
-                        onChange={(e) => setAutoClaimOnBattle(Boolean(e.target.checked))}
-                    />
-                    Auto-claim AIBA on battle (withdraw immediately)
+            ) : null}
+            {tutorialStep >= 1 && tutorialStep <= 4 ? (
+                <div className="tutorial-overlay">
+                    <div className="tutorial-card">
+                        <div className="tutorial-card__title">
+                            {tutorialSteps[tutorialStep - 1]?.title || 'Tutorial'}
+                        </div>
+                        <div className="tutorial-card__text">
+                            {tutorialSteps[tutorialStep - 1]?.text || ''}
+                        </div>
+                        <div className="tutorial-card__actions">
+                            {tutorialStep < 4 ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="btn btn--secondary"
+                                        onClick={() => setTutorialStep(0)}
+                                    >
+                                        Skip
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn--primary"
+                                        onClick={() => setTutorialStep((s) => s + 1)}
+                                    >
+                                        Next
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="btn btn--success"
+                                    onClick={() => {
+                                        try {
+                                            localStorage.setItem('aiba_tutorial_done', '1');
+                                        } catch {
+                                            // ignore
+                                        }
+                                        setTutorialStep(0);
+                                    }}
+                                >
+                                    Done
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+            <header className="app-header">
+                <div className="app-header__brand">
+                    <h1 className="aiba-app__title">AIBA Arena</h1>
+                </div>
+                <TonConnectButton />
+                {IS_DEV ? <p className="aiba-app__sub">Backend: {BACKEND_URL}</p> : null}
+                {status ? <p className={`status-msg ${status.toLowerCase().includes('fail') ? 'status-msg--error' : ''}`} style={{ margin: 0, width: '100%' }}>{status}</p> : null}
+            </header>
+
+            <div className="balance-strip" style={{ marginTop: 0, marginBottom: 8 }}>
+                {Array.isArray(economyMe?.badges) && economyMe.badges.includes('verified') ? (
+                    <span className="balance-strip__verified" title="Verified">✓</span>
+                ) : null}
+                <span className="balance-strip__label">NEUR</span>
+                <span className="balance-strip__value balance-strip__value--neur">{Number(economyMe?.neurBalance ?? 0)}</span>
+                <span className="balance-strip__label">AIBA</span>
+                <span className="balance-strip__value balance-strip__value--aiba">{Number(economyMe?.aibaBalance ?? 0)}</span>
+                <span className="balance-strip__label balance-strip__label--star" title="Telegram Stars–style in-app currency"><IconStar /></span>
+                <span className="balance-strip__value balance-strip__value--stars">{Number(economyMe?.starsBalance ?? 0)}</span>
+                <span className="balance-strip__label balance-strip__label--diamond" title="TON ecosystem premium asset"><IconDiamond /></span>
+                <span className="balance-strip__value balance-strip__value--diamonds">{Number(economyMe?.diamondsBalance ?? 0)}</span>
+                <label className="check-wrap" style={{ marginLeft: 'auto', marginTop: 0 }}>
+                    <input type="checkbox" checked={autoClaimOnBattle} onChange={(e) => setAutoClaimOnBattle(Boolean(e.target.checked))} />
+                    Auto-claim
                 </label>
             </div>
 
-            {vaultInfo ? (
-                <div style={{ marginTop: 10, color: '#666', fontSize: 12 }}>
-                    <div style={{ wordBreak: 'break-all' }}>Vault: {vaultInfo.vaultAddress}</div>
-                    <div>Vault TON balance (nano): {vaultInfo.tonBalanceNano}</div>
-                    <div style={{ wordBreak: 'break-all' }}>
-                        Vault Jetton wallet:{' '}
-                        {vaultInfo.vaultJettonWallet?.userFriendly || vaultInfo.vaultJettonWallet?.raw}
-                    </div>
-                    <div>Vault Jetton balance: {vaultInfo.jettonBalance}</div>
-                </div>
-            ) : null}
-
-            <div style={{ marginTop: 12 }}>
-                <div style={{ fontWeight: 600, marginBottom: 6 }}>My brokers</div>
-                {brokers.length === 0 ? (
-                    <div style={{ color: '#666' }}>No brokers yet. Create a starter broker.</div>
-                ) : (
-                    <select
-                        value={selectedBrokerId}
-                        onChange={(e) => setSelectedBrokerId(e.target.value)}
-                        style={{ padding: 8, minWidth: 260 }}
+            <div className="tab-bar">
+                {TAB_LIST.map(({ id, label, Icon }) => (
+                    <button
+                        key={id}
+                        type="button"
+                        className={`btn btn--ghost ${tab === id ? 'btn--active' : ''}`}
+                        onClick={() => setTab(id)}
+                        aria-pressed={tab === id}
+                        aria-label={label}
                     >
-                        {brokers.map((b) => (
-                            <option key={b._id} value={b._id}>
-                                #{b._id.slice(-6)} | INT {b.intelligence} SPD {b.speed} RISK {b.risk} | energy{' '}
-                                {b.energy}
-                            </option>
-                        ))}
-                    </select>
-                )}
+                        <Icon />
+                        <span>{label}</span>
+                    </button>
+                ))}
             </div>
 
-            <div style={{ marginTop: 12 }}>
-                <div style={{ fontWeight: 600, marginBottom: 6 }}>Arena</div>
-                <select value={arena} onChange={(e) => setArena(e.target.value)} style={{ padding: 8, minWidth: 260 }}>
-                    <option value="prediction">prediction</option>
-                    <option value="simulation">simulation</option>
-                    <option value="strategyWars">strategyWars</option>
-                    <option value="guildWars">guildWars</option>
-                </select>
-                {arena === 'guildWars' ? (
-                    <div style={{ marginTop: 6, color: '#666', fontSize: 12 }}>
-                        Guild wars requires you to be a member of a guild. Rewards split into guild treasury.
+            <p className="guide-tip" style={{ marginTop: 0 }}>
+                {tab === 'home' ? 'Pick a broker and arena, then hit Run battle to earn.' :
+                 tab === 'brokers' ? 'Merge two brokers or mint one as NFT.' :
+                 tab === 'arenas' ? 'Choose arena and run battle. Guild Wars needs a guild.' :
+                 tab === 'guilds' ? 'Create or join a group; deposit brokers to the pool.' :
+                 tab === 'market' ? 'Sell a broker for AIBA or buy one. Withdraw from guild first to list.' :
+                 tab === 'charity' ? 'Unite for Good. Donate NEUR or AIBA to active campaigns.' :
+                 tab === 'university' ? 'Learn the game. Courses and modules right here.' :
+                 tab === 'updates' ? 'Stay informed. Announcements, status & support here.' :
+                 'Daily NEUR, stake AIBA, or claim on-chain after a battle.'}
+            </p>
+
+            <div className="tab-content">
+                {/* ─── Home ───────────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'home' ? 'is-active' : ''}`} aria-hidden={tab !== 'home'}>
+                    <div className="action-row">
+                        <button type="button" className="btn btn--secondary" onClick={createStarterBroker} disabled={busy}><IconBrokers /> New broker</button>
+                        <button type="button" className="btn btn--secondary" onClick={refreshBrokers} disabled={busy}><IconRefresh /> Refresh</button>
+                        <button type="button" className="btn btn--primary" onClick={runBattle} disabled={busy || !selectedBrokerId}><IconRun /> Run battle</button>
+                        <button type="button" className="btn btn--secondary" onClick={refreshVaultInventory} disabled={busy}><IconVault /> Vault</button>
                     </div>
-                ) : null}
-            </div>
-
-            <div style={{ marginTop: 16, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
-                <div style={{ fontWeight: 700 }}>Guilds</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                    <button onClick={refreshGuilds} disabled={busy} style={{ padding: '8px 12px' }}>
-                        Refresh my guilds
-                    </button>
-                    <button
-                        onClick={depositBrokerToGuild}
-                        disabled={busy || !selectedGuildId || !selectedBrokerId}
-                        style={{ padding: '8px 12px' }}
-                    >
-                        Deposit selected broker
-                    </button>
-                    <button
-                        onClick={withdrawBrokerFromGuild}
-                        disabled={busy || !selectedGuildId || !selectedBrokerId}
-                        style={{ padding: '8px 12px' }}
-                    >
-                        Withdraw selected broker
-                    </button>
-                </div>
-
-                {guildMsg ? <div style={{ marginTop: 8 }}>{guildMsg}</div> : null}
-
-                <div style={{ marginTop: 12 }}>
-                    <div style={{ fontWeight: 600, marginBottom: 6 }}>My guilds</div>
-                    {guilds.length === 0 ? (
-                        <div style={{ color: '#666' }}>No guilds yet.</div>
-                    ) : (
-                        <select
-                            value={selectedGuildId}
-                            onChange={(e) => setSelectedGuildId(e.target.value)}
-                            style={{ padding: 8, minWidth: 320 }}
-                        >
-                            {guilds.map((g) => (
-                                <option key={g._id} value={g._id}>
-                                    {g.name} (members {g.members?.length ?? 0}) — vault NEUR {g.vaultNeur ?? 0}
-                                </option>
-                            ))}
+                    {vaultInfo ? (
+                        <div className="card card--elevated">
+                            <div className="card__title">Vault</div>
+                            <p className="card__hint" style={{ wordBreak: 'break-all' }}>Address: {vaultInfo.vaultAddress}</p>
+                            <p className="card__hint">TON (nano): {vaultInfo.tonBalanceNano} · Jetton: {vaultInfo.jettonBalance}</p>
+                        </div>
+                    ) : null}
+                    <div className="card card--elevated">
+                        <div className="card__title">Arena & battle</div>
+                        <p className="card__hint">Pick broker and arena, then Run battle above.</p>
+                        {brokers.length === 0 ? (
+                            <p className="guide-tip">No brokers. Create a starter broker above.</p>
+                        ) : (
+                            <select className="select" value={selectedBrokerId} onChange={(e) => setSelectedBrokerId(e.target.value)} style={{ marginTop: 6, minWidth: '100%' }}>
+                                {brokers.map((b) => (
+                                    <option key={b._id} value={b._id}>#{b._id.slice(-6)} INT{b.intelligence} SPD{b.speed} RISK{b.risk} · energy {b.energy}</option>
+                                ))}
+                            </select>
+                        )}
+                        <p className="card__hint" style={{ marginTop: 10 }}>Arena</p>
+                        <select className="select" value={arena} onChange={(e) => setArena(e.target.value)} style={{ marginTop: 4, minWidth: '100%' }}>
+                            <option value="prediction">prediction</option>
+                            <option value="simulation">simulation</option>
+                            <option value="strategyWars">strategyWars</option>
+                            <option value="arbitrage">arbitrage</option>
+                            <option value="guildWars">guildWars</option>
                         </select>
-                    )}
-                </div>
-
-                <div style={{ marginTop: 12, display: 'grid', gap: 8, maxWidth: 520 }}>
-                    <div style={{ fontWeight: 600 }}>Create guild</div>
-                    <input
-                        value={newGuildName}
-                        onChange={(e) => setNewGuildName(e.target.value)}
-                        placeholder="Name (3-24 chars)"
-                        style={{ padding: 10 }}
-                    />
-                    <input
-                        value={newGuildBio}
-                        onChange={(e) => setNewGuildBio(e.target.value)}
-                        placeholder="Bio (optional)"
-                        style={{ padding: 10 }}
-                    />
-                    <button
-                        onClick={createGuild}
-                        disabled={busy || !newGuildName.trim()}
-                        style={{ padding: '8px 12px' }}
-                    >
-                        Create
-                    </button>
-                </div>
-
-                <div style={{ marginTop: 12, display: 'grid', gap: 8, maxWidth: 520 }}>
-                    <div style={{ fontWeight: 600 }}>Join guild</div>
-                    <input
-                        value={joinGuildId}
-                        onChange={(e) => setJoinGuildId(e.target.value)}
-                        placeholder="Guild ID"
-                        style={{ padding: 10 }}
-                    />
-                    <button onClick={joinGuild} disabled={busy || !joinGuildId.trim()} style={{ padding: '8px 12px' }}>
-                        Join
-                    </button>
-                </div>
-            </div>
-
-            <div style={{ marginTop: 16, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
-                <div style={{ fontWeight: 700 }}>Referrals</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                    <button onClick={createReferral} disabled={busy} style={{ padding: '8px 12px' }}>
-                        Create my referral code
-                    </button>
-                </div>
-                {myReferral?.code ? (
-                    <div style={{ marginTop: 10, color: '#666' }}>
-                        Your code: <span style={{ fontWeight: 700 }}>{String(myReferral.code).toUpperCase()}</span>
+                        {arena === 'guildWars' ? <p className="guide-tip">Guild Wars requires a guild. Rewards go to guild treasury.</p> : null}
                     </div>
-                ) : null}
-
-                <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <input
-                        value={refCodeInput}
-                        onChange={(e) => setRefCodeInput(e.target.value)}
-                        placeholder="Enter referral code"
-                        style={{ padding: 10, minWidth: 240 }}
-                    />
-                    <button
-                        onClick={useReferral}
-                        disabled={busy || !refCodeInput.trim()}
-                        style={{ padding: '8px 12px' }}
-                    >
-                        Apply
-                    </button>
-                </div>
-                {refMsg ? <div style={{ marginTop: 8 }}>{refMsg}</div> : null}
-                <div style={{ marginTop: 8, color: '#666', fontSize: 12 }}>
-                    Note: applying a referral requires a connected wallet (anti-sybil baseline).
-                </div>
-            </div>
-
-            {battle ? (
-                <div style={{ marginTop: 16, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
-                    <div style={{ fontWeight: 700 }}>Battle result</div>
-                    <div style={{ marginTop: 6 }}>Score: {battle.score}</div>
-                    <div>Reward AIBA (credits): {battle.rewardAiba}</div>
-
-                    {ad?.imageUrl ? (
-                        <div style={{ marginTop: 12, padding: 10, border: '1px solid #f2f2f2', borderRadius: 10 }}>
-                            <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>Sponsored</div>
-                            <img
-                                src={ad.imageUrl}
-                                alt="ad"
-                                style={{ width: '100%', maxWidth: 520, borderRadius: 10, display: 'block' }}
-                                onClick={() => {
-                                    const url = String(ad.linkUrl || '').trim();
-                                    if (!url) return;
-                                    try {
-                                        if (window?.Telegram?.WebApp?.openLink) window.Telegram.WebApp.openLink(url);
-                                        else window.open(url, '_blank');
-                                    } catch {
-                                        // ignore
-                                    }
-                                }}
-                            />
-                            {ad.linkUrl ? (
-                                <div style={{ marginTop: 8 }}>
-                                    <button
-                                        onClick={() => {
-                                            const url = String(ad.linkUrl || '').trim();
-                                            if (!url) return;
-                                            try {
-                                                if (window?.Telegram?.WebApp?.openLink)
-                                                    window.Telegram.WebApp.openLink(url);
-                                                else window.open(url, '_blank');
-                                            } catch {
-                                                // ignore
-                                            }
-                                        }}
-                                        style={{ padding: '8px 12px' }}
-                                    >
-                                        Open
-                                    </button>
+                    {battle ? (
+                        <div className="card card--elevated">
+                            <div className="card__title">Battle result</div>
+                            <div className="victory-card">
+                                <div className="victory-card__badge">Victory</div>
+                                <div className="victory-card__score">Score {battle.score}</div>
+                                <div className="victory-card__meta">
+                                {arena} · {Number(battle.rewardAiba ?? 0)} AIBA
+                                {Number(battle.starsGranted ?? 0) > 0 ? ` · +${battle.starsGranted} Stars` : ''}
+                                {Number(battle.firstWinDiamond ?? 0) > 0 ? ` · +${battle.firstWinDiamond} Diamond (first win!)` : ''}
+                            </div>
+                                <button type="button" className="btn btn--primary" onClick={() => { const text = `My broker scored ${battle.score} in ${arena}! Reward: ${battle.rewardAiba} AIBA.`; const url = window?.location?.href || ''; navigator?.share?.({ title: 'AIBA Arena', text, url }).catch(() => {}); navigator?.clipboard?.writeText?.(text + ' ' + url); }}><IconShare /> Share</button>
+                            </div>
+                            {ad?.imageUrl ? (
+                                <div className="ad-box">
+                                    <div className="ad-box__label">Sponsored</div>
+                                    <img src={ad.imageUrl} alt="ad" onClick={() => { const u = String(ad?.linkUrl || '').trim(); if (u) (window?.Telegram?.WebApp?.openLink || window.open)(u, '_blank'); }} />
+                                    {ad.linkUrl ? <button type="button" className="btn btn--secondary" style={{ marginTop: 8 }} onClick={() => { const u = String(ad?.linkUrl || '').trim(); if (u) (window?.Telegram?.WebApp?.openLink || window.open)(u, '_blank'); }}>Open link</button> : null}
                                 </div>
                             ) : null}
                         </div>
                     ) : null}
-
-                    <div style={{ marginTop: 12, fontWeight: 600 }}>On-chain claim</div>
-                    {lastClaim?.vaultAddress ? (
-                        <>
-                            <div style={{ color: '#666', fontSize: 12, wordBreak: 'break-all' }}>
-                                vault: {lastClaim.vaultAddress}
-                            </div>
-                            <div style={{ color: '#666', fontSize: 12, wordBreak: 'break-all' }}>
-                                to: {lastClaim.toAddress}
-                            </div>
-                            <div style={{ color: '#666', fontSize: 12 }}>
-                                amount: {lastClaim.amount} | seqno: {lastClaim.seqno} | validUntil:{' '}
-                                {lastClaim.validUntil}
-                            </div>
-                            <button
-                                onClick={claimOnChain}
-                                disabled={busy}
-                                style={{ marginTop: 10, padding: '8px 12px' }}
-                            >
-                                Claim on-chain (TonConnect)
-                            </button>
-                            <button
-                                onClick={checkClaimStatus}
-                                disabled={busy}
-                                style={{ marginTop: 10, marginLeft: 8, padding: '8px 12px' }}
-                            >
-                                Check claim status
-                            </button>
-                            {claimStatus ? <div style={{ marginTop: 8 }}>{claimStatus}</div> : null}
-                            {vaultInfo?.jettonBalance ? (
-                                <div style={{ marginTop: 8, color: '#666' }}>
-                                    Vault inventory: {vaultInfo.jettonBalance} (jetton units)
+                    <div className="card">
+                        <div className="card__title">Referrals</div>
+                        <p className="card__hint">Share your code or enter someone else&apos;s.</p>
+                        <div className="action-row">
+                            <button type="button" className="btn btn--secondary" onClick={createReferral} disabled={busy}><IconShare /> My code</button>
+                        </div>
+                        {myReferral?.code ? <p className="card__hint" style={{ marginTop: 8 }}>Your code: <strong style={{ color: 'var(--accent-cyan)' }}>{String(myReferral.code).toUpperCase()}</strong></p> : null}
+                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <input className="input" value={refCodeInput} onChange={(e) => setRefCodeInput(e.target.value)} placeholder="Friend's code" style={{ flex: '1 1 180px' }} />
+                            <button type="button" className="btn btn--primary" onClick={useReferral} disabled={busy || !refCodeInput.trim()}>Apply</button>
+                        </div>
+                        {refMsg ? <p className="status-msg status-msg--success" style={{ marginTop: 8 }}>{refMsg}</p> : null}
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Leaderboard</div>
+                        <p className="card__hint">Global ranks by score, AIBA, NEUR, or battles.</p>
+                        <div className="action-row">
+                            <select className="select" value={leaderboardBy} onChange={(e) => setLeaderboardBy(e.target.value)}><option value="score">By score</option><option value="aiba">By AIBA</option><option value="neur">By NEUR</option><option value="battles">By battles</option></select>
+                            <button type="button" className="btn btn--secondary" onClick={refreshLeaderboard} disabled={busy}><IconRefresh /> Refresh</button>
+                        </div>
+                        {leaderboard.length > 0 ? (
+                            leaderboard.slice(0, 12).map((row, i) => (
+                                <div key={row.telegramId || i} className="list-item">
+                                    <span className="list-item__rank">#{row.rank}</span>
+                                    <span className="list-item__name">
+                                        {row.username || row.telegramId}
+                                        {Array.isArray(row.badges) && row.badges.length > 0 ? (
+                                            <span className="list-item__badges">
+                                                {row.badges.slice(0, 3).map((badgeId) => {
+                                                    const meta = BADGE_LABELS[badgeId] || { label: badgeId, color: 'var(--text-muted)' };
+                                                    return (
+                                                        <span key={badgeId} className="badge-pill badge-pill--inline" style={{ borderColor: meta.color, color: meta.color }} title={meta.title || meta.label}>{meta.label}</span>
+                                                    );
+                                                })}
+                                            </span>
+                                        ) : null}
+                                    </span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>score {row.totalScore} · AIBA {row.totalAiba}</span>
                                 </div>
-                            ) : null}
+                            ))
+                        ) : <p className="guide-tip">Run battles to appear on the board.</p>}
+                    </div>
+                </section>
+
+                {/* ─── Brokers ────────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'brokers' ? 'is-active' : ''}`} aria-hidden={tab !== 'brokers'}>
+                    <div className="card card--elevated">
+                        <div className="card__title">My brokers</div>
+                        <p className="card__hint">Fight, combine two to merge stats, or mint as NFT.</p>
+                        {brokers.length >= 2 ? (
+                            <div className="card" style={{ marginTop: 10, padding: 12 }}>
+                                <div className="card__title">Combine brokers</div>
+                                <p className="card__hint">Base keeps stats + XP; sacrifice is removed. Cost: {Number(economyMe?.economy?.combineNeurCost ?? 50)} NEUR.</p>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
+                                    <select className="select" value={combineBaseId} onChange={(e) => setCombineBaseId(e.target.value)}><option value="">Base</option>{brokers.map((b) => <option key={b._id} value={b._id}>#{b._id.slice(-6)}</option>)}</select>
+                                    <select className="select" value={combineSacrificeId} onChange={(e) => setCombineSacrificeId(e.target.value)}><option value="">Sacrifice</option>{brokers.filter((b) => b._id !== combineBaseId).map((b) => <option key={b._id} value={b._id}>#{b._id.slice(-6)}</option>)}</select>
+                                    <button type="button" className="btn btn--primary" onClick={combineBrokers} disabled={busy || !combineBaseId || !combineSacrificeId}><IconBrokers /> Combine</button>
+                                </div>
+                                {combineMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{combineMsg}</p> : null}
+                            </div>
+                        ) : null}
+                        {selectedBrokerId && brokers.find((b) => b._id === selectedBrokerId && !b.nftItemAddress) ? (
+                            <div className="card" style={{ marginTop: 10 }}>
+                                <div className="card__title">Mint as NFT</div>
+                                <p className="card__hint">Cost: {Number(economyMe?.economy?.mintAibaCost ?? 100)} AIBA. Job queued.</p>
+                                <button type="button" className="btn btn--secondary" onClick={mintNftBroker} disabled={busy}><IconMint /> Mint NFT</button>
+                                {mintNftMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{mintNftMsg}</p> : null}
+                            </div>
+                        ) : null}
+                        {brokers.length === 0 ? (
+                            <p className="guide-tip">No brokers. Go to Home and create a starter broker.</p>
+                        ) : (
+                            <select className="select" value={selectedBrokerId} onChange={(e) => setSelectedBrokerId(e.target.value)} style={{ minWidth: '100%', marginTop: 6 }}>
+                                {brokers.map((b) => (
+                                    <option key={b._id} value={b._id}>#{b._id.slice(-6)} INT{b.intelligence} SPD{b.speed} RISK{b.risk} energy {b.energy}</option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
+                </section>
+
+                {/* ─── Arenas ─────────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'arenas' ? 'is-active' : ''}`} aria-hidden={tab !== 'arenas'}>
+                    <div className="card card--elevated">
+                        <div className="card__title">Arena</div>
+                        <p className="card__hint">Choose battle mode. Guild Wars requires a guild.</p>
+                        <select className="select" value={arena} onChange={(e) => setArena(e.target.value)} style={{ marginTop: 6, minWidth: '100%' }}>
+                            <option value="prediction">prediction</option>
+                            <option value="simulation">simulation</option>
+                            <option value="strategyWars">strategyWars</option>
+                            <option value="arbitrage">arbitrage</option>
+                            <option value="guildWars">guildWars</option>
+                        </select>
+                        {arena === 'guildWars' ? <p className="guide-tip">Rewards go to guild treasury.</p> : null}
+                    </div>
+                    <div className="action-row">
+                        <button type="button" className="btn btn--primary" onClick={runBattle} disabled={busy || !selectedBrokerId}><IconRun /> Run battle</button>
+                        <button type="button" className="btn btn--secondary" onClick={refreshBrokers} disabled={busy}><IconRefresh /> Refresh</button>
+                    </div>
+                    {battle ? (
+                        <div className="card card--elevated">
+                            <div className="card__title">Battle result</div>
+                            <div className="victory-card">
+                                <div className="victory-card__badge">Victory</div>
+                                <div className="victory-card__score">Score {battle.score}</div>
+                                <div className="victory-card__meta">
+                                    {arena} · {Number(battle.rewardAiba ?? 0)} AIBA
+                                    {Number(battle.starsGranted ?? 0) > 0 ? <span className="victory-card__meta-stars"> · <IconStar /> +{battle.starsGranted} Stars</span> : ''}
+                                    {Number(battle.firstWinDiamond ?? 0) > 0 ? <span className="victory-card__meta-diamond"> · <IconDiamond /> +{battle.firstWinDiamond} Diamond (first win!)</span> : ''}
+                                </div>
+                                <button type="button" className="btn btn--primary" onClick={() => { const text = `My broker scored ${battle.score} in ${arena}! Reward: ${battle.rewardAiba} AIBA.`; navigator?.share?.({ title: 'AIBA Arena', text, url: window?.location?.href }).catch(() => {}); }}><IconShare /> Share</button>
+                            </div>
+                        </div>
+                    ) : null}
+                </section>
+
+                {/* ─── Guilds (Groups) — global leaderboard, pay-to-create, boost ────────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'guilds' ? 'is-active' : ''}`} aria-hidden={tab !== 'guilds'}>
+                    <div className="card card--elevated">
+                        <div className="card__title">Groups</div>
+                        <p className="card__hint">Top leaders create free; others pay TON. All groups visible globally. Anyone can join or boost.</p>
+                        <div className="action-row">
+                            <button type="button" className="btn btn--secondary" onClick={() => { refreshMyRank(); refreshGuilds(); }} disabled={busy}><IconRefresh /> My rank</button>
+                            <button type="button" className="btn btn--secondary" onClick={refreshAllGroups} disabled={busy}>Discover all</button>
+                            <button type="button" className="btn btn--secondary" onClick={depositBrokerToGuild} disabled={busy || !selectedGuildId || !selectedBrokerId}>Deposit broker</button>
+                            <button type="button" className="btn btn--secondary" onClick={withdrawBrokerFromGuild} disabled={busy || !selectedGuildId || !selectedBrokerId}>Withdraw broker</button>
+                        </div>
+                        {myRank ? (
+                            <p className="guide-tip" style={{ marginTop: 8 }}>
+                                Your leaderboard rank: <strong>#{myRank.rank}</strong> (score {myRank.totalScore}). Top {economyMe?.economy?.leaderboardTopFreeCreate ?? 50} create a group for free.
+                            </p>
+                        ) : null}
+                        {guildMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{guildMsg}</p> : null}
+                        <p className="card__hint" style={{ marginTop: 12 }}>My groups</p>
+                        {guilds.length === 0 ? <p className="guide-tip">No groups. Create one or join below.</p> : (
+                            <select className="select" value={selectedGuildId} onChange={(e) => setSelectedGuildId(e.target.value)} style={{ minWidth: '100%' }}>
+                                {guilds.map((g) => <option key={g._id} value={g._id}>{g.name} (members {g.members?.length ?? 0}) — boosts {g.boostCount ?? 0}</option>)}
+                            </select>
+                        )}
+                        <p className="card__hint" style={{ marginTop: 12 }}>Create group</p>
+                        <input className="input" value={newGuildName} onChange={(e) => setNewGuildName(e.target.value)} placeholder="Name (3-24 chars)" />
+                        <input className="input" value={newGuildBio} onChange={(e) => setNewGuildBio(e.target.value)} placeholder="Bio (optional)" style={{ marginTop: 8 }} />
+                        {myRank && economyMe?.economy && myRank.rank > (economyMe.economy.leaderboardTopFreeCreate ?? 50) && Number(economyMe.economy.createGroupCostTonNano) > 0 ? (
+                            <>
+                                <p className="card__hint" style={{ marginTop: 8 }}>Pay {(economyMe.economy.createGroupCostTonNano / 1e9).toFixed(1)} TON to create (send to Leader Board wallet, then paste tx hash)</p>
+                                <input className="input" value={createGroupTxHash} onChange={(e) => setCreateGroupTxHash(e.target.value)} placeholder="Payment tx hash" style={{ marginTop: 4 }} />
+                            </>
+                        ) : null}
+                        <button type="button" className="btn btn--primary" onClick={createGuild} disabled={busy || !newGuildName.trim()} style={{ marginTop: 8 }}>Create</button>
+                        <p className="card__hint" style={{ marginTop: 12 }}>Join group (paste Guild ID)</p>
+                        <input className="input" value={joinGuildId} onChange={(e) => setJoinGuildId(e.target.value)} placeholder="Guild ID" style={{ marginTop: 4 }} />
+                        <button type="button" className="btn btn--secondary" onClick={joinGuild} disabled={busy || !joinGuildId.trim()} style={{ marginTop: 8 }}>Join</button>
+                    </div>
+                    {allGroups.length > 0 ? (
+                        <div className="card">
+                            <div className="card__title">All groups worldwide</div>
+                            <p className="card__hint">Join any group. Boost a group with TON to give it benefits.</p>
+                            {allGroups.slice(0, 30).map((g) => (
+                                <div key={g._id} className="list-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                                        <span><strong>{g.name}</strong> — members {g.members?.length ?? 0}, boosts {g.boostCount ?? 0}</span>
+                                        <button type="button" className="btn btn--secondary" onClick={() => setJoinGuildId(g._id)}>Join</button>
+                                    </div>
+                                    {Number(economyMe?.economy?.boostGroupCostTonNano) > 0 ? (
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                            <input className="input" value={boostGuildId === g._id ? boostTxHash : ''} onChange={(e) => { setBoostGuildId(g._id); setBoostTxHash(e.target.value); }} placeholder={`Tx hash (${(economyMe?.economy?.boostGroupCostTonNano / 1e9).toFixed(1)} TON)`} style={{ flex: '1 1 180px', minWidth: 0 }} />
+                                            <button type="button" className="btn btn--primary" onClick={() => boostGuild(g._id, boostGuildId === g._id ? boostTxHash : '')} disabled={!(boostGuildId === g._id && boostTxHash.trim())}>Boost</button>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ))}
+                            {boostGroupMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{boostGroupMsg}</p> : null}
+                        </div>
+                    ) : null}
+                </section>
+
+                {/* ─── Market ─────────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'market' ? 'is-active' : ''}`} aria-hidden={tab !== 'market'}>
+                    <div className="card card--elevated">
+                        <div className="card__title">Marketplace</div>
+                        <p className="card__hint">Sell brokers for AIBA or buy from others.</p>
+                        <div className="action-row">
+                            <button type="button" className="btn btn--secondary" onClick={refreshListings} disabled={busy}><IconRefresh /> Refresh</button>
+                        </div>
+                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <span className="card__hint" style={{ margin: 0 }}>Sell:</span>
+                            <select className="select" value={listBrokerId} onChange={(e) => setListBrokerId(e.target.value)}>
+                                <option value="">Select broker</option>
+                                {brokers.map((b) => <option key={b._id} value={b._id}>#{b._id.slice(-6)} INT{b.intelligence} SPD{b.speed} RISK{b.risk}</option>)}
+                            </select>
+                            <input className="input" value={listPriceAIBA} onChange={(e) => setListPriceAIBA(e.target.value)} placeholder="Price (AIBA)" style={{ width: 100 }} />
+                            <button type="button" className="btn btn--primary" onClick={listBroker} disabled={busy || !listBrokerId || !listPriceAIBA.trim()}><IconList /> List</button>
+                        </div>
+                        {marketMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{marketMsg}</p> : null}
+                        {listings.length > 0 ? (
+                            listings.map((l) => (
+                                <div key={l._id} className="list-item">
+                                    <span>INT{l.broker?.intelligence} SPD{l.broker?.speed} RISK{l.broker?.risk} — {l.priceAIBA} AIBA</span>
+                                    <button type="button" className="btn btn--primary" onClick={() => buyListing(l._id)} disabled={busy}><IconBuy /> Buy</button>
+                                </div>
+                            ))
+                        ) : <p className="guide-tip">No listings.</p>}
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Boosts</div>
+                        <p className="card__hint">Multiply battle rewards for a period.</p>
+                        <div className="action-row">
+                            <button type="button" className="btn btn--secondary" onClick={refreshBoosts} disabled={busy}><IconRefresh /> Refresh</button>
+                            <button type="button" className="btn btn--primary" onClick={buyBoost} disabled={busy}>Buy boost (NEUR)</button>
+                        </div>
+                        {boostMsg ? <p className="status-msg status-msg--success" style={{ marginTop: 8 }}>{boostMsg}</p> : null}
+                        {boosts.length > 0 ? <p className="card__hint" style={{ marginTop: 8 }}>Active: {boosts.map((b) => `${b.multiplier}x until ${new Date(b.expiresAt).toLocaleString()}`).join('; ')}</p> : <p className="guide-tip">Buy a boost to multiply battle rewards.</p>}
+                    </div>
+                </section>
+
+                {/* ─── Charity (Unite for Good) ────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'charity' ? 'is-active' : ''}`} aria-hidden={tab !== 'charity'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-magenta)' }}>
+                        <div className="card__title">Community Impact</div>
+                        <p className="card__hint">Unite for Good. Donate NEUR or AIBA to causes. Every contribution counts.</p>
+                        <div className="action-row">
+                            <button type="button" className="btn btn--secondary" onClick={refreshCharityAll} disabled={busy}><IconRefresh /> Refresh</button>
+                        </div>
+                        {charityStats ? (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 12 }}>
+                                <span className="card__hint" style={{ margin: 0 }}><strong style={{ color: 'var(--accent-cyan)' }}>{charityStats.totalRaisedNeur ?? 0}</strong> NEUR raised</span>
+                                <span className="card__hint" style={{ margin: 0 }}><strong style={{ color: 'var(--accent-gold)' }}>{charityStats.totalRaisedAiba ?? 0}</strong> AIBA raised</span>
+                                <span className="card__hint" style={{ margin: 0 }}><strong>{charityStats.totalDonors ?? 0}</strong> donors</span>
+                                <span className="card__hint" style={{ margin: 0 }}><strong>{charityStats.activeCampaignCount ?? 0}</strong> active campaigns</span>
+                            </div>
+                        ) : null}
+                    </div>
+                    {charityCampaigns.length > 0 ? (
+                        <>
+                            <div className="card card--elevated">
+                                <div className="card__title">Active campaigns</div>
+                                <p className="card__hint">Donate from your balance. Progress is transparent.</p>
+                                {charityCampaigns.filter((c) => c.status === 'active').map((c) => {
+                                    const goalN = (c.goalNeur || 0) + (c.goalAiba || 0) * 10;
+                                    const raisedN = (c.raisedNeur || 0) + (c.raisedAiba || 0) * 10;
+                                    const pct = goalN > 0 ? Math.min(100, Math.round((raisedN / goalN) * 100)) : 0;
+                                    return (
+                                        <div key={c._id} className="card" style={{ marginTop: 10, padding: 12, borderLeft: `4px solid var(--accent-${c.cause === 'education' ? 'cyan' : c.cause === 'health' ? 'green' : 'magenta'})` }}>
+                                            <div className="card__title" style={{ marginBottom: 4 }}>{c.name}</div>
+                                            {c.description ? <p className="card__hint" style={{ marginTop: 4 }}>{c.description.slice(0, 120)}{c.description.length > 120 ? '…' : ''}</p> : null}
+                                            <p className="card__hint" style={{ marginTop: 6 }}>
+                                                <span className="cause-pill" style={{ background: 'var(--bg-glass)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: '0.8rem' }}>{c.cause}</span>
+                                                {' '}Raised: {c.raisedNeur ?? 0} NEUR, {c.raisedAiba ?? 0} AIBA · {c.donorCount ?? 0} donors
+                                            </p>
+                                            {goalN > 0 ? <div style={{ marginTop: 8, height: 8, background: 'var(--bg-deep)', borderRadius: 'var(--radius-pill)', overflow: 'hidden' }}><div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta))', borderRadius: 'var(--radius-pill)' }} /></div> : null}
+                                            <button type="button" className="btn btn--primary" style={{ marginTop: 10 }} onClick={() => setDonateCampaignId(c._id)}><IconHeart /> Donate</button>
+                                        </div>
+                                    );
+                                })}
+                                {charityCampaigns.filter((c) => c.status === 'active').length === 0 ? <p className="guide-tip">No active campaigns. Check back soon.</p> : null}
+                            </div>
+                            <div className="card">
+                                <div className="card__title">Donate</div>
+                                <p className="card__hint">Choose a campaign and amount (NEUR and/or AIBA from your balance).</p>
+                                <select className="select" value={donateCampaignId} onChange={(e) => setDonateCampaignId(e.target.value)} style={{ marginTop: 8, minWidth: '100%' }}>
+                                    <option value="">Select campaign</option>
+                                    {charityCampaigns.filter((c) => c.status === 'active').map((c) => <option key={c._id} value={c._id}>{c.name} ({c.cause})</option>)}
+                                </select>
+                                <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <input className="input" value={donateNeur} onChange={(e) => setDonateNeur(e.target.value)} placeholder="NEUR" style={{ width: 100 }} />
+                                    <input className="input" value={donateAiba} onChange={(e) => setDonateAiba(e.target.value)} placeholder="AIBA" style={{ width: 100 }} />
+                                </div>
+                                <input className="input" value={donateMessage} onChange={(e) => setDonateMessage(e.target.value)} placeholder="Message (optional)" style={{ marginTop: 8, width: '100%' }} />
+                                <label className="check-wrap" style={{ marginTop: 8, display: 'flex', alignItems: 'center' }}>
+                                    <input type="checkbox" checked={donateAnonymous} onChange={(e) => setDonateAnonymous(e.target.checked)} />
+                                    Donate anonymously
+                                </label>
+                                <button type="button" className="btn btn--primary" onClick={donateCharity} disabled={busy || !donateCampaignId || (!donateNeur && !donateAiba)} style={{ marginTop: 10 }}><IconHeart /> Donate</button>
+                                {charityMsg ? <p className={`status-msg ${charityMsg.includes('Thank') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{charityMsg}</p> : null}
+                            </div>
                         </>
                     ) : (
-                        <>
-                            <div style={{ color: '#666', marginTop: 6, fontSize: 12 }}>
-                                Create a claim from your AIBA credits (balance: {Number(economyMe?.aibaBalance ?? 0)}).
-                            </div>
-                            <div
-                                style={{
-                                    marginTop: 10,
-                                    display: 'flex',
-                                    gap: 8,
-                                    flexWrap: 'wrap',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <input
-                                    value={claimAmount}
-                                    onChange={(e) => setClaimAmount(e.target.value)}
-                                    placeholder="Amount (blank = all credits)"
-                                    style={{ padding: 10, minWidth: 240 }}
-                                />
-                                <button onClick={requestAibaClaim} disabled={busy} style={{ padding: '8px 12px' }}>
-                                    Create claim
-                                </button>
-                            </div>
-                            <div style={{ color: '#b45309', marginTop: 8, fontSize: 12 }}>
-                                Requires backend env: `ARENA_VAULT_ADDRESS`, `AIBA_JETTON_MASTER`,
-                                `ORACLE_PRIVATE_KEY_HEX` and a saved wallet.
-                            </div>
-                        </>
+                        <div className="card">
+                            <div className="card__title">Campaigns</div>
+                            <p className="guide-tip">No active campaigns yet. Check back soon or create one in the admin panel.</p>
+                        </div>
                     )}
-                </div>
-            ) : null}
+                    {charityMyImpact ? (
+                        <div className="card">
+                            <div className="card__title">My impact</div>
+                            <p className="card__hint">You&apos;ve donated <strong style={{ color: 'var(--accent-cyan)' }}>{charityMyImpact.amountNeur ?? 0}</strong> NEUR and <strong style={{ color: 'var(--accent-gold)' }}>{charityMyImpact.amountAiba ?? 0}</strong> AIBA. Impact score: <strong>{charityMyImpact.impactScore ?? 0}</strong></p>
+                            {charityMyImpact.byCampaign?.length > 0 ? <p className="card__hint" style={{ marginTop: 6 }}>By campaign: {charityMyImpact.byCampaign.map((c) => `${c.campaignName || c.campaignId}: ${c.amountNeur} NEUR, ${c.amountAiba} AIBA`).join('; ')}</p> : null}
+                        </div>
+                    ) : null}
+                    <div className="card">
+                        <div className="card__title">Charity leaderboard</div>
+                        <p className="card__hint">Top donors by impact, NEUR, AIBA, or donation count.</p>
+                        <div className="action-row">
+                            <select className="select" value={charityLeaderboardBy} onChange={(e) => setCharityLeaderboardBy(e.target.value)}><option value="impact">By impact</option><option value="neur">By NEUR</option><option value="aiba">By AIBA</option><option value="count">By count</option></select>
+                            <button type="button" className="btn btn--secondary" onClick={refreshCharityLeaderboard} disabled={busy}><IconRefresh /> Refresh</button>
+                        </div>
+                        {charityLeaderboard.length > 0 ? (
+                            charityLeaderboard.slice(0, 15).map((row, i) => (
+                                <div key={row.telegramId + i} className="list-item">
+                                    <span className="list-item__rank">#{row.rank}</span>
+                                    <span className="list-item__name">
+                                        {row.telegramId}
+                                        {Array.isArray(row.badges) && row.badges.length > 0 ? (
+                                            <span className="list-item__badges">
+                                                {row.badges.slice(0, 3).map((badgeId) => {
+                                                    const meta = BADGE_LABELS[badgeId] || { label: badgeId, color: 'var(--text-muted)' };
+                                                    return (
+                                                        <span key={badgeId} className="badge-pill badge-pill--inline" style={{ borderColor: meta.color, color: meta.color }} title={meta.title || meta.label}>{meta.label}</span>
+                                                    );
+                                                })}
+                                            </span>
+                                        ) : null}
+                                    </span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>impact {row.impactScore} · NEUR {row.amountNeur} · AIBA {row.amountAiba}</span>
+                                </div>
+                            ))
+                        ) : <p className="guide-tip">Donate to appear on the leaderboard (unless anonymous).</p>}
+                    </div>
+                </section>
+
+                {/* ─── University (AIBA ARENA UNIVERSITY) ─────────────────────── */}
+                <section className={`tab-panel ${tab === 'university' ? 'is-active' : ''}`} aria-hidden={tab !== 'university'}>
+                    <div className="card card--elevated card--university university-hero">
+                        <div className="card__title">AIBA ARENA UNIVERSITY</div>
+                        <p className="card__hint" style={{ marginTop: 8 }}>Super Futuristic learning hub. Learn, master, excel.</p>
+                        <p className="card__hint" style={{ marginTop: 4 }}>
+                            Progress: <strong>{universityProgress?.completedCount ?? 0}</strong> / <strong>{universityTotalModules || universityCourses.reduce((n, c) => n + (c.modules?.length || 0), 0)}</strong> modules
+                            {universityProgress?.graduate ? <span className="university-hero__graduate"> · You graduated!</span> : ' · Complete all to earn the University Graduate badge.'}
+                        </p>
+                        <button type="button" className="btn btn--ghost" style={{ marginTop: 10 }} onClick={refreshUniversity} disabled={busy}><IconRefresh /> Refresh</button>
+                    </div>
+                    {universityCourses.length === 0 ? (
+                        <p className="guide-tip">Unable to load courses. Check backend or try again.</p>
+                    ) : (
+                        <div className="university-courses">
+                            {universityCourses.map((course) => (
+                                <div key={course.id} className="card card--elevated university-course">
+                                    <button
+                                        type="button"
+                                        className="university-course__header"
+                                        onClick={() => toggleUniversityCourse(course.id)}
+                                        aria-expanded={universityExpandedCourseId === course.id}
+                                    >
+                                        <span className="university-course__title">{course.title}</span>
+                                        <span className="university-course__chevron" aria-hidden>{universityExpandedCourseId === course.id ? '▼' : '▶'}</span>
+                                    </button>
+                                    <p className="university-course__short">{course.shortDescription}</p>
+                                    {universityExpandedCourseId === course.id && Array.isArray(course.modules) ? (
+                                        <div className="university-modules">
+                                            {course.modules.map((mod) => {
+                                                const key = `${course.id}-${mod.id}`;
+                                                const isOpen = universityExpandedModuleKey === key;
+                                                return (
+                                                    <div key={key} className="university-module">
+                                                        <button
+                                                            type="button"
+                                                            className="university-module__header"
+                                                            onClick={() => toggleUniversityModule(course.id, mod.id, key)}
+                                                            aria-expanded={isOpen}
+                                                        >
+                                                            <span className="university-module__title">{mod.title}</span>
+                                                            <span className="university-module__chevron" aria-hidden>{isOpen ? '▼' : '▶'}</span>
+                                                        </button>
+                                                        {isOpen && mod.body ? (
+                                                            <div className="university-module__body">{mod.body}</div>
+                                                        ) : null}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {universityMintMsg ? <p className="guide-tip" style={{ marginTop: 12 }}>{universityMintMsg}</p> : null}
+                    {universityMintInfo?.canMint && !universityMintInfo?.alreadyMinted ? (
+                        <div className="card card--elevated card--university" style={{ marginTop: 16 }}>
+                            <div className="card__title">Mint Course Completion Badge</div>
+                            <p className="card__hint">Complete at least one course, then pay <strong>{universityMintInfo.costTon ?? 10} TON</strong> to the University wallet and paste the transaction hash below to mint the badge.</p>
+                            {universityMintInfo.walletAddress ? <p className="card__hint" style={{ fontSize: 11, wordBreak: 'break-all' }}>Wallet: {universityMintInfo.walletAddress}</p> : null}
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
+                                <input
+                                    type="text"
+                                    placeholder="TON tx hash"
+                                    value={universityBadgeTxHash}
+                                    onChange={(e) => setUniversityBadgeTxHash(e.target.value)}
+                                    style={{ flex: '1 1 200px', minWidth: 0, padding: 8 }}
+                                />
+                                <button type="button" className="btn btn--primary" onClick={mintCourseBadge} disabled={busy}>Mint badge</button>
+                            </div>
+                        </div>
+                    ) : null}
+                    {universityMintInfo?.canMintFullCertificate && !universityMintInfo?.alreadyMintedFullCertificate ? (
+                        <div className="card card--elevated card--university" style={{ marginTop: 16 }}>
+                            <div className="card__title">Mint Full Course Completion Certificate</div>
+                            <p className="card__hint">You completed all courses. Pay <strong>{universityMintInfo.fullCertificateCostTon ?? 15} TON</strong> to the University wallet and paste the transaction hash below to mint the certificate.</p>
+                            {universityMintInfo.walletAddress ? <p className="card__hint" style={{ fontSize: 11, wordBreak: 'break-all' }}>Wallet: {universityMintInfo.walletAddress}</p> : null}
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
+                                <input
+                                    type="text"
+                                    placeholder="TON tx hash"
+                                    value={universityCertificateTxHash}
+                                    onChange={(e) => setUniversityCertificateTxHash(e.target.value)}
+                                    style={{ flex: '1 1 200px', minWidth: 0, padding: 8 }}
+                                />
+                                <button type="button" className="btn btn--primary" onClick={mintFullCertificate} disabled={busy}>Mint certificate</button>
+                            </div>
+                        </div>
+                    ) : null}
+                </section>
+
+                {/* ─── Updates (Unified Comms) ────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'updates' ? 'is-active' : ''}`} aria-hidden={tab !== 'updates'}>
+                    <div className="card card--elevated card--comms-status">
+                        <div className="card__title">System status</div>
+                        <p className="card__hint" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span className="comms-status-dot" style={{ background: commsStatus?.status === 'operational' ? 'var(--accent-green)' : 'var(--text-muted)' }} aria-hidden />
+                            {commsStatus?.status === 'operational' ? 'All systems operational' : commsStatus?.status || 'Checking…'}
+                        </p>
+                        <button type="button" className="btn btn--ghost" style={{ marginTop: 6 }} onClick={refreshUpdatesAll} disabled={busy}><IconRefresh /> Refresh</button>
+                    </div>
+                    <div className="card card--elevated">
+                        <div className="card__title">Announcements</div>
+                        <p className="card__hint">News, maintenance and updates from the team.</p>
+                        {announcements.length === 0 ? (
+                            <p className="guide-tip">No announcements yet.</p>
+                        ) : (
+                            <div className="comms-feed">
+                                {announcements.map((a) => (
+                                    <div key={a._id} className="comms-feed__item">
+                                        <div className="comms-feed__item-title">{a.title}</div>
+                                        <div className="comms-feed__item-meta">
+                                            {a.type} · {a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : new Date(a.createdAt).toLocaleDateString()}
+                                        </div>
+                                        {a.body ? <p className="comms-feed__item-body">{a.body.slice(0, 300)}{a.body.length > 300 ? '…' : ''}</p> : null}
+                                        {a.link ? (
+                                            <a href={a.link} target="_blank" rel="noopener noreferrer" className="comms-feed__item-link">Open link</a>
+                                        ) : null}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <div className="card card--elevated">
+                        <div className="card__title">FAQ &amp; support</div>
+                        <div className="comms-faq">
+                            <p className="card__hint"><strong>How do I earn Stars?</strong> Win battles. Each win grants Stars (Telegram Stars–style currency).</p>
+                            <p className="card__hint"><strong>Where is my AIBA?</strong> After a battle, claim on-chain from the Vault or enable Auto-claim. Check Wallet → Vault.</p>
+                            <p className="card__hint"><strong>What are Diamonds?</strong> Rare TON ecosystem asset. You get Diamonds on your first battle win.</p>
+                            <p className="card__hint"><strong>Badges?</strong> Profile badges (verified, top leader, etc.) are assigned by the team or earned (e.g. top leaderboard).</p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ─── Wallet ─────────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'wallet' ? 'is-active' : ''}`} aria-hidden={tab !== 'wallet'}>
+                    <div className="card card--elevated card--identity">
+                        <div className="card__title">Profile</div>
+                        <div className="identity-badges">
+                            {Array.isArray(economyMe?.badges) && economyMe.badges.length > 0 ? (
+                                economyMe.badges.map((badgeId) => {
+                                    const meta = BADGE_LABELS[badgeId] || { label: badgeId, color: 'var(--text-muted)' };
+                                    return (
+                                        <span
+                                            key={badgeId}
+                                            className="badge-pill"
+                                            style={{ borderColor: meta.color, color: meta.color }}
+                                            title={meta.title || meta.label}
+                                            data-badge={badgeId === 'verified' ? 'verified' : undefined}
+                                        >
+                                            {meta.label}
+                                        </span>
+                                    );
+                                })
+                            ) : (
+                                <span className="card__hint">No badges yet. Earn or get assigned by admins.</span>
+                            )}
+                        </div>
+                    </div>
+                    <div className="card card--stars">
+                        <div className="card__title"><IconStar /> Stars</div>
+                        <p className="card__hint">Telegram Stars–style in-app currency. Earn from every battle win; use for digital value, tips & perks in the ecosystem.</p>
+                        <p className="balance-display balance-display--stars">
+                            <IconStar /> <strong>{Number(economyMe?.starsBalance ?? 0)}</strong> Stars
+                        </p>
+                    </div>
+                    <div className="card card--diamonds">
+                        <div className="card__title"><IconDiamond /> Diamonds</div>
+                        <p className="card__hint">Rare TON ecosystem asset. Earned on first win and exclusive milestones. Premium status.</p>
+                        <p className="balance-display balance-display--diamonds">
+                            <IconDiamond /> <strong>{Number(economyMe?.diamondsBalance ?? 0)}</strong> Diamonds
+                        </p>
+                    </div>
+                    {dailyStatus ? (
+                        <div className="card card--elevated">
+                            <div className="card__title">Daily reward</div>
+                            <p className="card__hint">
+                                {dailyStatus.alreadyClaimedToday ? 'Already claimed today.' : `Claim ${dailyStatus.dailyRewardNeur ?? 0} NEUR.`}
+                            </p>
+                            <button type="button" className="btn btn--success" onClick={claimDaily} disabled={busy || dailyStatus.alreadyClaimedToday}>
+                                <IconClaim /> {dailyStatus.alreadyClaimedToday ? 'Claimed' : 'Claim daily'}
+                            </button>
+                        </div>
+                    ) : null}
+                    {vaultInfo ? (
+                        <div className="card">
+                            <div className="card__title">Vault</div>
+                            <p className="card__hint" style={{ wordBreak: 'break-all' }}>Address: {vaultInfo.vaultAddress}</p>
+                            <p className="card__hint">TON (nano): {vaultInfo.tonBalanceNano} · Jetton: {vaultInfo.jettonBalance}</p>
+                        </div>
+                    ) : null}
+                    <div className="card">
+                        <div className="card__title">Staking</div>
+                        <p className="card__hint">Lock AIBA, earn APY. Unstake or claim rewards anytime.</p>
+                        <div className="action-row">
+                            <button type="button" className="btn btn--secondary" onClick={refreshStaking} disabled={busy}><IconRefresh /> Refresh</button>
+                        </div>
+                        {stakingSummary ? (
+                            <p className="card__hint" style={{ marginTop: 8 }}>Staked: {stakingSummary.stakedAmount} AIBA · APY: {stakingSummary.apyPercent}% · Pending: {stakingSummary.pendingReward} AIBA</p>
+                        ) : null}
+                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <input className="input" value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder="Stake (AIBA)" style={{ width: 120 }} />
+                            <button type="button" className="btn btn--primary" onClick={stake} disabled={busy || !stakeAmount.trim()}><IconStake /> Stake</button>
+                            <input className="input" value={unstakeAmount} onChange={(e) => setUnstakeAmount(e.target.value)} placeholder="Unstake (AIBA)" style={{ width: 120 }} />
+                            <button type="button" className="btn btn--secondary" onClick={unstake} disabled={busy || !unstakeAmount.trim()}>Unstake</button>
+                            <button type="button" className="btn btn--success" onClick={claimStaking} disabled={busy}><IconClaim /> Claim reward</button>
+                        </div>
+                        {stakeMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{stakeMsg}</p> : null}
+                    </div>
+                    <div className="card">
+                        <div className="card__title">DAO</div>
+                        <p className="card__hint">Create proposals and vote. Community-driven decisions.</p>
+                        <div className="action-row">
+                            <button type="button" className="btn btn--secondary" onClick={refreshProposals} disabled={busy}><IconRefresh /> Refresh</button>
+                        </div>
+                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <input className="input" value={newProposalTitle} onChange={(e) => setNewProposalTitle(e.target.value)} placeholder="New proposal title" />
+                            <input className="input" value={newProposalDesc} onChange={(e) => setNewProposalDesc(e.target.value)} placeholder="Description (optional)" />
+                            <button type="button" className="btn btn--primary" onClick={createProposal} disabled={busy || !newProposalTitle.trim()}>Create</button>
+                        </div>
+                        {daoMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{daoMsg}</p> : null}
+                        {proposals.length > 0 ? (
+                            proposals.map((p) => (
+                                <div key={p._id} className="card" style={{ padding: 12, marginTop: 10 }}>
+                                    <div className="card__title" style={{ marginBottom: 4 }}>{p.title}</div>
+                                    {p.description ? <p className="card__hint" style={{ marginTop: 4 }}>{p.description}</p> : null}
+                                    <p className="card__hint" style={{ marginTop: 6 }}>For: {p.votesFor} · Against: {p.votesAgainst} · {p.status}</p>
+                                    {p.status === 'active' ? (
+                                        <div style={{ marginTop: 8 }}>
+                                            <button type="button" className="btn btn--success" onClick={() => voteProposal(p._id, true)} disabled={busy} style={{ marginRight: 8 }}>Vote For</button>
+                                            <button type="button" className="btn btn--danger" onClick={() => voteProposal(p._id, false)} disabled={busy}>Vote Against</button>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ))
+                        ) : <p className="guide-tip">No proposals.</p>}
+                    </div>
+                    {battle && lastClaim?.vaultAddress ? (
+                        <div className="card card--elevated">
+                            <div className="card__title">On-chain claim</div>
+                            <p className="card__hint" style={{ wordBreak: 'break-all' }}>To: {lastClaim.toAddress}</p>
+                            <p className="card__hint">Amount: {lastClaim.amount} · validUntil: {lastClaim.validUntil}</p>
+                            <div className="action-row">
+                                <button type="button" className="btn btn--primary" onClick={claimOnChain} disabled={busy}>Claim on-chain (TonConnect)</button>
+                                <button type="button" className="btn btn--secondary" onClick={checkClaimStatus} disabled={busy}>Check status</button>
+                            </div>
+                            {claimStatus ? <p className="status-msg" style={{ marginTop: 8 }}>{claimStatus}</p> : null}
+                        </div>
+                    ) : battle && !lastClaim?.vaultAddress ? (
+                        <div className="card">
+                            <div className="card__title">Create AIBA claim</div>
+                            <p className="card__hint">Create a claim from AIBA credits (balance: {Number(economyMe?.aibaBalance ?? 0)}).</p>
+                            <div className="action-row" style={{ marginTop: 10 }}>
+                                <input className="input" value={claimAmount} onChange={(e) => setClaimAmount(e.target.value)} placeholder="Amount (blank = all)" style={{ minWidth: 160 }} />
+                                <button type="button" className="btn btn--primary" onClick={requestAibaClaim} disabled={busy}>Create claim</button>
+                            </div>
+                            <p className="guide-tip" style={{ borderLeftColor: 'var(--accent-gold)' }}>Requires backend vault + oracle and a saved wallet.</p>
+                        </div>
+                    ) : null}
+                </section>
+            </div>
         </div>
     );
 }

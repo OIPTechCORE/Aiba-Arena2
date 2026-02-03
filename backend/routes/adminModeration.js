@@ -108,6 +108,63 @@ router.post('/ban-broker', async (req, res) => {
     res.json(broker);
 });
 
+// GET /api/admin/mod/user?telegramId= — fetch single user profile (stars, diamonds, badges)
+router.get('/user', async (req, res) => {
+    const telegramId = String(req.query?.telegramId || '').trim();
+    if (!telegramId) return res.status(400).json({ error: 'telegramId required' });
+    try {
+        const user = await User.findOne({ telegramId })
+            .select('telegramId username telegram starsBalance diamondsBalance badges firstWinDiamondAwardedAt bannedUntil bannedReason createdAt updatedAt')
+            .lean();
+        if (!user) return res.status(404).json({ error: 'user not found' });
+        const username = user.username || (user.telegram && user.telegram.username) || '';
+        res.json({
+            telegramId: user.telegramId,
+            username,
+            starsBalance: user.starsBalance ?? 0,
+            diamondsBalance: user.diamondsBalance ?? 0,
+            badges: Array.isArray(user.badges) ? user.badges : [],
+            firstWinDiamondAwardedAt: user.firstWinDiamondAwardedAt || null,
+            bannedUntil: user.bannedUntil || null,
+            bannedReason: user.bannedReason || '',
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+        });
+    } catch (err) {
+        console.error('Error fetching user:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// POST /api/admin/mod/sync-top-leader-badges — run top_leader badge sync job once
+router.post('/sync-top-leader-badges', async (req, res) => {
+    try {
+        const { syncTopLeaderBadges } = require('../jobs/syncTopLeaderBadges');
+        const result = await syncTopLeaderBadges();
+        res.json({ ok: true, ...result });
+    } catch (err) {
+        console.error('Error syncing top leader badges:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// POST /api/admin/mod/user-badges
+// Body: { telegramId: string, badges: string[] } — set user profile badges (X-style)
+router.post('/user-badges', async (req, res) => {
+    const telegramId = String(req.body?.telegramId || '').trim();
+    let badges = req.body?.badges;
+    if (!telegramId) return res.status(400).json({ error: 'telegramId required' });
+    if (!Array.isArray(badges)) badges = [];
+    badges = badges.filter((b) => typeof b === 'string' && b.trim().length > 0).map((b) => String(b).trim());
+
+    const user = await User.findOneAndUpdate(
+        { telegramId },
+        { $set: { badges } },
+        { new: true, upsert: true, setDefaultsOnInsert: true },
+    ).lean();
+    res.json(user);
+});
+
 // POST /api/admin/mod/unban-broker
 router.post('/unban-broker', async (req, res) => {
     const brokerId = String(req.body?.brokerId || '').trim();

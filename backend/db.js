@@ -16,7 +16,7 @@ function getCache() {
 
 async function ensureDefaultGameModes() {
     // Idempotent: only inserts missing keys, never overwrites admin-tuned settings.
-    const arenas = ['prediction', 'simulation', 'strategyWars', 'guildWars'];
+    const arenas = ['prediction', 'simulation', 'strategyWars', 'guildWars', 'arbitrage'];
     const leagues = ['rookie', 'pro', 'elite'];
 
     const defaults = [];

@@ -15,16 +15,12 @@ This repo is instrumented primarily via logs. For production, add:
 - **Vault low TON**: `tonBalanceNano` below threshold for gas
 - **Mongo connection issues**: backend startup failures, reconnection loops
 
-### Suggested alerts (Prometheus metrics)
-
-- **Battle errors**: `rate(aiba_battle_runs_total{result="error"}[5m])` above baseline
+### Suggested alerts (Prometheus metrics)- **Battle errors**: `rate(aiba_battle_runs_total{result="error"}[5m])` above baseline
 - **Battle anomalies**: `rate(aiba_battle_anomalies_total[5m])` spikes (break down by `arena`/`league`/`mode_key`)
 - **Auto-ban spikes**: `rate(aiba_auto_bans_total{entity=~"user|broker"}[15m])` spikes
 - **Emission denials**: `rate(aiba_economy_emissions_total{result!="ok"}[10m])` spikes (labels: `currency`, `arena`, `league`)
 - **Sink spikes**: `rate(aiba_economy_sinks_total[10m])` spikes (labels: `currency`, `reason`)
-- **Withdrawal failures**: `rate(aiba_economy_withdrawals_total{result!="ok"}[10m])` above baseline
-
-## Metrics endpoint
+- **Withdrawal failures**: `rate(aiba_economy_withdrawals_total{result!="ok"}[10m])` above baseline## Metrics endpoint
 
 - **Backend**: `GET /metrics` (Prometheus format)
 - Includes:

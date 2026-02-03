@@ -3,7 +3,7 @@
 ## Components
 
 - **Contracts**: compiled/deployed via Blueprint (`npm run build`, `npm run bp run ...`)
-- **Backend**: Express (`backend/server.js`)
+- **Backend**: Express — local/Render/Railway use `backend/server.js`; Vercel uses `backend/api/index.js` (serverless).
 - **Miniapp**: Next.js (`miniapp/`) for Telegram Mini App
 - **Admin OS**: Next.js (`admin-panel/`) for operators
 
@@ -16,7 +16,10 @@
 ### Minimum env for testnet end-to-end
 
 - `MONGO_URI`
-- `TELEGRAM_BOT_TOKEN` (production Telegram auth)
+- `TELEGRAM_BOT_TOKEN` (production Telegram auth and push notifications, e.g. battle win)
+- `BOOST_TON_WALLET` (TON wallet address that receives boost payments; boost cost: Admin → Economy `boostCostTonNano`)
+- `LEADER_BOARD_WALLET` (Super Admin: receives TON when users pay to create a group; cost: Admin → Economy `createGroupCostTonNano`, 1–10 TON)
+- `BOOST_GROUP_WALLET` (Super Admin: receives TON when users boost a group; cost: Admin → Economy `boostGroupCostTonNano`, 1–10 TON)
 - `TELEGRAM_INITDATA_MAX_AGE_SECONDS` (recommended 300–900; set explicitly for mainnet)
 - `BATTLE_SEED_SECRET`
 - `ADMIN_JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` (required for production readiness checks; do not use plaintext password)
