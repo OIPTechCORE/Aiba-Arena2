@@ -66,6 +66,8 @@ if (enableLegacyPendingAibaDispatch) {
         console.log('MongoDB Connected');
 
         const { syncTopLeaderBadges } = require('./jobs/syncTopLeaderBadges');
+        const { seedRacingTracks } = require('./jobs/seedRacingTracks');
+        seedRacingTracks().catch((err) => console.error('Seed racing tracks failed:', err));
         syncTopLeaderBadges().catch((err) => console.error('Initial top-leader badge sync failed:', err));
         cron.schedule('0 */6 * * *', () => {
             syncTopLeaderBadges().catch((err) => console.error('Cron top-leader badge sync failed:', err));

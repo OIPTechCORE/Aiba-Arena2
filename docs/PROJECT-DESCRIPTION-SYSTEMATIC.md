@@ -37,7 +37,7 @@ This document is a **complete, systematic description** of the Aiba-Arena2 proje
 | `scripts/` | Blueprint runnable scripts: deploy token/vault/NFT/escrow, mint AIBA to vault, mint broker NFT, increment jetton. |
 | `tests/` | Contract tests (Jest + TON sandbox): AibaJetton, ArenaRewardVault, BrokerMarketplaceEscrow (and purchase flow). |
 | `backend/` | Express + MongoDB API: auth, battles, economy, brokers, guilds, referrals, vault claims, admin, cron. |
-| `miniapp/` | Next.js Telegram Mini App: TonConnect, tabs (Home, Brokers, Arenas, Guilds, Market, Charity, University, Updates, Wallet). |
+| `miniapp/` | Next.js Telegram Mini App: TonConnect, tabs (Home, Brokers, Arenas, Guilds, Market, Charity, University, Stars Store, Car Racing, Bike Racing, Updates, Wallet). |
 | `admin-panel/` | Next.js admin UI: tasks, ads, game modes, economy config, moderation, stats, treasury, charity, university, announcements. |
 | `docs/` | All project documentation (game, user guide, vision check, deployment, runbook, monitoring, plans). |
 | `.github/workflows/ci.yml` | CI: lint, Blueprint build, contract tests, backend tests, miniapp + admin build. |
@@ -240,6 +240,11 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 | **CourseBadgeMint**, **FullCertificateMint** | One-time mint records (telegramId) for course badge and full certificate. |
 | **NftUniverse** | slug, name, type, mintCostAiba, mintCostTonNano, feeBps, burnBps, stakingEnabled, active, order (NFT Multiverse config). |
 | **NftStake** | telegramId, universeSlug, brokerId, stakedAt, lastRewardAt (stake Broker NFT to earn AIBA daily). |
+| **RacingCar**, **RacingMotorcycle** | ownerTelegramId, topSpeed, acceleration, handling, durability, level, xp, energy, createdWithTonTxHash (autonomous racing vehicles). |
+| **CarTrack**, **BikeTrack** | trackId, name, length, difficulty, league, active. |
+| **CarRace**, **BikeRace** | trackId, league, status (open/running/completed), entryFeeAiba, rewardPool, maxEntries, seed, startedAt, completedAt. |
+| **CarRaceEntry**, **BikeRaceEntry** | raceId, carId/bikeId, telegramId, position, finishTime, points, aibaReward. |
+| **CarListing**, **BikeListing** | carId/bikeId, sellerTelegramId, priceAIBA, status (marketplace for vehicles). |
 
 ### 5.6 Backend Engine and Core Logic
 

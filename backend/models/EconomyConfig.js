@@ -105,6 +105,17 @@ const EconomyConfigSchema = new mongoose.Schema(
         // Arena Legend universe (future): mint cost in AIBA and unlock condition (battle wins)
         arenaLegendMintCostAiba: { type: Number, default: 500 },
         arenaLegendUnlockWins: { type: Number, default: 100 },
+
+        // Autonomous Car Racing: create with TON (1–10) → CAR_RACING_WALLET or AIBA
+        createCarCostTonNano: { type: Number, default: 1_000_000_000 },
+        createCarCostAiba: { type: Number, default: 100 },
+        carEntryFeeAiba: { type: Number, default: 10 },
+        carRacingFeeBps: { type: Number, default: 300 },
+        // Autonomous Bike Racing: create with TON (1–10) → MOTORCYCLE_RACING_WALLET or AIBA
+        createBikeCostTonNano: { type: Number, default: 1_000_000_000 },
+        createBikeCostAiba: { type: Number, default: 100 },
+        bikeEntryFeeAiba: { type: Number, default: 10 },
+        bikeRacingFeeBps: { type: Number, default: 300 },
     },
     { timestamps: true },
 );

@@ -65,6 +65,8 @@ function createApp() {
     app.use('/api/admin/multiverse', require('./routes/adminMultiverse'));
     app.use('/api/multiverse', require('./routes/multiverse'));
     app.use('/api/stars-store', require('./routes/starsStore'));
+    app.use('/api/car-racing', require('./routes/carRacing'));
+    app.use('/api/bike-racing', require('./routes/bikeRacing'));
 
     app.get('/api/comms/status', (_req, res) =>
         res.json({ status: 'operational', updatedAt: new Date().toISOString() }));

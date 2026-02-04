@@ -1,6 +1,6 @@
 # Autonomous Racing — Master Plan (Car & Motorcycle)
 
-This document is the **master plan** for **Autonomous Motor Car Racing** and **Autonomous Motorcycle Racing** inside the AIBA ecosystem. Each vertical is designed so **Users**, **AIBA Token** (AIWEC/ecosystem token), and **Super Admin** can each reach **billions of dollars** in value and revenue.
+This document is the **master plan** for **Autonomous Motor Car Racing** and **Autonomous Motorcycle Racing** inside the AIBA ecosystem. Each vertical is designed so **Users**, **AIBA Token** (AIBA/ecosystem token), and **Super Admin** can each reach **billions of dollars** in value and revenue.
 
 ---
 
@@ -165,3 +165,23 @@ Both can share the same **economy backend** (AIBA, ledger, caps) and **Super Adm
 ---
 
 This is the **master plan** for **Autonomous Motor Car Racing** and **Autonomous Motorcycle Racing**: two verticals with clear benefits for **Users**, **AIBA (AIWEC)**, and **Super Admin**, each capable of reaching **billions of dollars** as the ecosystem scales.
+
+---
+
+## 10. Implementation Checklist
+
+| Item | Status |
+|------|--------|
+| Backend: RacingCar, CarTrack, CarRace, CarRaceEntry, CarListing models | Done |
+| Backend: RacingMotorcycle, BikeTrack, BikeRace, BikeRaceEntry, BikeListing models | Done |
+| Backend: Deterministic race engine (stats + track + seed → order + times) | Done |
+| Backend: Economy config (create cost TON/AIBA, entry fee, fee BPS) | Done |
+| Backend: `/api/car-racing` routes (tracks, races, create, enter, leaderboard, config, marketplace) | Done |
+| Backend: `/api/bike-racing` routes (same) | Done |
+| Backend: Create with TON (CAR_RACING_WALLET, MOTORCYCLE_RACING_WALLET), UsedTonTxHash | Done |
+| Backend: Seed tracks job + default open races on startup | Done |
+| Admin: Economy knobs for racing (allowed in adminEconomy) | Done |
+| Miniapp: Car Racing tab (create, my cars, enter race, leaderboard, marketplace) | Done |
+| Miniapp: Bike Racing tab (same) | Done |
+| Docs: PROJECT-DESCRIPTION-SYSTEMATIC, GAME-EXPLAINED, USER-GUIDE, plan checklist | Done |
+| NFT mint / staking for cars and bikes | Future |

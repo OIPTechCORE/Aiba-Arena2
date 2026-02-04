@@ -92,6 +92,14 @@ router.patch('/config', async (req, res) => {
         'starsStorePackStars',
         'starsStorePackPriceAiba',
         'starsStorePackPriceTonNano',
+        'createCarCostTonNano',
+        'createCarCostAiba',
+        'carEntryFeeAiba',
+        'carRacingFeeBps',
+        'createBikeCostTonNano',
+        'createBikeCostAiba',
+        'bikeEntryFeeAiba',
+        'bikeRacingFeeBps',
     ]);
     const bodyKeys = req.body && typeof req.body === 'object' ? Object.keys(req.body) : [];
     const unknown = bodyKeys.filter((k) => !allowedTopLevel.has(k));
@@ -179,6 +187,22 @@ router.patch('/config', async (req, res) => {
         const v = Number(req.body.starsStorePackPriceTonNano);
         if (Number.isFinite(v) && v >= 0)
             update.starsStorePackPriceTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+    }
+    maybeNum('createCarCostAiba');
+    maybeNum('carEntryFeeAiba');
+    maybeNum('carRacingFeeBps');
+    if (req.body?.createCarCostTonNano !== undefined) {
+        const v = Number(req.body.createCarCostTonNano);
+        if (Number.isFinite(v) && v >= 0)
+            update.createCarCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+    }
+    maybeNum('createBikeCostAiba');
+    maybeNum('bikeEntryFeeAiba');
+    maybeNum('bikeRacingFeeBps');
+    if (req.body?.createBikeCostTonNano !== undefined) {
+        const v = Number(req.body.createBikeCostTonNano);
+        if (Number.isFinite(v) && v >= 0)
+            update.createBikeCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
     }
 
     const allowed = await getAllowedArenaKeys();

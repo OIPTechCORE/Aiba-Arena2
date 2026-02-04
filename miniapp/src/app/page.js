@@ -107,6 +107,16 @@ const IconMultiverse = () => (
         <circle cx="12" cy="12" r="3" /><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
     </svg>
 );
+const IconCar = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M5 17h14v-5H5v5z" /><path d="M5 12l2-4h10l2 4" /><circle cx="7" cy="17" r="1" /><circle cx="17" cy="17" r="1" />
+    </svg>
+);
+const IconBike = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="5.5" cy="17.5" r="3.5" /><circle cx="18.5" cy="17.5" r="3.5" /><path d="M9 17l4-7 3 4" /><path d="M13 10l2-3" /><path d="M5.5 17.5h4l5-7" />
+    </svg>
+);
 /* Futuristic Stars (Telegram Stars–style) */
 const IconStar = () => (
     <svg className="icon-svg icon-svg--star" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -138,6 +148,8 @@ const TAB_LIST = [
     { id: 'home', label: 'Home', Icon: IconHome },
     { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
     { id: 'market', label: 'Market', Icon: IconMarket },
+    { id: 'carRacing', label: 'Car Racing', Icon: IconCar },
+    { id: 'bikeRacing', label: 'Bike Racing', Icon: IconBike },
     { id: 'multiverse', label: 'Multiverse', Icon: IconMultiverse },
     { id: 'arenas', label: 'Arenas', Icon: IconArena },
     { id: 'guilds', label: 'Guilds', Icon: IconGuilds },
@@ -434,6 +446,164 @@ export default function HomePage() {
         }
     }
 
+    // Car Racing
+    const [carRacingConfig, setCarRacingConfig] = useState(null);
+    const [carTracks, setCarTracks] = useState([]);
+    const [carRaces, setCarRaces] = useState([]);
+    const [myCars, setMyCars] = useState([]);
+    const [carListings, setCarListings] = useState([]);
+    const [carLeaderboard, setCarLeaderboard] = useState([]);
+    const [carMsg, setCarMsg] = useState('');
+    const [carCreateTxHash, setCarCreateTxHash] = useState('');
+    const [carEnterRaceId, setCarEnterRaceId] = useState('');
+    const [carEnterCarId, setCarEnterCarId] = useState('');
+    async function refreshCarRacing() {
+        try {
+            const [config, tracks, races, cars, listings, leaderboard] = await Promise.all([
+                api.get('/api/car-racing/config').then((r) => r.data).catch(() => null),
+                api.get('/api/car-racing/tracks').then((r) => r.data).catch(() => []),
+                api.get('/api/car-racing/races').then((r) => r.data).catch(() => []),
+                api.get('/api/car-racing/cars').then((r) => r.data).catch(() => []),
+                api.get('/api/car-racing/listings').then((r) => r.data).catch(() => []),
+                api.get('/api/car-racing/leaderboard').then((r) => r.data).catch(() => []),
+            ]);
+            setCarRacingConfig(config);
+            setCarTracks(Array.isArray(tracks) ? tracks : []);
+            setCarRaces(Array.isArray(races) ? races : []);
+            setMyCars(Array.isArray(cars) ? cars : []);
+            setCarListings(Array.isArray(listings) ? listings : []);
+            setCarLeaderboard(Array.isArray(leaderboard) ? leaderboard : []);
+        } catch {
+            setCarRaces([]);
+            setMyCars([]);
+        }
+    }
+    async function createCarAiba() {
+        setBusy(true);
+        setCarMsg('');
+        try {
+            await api.post('/api/car-racing/create', { requestId: uuid() });
+            setCarMsg('Car created.');
+            await refreshCarRacing();
+            await refreshEconomy();
+        } catch (e) {
+            setCarMsg(e?.response?.data?.error || 'Create failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function createCarTon() {
+        if (!carCreateTxHash.trim()) return;
+        setBusy(true);
+        setCarMsg('');
+        try {
+            await api.post('/api/car-racing/create-with-ton', { txHash: carCreateTxHash.trim() });
+            setCarMsg('Car created.');
+            setCarCreateTxHash('');
+            await refreshCarRacing();
+        } catch (e) {
+            setCarMsg(e?.response?.data?.error || 'Create failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function enterCarRace() {
+        if (!carEnterRaceId || !carEnterCarId) return;
+        setBusy(true);
+        setCarMsg('');
+        try {
+            await api.post('/api/car-racing/enter', { requestId: uuid(), raceId: carEnterRaceId, carId: carEnterCarId });
+            setCarMsg('Entered race.');
+            setCarEnterRaceId('');
+            setCarEnterCarId('');
+            await refreshCarRacing();
+            await refreshEconomy();
+        } catch (e) {
+            setCarMsg(e?.response?.data?.error || 'Enter failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // Bike Racing
+    const [bikeRacingConfig, setBikeRacingConfig] = useState(null);
+    const [bikeTracks, setBikeTracks] = useState([]);
+    const [bikeRaces, setBikeRaces] = useState([]);
+    const [myBikes, setMyBikes] = useState([]);
+    const [bikeListings, setBikeListings] = useState([]);
+    const [bikeLeaderboard, setBikeLeaderboard] = useState([]);
+    const [bikeMsg, setBikeMsg] = useState('');
+    const [bikeCreateTxHash, setBikeCreateTxHash] = useState('');
+    const [bikeEnterRaceId, setBikeEnterRaceId] = useState('');
+    const [bikeEnterBikeId, setBikeEnterBikeId] = useState('');
+    async function refreshBikeRacing() {
+        try {
+            const [config, tracks, races, bikes, listings, leaderboard] = await Promise.all([
+                api.get('/api/bike-racing/config').then((r) => r.data).catch(() => null),
+                api.get('/api/bike-racing/tracks').then((r) => r.data).catch(() => []),
+                api.get('/api/bike-racing/races').then((r) => r.data).catch(() => []),
+                api.get('/api/bike-racing/bikes').then((r) => r.data).catch(() => []),
+                api.get('/api/bike-racing/listings').then((r) => r.data).catch(() => []),
+                api.get('/api/bike-racing/leaderboard').then((r) => r.data).catch(() => []),
+            ]);
+            setBikeRacingConfig(config);
+            setBikeTracks(Array.isArray(tracks) ? tracks : []);
+            setBikeRaces(Array.isArray(races) ? races : []);
+            setMyBikes(Array.isArray(bikes) ? bikes : []);
+            setBikeListings(Array.isArray(listings) ? listings : []);
+            setBikeLeaderboard(Array.isArray(leaderboard) ? leaderboard : []);
+        } catch {
+            setBikeRaces([]);
+            setMyBikes([]);
+        }
+    }
+    async function createBikeAiba() {
+        setBusy(true);
+        setBikeMsg('');
+        try {
+            await api.post('/api/bike-racing/create', { requestId: uuid() });
+            setBikeMsg('Bike created.');
+            await refreshBikeRacing();
+            await refreshEconomy();
+        } catch (e) {
+            setBikeMsg(e?.response?.data?.error || 'Create failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function createBikeTon() {
+        if (!bikeCreateTxHash.trim()) return;
+        setBusy(true);
+        setBikeMsg('');
+        try {
+            await api.post('/api/bike-racing/create-with-ton', { txHash: bikeCreateTxHash.trim() });
+            setBikeMsg('Bike created.');
+            setBikeCreateTxHash('');
+            await refreshBikeRacing();
+        } catch (e) {
+            setBikeMsg(e?.response?.data?.error || 'Create failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function enterBikeRace() {
+        if (!bikeEnterRaceId || !bikeEnterBikeId) return;
+        setBusy(true);
+        setBikeMsg('');
+        try {
+            await api.post('/api/bike-racing/enter', { requestId: uuid(), raceId: bikeEnterRaceId, bikeId: bikeEnterBikeId });
+            setBikeMsg('Entered race.');
+            setBikeEnterRaceId('');
+            setBikeEnterBikeId('');
+            await refreshBikeRacing();
+            await refreshEconomy();
+        } catch (e) {
+            setBikeMsg(e?.response?.data?.error || 'Enter failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
     // Boosts
     const [boosts, setBoosts] = useState([]);
     const [boostMsg, setBoostMsg] = useState('');
@@ -667,6 +837,8 @@ export default function HomePage() {
         if (tab === 'university') refreshUniversity();
         if (tab === 'updates') refreshUpdatesAll();
         if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); }
+        if (tab === 'carRacing') refreshCarRacing().catch(() => {});
+        if (tab === 'bikeRacing') refreshBikeRacing().catch(() => {});
         if (tab === 'multiverse') refreshMultiverse().catch(() => {});
         if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1438,6 +1610,8 @@ export default function HomePage() {
                  tab === 'arenas' ? 'Choose arena and run battle. Guild Wars needs a guild.' :
                  tab === 'guilds' ? 'Create or join a group; deposit brokers to the pool.' :
                  tab === 'market' ? 'Sell a broker for AIBA or buy one. Withdraw from guild first to list.' :
+                 tab === 'carRacing' ? 'Autonomous car racing. Create a car (AIBA or TON), enter races, earn AIBA by position.' :
+                 tab === 'bikeRacing' ? 'Autonomous bike racing. Create a bike (AIBA or TON), enter races, earn AIBA.' :
                  tab === 'multiverse' ? 'Own, stake & earn. Mint Broker NFTs with AIBA; stake to earn AIBA daily.' :
                  tab === 'charity' ? 'Unite for Good. Donate NEUR or AIBA to active campaigns.' :
                  tab === 'university' ? 'Learn the game. Courses and modules right here.' :
@@ -1750,6 +1924,119 @@ export default function HomePage() {
                         {boostMsg ? <p className="status-msg status-msg--success" style={{ marginTop: 8 }}>{boostMsg}</p> : null}
                         {boosts.length > 0 ? <p className="card__hint" style={{ marginTop: 8 }}>Active: {boosts.map((b) => `${b.multiplier}x until ${new Date(b.expiresAt).toLocaleString()}`).join('; ')}</p> : <p className="guide-tip">Buy a boost to multiply battle rewards.</p>}
                     </div>
+                </section>
+
+                {/* ─── Car Racing (Autonomous) ───────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'carRacing' ? 'is-active' : ''}`} aria-hidden={tab !== 'carRacing'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">Car Racing</div>
+                        <p className="card__hint">Autonomous car racing. Create a car (AIBA or TON), enter open races, earn AIBA by finish position.</p>
+                        <button type="button" className="btn btn--secondary" onClick={refreshCarRacing} disabled={busy}><IconRefresh /> Refresh</button>
+                        {carMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{carMsg}</p> : null}
+                    </div>
+                    {carRacingConfig ? (
+                        <div className="card">
+                            <div className="card__title">Create car</div>
+                            <p className="card__hint">Cost: {carRacingConfig.createCarCostAiba > 0 ? `${carRacingConfig.createCarCostAiba} AIBA` : ''}{carRacingConfig.createCarCostAiba > 0 && carRacingConfig.createCarCostTonNano > 0 ? ' or ' : ''}{carRacingConfig.createCarCostTonNano > 0 ? `${(carRacingConfig.createCarCostTonNano / 1e9).toFixed(1)} TON` : ''}</p>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                                {carRacingConfig.createCarCostAiba > 0 ? <button type="button" className="btn btn--primary" onClick={createCarAiba} disabled={busy}><IconCar /> Create with AIBA</button> : null}
+                                {carRacingConfig.createCarCostTonNano > 0 && carRacingConfig.walletForTon ? (
+                                    <>
+                                        <input className="input" value={carCreateTxHash} onChange={(e) => setCarCreateTxHash(e.target.value)} placeholder="TON tx hash" style={{ flex: '1 1 180px', minWidth: 0 }} />
+                                        <button type="button" className="btn btn--primary" onClick={createCarTon} disabled={busy || !carCreateTxHash.trim()}>Create with TON</button>
+                                    </>
+                                ) : null}
+                            </div>
+                        </div>
+                    ) : null}
+                    <div className="card">
+                        <div className="card__title">My cars</div>
+                        {myCars.length === 0 ? <p className="guide-tip">No cars. Create one above.</p> : (
+                            <ul style={{ listStyle: 'none', padding: 0 }}>{myCars.map((c) => <li key={c._id}>#{String(c._id).slice(-6)} — SPD{c.topSpeed} ACC{c.acceleration} HND{c.handling} DUR{c.durability}</li>)}</ul>
+                        )}
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Enter race</div>
+                        <p className="card__hint">Entry fee: {carRacingConfig?.entryFeeAiba ?? 10} AIBA. When race is full, it runs and rewards are paid.</p>
+                        <select className="select" value={carEnterRaceId} onChange={(e) => setCarEnterRaceId(e.target.value)} style={{ marginTop: 6, minWidth: '100%' }}>
+                            <option value="">Select race</option>
+                            {carRaces.map((r) => <option key={r._id} value={r._id}>{r.trackId} {r.league} — {r.entryCount ?? 0}/{r.maxEntries} — {r.entryFeeAiba} AIBA</option>)}
+                        </select>
+                        <select className="select" value={carEnterCarId} onChange={(e) => setCarEnterCarId(e.target.value)} style={{ marginTop: 8, minWidth: '100%' }}>
+                            <option value="">Select car</option>
+                            {myCars.map((c) => <option key={c._id} value={c._id}>#{String(c._id).slice(-6)}</option>)}
+                        </select>
+                        <button type="button" className="btn btn--primary" onClick={enterCarRace} disabled={busy || !carEnterRaceId || !carEnterCarId} style={{ marginTop: 8 }}>Enter race</button>
+                    </div>
+                    {carLeaderboard.length > 0 ? (
+                        <div className="card">
+                            <div className="card__title">Leaderboard</div>
+                            <p className="card__hint">Top by total points.</p>
+                            <ol style={{ margin: 0, paddingLeft: 20 }}>{carLeaderboard.slice(0, 10).map((r) => <li key={r.telegramId}>#{r.rank} — {r.totalPoints} pts, {r.wins} wins, {r.aibaEarned} AIBA</li>)}</ol>
+                        </div>
+                    ) : null}
+                    {carListings.length > 0 ? (
+                        <div className="card">
+                            <div className="card__title">Car marketplace</div>
+                            {carListings.map((l) => <div key={l._id} className="list-item"><span>Car #{String(l.carId).slice(-6)} — {l.priceAIBA} AIBA</span><button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post('/api/car-racing/buy-car', { requestId: uuid(), listingId: l._id }); setCarMsg('Purchased.'); await refreshCarRacing(); await refreshEconomy(); } catch (e) { setCarMsg(e?.response?.data?.error || 'Buy failed.'); } finally { setBusy(false); } }} disabled={busy}>Buy</button></div>)}
+                        </div>
+                    ) : null}
+                </section>
+
+                {/* ─── Bike Racing (Autonomous) ───────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'bikeRacing' ? 'is-active' : ''}`} aria-hidden={tab !== 'bikeRacing'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-magenta)' }}>
+                        <div className="card__title">Bike Racing</div>
+                        <p className="card__hint">Autonomous motorcycle racing. Create a bike (AIBA or TON), enter open races, earn AIBA.</p>
+                        <button type="button" className="btn btn--secondary" onClick={refreshBikeRacing} disabled={busy}><IconRefresh /> Refresh</button>
+                        {bikeMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{bikeMsg}</p> : null}
+                    </div>
+                    {bikeRacingConfig ? (
+                        <div className="card">
+                            <div className="card__title">Create bike</div>
+                            <p className="card__hint">Cost: {bikeRacingConfig.createBikeCostAiba > 0 ? `${bikeRacingConfig.createBikeCostAiba} AIBA` : ''}{bikeRacingConfig.createBikeCostAiba > 0 && bikeRacingConfig.createBikeCostTonNano > 0 ? ' or ' : ''}{bikeRacingConfig.createBikeCostTonNano > 0 ? `${(bikeRacingConfig.createBikeCostTonNano / 1e9).toFixed(1)} TON` : ''}</p>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                                {bikeRacingConfig.createBikeCostAiba > 0 ? <button type="button" className="btn btn--primary" onClick={createBikeAiba} disabled={busy}><IconBike /> Create with AIBA</button> : null}
+                                {bikeRacingConfig.createBikeCostTonNano > 0 && bikeRacingConfig.walletForTon ? (
+                                    <>
+                                        <input className="input" value={bikeCreateTxHash} onChange={(e) => setBikeCreateTxHash(e.target.value)} placeholder="TON tx hash" style={{ flex: '1 1 180px', minWidth: 0 }} />
+                                        <button type="button" className="btn btn--primary" onClick={createBikeTon} disabled={busy || !bikeCreateTxHash.trim()}>Create with TON</button>
+                                    </>
+                                ) : null}
+                            </div>
+                        </div>
+                    ) : null}
+                    <div className="card">
+                        <div className="card__title">My bikes</div>
+                        {myBikes.length === 0 ? <p className="guide-tip">No bikes. Create one above.</p> : (
+                            <ul style={{ listStyle: 'none', padding: 0 }}>{myBikes.map((b) => <li key={b._id}>#{String(b._id).slice(-6)} — SPD{b.topSpeed} ACC{b.acceleration} HND{b.handling} DUR{b.durability}</li>)}</ul>
+                        )}
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Enter race</div>
+                        <p className="card__hint">Entry fee: {bikeRacingConfig?.entryFeeAiba ?? 10} AIBA.</p>
+                        <select className="select" value={bikeEnterRaceId} onChange={(e) => setBikeEnterRaceId(e.target.value)} style={{ marginTop: 6, minWidth: '100%' }}>
+                            <option value="">Select race</option>
+                            {bikeRaces.map((r) => <option key={r._id} value={r._id}>{r.trackId} {r.league} — {r.entryCount ?? 0}/{r.maxEntries}</option>)}
+                        </select>
+                        <select className="select" value={bikeEnterBikeId} onChange={(e) => setBikeEnterBikeId(e.target.value)} style={{ marginTop: 8, minWidth: '100%' }}>
+                            <option value="">Select bike</option>
+                            {myBikes.map((b) => <option key={b._id} value={b._id}>#{String(b._id).slice(-6)}</option>)}
+                        </select>
+                        <button type="button" className="btn btn--primary" onClick={enterBikeRace} disabled={busy || !bikeEnterRaceId || !bikeEnterBikeId} style={{ marginTop: 8 }}>Enter race</button>
+                    </div>
+                    {bikeLeaderboard.length > 0 ? (
+                        <div className="card">
+                            <div className="card__title">Leaderboard</div>
+                            <ol style={{ margin: 0, paddingLeft: 20 }}>{bikeLeaderboard.slice(0, 10).map((r) => <li key={r.telegramId}>#{r.rank} — {r.totalPoints} pts, {r.wins} wins, {r.aibaEarned} AIBA</li>)}</ol>
+                        </div>
+                    ) : null}
+                    {bikeListings.length > 0 ? (
+                        <div className="card">
+                            <div className="card__title">Bike marketplace</div>
+                            {bikeListings.map((l) => <div key={l._id} className="list-item"><span>Bike #{String(l.bikeId).slice(-6)} — {l.priceAIBA} AIBA</span><button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post('/api/bike-racing/buy-bike', { requestId: uuid(), listingId: l._id }); setBikeMsg('Purchased.'); await refreshBikeRacing(); await refreshEconomy(); } catch (e) { setBikeMsg(e?.response?.data?.error || 'Buy failed.'); } finally { setBusy(false); } }} disabled={busy}>Buy</button></div>)}
+                        </div>
+                    ) : null}
                 </section>
 
                 {/* ─── Multiverse (NFT: own, stake, earn) ────────────────────────── */}
