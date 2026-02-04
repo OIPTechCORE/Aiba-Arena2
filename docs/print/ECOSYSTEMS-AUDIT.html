@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ECOSYSTEMS AUDIT — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>ECOSYSTEMS AUDIT</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Ecosystems Audit — NFT Creator, Staking, Center of Excellence, Wall of Fame</h1>
+<p>This document <strong>deep-checks</strong> whether the AIBA Arena project has the following four ecosystems, and to what degree (present, partial, or absent).</p>
+<hr/>
+<h2>1. Super Futuristic NFT Creator Ecosystem</h2>
+<h3>What exists today</h3>
+<table>
+<thead><tr>
+<th>Layer</th>
+<th>Status</th>
+<th>Details</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Backend</strong></td>
+<td>✅ Present</td>
+<td>Broker NFT mint: <code>POST /api/brokers/mint-nft</code> (pay AIBA → create <code>BrokerMintJob</code>). Admin: link-nft, mint-jobs, complete job. <code>Broker</code>: <code>nftCollectionAddress</code>, <code>nftItemAddress</code>, <code>nftItemIndex</code>. <code>EconomyConfig.mintAibaCost</code>. Metadata: NFT description for broker.</td>
+</tr>
+<tr>
+<td><strong>Miniapp</strong></td>
+<td>✅ Present</td>
+<td>Brokers tab: &quot;Mint as NFT&quot; card (cost, button, status). One broker at a time; no dedicated NFT gallery or creator hub.</td>
+</tr>
+<tr>
+<td><strong>Branding / UX</strong></td>
+<td>🔶 Partial</td>
+<td>No dedicated &quot;NFT Creator Ecosystem&quot; tab or section. No gallery of minted NFTs, no &quot;Creator Lab&quot; or &quot;NFT Studio&quot; narrative. Functional flow exists; not packaged as a super futuristic ecosystem.</td>
+</tr>
+</tbody></table>
+<h3>Verdict</h3>
+<p><strong>Partially present.</strong> Core NFT mint pipeline (pay AIBA → job → admin links NFT to broker) and Brokers-tab mint UI exist. A <strong>deep</strong> &quot;Super Futuristic NFT Creator Ecosystem&quot; would add: dedicated tab/section, gallery of minted brokers/NFTs, creator-focused copy and glass-and-glow styling, and optional roadmap (e.g. collections, traits).</p>
+<hr/>
+<h2>2. Super Futuristic Staking Ecosystem</h2>
+<h3>What exists today</h3>
+<table>
+<thead><tr>
+<th>Layer</th>
+<th>Status</th>
+<th>Details</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Backend</strong></td>
+<td>✅ Present</td>
+<td><code>Staking</code> model (telegramId, amount, lockedAt, lastClaimedAt). <code>GET /api/staking/summary</code>, <code>POST /api/staking/stake</code>, <code>POST /api/staking/unstake</code>, <code>POST /api/staking/claim</code>. <code>EconomyConfig.stakingApyPercent</code>. Ledger entries for lock/unlock/reward.</td>
+</tr>
+<tr>
+<td><strong>Miniapp</strong></td>
+<td>✅ Present</td>
+<td>Wallet tab: Staking card — staked amount, APY, pending reward, Stake / Unstake / Claim inputs and buttons.</td>
+</tr>
+<tr>
+<td><strong>Branding / UX</strong></td>
+<td>🔶 Partial</td>
+<td>Staking lives inside Wallet; no dedicated &quot;Staking Ecosystem&quot; or &quot;Yield Vault&quot; tab. No standalone narrative or super futuristic packaging.</td>
+</tr>
+</tbody></table>
+<h3>Verdict</h3>
+<p><strong>Partially present.</strong> Full staking (lock AIBA, APY, claim) and Wallet-tab UI exist. A <strong>deep</strong> &quot;Super Futuristic Staking Ecosystem&quot; would add: dedicated tab/section (e.g. &quot;Staking&quot; or &quot;Yield Vault&quot;), stronger visual identity (glass, glow), and optional features (tiers, lock periods, history).</p>
+<hr/>
+<h2>3. Super Futuristic Center of Excellence</h2>
+<h3>What exists today</h3>
+<table>
+<thead><tr>
+<th>Layer</th>
+<th>Status</th>
+<th>Details</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Backend</strong></td>
+<td>❌ Absent</td>
+<td>No &quot;Center of Excellence&quot; (CoE) concept. No CoE model, routes, or content. Brokers have &quot;training&quot; (pay NEUR to train). Charity has cause &quot;education&quot;. No certifications, tutorials API, or best-practices hub.</td>
+</tr>
+<tr>
+<td><strong>Miniapp</strong></td>
+<td>❌ Absent</td>
+<td>No CoE tab or section. No tutorials hub, certifications, or &quot;learn / excel&quot; narrative.</td>
+</tr>
+<tr>
+<td><strong>Docs</strong></td>
+<td>🔶 Partial</td>
+<td><code>docs/GAME-EXPLAINED.md</code>, <code>USER-GUIDE.md</code> exist; not exposed in-app as a CoE.</td>
+</tr>
+</tbody></table>
+<h3>Verdict</h3>
+<p><strong>Absent.</strong> No Center of Excellence in the product. A <strong>deep</strong> CoE would add: dedicated section (in-app or doc-driven) for learning (how to play, arenas, brokers), best practices, optional certifications/badges for completion, and a clear &quot;excellence&quot; narrative (super futuristic styling).</p>
+<hr/>
+<h2>4. Super Futuristic Wall of Fame</h2>
+<h3>What exists today</h3>
+<table>
+<thead><tr>
+<th>Layer</th>
+<th>Status</th>
+<th>Details</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Backend</strong></td>
+<td>✅ Present</td>
+<td><code>GET /api/leaderboard</code> (by score, aiba, neur, battles); <code>GET /api/leaderboard/my-rank</code>. Charity leaderboard. Leaderboard rows include rank, username, badges, totals.</td>
+</tr>
+<tr>
+<td><strong>Miniapp</strong></td>
+<td>✅ Present</td>
+<td>Home: &quot;Leaderboard&quot; card (by score/aiba/neur/battles, top 12). Guilds: &quot;Your leaderboard rank&quot;. Charity: &quot;Charity leaderboard&quot;. No &quot;Wall of Fame&quot; or &quot;Hall of Fame&quot; label.</td>
+</tr>
+<tr>
+<td><strong>Branding / UX</strong></td>
+<td>🔶 Partial</td>
+<td>Leaderboards exist and show badges; not branded as &quot;Wall of Fame&quot; or &quot;Hall of Fame&quot;. No dedicated tab/section with that name or a legends/achievements narrative.</td>
+</tr>
+</tbody></table>
+<h3>Verdict</h3>
+<p><strong>Partially present.</strong> Global and charity leaderboards with ranks and badges exist. A <strong>deep</strong> &quot;Super Futuristic Wall of Fame&quot; would add: explicit &quot;Wall of Fame&quot; (or &quot;Hall of Fame&quot;) section/tab, stronger visual treatment (glass, glow, legends), and optional all-time / milestones / achievements framing.</p>
+<hr/>
+<h2>5. Summary Table</h2>
+<table>
+<thead><tr>
+<th>Ecosystem</th>
+<th>Backend</th>
+<th>Miniapp UI</th>
+<th>Branding / Narrative</th>
+<th>Deeply present?</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>NFT Creator</strong></td>
+<td>✅</td>
+<td>✅ (in Brokers)</td>
+<td>🔶</td>
+<td>Partial — add dedicated section + gallery + narrative</td>
+</tr>
+<tr>
+<td><strong>Staking</strong></td>
+<td>✅</td>
+<td>✅ (in Wallet)</td>
+<td>🔶</td>
+<td>Partial — add dedicated tab + ecosystem narrative</td>
+</tr>
+<tr>
+<td><strong>Center of Excellence</strong></td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td><strong>No</strong> — needs CoE concept, content, and in-app section</td>
+</tr>
+<tr>
+<td><strong>Wall of Fame</strong></td>
+<td>✅ (leaderboard)</td>
+<td>✅ (leaderboard cards)</td>
+<td>🔶</td>
+<td>Partial — rebrand/expand as Wall of Fame + optional tab</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>6. What “deeply have” would mean (short)</h2>
+<ol>
+<li><strong>Staking Ecosystem</strong>: Dedicated Staking / Yield tab or section, clear &quot;Staking Ecosystem&quot; narrative and futuristic styling.</li>
+<li><strong>Center of Excellence</strong>: New CoE concept (learning hub, tutorials, best practices, optional certifications), backend content/APIs if needed, in-app CoE section.</li>
+<li><strong>Wall of Fame</strong>: Explicit &quot;Wall of Fame&quot; (or Hall of Fame) section/tab reusing leaderboard data, with dedicated copy and visual treatment; optional achievements/legends framing.</li>
+</ol>
+<p>This audit reflects the codebase and UI as of the audit date.</p>
+<hr/>
+<h2>7. Concrete Plan &amp; Implementation Steps (toward “deeply having” all four)</h2>
+<p>Below is a concrete plan and optional implementation steps for each ecosystem. Phases can be done in order or in parallel; “Optional” items are for later enhancement.</p>
+<hr/>
+<h3>7.1 Super Futuristic NFT Creator Ecosystem</h3>
+<p><strong>Goal:</strong> One dedicated place (tab/section) that feels like an “NFT Creator Ecosystem” — mint entry point, gallery of minted brokers/NFTs, creator-focused copy and glass-and-glow styling.</p>
+<table>
+<thead><tr>
+<th>Step</th>
+<th>Layer</th>
+<th>Action</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>Miniapp</td>
+<td>Add tab <strong>“NFT Studio”</strong> (or “Creator”) with <code>IconMint</code> or a dedicated icon.</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Miniapp</td>
+<td>In NFT Studio tab: <strong>Hero block</strong> — “Super Futuristic NFT Creator Ecosystem. Mint your AI broker as an on-chain NFT.” (glass card, glow).</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Miniapp</td>
+<td><strong>Mint card</strong> — same logic as current Brokers “Mint as NFT” (cost, broker select, button); move or duplicate here; style as primary CTA.</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>Backend</td>
+<td>Add <code>GET /api/brokers/minted</code> (or extend existing list) — list brokers that have <code>nftItemAddress</code> set (optionally filter by current user only for “My minted”).</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>Miniapp</td>
+<td><strong>Gallery</strong> — “My minted NFTs” / “Minted brokers”: call new (or existing) API, show cards (broker #, INT/SPD/RISK, NFT link if available). Optional: “All minted” (public gallery) if backend supports.</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>CSS</td>
+<td>Add <code>.card--nft-studio</code>, <code>.nft-gallery</code>, <code>.nft-gallery__item</code> with border/glow to match Stars/Diamonds cards.</td>
+</tr>
+<tr>
+<td><strong>Optional</strong></td>
+<td>Backend</td>
+<td>Endpoint for “featured minted” or “collection stats”.</td>
+</tr>
+<tr>
+<td><strong>Optional</strong></td>
+<td>Miniapp</td>
+<td>Deep link to view NFT on explorer (TON) when <code>nftItemAddress</code> is set.</td>
+</tr>
+</tbody></table>
+<p><strong>Files to touch:</strong> <code>miniapp/src/app/page.js</code> (TAB_LIST, new tab panel, gallery state + fetch), <code>miniapp/src/app/globals.css</code> (NFT Studio card/gallery), <code>backend/routes/brokers.js</code> (optional <code>GET ?minted=true</code> for user’s brokers or public minted list).</p>
+<hr/>
+<h3>7.2 Super Futuristic Staking Ecosystem</h3>
+<p><strong>Goal:</strong> A dedicated “Staking” or “Yield Vault” tab with clear “Staking Ecosystem” narrative and super futuristic styling (glass, glow).</p>
+<table>
+<thead><tr>
+<th>Step</th>
+<th>Layer</th>
+<th>Action</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>Miniapp</td>
+<td>Add tab <strong>“Staking”</strong> (or “Yield”) with <code>IconStake</code>; move staking UI out of Wallet into this tab.</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Miniapp</td>
+<td><strong>Hero block</strong> — “Super Futuristic Staking Ecosystem. Lock AIBA, earn APY. Unstake or claim anytime.” (glass card, glow).</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Miniapp</td>
+<td><strong>Summary card</strong> — staked amount, APY, pending reward (reuse existing summary API); prominent, glass-and-glow.</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>Miniapp</td>
+<td><strong>Actions</strong> — Stake / Unstake / Claim (same API calls as today); style as primary/secondary buttons.</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>Miniapp</td>
+<td>Short <strong>copy</strong> — “Your AIBA is locked in the Yield Vault. Rewards accrue over time; claim or unstake when you want.”</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>CSS</td>
+<td>Add <code>.card--staking</code>, <code>.staking-hero</code> with border/glow (e.g. green/cyan accent).</td>
+</tr>
+<tr>
+<td><strong>Optional</strong></td>
+<td>Backend</td>
+<td>Staking history (last N operations) or tier labels; optional new fields in config.</td>
+</tr>
+<tr>
+<td><strong>Optional</strong></td>
+<td>Miniapp</td>
+<td>Simple history list or “Next reward estimate” line.</td>
+</tr>
+</tbody></table>
+<p><strong>Files to touch:</strong> <code>miniapp/src/app/page.js</code> (TAB_LIST “Staking”, new tab panel with existing stake/unstake/claim logic + hero + summary), <code>miniapp/src/app/globals.css</code> (staking ecosystem cards). Wallet tab: remove or slim Staking card and add “Go to Staking →” link if Staking is its own tab.</p>
+<hr/>
+<h3>7.3 Super Futuristic Center of Excellence</h3>
+<p><strong>Goal:</strong> A dedicated “Center of Excellence” (CoE) section — learning hub, how to play, best practices, optional tutorials/certifications, super futuristic styling.</p>
+<table>
+<thead><tr>
+<th>Step</th>
+<th>Layer</th>
+<th>Action</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>Miniapp</td>
+<td>Add tab <strong>“Excellence”</strong> (or “Learn”) with an icon (e.g. graduation cap or star).</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Miniapp</td>
+<td><strong>Hero block</strong> — “Super Futuristic Center of Excellence. Learn, master, excel.” (glass card, glow).</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Content</td>
+<td>Define <strong>sections</strong> (e.g. “How to play”, “Arenas &amp; modes”, “Brokers &amp; traits”, “Economy: AIBA, NEUR, Stars, Diamonds”, “Tips &amp; best practices”). Copy can live in JS/constants or in a small JSON.</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>Miniapp</td>
+<td><strong>CoE panel</strong> — render sections as expandable cards or accordions; each section: title + short body (and optional “Read more” linking to <code>docs/</code> or external).</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>Backend (optional)</td>
+<td>Add <code>GET /api/coe/sections</code> returning list of sections (title, slug, body, order). If not desired, keep content fully in miniapp.</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>CSS</td>
+<td>Add <code>.card--coe</code>, <code>.coe-section</code>, <code>.coe-section__title</code> with border/glow.</td>
+</tr>
+<tr>
+<td><strong>Optional</strong></td>
+<td>Backend</td>
+<td>“Certifications” or “Completed tutorials” (user progress); badge for “CoE Graduate” in profile.</td>
+</tr>
+<tr>
+<td><strong>Optional</strong></td>
+<td>Miniapp</td>
+<td>Mark sections as “done” (localStorage) or show completion badge when all sections viewed.</td>
+</tr>
+</tbody></table>
+<p><strong>Files to touch:</strong> <code>miniapp/src/app/page.js</code> (TAB_LIST “Excellence”, new tab panel, sections data + render), <code>miniapp/src/app/globals.css</code> (CoE cards). Optional: <code>backend/routes/coe.js</code>, <code>backend/models/CoESection.js</code> if content is server-driven.</p>
+<hr/>
+<h3>7.4 Super Futuristic Wall of Fame</h3>
+<p><strong>Goal:</strong> An explicit “Wall of Fame” (or “Hall of Fame”) section/tab that reuses leaderboard data with dedicated copy and legends-style treatment.</p>
+<table>
+<thead><tr>
+<th>Step</th>
+<th>Layer</th>
+<th>Action</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>Miniapp</td>
+<td>Add tab <strong>“Wall of Fame”</strong> (or “Hall of Fame”) with an icon (e.g. trophy or medal).</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Miniapp</td>
+<td><strong>Hero block</strong> — “Super Futuristic Wall of Fame. Legends by score, AIBA, NEUR, battles.” (glass card, glow).</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Miniapp</td>
+<td><strong>Leaderboard reuse</strong> — same <code>GET /api/leaderboard</code> (by score / aiba / neur / battles); show top N (e.g. 20–50) with rank, username, badges, totals. Style rows as “fame” cards (avatar placeholder optional, glass border).</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>Miniapp</td>
+<td><strong>My rank</strong> — call <code>GET /api/leaderboard/my-rank</code> and show “Your rank: #X” prominently in the tab.</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>Copy</td>
+<td>Use “Wall of Fame” (or “Hall of Fame”) in title and guide tip; e.g. “Top players and donors. See where you stand.”</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>CSS</td>
+<td>Add <code>.card--wall-of-fame</code>, <code>.fame-list</code>, <code>.fame-list__item</code> with trophy/medal accent and glow.</td>
+</tr>
+<tr>
+<td><strong>Optional</strong></td>
+<td>Backend</td>
+<td>“Legends” or “All-time top” snapshot (cached daily); or “Achievements” (first win, 100 battles, etc.) with badges.</td>
+</tr>
+<tr>
+<td><strong>Optional</strong></td>
+<td>Miniapp</td>
+<td>Tabs or filters: “By score” / “By AIBA” / “By NEUR” / “Battles”; optional “Charity heroes” sub-section linking to charity leaderboard.</td>
+</tr>
+</tbody></table>
+<p><strong>Files to touch:</strong> <code>miniapp/src/app/page.js</code> (TAB_LIST “Wall of Fame”, new tab panel reusing leaderboard + my-rank state and fetch, hero + list), <code>miniapp/src/app/globals.css</code> (wall-of-fame cards/list). Existing Home “Leaderboard” card can stay as a teaser with “See full Wall of Fame →” linking to the new tab.</p>
+<hr/>
+<h2>8. Implementation Order (suggested)</h2>
+<table>
+<thead><tr>
+<th>Priority</th>
+<th>Ecosystem</th>
+<th>Reason</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Wall of Fame</strong></td>
+<td>Reuses existing APIs; only new tab + copy + styling.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Staking Ecosystem</strong></td>
+<td>Backend done; move UI to dedicated tab + add hero and styling.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>NFT Creator Ecosystem</strong></td>
+<td>Backend mostly done; add tab + gallery (and optional minted list API).</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Center of Excellence</strong></td>
+<td>New content and structure; can start with static in-app sections, add API later.</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>9. Checklist (quick reference)</h2>
+<ul>
+<li>[ ] <strong>Staking:</strong> Tab “Staking” + hero + summary + actions (move from Wallet) + CSS.</li>
+<li>[ ] <strong>Center of Excellence:</strong> Tab “Excellence” + hero + sections (how to play, arenas, brokers, economy, tips) + CSS; optional API.</li>
+<li>[ ] <strong>Wall of Fame:</strong> Tab “Wall of Fame” + hero + leaderboard list + my rank + CSS.</li>
+</ul>
+  </div>
+</body>
+</html>

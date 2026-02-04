@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>UNIFIED COMMS ECOSYSTEM — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>UNIFIED COMMS ECOSYSTEM</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Unified Super Futuristic Communications Ecosystem</h1>
+<p>This document defines the <strong>Unified Super Futuristic Communications Ecosystem</strong> for AIBA Arena: one coherent layer for notifications, announcements, support, and community so users stay informed, connected, and engaged.</p>
+<hr/>
+<h2>1. Vision</h2>
+<ul>
+<li><strong>Super Futuristic</strong>: Glass-and-glow UI, TON/Telegram-native feel, clear hierarchy (announcements, status, FAQ).</li>
+<li><strong>For Users</strong>: Users see updates, get push notifications for key events (battle win, Stars, Diamonds), check system status, and find help in one flow.</li>
+</ul>
+<hr/>
+<h2>2. Principles</h2>
+<table>
+<thead><tr>
+<th>Principle</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Single source of truth</strong></td>
+<td>Announcements and status live in the backend; miniapp and Telegram both consume them.</td>
+</tr>
+<tr>
+<td><strong>Re-engagement</strong></td>
+<td>Timely Telegram notifications (battle win, optional announcement broadcast) bring users back.</td>
+</tr>
+<tr>
+<td><strong>Transparency</strong></td>
+<td>Status (operational / maintenance) and announcements build trust.</td>
+</tr>
+<tr>
+<td><strong>Scalable support</strong></td>
+<td>In-app FAQ and status reduce &quot;where do I ask?&quot;; optional link to support channel.</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>3. Channels</h2>
+<table>
+<thead><tr>
+<th>Channel</th>
+<th>Purpose</th>
+<th>Implementation</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>In-app feed</strong></td>
+<td>Announcements, maintenance notices, tips.</td>
+<td>&quot;Updates&quot; tab in miniapp; <code>GET /api/announcements</code>.</td>
+</tr>
+<tr>
+<td><strong>Telegram push</strong></td>
+<td>Battle win (existing), optional broadcast for critical announcements.</td>
+<td><code>telegramNotify.notifyBattleWin</code>, <code>notifyAnnouncement</code>; admin &quot;Broadcast&quot; action.</td>
+</tr>
+<tr>
+<td><strong>System status</strong></td>
+<td>Operational / maintenance.</td>
+<td><code>GET /api/health</code> or <code>GET /api/comms/status</code>; shown in Updates tab.</td>
+</tr>
+<tr>
+<td><strong>Support / FAQ</strong></td>
+<td>Short FAQ in-app; optional link to Telegram support group.</td>
+<td>Static block in Updates tab; optional <code>supportLink</code> in config.</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>4. Data &amp; API</h2>
+<h3>Announcements</h3>
+<ul>
+<li><strong>Public</strong>: <code>GET /api/announcements?limit=20</code> — active, published, sorted by publishedAt desc.</li>
+<li><strong>Admin</strong>: <code>GET/POST/PATCH/DELETE /api/admin/announcements</code>, plus <code>POST /api/admin/announcements/:id/broadcast</code> (send to all users via Telegram).</li>
+</ul>
+<h3>Status</h3>
+<ul>
+</ul>
+<h3>Notifications (existing + new)</h3>
+<ul>
+<li><strong>New</strong>: <code>notifyAnnouncement(telegramId, { title, body, link })</code> — used by admin broadcast.</li>
+</ul>
+<hr/>
+<h2>5. Miniapp UX</h2>
+<ul>
+<li>- <strong>System status</strong>: One line (e.g. &quot;All systems operational&quot; with green dot).</li>
+<li>- <strong>Announcements feed</strong>: Cards (title, date, body snippet, optional link); glass-and-glow style.</li>
+<li>- <strong>FAQ / Support</strong>: Collapsible or short list (e.g. &quot;How do I earn Stars?&quot;, &quot;Where is my AIBA?&quot;) + optional &quot;Contact support&quot; link.</li>
+<li><strong>Guide tip</strong>: When tab is Updates, show tip like &quot;Stay informed. Announcements and status here.&quot;</li>
+</ul>
+<hr/>
+<h2>6. Phased Roadmap</h2>
+<table>
+<thead><tr>
+<th>Phase</th>
+<th>Deliverable</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>Vision doc, Announcement model, public + admin APIs, notifyAnnouncement + broadcast</td>
+<td>Done</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Miniapp Updates tab: feed, status, FAQ block; Admin Comms tab</td>
+<td>Done</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Optional: read/unread per user, or &quot;last seen&quot; announcement id</td>
+<td>Future</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>Optional: in-app support form or Telegram deep-link to support group</td>
+<td>Future</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>7. Files Touched</h2>
+<ul>
+<li><strong>backend/models/Announcement.js</strong> — schema (title, body, type, link, active, publishedAt, priority).</li>
+<li><strong>backend/routes/announcements.js</strong> — <code>GET /api/announcements</code> (public feed).</li>
+<li><strong>backend/routes/adminAnnouncements.js</strong> — GET/POST/PATCH/DELETE + <code>POST /:id/broadcast</code>.</li>
+<li><strong>backend/services/telegramNotify.js</strong> — <code>notifyAnnouncement(telegramId, { title, body, link })</code>.</li>
+<li><strong>backend/app.js</strong> — mount <code>/api/announcements</code>, <code>/api/admin/announcements</code>; <code>GET /api/comms/status</code>.</li>
+<li><strong>miniapp/src/app/page.js</strong> — Updates tab (IconUpdates), feed, system status, FAQ; TAB_LIST.</li>
+<li><strong>miniapp/src/app/globals.css</strong> — <code>.card--comms-status</code>, <code>.comms-status-dot</code>, <code>.comms-feed</code>, <code>.comms-faq</code>.</li>
+<li><strong>admin-panel/src/app/page.js</strong> — Comms tab: list announcements, create form, Broadcast to Telegram.</li>
+</ul>
+<p>This keeps the ecosystem <strong>unified</strong> (one feed, one status, one notification layer), <strong>super futuristic</strong> (glass-and-glow, clear hierarchy), and <strong>user-first</strong> (re-engagement, transparency, support).</p>
+  </div>
+</body>
+</html>

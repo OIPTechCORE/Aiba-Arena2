@@ -13,7 +13,8 @@
         "dev": "concurrently -n backend,miniapp,admin -c blue,green,magenta \"npm run dev:backend\" \"npm run dev:miniapp\" \"npm run dev:admin\"",
         "dev:backend": "npm start --prefix backend",
         "dev:miniapp": "npm run dev --prefix miniapp",
-        "dev:admin": "npm run dev --prefix admin-panel"
+        "dev:admin": "npm run dev --prefix admin-panel",
+        "build:print-docs": "node scripts/build-print-docs.js"
     },
     "dependencies": {
         "@ton/core": "^0.63.0"

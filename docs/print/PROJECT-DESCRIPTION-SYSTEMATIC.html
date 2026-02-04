@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>PROJECT DESCRIPTION SYSTEMATIC — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>PROJECT DESCRIPTION SYSTEMATIC</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Aiba-Arena2 — Deepest Systematic Project Description</h1>
+<p>This document is a <strong>complete, systematic description</strong> of the Aiba-Arena2 project. Nothing material is omitted: identity, architecture, tech stack, contracts, backend, frontends, economy, game flow, security, deployment, and operations.</p>
+<hr/>
+<h2>1. Project Identity and Purpose</h2>
+<p><strong>Name:</strong> Aiba-Arena2 (AIBA Arena)</p>
+<p><strong>What it is:</strong> A <strong>TON-based game and reward platform</strong> delivered as a <strong>Telegram Mini App</strong>. Users own AI-powered “broker” agents, compete in arenas (prediction, simulation, strategy wars, arbitrage, guild wars), run server-authoritative battles, and earn two in-app currencies: <strong>NEUR</strong> (off-chain only) and <strong>AIBA</strong> (off-chain credits that can be <strong>withdrawn on-chain</strong> as real AIBA jettons via a signed-claim vault). Supporting systems include guilds (groups), referrals, marketplace, staking, DAO, charity, university (courses/badges), announcements, boosts, daily rewards, and admin tooling.</p>
+<p><strong>Core loop:</strong> Connect wallet (TonConnect) → create/select broker → choose arena and league → run battle → receive deterministic score → earn NEUR + AIBA credits → optionally create signed claim and withdraw AIBA to TON wallet in one transaction.</p>
+<p><strong>Related docs:</strong></p>
+<ul>
+<li><strong>User flow:</strong> <a href="USER-GUIDE.md">USER-GUIDE.md</a></li>
+<li><strong>Vision vs implementation:</strong> <a href="VISION-VS-CODEBASE-CHECK.md">VISION-VS-CODEBASE-CHECK.md</a></li>
+<li><strong>Deployment:</strong> <a href="deployment.md">deployment.md</a></li>
+<li><strong>Mainnet readiness:</strong> <a href="mainnet-readiness.md">mainnet-readiness.md</a></li>
+<li><strong>Ops:</strong> <a href="runbook.md">runbook.md</a>, <a href="monitoring.md">monitoring.md</a></li>
+<li><strong>Assessment:</strong> <a href="PROJECT-ASSESSMENT.md">PROJECT-ASSESSMENT.md</a></li>
+</ul>
+<hr/>
+<h2>2. Repository and High-Level Architecture</h2>
+<h3>2.1 Top-Level Layout</h3>
+<table>
+<thead><tr>
+<th>Path</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>contracts/</code></td>
+<td>Tact smart contracts (TON): AIBA token, reward vault, broker NFT, marketplace escrow, jetton wallet/messages.</td>
+</tr>
+<tr>
+<td><code>scripts/</code></td>
+<td>Blueprint runnable scripts: deploy token/vault/NFT/escrow, mint AIBA to vault, mint broker NFT, increment jetton.</td>
+</tr>
+<tr>
+<td><code>tests/</code></td>
+<td>Contract tests (Jest + TON sandbox): AibaJetton, ArenaRewardVault, BrokerMarketplaceEscrow (and purchase flow).</td>
+</tr>
+<tr>
+<td><code>backend/</code></td>
+<td>Express + MongoDB API: auth, battles, economy, brokers, guilds, referrals, vault claims, admin, cron.</td>
+</tr>
+<tr>
+<td><code>miniapp/</code></td>
+<td>Next.js Telegram Mini App: TonConnect, tabs (Home, Brokers, Arenas, Guilds, Market, Charity, University, Updates, Wallet).</td>
+</tr>
+<tr>
+<td><code>admin-panel/</code></td>
+<td>Next.js admin UI: tasks, ads, game modes, economy config, moderation, stats, treasury, charity, university, announcements.</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td>All project documentation (game, user guide, vision check, deployment, runbook, monitoring, plans).</td>
+</tr>
+<tr>
+<td><code>.github/workflows/ci.yml</code></td>
+<td>CI: lint, Blueprint build, contract tests, backend tests, miniapp + admin build.</td>
+</tr>
+<tr>
+<td><code>tact.config.json</code></td>
+<td>Tact compiler config: seven projects (AibaJetton, AibaJettonSupply, ArenaVault, AibaToken, ArenaRewardVault, BrokerNFT, BrokerMarketplaceEscrow).</td>
+</tr>
+<tr>
+<td><code>jest.config.ts</code>, <code>jest.setup.ts</code></td>
+<td>Jest config for contract tests.</td>
+</tr>
+<tr>
+<td><code>cronWorker.js</code></td>
+<td>Optional root-level cron entry (if used; main cron lives in <code>backend/server.js</code>).</td>
+</tr>
+</tbody></table>
+<h3>2.2 Data and Control Flow (Simplified)</h3>
+<ul>
+<li><strong>Backend</strong> authenticates via Telegram, persists/updates User in MongoDB, runs battles (deterministic engine), updates Broker (energy, cooldowns), applies economy (NEUR/AIBA credits, ledger), and can return a <strong>signed reward claim</strong> for AIBA.</li>
+<li><strong>Miniapp</strong> uses TonConnect to send a single transaction to <strong>ArenaRewardVault</strong> with the signed claim; vault verifies signature and per-recipient seqno, then transfers AIBA jettons from its jetton wallet to the user’s wallet.</li>
+<li><strong>Admin panel</strong> authenticates with JWT (email + password/hash), calls admin-only routes to manage tasks, ads, game modes, economy, moderation, treasury, charity, university, stats, mint jobs.</li>
+</ul>
+<hr/>
+<h2>3. Technology Stack</h2>
+<h3>3.1 Root (Contracts &amp; Scripts)</h3>
+<ul>
+<li><strong>Blueprint</strong> (<code>@ton/blueprint</code>): build and run Tact contracts and TypeScript scripts.</li>
+<li><strong>Tact</strong> (<code>@tact-lang/compiler</code>): compile <code>.tact</code> to FunC; <code>tact.config.json</code> defines all projects.</li>
+<li><strong>@ton/core</strong>, <strong>@ton/ton</strong>, <strong>@ton/sandbox</strong>, <strong>@ton/test-utils</strong>, <strong>@ton/crypto</strong>, <strong>@ton/tolk-js</strong>, <strong>@ton-community/func-js</strong>: TON SDK and testing.</li>
+<li><strong>Jest</strong>, <strong>ts-jest</strong>: contract tests.</li>
+<li><strong>Prettier</strong>: lint/format (root and backend).</li>
+</ul>
+<h3>3.2 Backend</h3>
+<ul>
+<li><strong>Database:</strong> MongoDB via <strong>Mongoose</strong>.</li>
+<li><strong>Auth:</strong> Telegram initData verification (<code>security/telegram.js</code>, <code>telegramPolicy.js</code>); admin JWT (<code>jsonwebtoken</code>), bcrypt for password hash.</li>
+<li><strong>TON:</strong> <code>@ton/core</code>, <strong>tweetnacl</strong> (ed25519 for claim signing), <strong>tonweb</strong> / <strong>tonweb-mnemonic</strong> (optional legacy send).</li>
+<li><strong>Cron:</strong> <strong>node-cron</strong> (in <code>server.js</code>: legacy pending-AIBA dispatch when enabled; top-leader badge sync every 6 hours).</li>
+<li><strong>Metrics:</strong> <strong>prom-client</strong> (Prometheus); <code>/metrics</code> and <code>/health</code>.</li>
+<li><strong>Deployment:</strong> Standalone (<code>server.js</code>) or Vercel serverless (<code>api/index.js</code>).</li>
+</ul>
+<h3>3.3 Miniapp</h3>
+<ul>
+<li><strong>TonConnect:</strong> <code>@tonconnect/ui-react</code> (wallet connect, send claim tx).</li>
+<li><strong>HTTP:</strong> axios; API base URL from <code>NEXT_PUBLIC_BACKEND_URL</code>.</li>
+<li><strong>Telegram:</strong> WebApp initData and user from <code>lib/telegram.js</code>; optional TonConnect manifest at <code>/api/tonconnect-manifest</code>.</li>
+</ul>
+<h3>3.4 Admin Panel</h3>
+<ul>
+<li><strong>axios</strong> to backend with <code>Authorization: Bearer &lt;token&gt;</code>; token from login (<code>/api/admin/auth/login</code>) stored in localStorage.</li>
+</ul>
+<hr/>
+<h2>4. Smart Contracts (Tact / TON)</h2>
+<p>All built via Blueprint/Tact; config in <code>tact.config.json</code>. Output under <code>build/</code> per project.</p>
+<h3>4.1 Contract List and Roles</h3>
+<table>
+<thead><tr>
+<th>Contract</th>
+<th>File</th>
+<th>Role</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>AibaJetton</strong></td>
+<td><code>contracts/aiba_jetton.tact</code></td>
+<td>Jetton (alternate/legacy naming).</td>
+</tr>
+<tr>
+<td><strong>AibaJettonSupply</strong></td>
+<td><code>contracts/AibaJetton.tact</code></td>
+<td>Jetton supply / master.</td>
+</tr>
+<tr>
+<td><strong>ArenaVault</strong></td>
+<td><code>contracts/ArenaVault.tact</code></td>
+<td>Vault variant (may align with reward flow).</td>
+</tr>
+<tr>
+<td><strong>AibaToken</strong></td>
+<td><code>contracts/aiba_token.tact</code></td>
+<td><strong>Jetton master + default wallet</strong>: mint, burn; used as AIBA reward token.</td>
+</tr>
+<tr>
+<td><strong>ArenaRewardVault</strong></td>
+<td><code>contracts/arena_reward_vault.tact</code></td>
+<td><strong>Reward vault</strong>: receives signed <code>RewardClaim</code> (to, amount, seqno, validUntil, signature); verifies ed25519 oracle signature and per-recipient seqno; transfers AIBA from vault jetton wallet to <code>to</code>.</td>
+</tr>
+<tr>
+<td><strong>BrokerNFT</strong></td>
+<td><code>contracts/broker_nft.tact</code></td>
+<td><strong>Broker NFT collection + items</strong>: owner mints <code>MintBroker(to, metadata)</code>; TEP-62 style.</td>
+</tr>
+<tr>
+<td><strong>BrokerMarketplaceEscrow</strong></td>
+<td><code>contracts/broker_marketplace_escrow.tact</code></td>
+<td><strong>Marketplace</strong>: seller sends broker NFT with price in forward payload → listing; buyer pays AIBA to escrow jetton wallet with listingId → FinalizePurchase; fee/treasury/burn configurable.</td>
+</tr>
+</tbody></table>
+<p>Supporting: <code>jetton_messages.tact</code>, <code>jetton_default_wallet.tact</code>, <code>broker_nft_messages.tact</code> (messages and wallet used by token/vault/NFT/escrow).</p>
+<h3>4.2 ArenaRewardVault (Claims)</h3>
+<ul>
+<li><strong>lastSeqno: map&amp;lt;Address, uint64&amp;gt;</strong> for replay protection per recipient.</li>
+<li><strong>RewardClaim</strong> message: <code>to</code>, <code>amount</code>, <code>seqno</code>, <code>validUntil</code>, <code>signature</code> (64 bytes).</li>
+<li>Checks: <code>now() &lt;= validUntil</code>, <code>amount &gt; 0</code>, <code>sender() == to</code> (claim must be sent by recipient), <code>seqno == lastSeqno[to] + 1</code>, and signature over canonical payload (vault, jetton master, to, amount, seqno, validUntil).</li>
+<li>On success: increments <code>lastSeqno[to]</code>, sends jetton transfer from vault’s jetton wallet to <code>to</code>.</li>
+<li>Admin: <code>SetOracle</code>, <code>SetJettonMaster</code> (owner-only).</li>
+</ul>
+<h3>4.3 AibaToken (Jetton)</h3>
+<ul>
+<li><strong>Mint(to, amount)</strong> (owner-only); <strong>SafeTokenBurn</strong> (owner burn).</li>
+<li>Uses shared jetton wallet init and token transfer messages.</li>
+</ul>
+<h3>4.4 BrokerMarketplaceEscrow</h3>
+<ul>
+<li><strong>Pending listings</strong> by NFT item (seller, price); <strong>listings</strong> by id (nftItem, seller, price, active).</li>
+<li><strong>payments</strong>: buyer → (listingId → amount paid).</li>
+<li>Seller: transfer NFT to escrow with price in forward payload → pending then listing.</li>
+<li>Buyer: send AIBA to escrow jetton wallet with listingId in forward payload; then <strong>FinalizePurchase(listingId)</strong> to receive NFT; jettons to seller minus fee; optional <strong>RefundPayment</strong> if finalization failed.</li>
+</ul>
+<h3>4.5 Deploy and Helper Scripts (<code>scripts/</code>)</h3>
+<ul>
+<li><strong>deployAibaToken.ts</strong>, <strong>deployArenaRewardVault.ts</strong>, <strong>mintAibaToVault.ts</strong> — Split deploy/mint.</li>
+<li><strong>deployBrokerNft.ts</strong>, <strong>deployBrokerMarketplaceEscrow.ts</strong>, <strong>mintBrokerNft.ts</strong>, <strong>incrementAibaJetton.ts</strong> — NFT and jetton ops.</li>
+<li><strong>autocommit.ps1</strong>, <strong>autocommit.sh</strong> — Optional git auto-commit helpers.</li>
+</ul>
+<hr/>
+<h2>5. Backend — Deep Structure</h2>
+<h3>5.1 Entry Points</h3>
+<ul>
+<li><strong>Vercel:</strong> <code>backend/api/index.js</code> — serverless handler: same <code>createApp()</code>, <code>initDb()</code> (cached in <code>db.js</code> global), <code>app(req, res)</code>.</li>
+</ul>
+<h3>5.2 Application Bootstrap (<code>app.js</code>)</h3>
+<ul>
+<li><strong>Middleware (order):</strong> <code>requestId</code>, <code>metricsMiddleware</code>, CORS (from <code>CORS_ORIGIN</code>), <code>express.json()</code>, global <strong>rateLimit</strong> (e.g. 600/min from <code>RATE_LIMIT_PER_MINUTE</code>).</li>
+<li><strong>Routes:</strong> See section 5.4.</li>
+<li><strong>Endpoints:</strong> <code>GET /health</code>, <code>GET /metrics</code> (Prometheus), <code>GET /api/comms/status</code>.</li>
+<li><strong>Error handler:</strong> Last-resort 500 JSON with <code>requestId</code>.</li>
+</ul>
+<h3>5.3 Database (<code>db.js</code>)</h3>
+<ul>
+<li><strong>ensureDefaultGameModes():</strong> Idempotent upsert of default game modes: arenas <code>prediction</code>, <code>simulation</code>, <code>strategyWars</code>, <code>guildWars</code>, <code>arbitrage</code> × leagues <code>rookie</code>, <code>pro</code>, <code>elite</code> (key e.g. <code>prediction</code>, <code>prediction-pro</code>, <code>prediction-elite</code>), with energyCost, cooldownSeconds, reward multipliers, and <code>guildWars</code> rules <code>{ requiresGuild: true }</code>.</li>
+</ul>
+<h3>5.4 Routes (Complete)</h3>
+<p><strong>Public / game (Telegram-authenticated where noted):</strong></p>
+<ul>
+<li><code>/api/game</code> — game config.</li>
+<li><code>/api/tasks</code> — list tasks.</li>
+<li><code>/api/ads</code> — ads by placement.</li>
+<li><code>/api/economy</code> — me, claim-aiba (create claim).</li>
+<li><code>/api/game-modes</code> — list game modes.</li>
+<li><code>/api/guilds</code> — create (optional TON txHash for paid create), join, leave, list, top, deposit/withdraw broker, <code>:guildId/boost</code> (TON txHash).</li>
+<li><code>/api/referrals</code> — create code, use (apply referral).</li>
+<li><code>/api/metadata</code> — metadata for app.</li>
+<li><code>/api/battle</code> — <strong>POST /run</strong> (requestId, brokerId, arena, league, modeKey; optional auto-claim).</li>
+<li><code>/api/brokers</code> — mine, create starter, train, repair, upgrade, combine, mint-nft.</li>
+<li><code>/api/vault</code> — inventory, claim-status, last-seqno.</li>
+<li><code>/api/leaderboard</code> — global list (by score/aiba/neur/battles), my-rank.</li>
+<li><code>/api/marketplace</code> — listings, list, buy.</li>
+<li><code>/api/boosts</code> — mine, buy (NEUR), buy-with-ton.</li>
+<li><code>/api/staking</code> — summary, stake, unstake, claim.</li>
+<li><code>/api/dao</code> — proposals (list, create), vote, close, execute.</li>
+<li><code>/api/daily</code> — status, claim (daily NEUR).</li>
+<li><code>/api/oracle</code> — price (oracle display).</li>
+<li><code>/api/treasury</code> — summary.</li>
+<li><code>/api/charity</code> — campaigns, donate, impact.</li>
+<li><code>/api/announcements</code> — list (active).</li>
+<li><code>/api/university</code> — courses, progress (GET/POST), mint-course-badge-info, mint-course-badge, mint-full-certificate-info, mint-full-certificate.</li>
+</ul>
+<p><strong>Admin (JWT required):</strong></p>
+<ul>
+<li><code>/api/admin</code> — base admin.</li>
+<li><code>/api/admin/brokers</code> — mint-jobs (list, complete).</li>
+<li><code>/api/admin/ads</code> — CRUD ads.</li>
+<li><code>/api/admin/game-modes</code> — CRUD game modes.</li>
+<li><code>/api/admin/economy</code> — get/update config, simulate.</li>
+<li><code>/api/admin/mod</code> — moderation (ban/unban by telegramId).</li>
+<li><code>/api/admin/treasury</code> — fund Treasury, StabilityReserve, BuybackPool.</li>
+<li><code>/api/admin/stats</code> — DAU, total users/battles, emitted today.</li>
+<li><code>/api/admin/charity</code> — manage charity campaigns.</li>
+<li><code>/api/admin/announcements</code> — manage announcements.</li>
+<li><code>/api/admin/university</code> — stats, courses, graduates.</li>
+</ul>
+<h3>5.5 Backend Models (MongoDB / Mongoose)</h3>
+<table>
+<thead><tr>
+<th>Model</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>User</strong></td>
+<td>telegramId (unique), username, telegram (username, firstName, lastName, languageCode, photoUrl), lastSeenAt, lastDailyClaimAt, wallet, aibaBalance, pendingAIBA, neurBalance, starsBalance, diamondsBalance, firstWinDiamondAwardedAt, badges[], bannedUntil, bannedReason, anomalyFlags, vaultClaimSeqno.</td>
+</tr>
+<tr>
+<td><strong>Broker</strong></td>
+<td>ownerTelegramId, risk, intelligence, speed, specialty, level, xp, energy, energyUpdatedAt, lastBattleAt, cooldowns (Map), anomalyFlags, banned, banReason, lastRequestId, nftCollectionAddress, nftItemAddress, nftItemIndex, metadataUri, guildId.</td>
+</tr>
+<tr>
+<td><strong>Battle</strong></td>
+<td>requestId (unique), ownerTelegramId, brokerId, arena, league, modeKey, seedHex, score, rewardAiba, rewardNeur, guildId, opponentGuildId, guildShareNeur, anomaly, anomalyReason, claim (vaultAddress, toAddress, amount, seqno, validUntil, signatureBase64, payloadBocBase64).</td>
+</tr>
+<tr>
+<td><strong>BattleRunKey</strong></td>
+<td>Idempotency lock for battle run (requestId, ownerTelegramId, status, expiresAt, battleId). TTL index for expiry.</td>
+</tr>
+<tr>
+<td><strong>ActionRunKey</strong></td>
+<td>Generic action lock (scope, requestId, ownerTelegramId, status, expiresAt). Used e.g. for claim mutex.</td>
+</tr>
+<tr>
+<td><strong>GameMode</strong></td>
+<td>key (unique), name, description, enabled, arena, league, energyCost, cooldownSeconds, entryNeurCost, entryAibaCost, rewardMultiplierAiba/Neur, rules.</td>
+</tr>
+<tr>
+<td><strong>EconomyConfig</strong></td>
+<td>Single-doc config: dailyCapAiba/Neur, dailyCap<em>ByArena, baseRewardAibaPerScore, baseRewardNeurPerScore, emissionStartHourUtc/EndHourUtc, emissionWindowsUtc, upgradeAibaCost, trainNeurCost, repairNeurCost, combineNeurCost, marketplaceFeeBps/BurnBps, referral rewards (NEUR/AIBA referrer/referee), dailyRewardNeur, mintAibaCost, boostCostTonNano, createGroupCostTonNano, boostGroupCostTonNano, leaderboardTopFreeCreate, oracle knobs, boostCostNeur/DurationHours/Multiplier, stakingApyPercent, battle</em> (maxEnergy, regen, anomaly thresholds, auto-ban flags/minutes), charityImpactAibaMultiplier, starRewardPerBattle, diamondRewardFirstWin, topLeaderBadgeTopN, courseCompletionBadgeMintCostTonNano, fullCourseCompletionCertificateMintCostTonNano.</td>
+</tr>
+<tr>
+<td><strong>EconomyDay</strong></td>
+<td>Per-day aggregates (UTC day key) for emission caps and tracking.</td>
+</tr>
+<tr>
+<td><strong>LedgerEntry</strong></td>
+<td>telegramId, currency (NEUR</td>
+<td>AIBA</td>
+<td>STARS</td>
+<td>DIAMONDS), direction (credit</td>
+<td>debit), amount, reason, arena, league, sourceType, sourceId, requestId, battleId, applied, meta. Unique index on (sourceType, sourceId, telegramId, currency, direction, reason) for idempotency.</td>
+</tr>
+<tr>
+<td><strong>Guild</strong></td>
+<td>name (unique), ownerTelegramId, members[], bio, active, pooledBrokers[], vaultNeur, vaultAiba, paidCreateTxHash, boostCount, boostedUntil, boostTxHashes[].</td>
+</tr>
+<tr>
+<td><strong>Referral</strong></td>
+<td>One per user: code, ownerTelegramId.</td>
+</tr>
+<tr>
+<td><strong>ReferralUse</strong></td>
+<td>Referral use event (referrerTelegramId, refereeTelegramId, etc.).</td>
+</tr>
+<tr>
+<td><strong>Listing</strong></td>
+<td>brokerId, sellerTelegramId, price, status, etc. (off-chain marketplace).</td>
+</tr>
+<tr>
+<td><strong>Boost</strong></td>
+<td>telegramId, type, expiresAt (NEUR or TON boost).</td>
+</tr>
+<tr>
+<td><strong>Staking</strong></td>
+<td>telegramId, amount, lockedAt, etc. (off-chain staking).</td>
+</tr>
+<tr>
+<td><strong>Proposal</strong></td>
+<td>DAO proposal (title, description, status, treasuryAmount, etc.).</td>
+</tr>
+<tr>
+<td><strong>Vote</strong></td>
+<td>proposalId, telegramId, choice (unique per proposal per user).</td>
+</tr>
+<tr>
+<td><strong>Treasury</strong>, <strong>StabilityReserve</strong>, <strong>BuybackPool</strong></td>
+<td>Admin-funded pools (amounts).</td>
+</tr>
+<tr>
+<td><strong>BrokerMintJob</strong></td>
+<td>brokerId, status, nftItemAddress, etc. (NFT mint queue; admin can complete).</td>
+</tr>
+<tr>
+<td><strong>Task</strong></td>
+<td>title, description, enabled.</td>
+</tr>
+<tr>
+<td><strong>Ad</strong></td>
+<td>imageUrl, linkUrl, placement, weight, active, startsAt, endsAt.</td>
+</tr>
+<tr>
+<td><strong>CharityCampaign</strong></td>
+<td>cause, title, description, status, featured, order, etc.</td>
+</tr>
+<tr>
+<td><strong>CharityDonation</strong></td>
+<td>campaignId, telegramId, amount, donatedAt.</td>
+</tr>
+<tr>
+<td><strong>Announcement</strong></td>
+<td>title, body, type, active, publishedAt.</td>
+</tr>
+<tr>
+<td><strong>UniversityProgress</strong></td>
+<td>telegramId, completedKeys[], graduatedAt.</td>
+</tr>
+<tr>
+<td><strong>CourseBadgeMint</strong>, <strong>FullCertificateMint</strong></td>
+<td>One-time mint records (telegramId) for course badge and full certificate.</td>
+</tr>
+</tbody></table>
+<h3>5.6 Backend Engine and Core Logic</h3>
+<ul>
+<li><strong>engine/battleSeed.js</strong> — Builds canonical seed message from BATTLE_SEED_SECRET + telegramId, brokerId, modeKey, arena, league, requestId (and opponent guild in guild wars); <strong>engine/deterministicRandom.js</strong> exposes hmacSha256Hex, seedFromHex.</li>
+<li><strong>engine/battleEnergy.js</strong> — Energy regen (battleEnergyRegenSecondsPerEnergy, battleMaxEnergy), clamp, applyEnergyRegen.</li>
+<li><strong>engine/battleCooldown.js</strong> — getBattleCooldownKey(modeKey, arena, league), cooldown checks.</li>
+<li><strong>engine/economy.js</strong> — getConfig (EconomyConfig singleton), emission windows (getEmissionWindow, isEmissionOpenAt), tryEmitAiba/tryEmitNeur (caps, windows, ledger, balance updates), creditAibaNoCap/creditNeurNoCap, debitNeurFromUser/debitAibaFromUser/debitAibaFromUserNoBurn, safeCreateLedgerEntry; ledger identity query for idempotency; EconomyDay updates.</li>
+<li><strong>engine/adminEconomySanitize.js</strong> — Sanitization of economy config (prod PATCH validation).</li>
+<li><strong>engine/charity.js</strong> — Charity impact / campaign logic.</li>
+<li><strong>engine/idempotencyKey.js</strong> — Helpers for idempotent actions.</li>
+</ul>
+<h3>5.7 TON and Vault Integration (Backend)</h3>
+<ul>
+<li><strong>ton/vaultRead.js</strong> — Reads vault state (e.g. last seqno for recipient) via TON provider.</li>
+<li><strong>ton/sendAiba.js</strong> — Legacy: send AIBA from admin wallet (used only if ENABLE_LEGACY_PENDING_AIBA_DISPATCH=true).</li>
+</ul>
+<h3>5.8 Security and Middleware</h3>
+<ul>
+<li><strong>security/telegramPolicy.js</strong> — getTelegramInitDataMaxAgeSeconds(env); default 900, configurable.</li>
+<li><strong>security/productionReadiness.js</strong> — isProduction(env) (APP_ENV prod vs dev/test, else NODE_ENV); enforceProductionReadiness(env): in prod requires CORS_ORIGIN, TELEGRAM_BOT_TOKEN, TELEGRAM_INITDATA_MAX_AGE_SECONDS, strong ADMIN_JWT_SECRET, ADMIN_PASSWORD_HASH (no plaintext), BATTLE_SEED_SECRET, and if vault env is set then all of ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX + non-testnet TON_PROVIDER_URL; forbids ENABLE_LEGACY_PENDING_AIBA_DISPATCH in prod.</li>
+<li><strong>middleware/requireTelegram.js</strong> — In dev/test: accept x-telegram-id (and optional x-telegram-username), upsert User. In prod: verify initData, optional max-age check, upsert User. Sets req.telegramUser, req.telegramId, req.user.</li>
+<li><strong>middleware/requireAdmin.js</strong> — Verifies JWT and attaches admin identity.</li>
+<li><strong>middleware/rateLimit.js</strong> — In-memory rate limit (windowMs, max, optional keyFn).</li>
+<li><strong>middleware/requestId.js</strong> — Attaches requestId to req and res.</li>
+<li><strong>middleware/validate.js</strong> — Validation helpers.</li>
+</ul>
+<h3>5.9 Jobs and Cron (server.js)</h3>
+<ul>
+<li><strong>Top-leader badge sync:</strong> <code>jobs/syncTopLeaderBadges.js</code> — run on startup and every 6 hours (cron); assigns top_leader badge to top N users by total score (EconomyConfig.topLeaderBadgeTopN).</li>
+</ul>
+<h3>5.10 Metrics (Prometheus)</h3>
+<ul>
+</ul>
+<h3>5.11 Backend Tests</h3>
+<ul>
+<li><strong>Location:</strong> <code>backend/tests/</code>. Files: adminEconomySanitize.test.js, battleCooldown.test.js, battleEnergy.test.js, battleEngine.test.js, battleSeed.test.js, deterministicRandom.test.js, economyWindow.test.js, idempotencyKey.test.js, productionReadiness.test.js, signRewardClaim.test.js, telegramPolicy.test.js.</li>
+</ul>
+<hr/>
+<h2>6. Battle Flow (End-to-End)</h2>
+<ol>
+<li><strong>requireTelegram</strong> → resolve User; reject if banned.</li>
+<li><strong>Idempotency:</strong> If Battle with same requestId for this user exists, return it. If requestId used by another user → 409.</li>
+<li><strong>BattleRunKey</strong> lock (TTL) to prevent concurrent double charge for same requestId.</li>
+<li>Load Broker; validate ownership, not banned, guild requirement for guildWars (Guild membership).</li>
+<li>Resolve <strong>GameMode</strong> (modeKey or arena+league); validate enabled, energy and cooldown (battleEnergy, battleCooldown).</li>
+<li>Optional <strong>entry fees</strong> (entryNeurCost/entryAibaCost): debit from User via economy engine.</li>
+<li><strong>Seed:</strong> buildBattleSeedMessage(secret, telegramId, brokerId, modeKey, arena, league, requestId, opponentGuildId); seedHex from HMAC.</li>
+<li><strong>simulateBattle(broker, seed, arena, league, rules)</strong> → score.</li>
+<li><strong>Anomaly check:</strong> if score out of expected range, set anomaly, increment broker/user anomalyFlags; auto-ban if over threshold (battleAutoBanBrokerAnomalyFlags / battleAutoBanUserAnomalyFlags).</li>
+<li><strong>Rewards (if emission open and under caps):</strong> tryEmitNeur, tryEmitNeur (guild share to guild vault if guildWars), tryEmitAiba; also starRewardPerBattle (STARS), optional diamondRewardFirstWin (DIAMONDS) once per user.</li>
+<li><strong>Broker update:</strong> energy decrease, cooldown set, lastBattleAt, xp/level if applicable.</li>
+<li><strong>Battle document</strong> saved (requestId, score, rewardAiba, rewardNeur, seedHex, claim if autoClaim and vault configured).</li>
+<li>If <strong>autoClaim</strong> and vault configured: get user wallet, vaultClaimSeqno, createSignedClaim, return claim (payloadBocBase64, signatureBase64, vault, to, amount, seqno, validUntil); increment user vaultClaimSeqno.</li>
+<li><strong>BattleRunKey</strong> updated to completed with battleId.</li>
+<li>Optional: <strong>telegramNotify.notifyBattleWin</strong> (if TELEGRAM_BOT_TOKEN) for push “Your AI just won”.</li>
+<li>Response: full Battle document (including claim if present).</li>
+</ol>
+<hr/>
+<h2>7. Economy Summary</h2>
+<ul>
+<li><strong>AIBA:</strong> Off-chain balance; same units as jetton smallest unit. Credits from battle (and referrals); debits for upgrade, marketplace fee; can be withdrawn on-chain via signed claim. Capped by dailyCapAiba and per-arena; emission windows apply.</li>
+<li><strong>STARS / DIAMONDS:</strong> In-app recognition (Stars: per battle; Diamonds: first win one-time); ledger entries and user balances; optional badges (verified, early_adopter, top_donor, guild_leader, top_leader, champion, diamond_holder, university_graduate, course_completion, full_course_completion_certificate).</li>
+<li><strong>Ledger:</strong> Every credit/debit is a LedgerEntry (sourceType/sourceId/reason for idempotency); balance updates applied after ledger row created to avoid double-credit on retry.</li>
+</ul>
+<hr/>
+<h2>8. Miniapp (Telegram Mini App)</h2>
+<ul>
+<li><strong>Home:</strong> New broker, Refresh, Run battle, Vault; arena &amp; battle card; battle result and victory card; referrals; leaderboard.</li>
+<li><strong>Brokers:</strong> My brokers (combine, mint NFT, select).</li>
+<li><strong>Arenas:</strong> Arena select; Run battle; result.</li>
+<li><strong>Guilds:</strong> My rank, Discover all; create (with optional TON + txHash), join; list with Join/Boost (txHash).</li>
+<li><strong>Market:</strong> Listings, list broker, buy; Boosts.</li>
+<li><strong>Charity:</strong> Campaigns, donate, impact.</li>
+<li><strong>University:</strong> Progress (X/Y modules), courses/modules, graduate badge; mint course badge / full certificate (TON).</li>
+<li><strong>Updates:</strong> Announcements feed.</li>
+<li><strong>Wallet:</strong> Daily claim, Vault, Staking, DAO, on-chain claim (create claim + Claim on-chain via TonConnect); profile with badges; Stars and Diamonds cards.</li>
+<li><strong>UI:</strong> Futuristic theme (globals.css): glass, glow, Orbitron/Exo 2, balance strip (NEUR, AIBA, Stars, Diamonds + verified badge), guide tips, icons. TonConnectButton; API via createApi(BACKEND_URL) with x-telegram-init-data or x-telegram-id (dev). Claim payload built via <code>lib/tonRewardClaim.js</code> (buildRewardClaimPayload) and sent with TonConnect.</li>
+</ul>
+<hr/>
+<h2>9. Admin Panel</h2>
+<ul>
+<li><strong>Tabs:</strong> tasks, ads, modes, economy, mod, stats, treasury, charity, announcements, university, comms.</li>
+<li><strong>Tasks:</strong> List, create, toggle enabled.</li>
+<li><strong>Ads:</strong> List, create (imageUrl, linkUrl, placement, weight).</li>
+<li><strong>Game modes:</strong> List, create, toggle; arena (including arbitrage) and league dropdowns.</li>
+<li><strong>Economy:</strong> Load/save full EconomyConfig JSON; emission dashboard (today UTC); simulator (e.g. 30 days).</li>
+<li><strong>Moderation:</strong> Ban/unban by telegramId.</li>
+<li><strong>Stats:</strong> DAU, total users, battles, emitted today.</li>
+<li><strong>Treasury:</strong> Fund Treasury, Stability Reserve, Buyback Pool; treasury summary.</li>
+<li><strong>Charity / Announcements / University:</strong> CRUD and stats as per admin routes.</li>
+<li><strong>Comms:</strong> Status (e.g. GET /api/comms/status).</li>
+</ul>
+<hr/>
+<h2>10. Configuration and Environment</h2>
+<h3>10.1 Backend (.env.example)</h3>
+<ul>
+<li><strong>ADMIN_SIGNER_TYPE</strong> (stub vs real), <strong>TON_PROVIDER_URL</strong>, <strong>TON_API_KEY</strong></li>
+<li><strong>ADMIN_WALLET</strong>, <strong>ADMIN_MNEMONIC</strong>, <strong>ADMIN_JETTON_WALLET</strong> (legacy send)</li>
+<li><strong>TELEGRAM_BOT_TOKEN</strong>, <strong>TELEGRAM_INITDATA_MAX_AGE_SECONDS</strong></li>
+<li><strong>BOOST_TON_WALLET</strong>, <strong>LEADER_BOARD_WALLET</strong>, <strong>BOOST_GROUP_WALLET</strong></li>
+<li><strong>ADMIN_JWT_SECRET</strong>, <strong>ADMIN_EMAIL</strong>, <strong>ADMIN_PASSWORD_HASH</strong>, <strong>ADMIN_PASSWORD</strong> (dev only)</li>
+<li><strong>BATTLE_SEED_SECRET</strong></li>
+<li><strong>ARENA_VAULT_ADDRESS</strong>, <strong>AIBA_JETTON_MASTER</strong>, <strong>ORACLE_PRIVATE_KEY_HEX</strong></li>
+<li><strong>ENABLE_LEGACY_PENDING_AIBA_DISPATCH</strong> (default false)</li>
+<li>Optional: <strong>dailyCapNeurByArena</strong> (JSON), <strong>RATE_LIMIT_PER_MINUTE</strong></li>
+</ul>
+<h3>10.2 Frontends</h3>
+<ul>
+<li><strong>admin-panel:</strong> <code>NEXT_PUBLIC_BACKEND_URL</code></li>
+</ul>
+<hr/>
+<h2>11. CI/CD and Quality</h2>
+<ul>
+<li><strong>Lint:</strong> Prettier (root and backend); config in .prettierrc, .prettierignore.</li>
+</ul>
+<hr/>
+<h2>12. Deployment (Summary)</h2>
+<ul>
+<li><strong>Backend:</strong> Local/Render/Railway: <code>backend/server.js</code>; Vercel: root directory <code>backend</code>, serverless via <code>api/index.js</code>. Env from .env.example; production readiness enforced when APP_ENV=prod or NODE_ENV=production.</li>
+<li><strong>Miniapp / Admin:</strong> Next.js build; deploy to Vercel or similar; set NEXT_PUBLIC_BACKEND_URL to backend URL.</li>
+</ul>
+<hr/>
+<h2>13. Documentation Index</h2>
+<ul>
+<li><strong>USER-GUIDE.md</strong> — How to play (connect wallet, broker, battle, balances, guilds, claim, referrals, troubleshooting).</li>
+<li><strong>VISION-VS-CODEBASE-CHECK.md</strong> — Vision vs implementation (implemented/partial/not implemented).</li>
+<li><strong>deployment.md</strong> — Components, backend env, miniapp/admin env.</li>
+<li><strong>mainnet-readiness.md</strong> — Key management, validation defaults, checklist enforcement, required env.</li>
+<li><strong>runbook.md</strong> — Key summary, incident response, production checks, key rotation, security playbooks.</li>
+<li><strong>monitoring.md</strong> — Logs, uptime, Prometheus /metrics, suggested alerts and metrics.</li>
+<li><strong>PROJECT-ASSESSMENT.md</strong> — Repo-wide assessment (contracts, backend, miniapp, admin, risks).</li>
+<li><strong>TELEGRAM-MINI-APP-SETUP-GUIDE.md</strong> — Telegram Mini App setup.</li>
+<li><strong>CHARITY-ECOSYSTEM-PLAN.md</strong>, <strong>AIBA-ARENA-UNIVERSITY-PLAN.md</strong>, *<em>STARS-BADGES-DIAMONDS-</em>.md<strong>, </strong>UNIFIED-COMMS-ECOSYSTEM.md<strong>, </strong>ECOSYSTEMS-AUDIT.md** — Feature and ecosystem plans.</li>
+</ul>
+<hr/>
+<h2>14. Summary Table</h2>
+<table>
+<thead><tr>
+<th>Layer</th>
+<th>Stack</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Contracts</td>
+<td>Tact, Blueprint, @ton/*</td>
+<td>AIBA token, reward vault, broker NFT, marketplace escrow</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td>Express, Mongoose, node-cron, prom-client</td>
+<td>API, battles, economy, claims signing, admin, cron</td>
+</tr>
+<tr>
+<td>Miniapp</td>
+<td>Next.js, TonConnect, axios</td>
+<td>Telegram Mini App: full player flow</td>
+</tr>
+<tr>
+<td>Admin</td>
+<td>Next.js, axios</td>
+<td>Operator UI: tasks, ads, modes, economy, mod, stats, treasury, charity, university</td>
+</tr>
+<tr>
+<td>DB</td>
+<td>MongoDB</td>
+<td>Users, brokers, battles, ledger, guilds, config, all feature models</td>
+</tr>
+<tr>
+<td>Auth</td>
+<td>Telegram initData, JWT (admin)</td>
+<td>Player identity; admin login</td>
+</tr>
+<tr>
+<td>Claims</td>
+<td>Ed25519 (oracle), ArenaRewardVault</td>
+<td>Withdraw AIBA credits to TON wallet</td>
+</tr>
+</tbody></table>
+<p>This document is the <strong>single systematic reference</strong> for the entire Aiba-Arena2 project structure and behavior.</p>
+  </div>
+</body>
+</html>

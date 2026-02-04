@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>PROJECT ASSESSMENT — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>PROJECT ASSESSMENT</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Aiba-Arena Project — Deep Assessment</h1>
+<p><strong>Assessment date:</strong> February 2025 <strong>Scope:</strong> Repo-wide status of contracts, backend, miniapp, admin-panel, docs, CI, and deployment.</p>
+<hr/>
+<h2>1. Executive Summary</h2>
+<p>Aiba-Arena2 is a <strong>TON-based game/reward platform</strong> with:</p>
+<ul>
+<li><strong>Backend</strong> (Express + MongoDB): wallet linking, battles, economy (NEUR/AIBA), reward claims, admin APIs.</li>
+<li><strong>Miniapp</strong> (Next.js): Telegram Mini App with TonConnect, battles, brokers, ads, economy, on-chain claim flow.</li>
+<li><strong>Admin panel</strong> (Next.js): operator UI (referenced in CI and README; present in repo).</li>
+</ul>
+<p>The codebase is <strong>feature-complete for a testnet/MVP</strong>: contracts build and have tests, backend has production-readiness checks and Vercel serverless support, miniapp implements the full user flow. <strong>Mainnet readiness</strong> is documented in <code>docs/mainnet-readiness.md</code> and requires env hardening, key isolation, and operational setup (monitoring, backups, runbooks).</p>
+<hr/>
+<h2>2. Repository Structure &amp; Ownership</h2>
+<table>
+<thead><tr>
+<th>Component</th>
+<th>Path</th>
+<th>Stack / Tech</th>
+<th>Status in repo</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Contracts</td>
+<td><code>contracts/</code></td>
+<td>Tact, Blueprint, @ton/*</td>
+<td>✅ Present, builds</td>
+</tr>
+<tr>
+<td>Scripts</td>
+<td><code>scripts/</code></td>
+<td>Blueprint run (deploy, mint, etc.)</td>
+<td>✅ Present</td>
+</tr>
+<tr>
+<td>Tests (contracts)</td>
+<td><code>tests/</code></td>
+<td>Jest, @ton/sandbox</td>
+<td>✅ Present</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td><code>backend/</code></td>
+<td>Express, Mongoose, node-cron</td>
+<td>✅ Present</td>
+</tr>
+<tr>
+<td>Backend tests</td>
+<td><code>backend/tests/</code></td>
+<td>Node <code>--test</code> (TAP)</td>
+<td>✅ Present, passing</td>
+</tr>
+<tr>
+<td>Miniapp</td>
+<td><code>miniapp/</code></td>
+<td>Next.js 14, TonConnect, axios</td>
+<td>✅ Present</td>
+</tr>
+<tr>
+<td>Admin panel</td>
+<td><code>admin-panel/</code></td>
+<td>Next.js, backend API</td>
+<td>✅ Present</td>
+</tr>
+<tr>
+<td>Docs</td>
+<td><code>docs/</code></td>
+<td>deployment, runbook, monitoring, mainnet</td>
+<td>✅ Present</td>
+</tr>
+<tr>
+<td>CI</td>
+<td><code>.github/workflows/ci.yml</code></td>
+<td>build, test, lint, miniapp &amp; admin build</td>
+<td>✅ Present</td>
+</tr>
+</tbody></table>
+<p><strong>Gaps / notes:</strong></p>
+<ul>
+<li><strong>docs/deployment.md</strong> still says “Backend: Express (<code>backend/server.js</code>)”. Correct: <strong>local/Render</strong> use <code>server.js</code>; <strong>Vercel</strong> uses <code>backend/api/index.js</code> (serverless). Consider adding one line that Vercel uses <code>api/index.js</code>.</li>
+</ul>
+<hr/>
+<h2>3. Smart Contracts (Tact / Blueprint)</h2>
+<h3>3.1 Contracts list (from tact.config.json)</h3>
+<ul>
+<li><strong>AibaJettonSupply</strong> — <code>contracts/AibaJetton.tact</code></li>
+<li><strong>ArenaVault</strong> — <code>contracts/ArenaVault.tact</code></li>
+<li><strong>AibaToken</strong> — <code>contracts/aiba_token.tact</code> (jetton master + default wallet)</li>
+<li><strong>ArenaRewardVault</strong> — <code>contracts/arena_reward_vault.tact</code> (oracle-signed claims)</li>
+<li><strong>BrokerNFT</strong> — <code>contracts/broker_nft.tact</code> (collection + item)</li>
+<li><strong>BrokerMarketplaceEscrow</strong> — <code>contracts/broker_marketplace_escrow.tact</code></li>
+</ul>
+<h3>3.2 Build &amp; test status</h3>
+<ul>
+<li><strong>Contract tests:</strong> <code>npm test</code> runs <code>build:contracts</code> then Jest. Tests exist for:</li>
+<li>- <code>AibaJetton.spec.ts</code></li>
+<li>- <code>ArenaRewardVault.spec.ts</code></li>
+<li>- <code>BrokerMarketplaceEscrow.spec.ts</code> / <code>BrokerMarketplaceEscrowPurchase.spec.ts</code></li>
+<li><strong>Note:</strong> Full <code>npm test</code> is heavy (rebuilds all contracts then Jest). CI runs it; locally it may be slow/timeout in constrained environments.</li>
+</ul>
+<h3>3.3 Deploy scripts</h3>
+<ul>
+<li><strong>deployAibaToken.ts</strong>, <strong>deployArenaRewardVault.ts</strong>, <strong>mintAibaToVault.ts</strong> — Used for split deploy/mint flows.</li>
+<li><strong>deployBrokerNft.ts</strong>, <strong>deployBrokerMarketplaceEscrow.ts</strong>, <strong>deployBrokerMarketplaceEscrow.ts</strong>, <strong>mintBrokerNft.ts</strong>, <strong>incrementAibaJetton.ts</strong> — Broker/NFT/marketplace and jetton helpers.</li>
+</ul>
+<p>Previous fixes (from conversation history) addressed passing a proper <code>Deploy</code> message to AibaToken where required; vault deploy may use contract’s default deploy payload.</p>
+<h3>3.4 Risk summary (contracts)</h3>
+<ul>
+<li><strong>Mainnet:</strong> Follow <code>docs/mainnet-readiness.md</code> (key isolation, vault claim invariants, escrow refund paths, NFT bounce handling).</li>
+</ul>
+<hr/>
+<h2>4. Backend (Express + MongoDB)</h2>
+<h3>4.1 Entry points</h3>
+<ul>
+<li><strong>Vercel:</strong> <code>backend/api/index.js</code> — serverless handler: <code>createApp()</code> (once), <code>initDb()</code> per request (cached via <code>db.js</code>), <code>app(req, res)</code>.</li>
+</ul>
+<h3>4.2 App structure (app.js)</h3>
+<ul>
+<li><strong>Security:</strong> <code>enforceProductionReadiness(process.env)</code> — <strong>fail-fast in production</strong>; with <code>APP_ENV=dev</code> (or <code>test</code>) prod checks are <strong>skipped</strong> (allows Vercel with incomplete prod env).</li>
+<li><strong>Routes:</strong></li>
+</ul>
+<p><code>wallet</code>, <code>game</code>, <code>tasks</code>, <code>ads</code>, <code>economy</code>, <code>gameModes</code>, <code>guilds</code>, <code>referrals</code>, <code>metadata</code>, <code>admin/auth</code>, <code>admin</code>, <code>admin/brokers</code>, <code>admin/ads</code>, <code>admin/game-modes</code>, <code>admin/economy</code>, <code>admin/mod</code>, <code>battle</code>, <code>brokers</code>, <code>vault</code>.</p>
+<ul>
+</ul>
+<h3>4.3 Backend tests</h3>
+<ul>
+<li><strong>Files:</strong> e.g. <code>adminEconomySanitize.test.js</code>, <code>battleCooldown.test.js</code>, <code>battleEnergy.test.js</code>, <code>battleEngine.test.js</code>, <code>battleSeed.test.js</code>, <code>deterministicRandom.test.js</code>, <code>economyWindow.test.js</code>, <code>idempotencyKey.test.js</code>, <code>productionReadiness.test.js</code>, <code>signRewardClaim.test.js</code>, <code>telegramPolicy.test.js</code>.</li>
+<li><strong>Status:</strong> Tests observed <strong>passing</strong> (TAP ok 1..17+); coverage spans battle engine, economy sanitization, production readiness, telegram policy.</li>
+</ul>
+<h3>4.4 Configuration &amp; env</h3>
+<ul>
+<li><strong>Production readiness</strong> (see <code>backend/security/productionReadiness.js</code>): when <code>APP_ENV=prod</code> or <code>NODE_ENV=production</code>, requires CORS, Telegram token, initData max age, strong admin JWT/password hash, battle seed, and “all-or-nothing” vault env + non-testnet TON URL if claims enabled.</li>
+</ul>
+<h3>4.5 Risk summary (backend)</h3>
+<ul>
+<li><strong>Cron:</strong> Legacy pending-AIBA cron runs only in <code>server.js</code> (not in Vercel serverless). Intentional; claims flow is signature-based.</li>
+<li><strong>DB:</strong> <code>db.js</code> uses global cache for serverless; <code>GameMode</code> model is required by <code>ensureDefaultGameModes()</code> — present in <code>backend/models/GameMode.js</code>.</li>
+<li><strong>Rate limiting:</strong> In-memory; mainnet-readiness suggests Redis for multi-instance.</li>
+</ul>
+<hr/>
+<h2>5. Miniapp (Next.js + TonConnect)</h2>
+<h3>5.1 Stack</h3>
+<ul>
+<li><strong>Env:</strong> <code>NEXT_PUBLIC_BACKEND_URL</code> (default <code>http://localhost:5000</code>); optional <code>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</code>.</li>
+</ul>
+<h3>5.2 Features (from page.js / lib)</h3>
+<ul>
+<li><strong>Brokers:</strong> list “mine”, select broker, arena (e.g. prediction).</li>
+<li><strong>Battle:</strong> run battle, optional auto-claim on battle.</li>
+<li><strong>Economy:</strong> <code>GET /api/economy/me</code>.</li>
+<li><strong>Ads:</strong> weighted pick from <code>GET /api/ads?placement=between_battles</code>.</li>
+<li><strong>Reward claim:</strong> <code>buildRewardClaimPayload</code> (tonRewardClaim.js), send to vault with backend-signed claim.</li>
+<li><strong>Vault info:</strong> display vault balance/inventory when available.</li>
+</ul>
+<h3>5.3 Status</h3>
+<ul>
+<li><strong>Local:</strong> <code>npm run dev</code> (port 3000); backend URL via <code>.env.local</code> from <code>miniapp/.env.local.example</code>.</li>
+</ul>
+<hr/>
+<h2>6. Admin Panel (Next.js)</h2>
+<h3>6.1 Presence</h3>
+<ul>
+<li><strong>CI:</strong> <code>.github/workflows/ci.yml</code> installs deps and runs <code>npm run build</code> in <code>admin-panel</code>.</li>
+</ul>
+<h3>6.2 Role</h3>
+<ul>
+<li>Admin auth: backend <code>ADMIN_JWT_SECRET</code>, <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD_HASH</code> (or <code>ADMIN_PASSWORD</code> for dev).</li>
+</ul>
+<hr/>
+<h2>7. Documentation &amp; Ops</h2>
+<ul>
+<li><strong>docs/deployment.md</strong> — Testnet baseline; components; backend (Render/Railway) env; miniapp + admin on Vercel. <strong>Minor:</strong> Backend line could say “Local/Render: server.js; Vercel: api/index.js”.</li>
+<li><strong>docs/mainnet-readiness.md</strong> — Key separation, validations, idempotency, rate limiting, required env, checklist enforcement, security review steps. <strong>Strong.</strong></li>
+<li><strong>docs/runbook.md</strong> — Incident response, production safety checks, key rotation (including oracle), security playbooks, data migrations. <strong>Useful.</strong></li>
+<li><strong>docs/monitoring.md</strong> — Logs, uptime, Prometheus, suggested alerts and metric names. <strong>Good baseline.</strong></li>
+</ul>
+<hr/>
+<h2>8. CI/CD</h2>
+<ul>
+<li><strong>Jobs:</strong> Node 20; <code>npm ci</code> root; lint (prettier); Blueprint build; contract tests (<code>npm test</code>); backend <code>npm ci</code> + <code>npm test</code>; miniapp install + build; admin-panel install + build.</li>
+<li><strong>Status:</strong> All steps defined; contract tests can be slow (build + Jest). Backend and frontend build/test are appropriate for a single-pipeline setup.</li>
+</ul>
+<hr/>
+<h2>9. Security &amp; Production Readiness (recap)</h2>
+<ul>
+<li><strong>Secrets:</strong> Documented in .env.example and mainnet-readiness; no secrets in repo.</li>
+<li><strong>Telegram:</strong> initData verification and max age; dev escape with <code>x-telegram-id</code> when <code>APP_ENV=dev</code>.</li>
+<li><strong>Claims:</strong> Oracle key in backend; mainnet-readiness recommends moving signing to a dedicated service/KMS and allow-lists.</li>
+</ul>
+<hr/>
+<h2>10. What’s Done vs What’s Next</h2>
+<h3>Done (current state)</h3>
+<ul>
+<li>Deploy scripts for token, vault, mint, broker NFT, escrow.</li>
+<li>Backend: full API surface, production-readiness checks, Vercel serverless, MongoDB + GameMode defaults, battle/economy/vault routes, backend unit tests.</li>
+<li>Miniapp: TonConnect, Telegram auth, battles, brokers, economy, ads, reward claim flow.</li>
+<li>Admin panel: present and in CI.</li>
+<li>Docs: deployment, runbook, monitoring, mainnet-readiness.</li>
+<li>CI: build, contract tests, backend tests, miniapp and admin build.</li>
+</ul>
+<h3>Completed (recorded in repo)</h3>
+<ul>
+<li><strong>Finalize mainnet readiness checklist enforcement and runbooks (security + key mgmt + validation defaults).</strong> — Done: mainnet-readiness.md has &quot;Validation defaults&quot; and updated &quot;Checklist enforcement&quot; (incl. legacy dispatch); runbook.md has Key management summary, validation-defaults ref, production safety details, and Security checklist (pre-mainnet).</li>
+</ul>
+<h3>Recommended next steps (concise)</h3>
+<ol>
+<li><strong>Deployment doc:</strong> One-line clarification that Vercel uses <code>backend/api/index.js</code>.</li>
+<li><strong>Rate limiting:</strong> Plan Redis (or shared store) for production multi-instance.</li>
+<li><strong>Contract tests:</strong> Run full <code>npm test</code> in CI; if flaky/slow, consider splitting “build only” vs “build + test” or caching build artifacts.</li>
+<li><strong>Operational:</strong> Configure monitoring/alerting per docs/monitoring.md; test backups and runbook procedures.</li>
+</ol>
+<hr/>
+<h2>11. Overall Grade &amp; One-Line Summary</h2>
+<ul>
+<li><strong>Production hardening:</strong> <strong>Documented</strong> — mainnet-readiness and runbook give a clear path; implementation already has fail-fast checks and security hooks.</li>
+<li><strong>Deployment flexibility:</strong> <strong>Good</strong> — Backend runs as long-lived (server.js) or serverless (Vercel); frontends build for Vercel.</li>
+</ul>
+<p><strong>One-line summary:</strong> Aiba-Arena2 is a <strong>testnet-ready TON game/reward stack</strong> with contracts, Express backend (local + Vercel), Telegram miniapp, and admin panel; mainnet readiness is documented and largely enforced by existing production checks, with a short list of follow-ups (env, docs tweak, rate-limit store, ops).</p>
+  </div>
+</body>
+</html>

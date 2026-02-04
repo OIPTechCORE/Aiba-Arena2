@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>CHARITY ECOSYSTEM PLAN — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>CHARITY ECOSYSTEM PLAN</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Unified Super Futuristic Charity Ecosystem — Deep Plan</h1>
+<p>This document plans a <strong>unified, super, futuristic charity ecosystem</strong> inside the AIBA Arena project. The ecosystem integrates with existing economy (NEUR/AIBA), DAO, Treasury, guilds, and marketplace to create one coherent “play → earn → give” loop with full transparency and a futuristic UX.</p>
+<hr/>
+<h2>1. Vision &amp; Principles</h2>
+<h3>1.1 Unified</h3>
+<ul>
+<li><strong>One token flow</strong>: NEUR and AIBA earned in-game can be donated without leaving the ecosystem; optional TON for external donors.</li>
+<li><strong>One source of truth</strong>: Campaigns, donations, and disbursements are tracked in one place and can be audited (public donation ledger, campaign totals).</li>
+<li><strong>Unified with existing features</strong>:</li>
+<li>- <strong>Treasury</strong>: Charity campaigns can hold pooled NEUR/AIBA in a dedicated Charity Treasury (or per-campaign pools); DAO can vote to allocate main Treasury to charity.</li>
+<li>- <strong>DAO</strong>: Proposal type <code>charity_payout</code> to send Treasury (or Charity Treasury) to an approved campaign beneficiary.</li>
+<li>- <strong>Guilds</strong>: Optional “Guild charity pool” — guild can allocate a % of vault or create a guild-sponsored campaign.</li>
+<li>- <strong>Marketplace</strong>: Optional “Donate X% of sale to campaign” at list time.</li>
+<li>- <strong>Battles</strong>: Optional “Round up for charity” — user opts in to donate a % of each battle reward to a selected campaign.</li>
+</ul>
+<h3>1.2 Super</h3>
+<ul>
+<li><strong>Impact metrics</strong>: Global stats — total NEUR/AIBA/TON raised, number of campaigns, number of donors, “impact score” (e.g. NEUR + AIBA normalized).</li>
+<li><strong>Recognition</strong>: Charity leaderboard (top donors by amount or impact score); optional badges or titles (“Champion”, “Guardian”) for tiers.</li>
+<li><strong>Flexible giving</strong>: Donate NEUR or AIBA from in-app balance; optional TON to a campaign’s TON wallet for external/on-chain transparency.</li>
+<li><strong>Campaign lifecycle</strong>: Draft → Active → Ended → Funded → Disbursed; admin or DAO controls transitions and payouts.</li>
+</ul>
+<h3>1.3 Futuristic</h3>
+<ul>
+<li><strong>Copy &amp; tone</strong>: “Impact”, “Cause”, “Unite for Good”, “Donate”, “Campaign”, “Raised”, “Donors”.</li>
+<li><strong>Icons</strong>: Heart, hand, globe, spark (impact); consistent with existing icon set (stroke, 24×24).</li>
+<li><strong>Experience</strong>: Charity tab feels like a “mission control” for good — campaign cards with clear goals, one-tap donate, and instant feedback (thank-you + updated total).</li>
+</ul>
+<h3>1.4 Charity</h3>
+<ul>
+<li><strong>Donations</strong> are voluntary; no gameplay penalty. Optionally, small soft rewards (e.g. badge, leaderboard) to encourage participation.</li>
+<li><strong>Disbursement</strong>: When a campaign is funded/ended, funds are sent to the beneficiary (via DAO execute to TON, or admin-triggered off-chain payout from Charity Treasury).</li>
+</ul>
+<hr/>
+<h2>2. Core Concepts</h2>
+<h3>2.1 Campaign</h3>
+<ul>
+<li><strong>Goals</strong>: <code>goalNeur</code>, <code>goalAiba</code> (optional; 0 = no goal or “open” goal). Optional <code>goalTonNano</code> for TON.</li>
+<li><strong>Beneficiary</strong>: <code>beneficiaryTonAddress</code> (for TON payouts) and/or <code>beneficiaryType: 'treasury' | 'external'</code> (treasury = we hold and DAO pays out; external = we record and optionally forward).</li>
+<li><strong>Lifecycle</strong>: <code>status: 'draft' | 'active' | 'ended' | 'funded' | 'disbursed'</code>; <code>startAt</code>, <code>endAt</code>; <code>disbursedAt</code> when payout is done.</li>
+<li><strong>Pool</strong>: Track <code>raisedNeur</code>, <code>raisedAiba</code> on the campaign (or in a separate CharityPool per campaign). Optional <code>raisedTonNano</code> if we verify TON donations.</li>
+<li><strong>Visibility</strong>: <code>featured</code> (boolean), <code>order</code> (for listing). Admin can pin campaigns.</li>
+</ul>
+<h3>2.2 Donation</h3>
+<ul>
+<li><strong>What</strong>: <code>campaignId</code>, <code>amountNeur</code>, <code>amountAiba</code> (one or both; at least one &gt; 0).</li>
+<li><strong>When</strong>: <code>donatedAt</code> (Date).</li>
+<li><strong>Optional</strong>: <code>message</code> (public thank-you note), <code>anonymous</code> (boolean; if true, donor not shown in public leaderboard).</li>
+<li><strong>Idempotency</strong>: For TON donations, <code>txHash</code> so same tx is not counted twice.</li>
+<li><strong>Source</strong>: <code>source: 'balance' | 'ton' | 'round_up' | 'marketplace'</code> for analytics (balance = user clicked Donate; round_up = battle round-up; marketplace = % of sale).</li>
+</ul>
+<h3>2.3 Charity Treasury (optional but recommended)</h3>
+<ul>
+<li><strong>Model</strong>: Either extend <code>Treasury</code> with <code>charityBalanceNeur</code>, <code>charityBalanceAiba</code> or a dedicated <code>CharityTreasury</code> document. Campaigns can be “pooled” (donations go to Charity Treasury and are then allocated to campaigns by admin/DAO) or “direct” (donations increase campaign’s own raisedNeur/raisedAiba and we track separately).</li>
+<li><strong>Simpler approach</strong>: Each campaign has <code>raisedNeur</code>, <code>raisedAiba</code>; when user donates, we debit user and credit campaign (no separate Charity Treasury). When campaign is disbursed, we debit campaign pool and send to beneficiary (DAO execute or admin). So “pool” is virtual (sum of campaign raised) until disbursement.</li>
+</ul>
+<h3>2.4 Impact &amp; Leaderboard</h3>
+<ul>
+<li><strong>Charity leaderboard</strong>: Top donors (all-time or per campaign), optional “top this month”. Respect <code>anonymous</code> (exclude or show as “Anonymous”).</li>
+</ul>
+<hr/>
+<h2>3. Data Models (Backend)</h2>
+<h3>3.1 CharityCampaign</h3>
+<pre><code>{
+  name: String,           // required
+  description: String,
+  cause: String,          // enum or tag: education, environment, health, emergency, community
+  goalNeur: Number,       // 0 = no goal
+  goalAiba: Number,       // 0 = no goal
+  goalTonNano: Number,    // optional
+  raisedNeur: Number,     // default 0
+  raisedAiba: Number,     // default 0
+  raisedTonNano: Number,  // optional, if we verify TON
+  donorCount: Number,     // default 0 (unique donors)
+  status: String,         // draft | active | ended | funded | disbursed
+  beneficiaryTonAddress: String,  // for TON payout
+  beneficiaryType: String,        // 'treasury' | 'external'
+  startAt: Date,
+  endAt: Date,
+  disbursedAt: Date,
+  featured: Boolean,
+  order: Number,
+  createdBy: String,       // admin telegramId or 'system'
+}</code></pre>
+<h3>3.2 CharityDonation</h3>
+<pre><code>{
+  campaignId: ObjectId,   // ref CharityCampaign
+  telegramId: String,
+  amountNeur: Number,     // default 0
+  amountAiba: Number,     // default 0
+  amountTonNano: Number,   // optional
+  source: String,         // 'balance' | 'ton' | 'round_up' | 'marketplace'
+  message: String,
+  anonymous: Boolean,
+  txHash: String,         // for TON idempotency
+  donatedAt: Date,
+}</code></pre>
+<p>Indexes: <code>campaignId</code>, <code>telegramId</code>, <code>donatedAt</code>; compound for leaderboard queries.</p>
+<h3>3.3 EconomyConfig additions</h3>
+<ul>
+<li><code>charityMarketplacePercentMax: Number</code> (max % seller can assign to charity per listing; 0 = feature off).</li>
+<li><code>charityImpactAibaMultiplier: Number</code> (e.g. 10 — 1 AIBA = 10 “impact points” for leaderboard).</li>
+</ul>
+<h3>3.4 User (optional)</h3>
+<ul>
+</ul>
+<hr/>
+<h2>4. API Design</h2>
+<h3>4.1 Public / Authenticated</h3>
+<ul>
+<li><code>GET /api/charity/campaigns/:id</code> — One campaign + recent donations (optional, anonymized if anonymous).</li>
+<li><code>POST /api/charity/donate</code> — Body: <code>campaignId</code>, <code>amountNeur</code>, <code>amountAiba</code> (at least one &gt; 0), optional <code>message</code>, <code>anonymous</code>. Debit user (LedgerEntry), credit campaign (raisedNeur/raisedAiba), create CharityDonation. Idempotency: optional <code>requestId</code>.</li>
+<li><code>POST /api/charity/donate-ton</code> — Body: <code>campaignId</code>, <code>txHash</code>. Verify TON tx to campaign’s <code>beneficiaryTonAddress</code> (or a shared charity TON wallet); credit campaign’s raisedTonNano and donorCount; create CharityDonation with source 'ton'. Idempotency: txHash.</li>
+<li><code>GET /api/charity/leaderboard</code> — Query: ?by=neur|aiba|impact|count, ?campaignId=, ?limit=. Returns list of { telegramId (or 'anonymous'), amountNeur, amountAiba, impactScore, rank }.</li>
+<li><code>GET /api/charity/my-impact</code> — Current user’s total donated (NEUR, AIBA, impact score) and optional per-campaign breakdown.</li>
+<li><code>GET /api/charity/stats</code> — Global: totalRaisedNeur, totalRaisedAiba, totalDonors, campaignCount, activeCampaignCount.</li>
+</ul>
+<h3>4.2 Admin</h3>
+<ul>
+<li><code>POST /api/admin/charity/campaigns</code> — Create campaign (name, description, cause, goals, beneficiary, startAt, endAt, featured, order).</li>
+<li><code>PATCH /api/admin/charity/campaigns/:id</code> — Update campaign (e.g. status, endAt, featured).</li>
+<li><code>POST /api/admin/charity/campaigns/:id/close</code> — Set status to ended (or funded if goals met).</li>
+<li><code>POST /api/admin/charity/campaigns/:id/disburse</code> — Disburse: create DAO proposal (charity_payout) or trigger payout from Treasury to beneficiary. Or mark as disbursed and record disbursedAt (actual TON send might be manual or via existing DAO execute).</li>
+<li><code>GET /api/admin/charity/donations</code> — List donations (filter by campaignId, telegramId, date range) for transparency/audit.</li>
+<li><code>GET /api/admin/charity/stats</code> — Same as public stats + breakdown by campaign.</li>
+</ul>
+<h3>4.3 Integration hooks (existing routes)</h3>
+<ul>
+<li><strong>Marketplace</strong>: On list, optional <code>charityCampaignId</code>, <code>charityPercent</code>. On sale, that % of seller’s proceeds is debited and credited to campaign (CharityDonation source 'marketplace').</li>
+<li><strong>DAO</strong>: New proposal type <code>charity_payout</code>: same as treasury_payout but with optional <code>campaignId</code> and narrative “Disburse campaign X to beneficiary”. Execute sends from Treasury (or Charity Treasury) to beneficiary.</li>
+</ul>
+<hr/>
+<h2>5. Miniapp UI (Futuristic)</h2>
+<h3>5.1 New tab: Charity</h3>
+<ul>
+<li><strong>Sections</strong> (in one scroll or sub-sections):</li>
+<li>1. <strong>Impact headline</strong> — “Unite for Good” or “Community Impact”; global stats (total raised, donors, active campaigns) in glass cards with gradient accents.</li>
+<li>2. <strong>Featured / Active campaigns</strong> — Card per campaign: cause tag, name, progress ring or bar (raised / goal), donor count, “Donate” button. Tapping opens campaign detail or inline donate (amount input + NEUR/AIBA toggle + optional message + anonymous checkbox).</li>
+<li>3. <strong>My impact</strong> — “You’ve donated X NEUR, Y AIBA” and impact score; link to leaderboard.</li>
+<li>4. <strong>Leaderboard</strong> — Top donors (by NEUR, AIBA, or impact); optional filter by campaign. Anonymous donors shown as “Anonymous”.</li>
+<li>5. <strong>Recent donations</strong> (optional) — Feed of “User X donated N NEUR to Campaign Y” (anonymized if needed).</li>
+</ul>
+<h3>5.2 Campaign card (futuristic)</h3>
+<ul>
+<li>Progress: circular or linear bar (raised/goal) with glow.</li>
+<li>Cause tag: pill with icon.</li>
+<li>CTA: “Donate” (primary button) → modal or inline: amount (NEUR / AIBA), optional message, anonymous; confirm.</li>
+<li>After donate: toast or inline “Thank you! Raised total updated.”</li>
+</ul>
+<h3>5.3 Settings / Battle flow (optional)</h3>
+<ul>
+</ul>
+<h3>5.4 Copy</h3>
+<ul>
+<li>Headline: “Unite for Good” / “Community Impact”.</li>
+<li>Buttons: “Donate”, “Donate NEUR”, “Donate AIBA”.</li>
+<li>Empty state: “No active campaigns yet. Check back soon.”</li>
+</ul>
+<hr/>
+<h2>6. Admin Panel</h2>
+<h3>6.1 Charity section</h3>
+<ul>
+<li><strong>Campaigns</strong>: List all; Create (form: name, description, cause, goalNeur, goalAiba, beneficiary, dates, featured); Edit; Close; Disburse.</li>
+<li><strong>Donations</strong>: Table (campaign, donor, amount, date, source) with export option.</li>
+<li><strong>Stats</strong>: Total raised (NEUR, AIBA), donor count, per-campaign breakdown.</li>
+</ul>
+<h3>6.2 Economy config (existing)</h3>
+<ul>
+</ul>
+<hr/>
+<h2>7. Transparency &amp; Trust</h2>
+<ul>
+<li><strong>Global stats</strong>: Visible in app and optionally on a public page (total raised, number of campaigns, number of donors).</li>
+<li><strong>Disbursement</strong>: When a campaign is disbursed, record disbursedAt and optionally a tx hash or “Disbursed to [address]” so donors see the outcome.</li>
+<li><strong>DAO-driven payouts</strong>: For treasury-funded charity payouts, DAO vote creates accountability (proposal + execute).</li>
+</ul>
+<hr/>
+<h2>8. Phased Implementation</h2>
+<h3>Phase 1 — MVP (Unified core)</h3>
+<ul>
+<li>Routes: GET campaigns (list, one), POST donate (NEUR/AIBA from balance), GET leaderboard, GET my-impact, GET stats.</li>
+<li>Admin: Create/edit campaign, list donations, close campaign.</li>
+<li>Miniapp: Charity tab with campaign list, progress, Donate (NEUR/AIBA), leaderboard, my impact.</li>
+<li>EconomyConfig: no new fields yet (no round-up, no marketplace %).</li>
+</ul>
+<h3>Phase 2 — Disbursement &amp; DAO</h3>
+<ul>
+<li>Admin: Disburse (create DAO proposal type <code>charity_payout</code> or direct payout from Treasury).</li>
+<li>DAO: Support <code>charity_payout</code> in execute (send to campaign beneficiary).</li>
+<li>Optional: TON donation (POST donate-ton, verify tx, credit campaign).</li>
+</ul>
+<h3>Phase 3 — Integrations</h3>
+<ul>
+<li>EconomyConfig: <code>charityRoundUpPercent</code>, <code>charityImpactAibaMultiplier</code>.</li>
+<li>Marketplace: optional <code>charityCampaignId</code> + <code>charityPercent</code> on list; on sale, credit campaign.</li>
+</ul>
+<h3>Phase 4 — Guild &amp; polish</h3>
+<ul>
+<li>Badges/titles for top donors (e.g. “Champion”, “Guardian”) — optional User fields or computed from leaderboard.</li>
+<li>Public impact page (optional): standalone page with global stats and list of campaigns for sharing.</li>
+</ul>
+<hr/>
+<h2>9. File &amp; Route Summary (Implementation Checklist)</h2>
+<h3>Backend</h3>
+<ul>
+<li><code>models/CharityDonation.js</code> — schema above.</li>
+<li><code>routes/charity.js</code> — GET campaigns, GET campaigns/:id, POST donate, GET leaderboard, GET my-impact, GET stats; POST donate-ton (phase 2).</li>
+<li><code>routes/adminCharity.js</code> — GET/POST/PATCH campaigns, POST close, POST disburse, GET donations, GET stats.</li>
+<li><code>engine/economy.js</code> or <code>engine/charity.js</code> — <code>donateToCampaign(telegramId, campaignId, amountNeur, amountAiba)</code> (debit user, credit campaign, create CharityDonation). Reuse LedgerEntry and existing debit/credit helpers where possible.</li>
+<li><code>app.js</code> — mount <code>/api/charity</code>, <code>/api/admin/charity</code>.</li>
+<li>EconomyConfig: add fields in phase 3.</li>
+<li>Battle route: after battle reward, if round-up enabled, call donateToCampaign(..., source: 'round_up').</li>
+<li>Marketplace route: on buy, if listing had charityPercent + charityCampaignId, credit campaign.</li>
+<li>DAO: proposal type <code>charity_payout</code>; execute same as treasury_payout (recipient = campaign beneficiary or treasury payout to TON).</li>
+</ul>
+<h3>Miniapp</h3>
+<ul>
+<li>Panel: impact headline, campaign cards, donate flow, my impact, leaderboard.</li>
+<li>Reuse existing card, button, input, guide-tip styles from globals.css.</li>
+</ul>
+<h3>Admin</h3>
+<ul>
+<li>Economy JSON: allow new charity fields when phase 3.</li>
+</ul>
+<hr/>
+<h2>10. Benefits for Project Owners</h2>
+<p>As <strong>project owners</strong>, you benefit from this unified, super, futuristic charity ecosystem in concrete ways:</p>
+<h3>10.1 Brand &amp; Reputation</h3>
+<ul>
+<li><strong>Trust</strong>: Public donation ledger, campaign progress, and DAO-driven disbursements show you’re serious about transparency. That builds trust with users and partners.</li>
+<li><strong>Storytelling</strong>: You have clear narratives for marketing and partnerships: “X NEUR raised for Education,” “Y donors in 30 days,” “Community chose this cause via DAO.”</li>
+</ul>
+<h3>10.2 User Engagement &amp; Retention</h3>
+<ul>
+<li><strong>Emotional connection</strong>: Giving creates attachment. Users who donate are more likely to stay and invite others.</li>
+<li><strong>Soft rewards</strong>: Donor recognition (leaderboard, badges) costs little but increases participation and social proof.</li>
+</ul>
+<h3>10.3 Token &amp; Ecosystem Utility</h3>
+<ul>
+<li><strong>Flow through your stack</strong>: Donations stay in your economy until disbursement — you control the flow, reporting, and optional fees (if you ever take a small % for operations, it’s configurable and transparent).</li>
+</ul>
+<h3>10.4 Differentiation</h3>
+<ul>
+<li><strong>“Futuristic” angle</strong>: Glass UI, impact metrics, and mission-control charity UX support a premium, forward-looking brand.</li>
+</ul>
+<h3>10.5 Governance &amp; Treasury</h3>
+<ul>
+<li><strong>Treasury narrative</strong>: You can allocate part of the Treasury to charity (via proposals), showing the community that the project shares value with the world.</li>
+</ul>
+<h3>10.6 Compliance &amp; Optics</h3>
+<ul>
+<li><strong>Impact metrics</strong>: You can report “total raised,” “number of donors,” “campaigns funded” in reports, decks, and audits.</li>
+</ul>
+<p><strong>In short</strong>: You get <strong>stronger brand</strong>, <strong>higher engagement</strong>, <strong>more token utility</strong>, <strong>clear differentiation</strong>, <strong>better DAO usage</strong>, and <strong>cleaner compliance storytelling</strong> — all from one unified charity layer that fits your existing economy, DAO, guilds, and marketplace.</p>
+<hr/>
+<h2>11. Success Metrics</h2>
+<ul>
+<li><strong>Volume</strong>: Total NEUR/AIBA (and TON if applicable) raised per campaign and globally.</li>
+<li><strong>Trust</strong>: Public donation list and disbursement records; DAO votes on charity payouts.</li>
+<li><strong>Engagement</strong>: Repeat donors, leaderboard movement, round-up opt-in rate (if implemented).</li>
+</ul>
+<hr/>
+<p>This plan keeps the charity ecosystem <strong>unified</strong> (one layer, one tab, one admin), <strong>super</strong> (transparent, impactful, recognizable), <strong>futuristic</strong> (glass UI, progress rings, cause tags), and <strong>charity-focused</strong> (voluntary, campaign-based, clear disbursement). Implementation can follow the phased approach so MVP ships first and integrations (round-up, marketplace, DAO, TON) follow.</p>
+  </div>
+</body>
+</html>

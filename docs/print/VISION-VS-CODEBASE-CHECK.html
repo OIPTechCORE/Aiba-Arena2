@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>VISION VS CODEBASE CHECK — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>VISION VS CODEBASE CHECK</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Vision vs Codebase — Deepest Check</h1>
+<p>This document compares the <strong>AI Broker Battle Arena</strong> product vision against the <strong>current Aiba-Arena2 codebase</strong>. Each claim is verifiable by route, model, or UI presence. Status: <strong>Implemented</strong>, <strong>Partial</strong>, <strong>Different</strong>, or <strong>Not implemented</strong>.</p>
+<hr/>
+<h2>1. Core Game Concept</h2>
+<table>
+<thead><tr>
+<th>Vision</th>
+<th>Codebase</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Players own AI-powered broker agents</td>
+<td>Broker model: intelligence, speed, risk, specialty, level, energy, cooldowns. Owned by <code>ownerTelegramId</code>.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Analyze simulated &amp; real market data</td>
+<td>Battles use <strong>deterministic formula</strong> (broker stats + server seed + arena weights). No live market data.</td>
+<td><strong>Different</strong> — simulated only</td>
+</tr>
+<tr>
+<td>Compete in trading leagues</td>
+<td>GameMode (arena + league), arenas: prediction, simulation, strategyWars, <strong>arbitrage</strong>, guildWars; leagues: rookie, pro, elite.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Missions: arbitrage, prediction, strategy battles</td>
+<td>Arenas include arbitrage; “missions” = battle runs (POST /api/battle/run).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Earn rewards by performance</td>
+<td>Score → NEUR + AIBA (emission caps, windows); on-chain AIBA claim via signed vault.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Fantasy trading league / AI pet / strategy game</td>
+<td>Own brokers → pick arena → run battle → earn; guilds, marketplace, staking, DAO.</td>
+<td><strong>Aligned</strong></td>
+</tr>
+</tbody></table>
+<p><strong>Summary:</strong> Core loop is implemented. Battles are <strong>deterministic simulation</strong> (stats + seed), not “AI analyzing live markets.”</p>
+<hr/>
+<h2>2. Core Mechanics</h2>
+<h3>2.1 AI Brokers</h3>
+<table>
+<thead><tr>
+<th>Vision</th>
+<th>Codebase</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Traits: Risk, Intelligence, Speed, Specialty</td>
+<td>Broker: risk, intelligence, speed, specialty (default crypto). Arena weights favor int/speed/risk per mode.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Upgrade brokers</td>
+<td>POST /api/brokers/upgrade (AIBA cost, +1 stat, level). upgradeAibaCost in EconomyConfig.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Train brokers</td>
+<td>POST /api/brokers/train (NEUR, +1 to one stat).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Combine brokers</td>
+<td>POST /api/brokers/combine (base + sacrifice → blended stats; NEUR cost).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Sell brokers on marketplace</td>
+<td>Listing model; POST /api/marketplace/list, /buy; miniapp Market tab (list/buy). Off-chain only; on-chain escrow contract exists (BrokerMarketplaceEscrow).</td>
+<td><strong>Implemented</strong> (off-chain); on-chain settlement partial</td>
+</tr>
+<tr>
+<td>Broker as NFT on-chain</td>
+<td>Broker.nftItemAddress, nftCollectionAddress; POST /api/brokers/mint-nft (AIBA); BrokerMintJob; admin mint-jobs complete.</td>
+<td><strong>Implemented</strong> (in-app mint flow)</td>
+</tr>
+</tbody></table>
+<h3>2.2 Arenas</h3>
+<table>
+<thead><tr>
+<th>Vision</th>
+<th>Codebase</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Prediction Arena</td>
+<td>arena = prediction, GameMode defaults.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Trading Simulation</td>
+<td>arena = simulation.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Strategy Wars</td>
+<td>arena = strategyWars.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Arbitrage</td>
+<td>arena = arbitrage (db.js default modes; admin Game modes dropdown; miniapp arena select).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Guild Wars</td>
+<td>arena = guildWars; guild membership; reward split to guild treasury; deposit/withdraw broker.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+</tbody></table>
+<h3>2.3 Gameplay Loop</h3>
+<table>
+<thead><tr>
+<th>Vision</th>
+<th>Codebase</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Assign broker → arena → compete → earn → upgrade / higher leagues</td>
+<td>Assign broker + arena → Run battle (immediate result). NEUR + AIBA + broker XP. Energy + cooldown. Leagues + level.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>3. Tokenomics</h2>
+<table>
+<thead><tr>
+<th>Vision</th>
+<th>Codebase</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>$AIBA — value token, rewards</td>
+<td>Jetton (AibaToken), off-chain credits, on-chain claim (ArenaRewardVault, signed claims).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>$NEUR — gameplay fuel</td>
+<td>Off-chain ledger; battle, daily, referrals; train/repair/combine/entry costs.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Entry fees (high-level)</td>
+<td>entryNeurCost / entryAibaCost per GameMode (admin).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Governance / voting</td>
+<td>Off-chain DAO: Proposal, Vote; POST /api/dao/proposals, /vote; close + execute (treasury payout).</td>
+<td><strong>Implemented</strong> (off-chain)</td>
+</tr>
+<tr>
+<td>Staking for yield</td>
+<td>Off-chain Staking model; POST /api/staking/stake, unstake, claim; APY in config.</td>
+<td><strong>Implemented</strong> (off-chain)</td>
+</tr>
+<tr>
+<td>Marketplace fees</td>
+<td>marketplaceFeeBps, marketplaceBurnBps (config). List/buy in app.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Deflation (burn)</td>
+<td>upgradeAibaCost (upgrade debits AIBA); EconomyDay burn tracking; Treasury, StabilityReserve, BuybackPool models. No on-chain burn contract.</td>
+<td><strong>Partial</strong> (ledger + admin treasury)</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>4. Reward System</h2>
+<table>
+<thead><tr>
+<th>Vision</th>
+<th>Codebase</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Arenas → AIBA + NEUR</td>
+<td>Battle → score → tryEmitAiba + tryEmitNeur (caps, emission windows).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>League ranking → AIBA</td>
+<td>Reward multipliers by league/mode.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Daily activity → NEUR</td>
+<td>GET/POST /api/daily (claim daily NEUR); dailyRewardNeur; lastDailyClaimAt on User.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Referrals → NEUR + AIBA</td>
+<td>referralRewardNeur/Aiba (referrer + referee); POST /api/referrals/use credits both.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Guild victories → pool share</td>
+<td>Guild wars NEUR split to guild vault.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Push “Your AI just won”</td>
+<td>telegramNotify.notifyBattleWin (TELEGRAM_BOT_TOKEN) after battle.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Skill-based earning</td>
+<td>Score = f(stats, arena weights, league, level).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>5. UX (Telegram Mini App)</h2>
+<table>
+<thead><tr>
+<th>Vision</th>
+<th>Codebase</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Cinematic intro + guided tutorial</td>
+<td>showCinematicIntro (localStorage aiba_cinematic_seen); tutorial steps (aiba_tutorial_done); Skip/Next/Done.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Main tabs: Home, Brokers, Arenas, Guilds, Market, Wallet</td>
+<td>Tab bar: home, brokers, arenas, guilds, market, wallet. Tab panels; only active panel visible.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Push “Your AI just won”</td>
+<td>Backend calls notifyBattleWin on battle success.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Global player leaderboard</td>
+<td>GET /api/leaderboard (by=score</td>
+<td>aiba</td>
+<td>neur</td>
+<td>battles, limit up to 500). GET /api/leaderboard/my-rank. Global, no country filter.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Shareable victory cards</td>
+<td>Victory card + Share button (Web Share / clipboard).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>TonConnect wallet</td>
+<td>TonConnectButton; POST /api/wallet/connect; used for on-chain claim.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Futuristic 3D UI, multi-card, modular</td>
+<td>globals.css: glass, glow, Orbitron/Exo 2, cards, tabs, icons, guide tips, balance strip.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>6. Groups (Guilds) &amp; Leaderboard (Vision Extensions)</h2>
+<table>
+<thead><tr>
+<th>Vision</th>
+<th>Codebase</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>All users see global leaderboard</td>
+<td>GET /api/leaderboard; miniapp Home + Leaderboard card; limit 100 in UI, 500 server.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Top leaders can create groups free</td>
+<td>leaderboardTopFreeCreate (default 50); rank from GET /api/leaderboard/my-rank; create free if rank ≤ N.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Pay TON to create group (1–10 TON)</td>
+<td>createGroupCostTonNano; LEADER_BOARD_WALLET; POST /api/guilds/create with txHash when not top N; TON verify.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Groups visible globally</td>
+<td>GET /api/guilds/list (all active, limit 200–300). Miniapp “Discover all”.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Anyone can join any group</td>
+<td>POST /api/guilds/join (guildId).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Boost group with TON (1–10 TON)</td>
+<td>boostGroupCostTonNano; BOOST_GROUP_WALLET; POST /api/guilds/:guildId/boost (txHash); Guild.boostCount, boostedUntil.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Super Admin: adjustable costs + wallets</td>
+<td>Admin Economy: createGroupCostTonNano, boostGroupCostTonNano, leaderboardTopFreeCreate. Env: LEADER_BOARD_WALLET, BOOST_GROUP_WALLET.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>7. Admin Panel</h2>
+<table>
+<thead><tr>
+<th>Vision</th>
+<th>Codebase</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Tasks</td>
+<td>Admin Tasks tab; create, toggle.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Ads</td>
+<td>Admin Ads tab; imageUrl, linkUrl, placement, weight.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Economy / rewards</td>
+<td>Admin Economy tab; full JSON config (caps, rewards, costs, referral, daily, boost, group costs). Emission dashboard (today UTC).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Ban users</td>
+<td>Admin Moderation; ban/unban by telegramId.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Game modes</td>
+<td>Admin Game modes; create, toggle; arena dropdown includes arbitrage; league dropdown.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Stats (DAU, volume)</td>
+<td>GET /api/admin/stats (DAU, total users/battles, emitted today). Admin Stats tab.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Treasury</td>
+<td>Admin Treasury tab; fund Treasury, Stability Reserve, Buyback Pool; GET /api/treasury/summary.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Economy simulator</td>
+<td>GET /api/admin/economy/simulate?days=30.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Mint jobs (broker NFT)</td>
+<td>GET/POST /api/admin/brokers/mint-jobs (list, complete).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>8. Tech Stack</h2>
+<table>
+<thead><tr>
+<th>Vision</th>
+<th>Codebase</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Mini App + Admin: Next.js, Vercel</td>
+<td>miniapp, admin-panel (Next.js); Vercel-ready.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Backend: Node + Express</td>
+<td>Express (server.js + Vercel serverless api/index.js).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>DB: MongoDB</td>
+<td>Mongoose, MONGO_URI.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>TON: Jetton, NFT, Vault</td>
+<td>AibaToken, ArenaRewardVault, broker NFT, BrokerMarketplaceEscrow.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Auth: Telegram</td>
+<td>requireTelegram (initData or x-telegram-id dev).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Payments: TON</td>
+<td>TonConnect; claim tx to vault; boost/create/boost-group TON verify (getTransactionByHash).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Server-side scoring</td>
+<td>battleEngine.simulateBattle (deterministic).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Anti-cheat</td>
+<td>Anomaly detection, anomalyFlags, auto-ban, idempotency (requestId, BattleRunKey), rate limit.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>9. Deep Verification — Routes &amp; Models</h2>
+<h3>Backend routes (mounted in app.js)</h3>
+<table>
+<thead><tr>
+<th>Route prefix</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>/api/wallet</td>
+<td>Connect wallet</td>
+</tr>
+<tr>
+<td>/api/game</td>
+<td>Game config</td>
+</tr>
+<tr>
+<td>/api/tasks</td>
+<td>Tasks (public)</td>
+</tr>
+<tr>
+<td>/api/ads</td>
+<td>Ads by placement</td>
+</tr>
+<tr>
+<td>/api/economy</td>
+<td>me, claim-aiba</td>
+</tr>
+<tr>
+<td>/api/game-modes</td>
+<td>List modes (public)</td>
+</tr>
+<tr>
+<td>/api/guilds</td>
+<td>create (with optional txHash), join, leave, deposit/withdraw broker, list, top, :guildId/boost</td>
+</tr>
+<tr>
+<td>/api/referrals</td>
+<td>create, use</td>
+</tr>
+<tr>
+<td>/api/battle</td>
+<td>run</td>
+</tr>
+<tr>
+<td>/api/brokers</td>
+<td>mine, starter, train, repair, upgrade, combine, mint-nft</td>
+</tr>
+<tr>
+<td>/api/vault</td>
+<td>inventory, claim-status</td>
+</tr>
+<tr>
+<td>/api/leaderboard</td>
+<td>GET / (global), GET /my-rank</td>
+</tr>
+<tr>
+<td>/api/marketplace</td>
+<td>listings, list, buy</td>
+</tr>
+<tr>
+<td>/api/boosts</td>
+<td>mine, buy, buy-with-ton</td>
+</tr>
+<tr>
+<td>/api/staking</td>
+<td>summary, stake, unstake, claim</td>
+</tr>
+<tr>
+<td>/api/dao</td>
+<td>proposals (list, create), vote, close, execute</td>
+</tr>
+<tr>
+<td>/api/daily</td>
+<td>status, claim</td>
+</tr>
+<tr>
+<td>/api/oracle</td>
+<td>price</td>
+</tr>
+<tr>
+<td>/api/treasury</td>
+<td>summary</td>
+</tr>
+<tr>
+<td>/api/university</td>
+<td>courses, progress (GET/POST), mint-course-badge-info, mint-course-badge, mint-full-certificate-info, mint-full-certificate</td>
+</tr>
+<tr>
+<td>/api/admin/university</td>
+<td>stats, courses, graduates</td>
+</tr>
+<tr>
+<td>/api/admin/*</td>
+<td>auth, tasks, ads, game-modes, economy, mod, treasury, stats, brokers (mint-jobs)</td>
+</tr>
+</tbody></table>
+<h3>Backend models</h3>
+<table>
+<thead><tr>
+<th>Model</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>User, Broker, Battle, BattleRunKey</td>
+<td>Core game</td>
+</tr>
+<tr>
+<td>GameMode</td>
+<td>Arena/league modes</td>
+</tr>
+<tr>
+<td>LedgerEntry, EconomyConfig, EconomyDay</td>
+<td>Economy &amp; caps</td>
+</tr>
+<tr>
+<td>Guild</td>
+<td>Groups; paidCreateTxHash, boostCount, boostedUntil, boostTxHashes</td>
+</tr>
+<tr>
+<td>Referral, ReferralUse</td>
+<td>Referrals</td>
+</tr>
+<tr>
+<td>Listing</td>
+<td>Marketplace (off-chain)</td>
+</tr>
+<tr>
+<td>Boost</td>
+<td>Reward multiplier (NEUR or TON)</td>
+</tr>
+<tr>
+<td>Staking</td>
+<td>Off-chain staking</td>
+</tr>
+<tr>
+<td>Proposal, Vote</td>
+<td>DAO</td>
+</tr>
+<tr>
+<td>Treasury, StabilityReserve, BuybackPool</td>
+<td>Treasury / reserve / buyback</td>
+</tr>
+<tr>
+<td>BrokerMintJob</td>
+<td>NFT mint queue</td>
+</tr>
+<tr>
+<td>UniversityProgress</td>
+<td>University: telegramId, completedKeys[], graduatedAt</td>
+</tr>
+<tr>
+<td>Task, Ad</td>
+<td>Tasks, ads</td>
+</tr>
+</tbody></table>
+<h3>Miniapp structure</h3>
+<ul>
+<li><strong>Home:</strong> Actions (New broker, Refresh, Run battle, Vault); Arena &amp; battle card; battle result + victory card; Referrals; Leaderboard.</li>
+<li><strong>Brokers:</strong> My brokers (combine, mint NFT, select).</li>
+<li><strong>Arenas:</strong> Arena select; Run battle; battle result.</li>
+<li><strong>Guilds:</strong> My rank, Discover all, create (with optional pay TON + txHash), join; all groups list with Join + Boost (txHash).</li>
+<li><strong>Market:</strong> Listings refresh, list broker, buy; Boosts.</li>
+<li><strong>Wallet:</strong> Daily claim, Vault, Staking, DAO, on-chain claim (when battle + lastClaim); Profile with badges; Stars and Diamonds cards (Telegram Stars–style, TON Diamonds).</li>
+<li><strong>University:</strong> Hero (progress X / Y modules), expandable courses and modules; POST progress on module expand; graduate badge; optional mint course badge / full certificate (TON).</li>
+<li><strong>UI:</strong> globals.css futuristic theme; icons (Home, Brokers, Arena, Guilds, Market, Wallet, University, Run, Refresh, Claim, Mint, Stake, List, Buy, Share, Vault, Star, Diamond); balance strip (NEUR, AIBA, Stars, Diamonds + verified badge); guide tips per tab.</li>
+</ul>
+<hr/>
+<h2>10. Gaps vs Full Vision (On-Chain / Optional)</h2>
+<table>
+<thead><tr>
+<th>Area</th>
+<th>Current</th>
+<th>Gap</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>DAO</td>
+<td>Off-chain proposals/votes + treasury execute</td>
+<td>No on-chain DAO contract</td>
+</tr>
+<tr>
+<td>Staking</td>
+<td>Off-chain lock + APY in backend</td>
+<td>No on-chain staking contract</td>
+</tr>
+<tr>
+<td>Marketplace</td>
+<td>Off-chain list/buy; Listing model</td>
+<td>On-chain BrokerMarketplaceEscrow not wired to app flow</td>
+</tr>
+<tr>
+<td>Burn / buyback</td>
+<td>EconomyDay tracking; Treasury/Reserve/BuybackPool (admin fund)</td>
+<td>No on-chain burn/buyback execution</td>
+</tr>
+<tr>
+<td>“Real” AI / market data</td>
+<td>Deterministic battle from stats + seed</td>
+<td>No live market data or external AI</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>11. Summary Table</h2>
+<table>
+<thead><tr>
+<th>Category</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Core game (brokers, arenas, battles, rewards)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Dual token (NEUR, AIBA + on-chain claim)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Arbitrage arena</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Guilds + guild wars + pay-to-create + boost (TON)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Global leaderboard + my-rank</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Referrals (NEUR + AIBA)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Daily login NEUR</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Ads, Tasks, Game modes (admin + app)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Broker train / repair / upgrade / combine</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Marketplace (list/buy/sell brokers, off-chain)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Broker NFT (mint with AIBA, job queue)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>DAO (proposals, votes, treasury execute)</td>
+<td>Implemented (off-chain)</td>
+</tr>
+<tr>
+<td>Staking APY</td>
+<td>Implemented (off-chain)</td>
+</tr>
+<tr>
+<td>Boost (NEUR or TON)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Push notifications (battle win)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Cinematic intro + tutorial</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Main tabs (Home, Brokers, Arenas, Guilds, Market, Wallet)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Futuristic 3D UI, multi-card, icons, guidance</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Admin: Economy, Stats, Treasury, Game modes, Mint jobs</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Oracle, Treasury, Reserve, Buyback, Simulator</td>
+<td>Implemented (backend + admin)</td>
+</tr>
+<tr>
+<td>On-chain DAO / staking / marketplace settlement</td>
+<td>Partial / not wired</td>
+</tr>
+<tr>
+<td>Real market data / live AI</td>
+<td>Not implemented (design: simulated)</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>12. Conclusion</h2>
+<ul>
+<li><strong>UX:</strong> Modular tabbed miniapp with futuristic 3D styling, icons, and per-tab guidance; cinematic intro and tutorial; shareable victory cards; push notifications on win.</li>
+<li><strong>Main deliberate difference:</strong> battles are <strong>deterministic simulation</strong> from broker stats and server seed, not “AI analyzing real market data.”</li>
+<li><strong>Remaining gaps:</strong> on-chain DAO/staking/marketplace settlement and on-chain burn/buyback are not wired; real-time market data is out of scope per current design.</li>
+</ul>
+<p>Use this document to align product docs with the built product or to prioritize any remaining on-chain or data integrations.</p>
+  </div>
+</body>
+</html>

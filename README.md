@@ -3,6 +3,7 @@
 - **Game explanation:** [docs/GAME-EXPLAINED.md](docs/GAME-EXPLAINED.md) — what the game is, brokers, arenas, battles, economy, claims, guilds, referrals.
 - **User guide:** [docs/USER-GUIDE.md](docs/USER-GUIDE.md) — how to play: connect wallet, create broker, run battles, earn NEUR/AIBA, withdraw AIBA on-chain, guilds, referrals, troubleshooting.
 - **Vision vs codebase:** [docs/VISION-VS-CODEBASE-CHECK.md](docs/VISION-VS-CODEBASE-CHECK.md) — deep check of the AI Broker Battle Arena vision/spec against the repo (implemented, partial, not implemented, misalignments).
+- **Printable docs:** Run `npm run build:print-docs`, then open **docs/print/index.html** in a browser to print or save as PDF — [docs/PRINT.md](docs/PRINT.md).
 
 ## Project structure
 
@@ -152,6 +153,7 @@ Set these in `backend/.env`:
 
 ## Deployment / Ops
 
+- **Printable docs:** `npm run build:print-docs` → open `docs/print/index.html` ([docs/PRINT.md](docs/PRINT.md)).
 - Deployment guide: `docs/deployment.md`
 - Ops runbook: `docs/runbook.md`
 - Monitoring notes: `docs/monitoring.md`

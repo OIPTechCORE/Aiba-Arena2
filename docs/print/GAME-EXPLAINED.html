@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>GAME EXPLAINED — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>GAME EXPLAINED</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>AIBA Arena — Deep Game Explanation</h1>
+<p>This document explains <strong>what the game is</strong>, <strong>how it works</strong>, and <strong>how the pieces fit together</strong> (brokers, arenas, battles, economy, on-chain claims, guilds, referrals).</p>
+<hr/>
+<h2>1. What Is AIBA Arena?</h2>
+<p><strong>AIBA Arena</strong> is a <strong>Telegram Mini App</strong> where you:</p>
+<ul>
+<li>Enter <strong>arenas</strong> (prediction, simulation, strategy wars, guild wars) and <strong>leagues</strong> (rookie, pro, elite).</li>
+<li>Run <strong>battles</strong>: the server simulates a deterministic “match” using your broker’s stats and a secret seed. You get a <strong>score</strong>.</li>
+<li>Earn <strong>rewards</strong>:</li>
+<li>- <strong>NEUR</strong> — off-chain points (ledger only); used for entry fees, upgrades, referrals.</li>
+<li>- <strong>AIBA</strong> — off-chain “credits” that you can <strong>withdraw on-chain</strong> as real AIBA jettons (TON) when the backend and vault are configured.</li>
+</ul>
+<p>So: <strong>play with brokers in arenas → get score → earn NEUR and AIBA credits → optionally withdraw AIBA to your TON wallet.</strong></p>
+<hr/>
+<h2>2. Core Concepts</h2>
+<h3>2.1 Brokers</h3>
+<p>A <strong>broker</strong> is your in-game “agent.” Each broker has:</p>
+<ul>
+<li>- <strong>Intelligence</strong> — affects score in prediction-heavy arenas.</li>
+<li>- <strong>Speed</strong> — affects score in speed-sensitive arenas.</li>
+<li>- <strong>Risk</strong> — adds variance (higher risk = more swing in score).</li>
+<li><strong>Level</strong> — from battles/XP; some leagues require a minimum level.</li>
+<li><strong>Energy</strong> — consumed per battle; regenerates over time (e.g. 1 energy per minute, cap 100).</li>
+<li><strong>Cooldown</strong> — per arena/mode; you must wait (e.g. 30–60 seconds) before the next battle in that mode.</li>
+<li><strong>Guild</strong> — a broker can be deposited into a <strong>guild pool</strong> for guild wars.</li>
+</ul>
+<p>You can have <strong>multiple brokers</strong>. You pick one for each battle. New users get a <strong>starter broker</strong> (Create starter broker).</p>
+<h3>2.2 Arenas and Leagues</h3>
+<ul>
+<li>- <strong>Prediction</strong> — intelligence-weighted (e.g. 70% int, 20% speed, 10% risk).</li>
+<li>- <strong>Simulation</strong> — more balanced (50% int, 30% speed, 20% risk).</li>
+<li>- <strong>Strategy Wars</strong> — risk matters more (60% int, 10% speed, 30% risk).</li>
+<li>- <strong>Guild Wars</strong> — requires guild membership; rewards split (e.g. 80% to you, 20% to guild treasury); brokers can be deposited in the guild pool.</li>
+<li><strong>Leagues</strong> (rookie, pro, elite):</li>
+<li>- Higher league = higher score multiplier and often higher energy/cooldown cost.</li>
+<li>- Pro/elite may require a minimum broker level.</li>
+</ul>
+<p>The server stores <strong>game modes</strong> (arena + league + energy cost, cooldown, entry fees, reward multipliers). Defaults are created at first DB connect (e.g. prediction/rookie, prediction/pro, …, guildWars/elite).</p>
+<h3>2.3 Battles</h3>
+<p>When you <strong>Run battle</strong>:</p>
+<ol>
+<li>Server checks:</li>
+<li>- You’re not banned; broker is yours; broker not banned.</li>
+<li>- <strong>Game mode</strong> exists and is enabled for that arena/league.</li>
+<li>- <strong>Guild Wars</strong> only: you’re in a guild.</li>
+<li>- Broker has enough <strong>energy</strong> and is off <strong>cooldown</strong> for that mode.</li>
+<li>- Optional <strong>entry fees</strong> (NEUR or AIBA) if the mode has them; your balance is debited.</li>
+<li>Server computes a <strong>deterministic seed</strong> from: secret + your telegramId, brokerId, modeKey, arena, league, requestId (and opponent guild in guild wars). So same inputs ⇒ same score (no client cheating).</li>
+<li><strong>Battle simulation</strong>:</li>
+</ol>
+<p><code>score = f(broker stats, seed, arena, league)</code>. Formula: weighted sum of intelligence/speed/risk (arena-specific weights), plus league multiplier, level bonus, and a variance term (risk increases variance). Score is an integer ≥ 0.</p>
+<ol>
+<li><strong>Rewards</strong> (if within emission windows and under daily caps):</li>
+<li>- <strong>NEUR</strong> = score × baseRewardNeurPerScore × mode multiplier → credited to your NEUR balance (off-chain). In guild wars, a share (e.g. 20%) goes to the guild treasury.</li>
+<li>- <strong>AIBA</strong> = score × baseRewardAibaPerScore × mode multiplier → credited to your <strong>AIBA balance</strong> (off-chain “credits”).</li>
+<li><strong>Broker state</strong> updated: energy decreased, cooldown set, lastBattleAt, etc.</li>
+<li>If you requested <strong>auto-claim</strong> and the backend has vault/oracle configured, the server may create a <strong>signed claim</strong> and return it so you can withdraw that battle’s AIBA on-chain in one go.</li>
+</ol>
+<p>So: <strong>battle = one deterministic simulation → score → NEUR + AIBA credits (and optional claim for on-chain AIBA).</strong></p>
+<hr/>
+<h2>3. Economy (NEUR and AIBA)</h2>
+<h3>3.1 NEUR (off-chain only)</h3>
+<ul>
+<li><strong>Earned:</strong> battle rewards (and referral bonuses).</li>
+<li><strong>Spent:</strong> entry fees (if a mode has entryNeurCost), upgrades, training, repairs (when implemented).</li>
+<li><strong>Caps:</strong> daily emission caps per arena (and optionally per arena:league) so the economy doesn’t explode.</li>
+<li><strong>Emission windows:</strong> rewards may only be granted during certain UTC hours (configurable per arena/league).</li>
+</ul>
+<h3>3.2 AIBA credits (off-chain) and on-chain withdrawal</h3>
+<ul>
+<li><strong>Earned:</strong> battle rewards (within caps and emission windows).</li>
+<li><strong>Withdrawal:</strong> you <strong>create a claim</strong> (either after a battle with “Create claim” or via “Auto-claim AIBA on battle”). The backend signs a <strong>reward claim</strong> (vault address, your wallet, amount, seqno, expiry). You then send a <strong>TonConnect transaction</strong> to the <strong>ArenaRewardVault</strong> contract with that signed payload; the vault checks the signature and sends AIBA jettons to your wallet.</li>
+<li><strong>Claim flow:</strong></li>
+</ul>
+<p>Credits → backend creates signed claim → you send 1 tx to vault with payload → vault transfers AIBA to your TON address. So <strong>AIBA credits</strong> are “withdrawable” as <strong>real AIBA jettons</strong> when the project has deployed the vault and configured the backend (ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON provider).</p>
+<hr/>
+<h2>4. Guilds</h2>
+<ul>
+<li><strong>Guild Wars</strong> arena requires you to be in a guild. Rewards (NEUR) are split (e.g. 80% to you, 20% to guild treasury).</li>
+<li>You can <strong>deposit</strong> a broker into a guild’s pool or <strong>withdraw</strong> it back to “yours.” Guild wars may use pooled brokers for matchmaking (e.g. guild vs guild).</li>
+<li>Guild has a <strong>vault</strong> (NEUR) that grows from the guild’s share of guild war rewards.</li>
+</ul>
+<hr/>
+<h2>5. Referrals</h2>
+<ul>
+<li>Others <strong>apply</strong> your code (they need a connected wallet; anti-sybil baseline). When they apply, both you and they can get <strong>NEUR</strong> bonuses (amounts set in economy config: referralRewardNeurReferrer, referralRewardNeurReferee).</li>
+<li>Referral is one-time per referee (wallet/account).</li>
+</ul>
+<hr/>
+<h2>6. Ads</h2>
+<ul>
+</ul>
+<hr/>
+<h2>7. Tasks</h2>
+<ul>
+</ul>
+<hr/>
+<h2>8. Security and Fairness (short)</h2>
+<ul>
+<li><strong>Idempotency:</strong> each battle is tied to a <strong>requestId</strong>; repeating the same requestId returns the same battle result (no double reward).</li>
+<li><strong>Rate limits:</strong> battle endpoint is rate-limited per user; cooldowns and energy prevent spam.</li>
+<li><strong>Telegram auth:</strong> user identity is from Telegram (initData or, in dev, x-telegram-id). Wallet is stored when you connect TonConnect so the backend knows where to allow claims.</li>
+<li><strong>Bans:</strong> users or brokers can be banned (or auto-banned after too many anomaly flags). Banned users get 403 on battle run.</li>
+</ul>
+<hr/>
+<h2>9. End-to-End Flow (summary)</h2>
+<ol>
+<li><strong>Connect wallet</strong> (TonConnect) → backend saves your TON address.</li>
+<li><strong>Create a starter broker</strong> (or use an existing one).</li>
+<li><strong>Select broker</strong>, <strong>select arena</strong> (and league if the UI offers it).</li>
+<li>Optionally <strong>join/create a guild</strong> for guild wars.</li>
+<li><strong>Run battle</strong> → get <strong>score</strong> and <strong>rewards</strong> (NEUR + AIBA credits).</li>
+<li><strong>NEUR</strong> stays in your off-chain balance; use for entries, upgrades, etc.</li>
+<li><strong>AIBA credits</strong> → either:</li>
+<li>- <strong>Auto-claim on battle:</strong> backend returns a signed claim; you send one TonConnect tx to the vault to receive AIBA on-chain, or</li>
+<li>- <strong>Create claim</strong> later (amount or “all”), then <strong>Claim on-chain (TonConnect)</strong> with the same flow.</li>
+<li><strong>Referrals:</strong> create code, share it; others apply with wallet to get NEUR bonuses.</li>
+<li><strong>Ads</strong> may appear between battles; <strong>tasks</strong> can be shown for future engagement.</li>
+</ol>
+<p>This is the <strong>full picture</strong> of the game: brokers, arenas, leagues, deterministic battles, NEUR/AIBA economy, on-chain AIBA withdrawal via signed claims, guilds, referrals, and supporting features (ads, tasks).</p>
+  </div>
+</body>
+</html>

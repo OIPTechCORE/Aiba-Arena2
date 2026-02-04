@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>VERCEL ENV GUIDE — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>VERCEL ENV GUIDE</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Vercel Environment Variables — Systematic Guide</h1>
+<p>This guide tells you <strong>exactly which environment variables</strong> to set, <strong>in which Vercel project</strong>, and <strong>where to place them</strong> in the Vercel dashboard. Nothing is omitted.</p>
+<hr/>
+<h2>Your Vercel Projects (Reference)</h2>
+<table>
+<thead><tr>
+<th>#</th>
+<th>Project / URL</th>
+<th>What it is</th>
+<th>Root directory in Vercel</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>aiba-arena2</strong> → https://aiba-arena2.vercel.app/</td>
+<td><strong>Miniapp</strong> (Telegram Mini App, Next.js)</td>
+<td><code>miniapp</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>aiba-arena2-admin-panel</strong> → https://vercel.com/oiptechcores-projects/aiba-arena2-admin-panel</td>
+<td><strong>Admin panel</strong> (operator UI, Next.js)</td>
+<td><code>admin-panel</code></td>
+</tr>
+</tbody></table>
+<p><strong>Backend:</strong> Your backend (Express API) is <strong>not</strong> one of these two. It runs either:</p>
+<ul>
+<li>as a <strong>separate Vercel project</strong> (root directory = <code>backend/</code>).</li>
+</ul>
+<p>All <strong>backend</strong> environment variables (MONGO_URI, TELEGRAM_BOT_TOKEN, etc.) are set <strong>where the backend runs</strong>, not in the miniapp or admin-panel Vercel projects. See <a href="#3-backend-environment-variables-where-the-backend-runs">Section 3</a> for the full list.</p>
+<hr/>
+<h2>Where to Set Variables in Vercel</h2>
+<p>For <strong>each project</strong> (miniapp and admin-panel):</p>
+<ol>
+<li>Click the <strong>project name</strong> (e.g. <strong>aiba-arena2</strong> or <strong>aiba-arena2-admin-panel</strong>)</li>
+<li>Go to <strong>Settings</strong> → <strong>Environment Variables</strong></li>
+<li>For each variable below:</li>
+<li>- <strong>Key</strong> = exact name (e.g. <code>NEXT_PUBLIC_BACKEND_URL</code>)</li>
+<li>- <strong>Value</strong> = your value (no quotes in the UI)</li>
+<li>- <strong>Environments</strong> = choose <strong>Production</strong>, <strong>Preview</strong>, and <strong>Development</strong> (or only Production if you only care about prod)</li>
+<li>Click <strong>Save</strong> after adding/editing.</li>
+<li><strong>Redeploy</strong> the project (Deployments → ⋮ on latest → Redeploy) so new variables take effect.</li>
+</ol>
+<hr/>
+<h2>1. Miniapp (aiba-arena2.vercel.app)</h2>
+<p><strong>Vercel:</strong> https://vercel.com/oiptechcores-projects/aiba-arena2 <strong>Project Settings → Root Directory:</strong> must be <strong><code>miniapp</code></strong> (so that <code>miniapp/package.json</code> and <code>miniapp/next.config.js</code> are used).</p>
+<h3>Variables to add</h3>
+<table>
+<thead><tr>
+<th>Key</th>
+<th>Required</th>
+<th>Description</th>
+<th>Example / Value</th>
+<th>Environments</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>NEXT_PUBLIC_BACKEND_URL</strong></td>
+<td><strong>Yes</strong></td>
+<td>Full URL of your backend API (no trailing slash). Miniapp calls this for all API requests (battles, brokers, wallet, economy, etc.).</td>
+<td><code>https://your-backend.vercel.app</code> or <code>https://aiba-arena2-api.onrender.com</code></td>
+<td>Production, Preview, Development</td>
+</tr>
+<tr>
+<td><strong>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</strong></td>
+<td>No</td>
+<td>Absolute URL of the TonConnect manifest JSON. If empty, the app uses <code>https://&lt;miniapp-domain&gt;/api/tonconnect-manifest</code>. Set only if you host the manifest elsewhere.</td>
+<td><code>https://aiba-arena2.vercel.app/api/tonconnect-manifest</code></td>
+<td>Production, Preview (optional)</td>
+</tr>
+<tr>
+<td><strong>NEXT_PUBLIC_APP_URL</strong></td>
+<td>No</td>
+<td>Canonical base URL of the miniapp (used by <code>/api/tonconnect-manifest</code> for <code>url</code> and <code>iconUrl</code>). If unset, Vercel’s <code>x-forwarded-proto</code> / <code>x-forwarded-host</code> are used. Set if you use a custom domain.</td>
+<td><code>https://aiba-arena2.vercel.app</code></td>
+<td>Production, Preview (optional)</td>
+</tr>
+<tr>
+<td><strong>APP_URL</strong></td>
+<td>No</td>
+<td>Same as NEXT_PUBLIC_APP_URL but server-only (used in <code>tonconnect-manifest/route.js</code>). Prefer NEXT_PUBLIC_APP_URL or leave both unset for default behavior.</td>
+<td><code>https://aiba-arena2.vercel.app</code></td>
+<td>Production, Preview (optional)</td>
+</tr>
+</tbody></table>
+<h3>Miniapp checklist</h3>
+<ul>
+<li>[ ] Root Directory = <strong>miniapp</strong>.</li>
+<li>[ ] Redeploy after changing env vars.</li>
+</ul>
+<hr/>
+<h2>2. Admin Panel (aiba-arena2-admin-panel)</h2>
+<p><strong>Vercel:</strong> https://vercel.com/oiptechcores-projects/aiba-arena2-admin-panel <strong>Project Settings → Root Directory:</strong> must be <strong><code>admin-panel</code></strong>.</p>
+<h3>Variables to add</h3>
+<table>
+<thead><tr>
+<th>Key</th>
+<th>Required</th>
+<th>Description</th>
+<th>Example / Value</th>
+<th>Environments</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>NEXT_PUBLIC_BACKEND_URL</strong></td>
+<td><strong>Yes</strong></td>
+<td>Full URL of your backend API (no trailing slash). Admin panel uses this for all requests (login, tasks, ads, economy, moderation, stats, treasury, etc.).</td>
+<td><code>https://your-backend.vercel.app</code> or <code>https://aiba-arena2-api.onrender.com</code></td>
+<td>Production, Preview, Development</td>
+</tr>
+</tbody></table>
+<h3>Admin panel checklist</h3>
+<ul>
+<li>[ ] Root Directory = <strong>admin-panel</strong>.</li>
+<li>[ ] Redeploy after changing env vars.</li>
+</ul>
+<hr/>
+<h2>3. Backend Environment Variables (Where the Backend Runs)</h2>
+<p>The backend is <strong>not</strong> the miniapp or admin-panel. It is either:</p>
+<ul>
+<li>Deployed on <strong>Render / Railway / other</strong> — in that case you set these variables in that platform’s “Environment” or “Env Vars” section, <strong>not</strong> in Vercel.</li>
+</ul>
+<p>Below is the <strong>full list</strong> of backend environment variables. Set every <strong>required</strong> one where the backend runs; optional ones as needed.</p>
+<h3>3.1 Required (minimum for production)</h3>
+<table>
+<thead><tr>
+<th>Key</th>
+<th>Description</th>
+<th>Where to get / Example</th>
+<th>Note</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>MONGO_URI</strong></td>
+<td>MongoDB connection string.</td>
+<td>e.g. <code>mongodb+srv://user:pass@cluster.mongodb.net/aiba_arena?retryWrites=true&amp;w=majority</code></td>
+<td>Required for DB.</td>
+</tr>
+<tr>
+<td><strong>APP_ENV</strong></td>
+<td><code>prod</code> for production (enables strict checks). Use <code>dev</code> only for local/staging.</td>
+<td><code>prod</code></td>
+<td>With <code>prod</code>, CORS, Telegram, admin, battle seed, and vault rules are enforced.</td>
+</tr>
+<tr>
+<td><strong>CORS_ORIGIN</strong></td>
+<td>Comma-separated list of allowed origins (no spaces after commas). Must include miniapp and admin URLs.</td>
+<td><code>https://aiba-arena2.vercel.app,https://aiba-arena2-admin-panel.vercel.app</code></td>
+<td>If you use custom domains, add them. Required when APP_ENV=prod.</td>
+</tr>
+<tr>
+<td><strong>TELEGRAM_BOT_TOKEN</strong></td>
+<td>Telegram Bot token (from BotFather). Used to verify Mini App initData and send “battle win” notifications.</td>
+<td>From BotFather</td>
+<td>Required when APP_ENV=prod.</td>
+</tr>
+<tr>
+<td><strong>TELEGRAM_INITDATA_MAX_AGE_SECONDS</strong></td>
+<td>Max age (seconds) of Telegram initData; reject older.</td>
+<td><code>300</code> to <code>900</code> (e.g. 900 = 15 min)</td>
+<td>Must be set explicitly when APP_ENV=prod.</td>
+</tr>
+<tr>
+<td><strong>ADMIN_JWT_SECRET</strong></td>
+<td>Secret used to sign admin JWT. Must be strong (≥ 32 chars).</td>
+<td>Long random string (e.g. 64 chars)</td>
+<td>Required when APP_ENV=prod; do not use <code>dev-change-me</code>.</td>
+</tr>
+<tr>
+<td><strong>ADMIN_EMAIL</strong></td>
+<td>Admin login email.</td>
+<td>Your admin email</td>
+<td>Required when APP_ENV=prod.</td>
+</tr>
+<tr>
+<td><strong>ADMIN_PASSWORD_HASH</strong></td>
+<td>bcrypt hash of admin password. Do not use plaintext ADMIN_PASSWORD in production.</td>
+<td>e.g. <code>$2a$10$...</code> (bcrypt)</td>
+<td>Required when APP_ENV=prod.</td>
+</tr>
+<tr>
+<td><strong>BATTLE_SEED_SECRET</strong></td>
+<td>Server secret for deterministic battle seeds. Must be strong (≥ 32 chars).</td>
+<td>Long random string</td>
+<td>Required when APP_ENV=prod; do not use <code>dev-secret-change-me</code>.</td>
+</tr>
+</tbody></table>
+<h3>3.2 Optional but recommended (features / production)</h3>
+<table>
+<thead><tr>
+<th>Key</th>
+<th>Description</th>
+<th>Example / Value</th>
+<th>Note</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>PORT</strong></td>
+<td>Port the server listens on.</td>
+<td><code>5000</code> (Vercel/serverless may ignore)</td>
+<td>Often set by host.</td>
+</tr>
+<tr>
+<td><strong>RATE_LIMIT_PER_MINUTE</strong></td>
+<td>Global rate limit (requests per minute per IP).</td>
+<td><code>600</code> (default)</td>
+<td>Tune as needed.</td>
+</tr>
+<tr>
+<td><strong>BOOST_TON_WALLET</strong></td>
+<td>TON address that receives boost payments (cost set in Admin → Economy).</td>
+<td>TON address</td>
+<td>Needed if boosts with TON are used.</td>
+</tr>
+<tr>
+<td><strong>LEADER_BOARD_WALLET</strong></td>
+<td>TON address that receives payment when users <strong>pay to create</strong> a guild (not in top N).</td>
+<td>TON address</td>
+<td>Needed for paid guild create.</td>
+</tr>
+<tr>
+<td><strong>BOOST_GROUP_WALLET</strong></td>
+<td>TON address that receives payment when users <strong>boost</strong> a guild.</td>
+<td>TON address</td>
+<td>Needed for guild boost.</td>
+</tr>
+</tbody></table>
+<h3>3.3 On-chain reward claims (AIBA withdrawal)</h3>
+<p>If you want users to <strong>withdraw AIBA</strong> from the app to their TON wallet via the vault, set <strong>all</strong> of these (and keep TON provider mainnet for production):</p>
+<table>
+<thead><tr>
+<th>Key</th>
+<th>Description</th>
+<th>Example / Value</th>
+<th>Note</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>ARENA_VAULT_ADDRESS</strong></td>
+<td>ArenaRewardVault contract address (EQ...).</td>
+<td>TON address</td>
+<td>All three required together.</td>
+</tr>
+<tr>
+<td><strong>AIBA_JETTON_MASTER</strong></td>
+<td>AIBA jetton master contract address.</td>
+<td>TON address</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>ORACLE_PRIVATE_KEY_HEX</strong></td>
+<td>32-byte ed25519 seed in hex (64 hex chars). Used to sign reward claims.</td>
+<td>64 hex characters</td>
+<td>Must match vault’s oracle public key.</td>
+</tr>
+<tr>
+<td><strong>TON_PROVIDER_URL</strong></td>
+<td>TON API endpoint (for vault reads, seqno, etc.).</td>
+<td>e.g. <code>https://toncenter.com/api/v2/jsonRPC</code> (mainnet)</td>
+<td>When vault is set, required and must be mainnet in prod.</td>
+</tr>
+<tr>
+<td><strong>TON_API_KEY</strong></td>
+<td>API key for TON provider (e.g. TonCenter) to avoid rate limits.</td>
+<td>From toncenter.com or your provider</td>
+<td>Strongly recommended when using vault.</td>
+</tr>
+</tbody></table>
+<h3>3.4 Optional / legacy (backend)</h3>
+<table>
+<thead><tr>
+<th>Key</th>
+<th>Description</th>
+<th>Example / Value</th>
+<th>Note</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>ADMIN_PASSWORD</strong></td>
+<td>Plaintext admin password. <strong>Only for dev.</strong></td>
+<td>—</td>
+<td>Do <strong>not</strong> use in production; use ADMIN_PASSWORD_HASH.</td>
+</tr>
+<tr>
+<td><strong>ADMIN_SIGNER_TYPE</strong></td>
+<td>Payout signer type.</td>
+<td><code>stub</code> (default)</td>
+<td>Use <code>stub</code> unless you have real payout flow.</td>
+</tr>
+<tr>
+<td><strong>ADMIN_WALLET</strong></td>
+<td>Legacy: admin TON wallet.</td>
+<td>—</td>
+<td>Only for legacy send flow.</td>
+</tr>
+<tr>
+<td><strong>ADMIN_MNEMONIC</strong></td>
+<td>Legacy: admin mnemonic.</td>
+<td>—</td>
+<td>Only for legacy send; never in prod.</td>
+</tr>
+<tr>
+<td><strong>ADMIN_JETTON_WALLET</strong></td>
+<td>Legacy: admin jetton wallet.</td>
+<td>—</td>
+<td>Only for legacy send.</td>
+</tr>
+<tr>
+<td><strong>ENABLE_LEGACY_PENDING_AIBA_DISPATCH</strong></td>
+<td>Enable legacy hourly pending-AIBA send.</td>
+<td><code>false</code> (default)</td>
+<td>Must stay <code>false</code> in production.</td>
+</tr>
+<tr>
+<td><strong>dailyCapNeurByArena</strong></td>
+<td>JSON object for per-arena NEUR caps.</td>
+<td>e.g. <code>{&quot;prediction&quot;:5000000}</code></td>
+<td>Optional economy tuning.</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>4. Cross-Reference Summary</h2>
+<h3>URLs that must match</h3>
+<ol>
+<li>- Same value in:</li>
+<li>- Miniapp: <strong>NEXT_PUBLIC_BACKEND_URL</strong></li>
+<li>- Admin panel: <strong>NEXT_PUBLIC_BACKEND_URL</strong></li>
+<li>- And in:</li>
+<li>- Backend: <strong>CORS_ORIGIN</strong> must include both frontend URLs (comma-separated, no trailing slashes).</li>
+</ol>
+<ol>
+<li>- Backend: <code>https://aiba-arena2-api.vercel.app</code> (or your real backend URL).</li>
+<li>- Miniapp: <code>https://aiba-arena2.vercel.app</code></li>
+<li>- Admin: <code>https://aiba-arena2-admin-panel.vercel.app</code></li>
+</ol>
+<p>Then:</p>
+<ul>
+<li>- <strong>CORS_ORIGIN</strong> (backend) = <code>https://aiba-arena2.vercel.app,https://aiba-arena2-admin-panel.vercel.app</code></li>
+</ul>
+<h3>Where each variable lives (quick reference)</h3>
+<table>
+<thead><tr>
+<th>Variable</th>
+<th>Set in project</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>NEXT_PUBLIC_BACKEND_URL</td>
+<td>Miniapp + Admin panel (both)</td>
+</tr>
+<tr>
+<td>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</td>
+<td>Miniapp only</td>
+</tr>
+<tr>
+<td>NEXT_PUBLIC_APP_URL / APP_URL</td>
+<td>Miniapp only (optional)</td>
+</tr>
+<tr>
+<td>MONGO_URI, APP_ENV, CORS_ORIGIN, TELEGRAM_<em>, ADMIN_</em>, BATTLE_SEED_SECRET, BOOST_<em>_WALLET, LEADER_BOARD_WALLET, ARENA_VAULT_</em>, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON_*</td>
+<td>Backend only (Vercel backend project or Render/Railway/etc.)</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>5. Step-by-Step (Copy-Paste Order)</h2>
+<h3>Step 1: Miniapp (aiba-arena2)</h3>
+<ol>
+<li>Add:</li>
+<li>- <strong>NEXT_PUBLIC_BACKEND_URL</strong> = <code>https://&lt;your-backend-host&gt;</code> (your real backend URL).</li>
+<li>Optionally add <strong>NEXT_PUBLIC_APP_URL</strong> = <code>https://aiba-arena2.vercel.app</code> (or your miniapp domain).</li>
+<li>Save. <strong>Redeploy</strong> the miniapp.</li>
+</ol>
+<h3>Step 2: Admin panel (aiba-arena2-admin-panel)</h3>
+<ol>
+<li>Add:</li>
+<li>- <strong>NEXT_PUBLIC_BACKEND_URL</strong> = <code>https://&lt;your-backend-host&gt;</code> (same as miniapp).</li>
+<li>Save. <strong>Redeploy</strong> the admin panel.</li>
+</ol>
+<h3>Step 3: Backend (Vercel or other host)</h3>
+<ol>
+<li>- Set all <strong>required</strong> backend variables from section 3.1.</li>
+<li>- Set <strong>CORS_ORIGIN</strong> = <code>https://aiba-arena2.vercel.app,https://aiba-arena2-admin-panel.vercel.app</code> (or your actual frontend URLs).</li>
+<li>- If using claims: set all vault/TON variables from section 3.3.</li>
+<li>- Optionally set BOOST_<em> and LEADER_BOARD_</em> from section 3.2.</li>
+<li>Redeploy the backend.</li>
+</ol>
+<h3>Step 4: Verify</h3>
+<ul>
+<li>Open admin panel → log in; requests should go to the same backend.</li>
+<li>Backend logs: no CORS errors; Telegram auth and admin login work.</li>
+</ul>
+<hr/>
+<h2>6. If Backend Is Also on Vercel</h2>
+<p>If you create a <strong>third</strong> Vercel project for the backend (e.g. <strong>aiba-arena2-backend</strong>):</p>
+<ul>
+<li><strong>Build:</strong> Vercel will use <code>backend/vercel.json</code> (serverless via <code>api/index.js</code>).</li>
+<li>Add <strong>every</strong> backend variable from <strong>Section 3</strong> in that project’s <strong>Settings → Environment Variables</strong>.</li>
+<li><strong>CORS_ORIGIN</strong> must list your miniapp and admin-panel production (and preview if you use them) URLs, comma-separated.</li>
+</ul>
+<p>No environment variables from Section 3 belong in the miniapp or admin-panel Vercel projects—only in the backend project or your external backend host.</p>
+<hr/>
+<p>This is the full set: nothing omitted. Use the checklists and tables above to configure both Vercel frontends and your backend.</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>STARS BADGES DIAMONDS VISION — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>STARS BADGES DIAMONDS VISION</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Stars, Badges &amp; Diamonds — Deep Vision (Super Futuristic)</h1>
+<p>This document <strong>deep-checks</strong> the AIBA Arena implementation of <strong>Telegram Stars</strong>, <strong>X-style Profile Badges</strong>, and <strong>Telegram/TON Diamonds</strong>, and aligns product language and UX with the real ecosystems in a <strong>super, futuristic</strong> way.</p>
+<hr/>
+<h2>1. Telegram Stars (Real World)</h2>
+<ul>
+<li><strong>In AIBA Arena</strong>: We use “Stars” as an <strong>in-app recognition and reward currency</strong> that mirrors this idea: earn from battles (no real-money purchase in-app), display prominently, and position for future “spend” (tips, boosts, charity). No real Telegram Stars API is required; the <strong>branding and UX</strong> should feel like “this is your Stars balance — Telegram-style digital value.”</li>
+</ul>
+<h3>Implementation checklist (super futuristic)</h3>
+<table>
+<thead><tr>
+<th>Item</th>
+<th>Status</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>User.starsBalance</td>
+<td>✅</td>
+<td>Backend model</td>
+</tr>
+<tr>
+<td>Earn per battle win</td>
+<td>✅</td>
+<td>starRewardPerBattle, ledger</td>
+</tr>
+<tr>
+<td>Balance strip</td>
+<td>✅</td>
+<td>Stars and Diamonds with icons + glow (balance-strip__label--star/diamond, icon-svg glow)</td>
+</tr>
+<tr>
+<td>Wallet card</td>
+<td>✅</td>
+<td>Enhance copy: “Telegram Stars–style • Earn in battles, digital value”</td>
+</tr>
+<tr>
+<td>Victory card</td>
+<td>✅</td>
+<td>Shows +Stars; ensure icon + glow</td>
+</tr>
+<tr>
+<td>Icon + CSS</td>
+<td>✅</td>
+<td><code>.icon-svg--star</code> gold glow; balance-display + victory-card meta</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>2. Profile Badges (X-Style)</h2>
+<ul>
+<li><strong>In AIBA Arena</strong>: We implement <strong>profile badges</strong> as a list of IDs (<code>verified</code>, <code>early_adopter</code>, <code>top_leader</code>, <code>top_donor</code>, etc.), assignable by admins (and auto for <code>top_leader</code>). Display: <strong>X-style</strong> — next to username in Profile, leaderboards, charity leaderboard, and a small verified mark in the balance strip.</li>
+</ul>
+<h3>Implementation checklist (super futuristic)</h3>
+<table>
+<thead><tr>
+<th>Item</th>
+<th>Status</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>User.badges[]</td>
+<td>✅</td>
+<td>Backend</td>
+</tr>
+<tr>
+<td>Admin set badges</td>
+<td>✅</td>
+<td>POST /api/admin/mod/user-badges</td>
+</tr>
+<tr>
+<td>Auto top_leader</td>
+<td>✅</td>
+<td>Cron + sync job</td>
+</tr>
+<tr>
+<td>BADGE_LABELS</td>
+<td>✅</td>
+<td>label, color, title (tooltip); diamond_holder</td>
+</tr>
+<tr>
+<td>Profile card pills</td>
+<td>✅</td>
+<td>Futuristic pills; verified = cyan; title tooltip</td>
+</tr>
+<tr>
+<td>Leaderboard badges</td>
+<td>✅</td>
+<td>Inline pills (up to 3); title tooltip</td>
+</tr>
+<tr>
+<td>Balance strip verified</td>
+<td>✅</td>
+<td>Small ✓ badge</td>
+</tr>
+<tr>
+<td>CSS per-badge glow</td>
+<td>✅</td>
+<td><code>.badge-pill[data-badge=&quot;verified&quot;]</code> glow</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>3. Diamonds (Telegram / TON Ecosystem)</h2>
+<ul>
+<li><strong>In AIBA Arena</strong>: <strong>Diamonds</strong> are a scarce, premium asset: first battle win grants Diamonds (configurable); future use can include milestones or exclusive perks. No on-chain diamond token required; the <strong>feel</strong> is “premium TON ecosystem asset.”</li>
+</ul>
+<h3>Implementation checklist (super futuristic)</h3>
+<table>
+<thead><tr>
+<th>Item</th>
+<th>Status</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>User.diamondsBalance</td>
+<td>✅</td>
+<td>Backend</td>
+</tr>
+<tr>
+<td>First-win grant</td>
+<td>✅</td>
+<td>firstWinDiamondAwardedAt, ledger</td>
+</tr>
+<tr>
+<td>Balance strip</td>
+<td>✅</td>
+<td>Diamonds with icon + glow (TON premium title)</td>
+</tr>
+<tr>
+<td>Wallet card</td>
+<td>✅</td>
+<td>Copy: “Rare TON ecosystem asset • First win + milestones”</td>
+</tr>
+<tr>
+<td>Victory card</td>
+<td>✅</td>
+<td>“+1 Diamond (first win!)” with icon</td>
+</tr>
+<tr>
+<td>Icon + CSS</td>
+<td>✅</td>
+<td><code>.icon-svg--diamond</code> cyan/ice glow; victory-card__meta-diamond</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>4. Super Futuristic UX Summary</h2>
+<ol>
+<li><strong>Wallet tab</strong>:</li>
+<li>- <strong>Stars</strong> card: Telegram Stars–style copy and gold/amber futuristic styling.</li>
+<li>- <strong>Diamonds</strong> card: TON premium copy and cyan/ice styling.</li>
+<li>- <strong>Profile</strong> card: Identity + full badge pills (X-style), with verified check when present.</li>
+<li><strong>Leaderboards / Charity</strong>: Badge pills next to names (verified, top_leader, etc.) with distinct colors.</li>
+<li><strong>Victory card</strong>: Prominent Stars and first-win Diamond line with icons.</li>
+<li><strong>CSS</strong>: Dedicated classes for star/diamond icons (glow, gradient), card borders, and badge pills so the whole experience feels cohesive and “super futuristic.”</li>
+</ol>
+<hr/>
+<h2>5. Files Touched (Implementation)</h2>
+<ul>
+<li><strong>miniapp/src/app/globals.css</strong>: <code>.icon-svg--star</code>, <code>.icon-svg--diamond</code> glow; <code>.victory-card__meta-stars</code> / <code>.victory-card__meta-diamond</code>; <code>.card--stars</code> / <code>.card--diamonds</code> stronger border and inset glow; <code>.badge-pill[data-badge=&quot;verified&quot;]</code> glow.</li>
+<li><strong>Backend</strong>: No schema changes (already aligned).</li>
+</ul>
+<hr/>
+<h2>6. Deep Check Completed</h2>
+<p>All checklist items are implemented. <strong>Stars</strong> = Telegram Stars–style in-app currency (balance strip, wallet card, victory with icon + glow). <strong>Badges</strong> = X-style pills with tooltips and verified glow. <strong>Diamonds</strong> = TON premium asset (balance strip, wallet card, victory with icon + glow). UX is cohesive and super futuristic (glass + glow).</p>
+<p>This vision keeps <strong>Stars</strong> aligned with Telegram’s in-app currency idea, <strong>Badges</strong> with X-style identity/status, and <strong>Diamonds</strong> with TON premium scarcity, while pushing the in-app presentation to a super futuristic, glass-and-glow style.</p>
+  </div>
+</body>
+</html>

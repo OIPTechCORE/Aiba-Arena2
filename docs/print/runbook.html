@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>runbook — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>runbook</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Ops Runbook</h1>
+<h2>Key management summary</h2>
+<table>
+<thead><tr>
+<th>Purpose</th>
+<th>Env / asset</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Contract deploy</td>
+<td>(wallet/mnemonic used by Blueprint)</td>
+<td>Separate from runtime; never in backend env</td>
+</tr>
+<tr>
+<td>Reward-claim signer</td>
+<td><code>ORACLE_PRIVATE_KEY_HEX</code></td>
+<td>32-byte seed (64 hex chars); rotate via vault <code>set_oracle</code> + backend secret</td>
+</tr>
+<tr>
+<td>Admin JWT</td>
+<td><code>ADMIN_JWT_SECRET</code></td>
+<td>≥ 32 chars; rotate invalidates existing tokens</td>
+</tr>
+<tr>
+<td>Admin login</td>
+<td><code>ADMIN_EMAIL</code> + <code>ADMIN_PASSWORD_HASH</code></td>
+<td>Prefer bcrypt hash; no plaintext in prod</td>
+</tr>
+<tr>
+<td>Telegram bot</td>
+<td><code>TELEGRAM_BOT_TOKEN</code></td>
+<td>Rotate in BotFather; update backend secret</td>
+</tr>
+<tr>
+<td>Battle determinism</td>
+<td><code>BATTLE_SEED_SECRET</code></td>
+<td>≥ 32 chars; changing changes battle seeds</td>
+</tr>
+</tbody></table>
+<p><strong>Validation defaults:</strong> When env vars are unset, backend uses defaults (e.g. Telegram initData age 900s, CORS allow-all). Production readiness checks <strong>require</strong> explicit values for CORS, Telegram age, admin hash, battle seed, and (when vault/claims are used) vault env and TON provider. See <code>docs/mainnet-readiness.md</code> (“Validation defaults” and “Checklist enforcement”).</p>
+<h2>Incident response (quick checklist)</h2>
+<ul>
+<li>Check Mongo connectivity (backend logs + connection status)</li>
+<li>Confirm TON provider is reachable (<code>TON_PROVIDER_URL</code> / <code>TON_API_KEY</code>)</li>
+<li>If claims fail:</li>
+<li>- Check vault TON balance and jetton inventory (<code>GET /api/vault/inventory</code>)</li>
+<li>- Check seqno tracking (<code>GET /api/vault/last-seqno?to=&lt;addr&gt;</code>)</li>
+<li>If battles are rate-limited or failing:</li>
+<li>- Inspect broker energy/cooldowns</li>
+<li>- Inspect <code>anomalyFlags</code> and bans</li>
+</ul>
+<h2>Production safety checks (startup)</h2>
+<p>When <code>APP_ENV=prod</code> or <code>NODE_ENV=production</code>, the backend will <strong>refuse to start</strong> if critical security settings are missing or unsafe (see <code>backend/security/productionReadiness.js</code>). If a prod deploy is crashing at boot, check the logs for “Production readiness checks failed” or “PROD_READINESS_FAILED”. Enforced items include: CORS, Telegram token and initData max age, admin JWT/password hash, battle seed, vault/claim env (all-or-nothing + non-testnet TON URL), and no legacy pending-AIBA dispatch. When <code>APP_ENV=dev</code> or <code>APP_ENV=test</code>, these checks are skipped.</p>
+<h2>Key rotation</h2>
+<ul>
+<li>Rotate <code>ADMIN_JWT_SECRET</code></li>
+<li>Rotate <code>TELEGRAM_BOT_TOKEN</code> (Telegram bot)</li>
+<li>Review <code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code> (recommended 300–900s; must be set explicitly for mainnet)</li>
+<li>Rotate <code>ORACLE_PRIVATE_KEY_HEX</code> (reward claim signer)</li>
+<li>- Requires updating the vault oracle key on-chain (<code>set_oracle</code>) and backend env</li>
+</ul>
+<h3>Rotation: reward-claim oracle key (<code>ORACLE_PRIVATE_KEY_HEX</code>)</h3>
+<ul>
+<li>- Ensure you can sign claims in an isolated environment (KMS/HSM or dedicated signer host)</li>
+<li>- Prepare a rollback key plan (time-boxed)</li>
+<li><strong>Rotate</strong></li>
+<li>- Update the on-chain oracle key (<code>set_oracle</code>) on the vault</li>
+<li>- Update backend secret (<code>ORACLE_PRIVATE_KEY_HEX</code>) in the secret manager</li>
+<li>- Restart backend and verify <code>GET /api/vault/last-seqno</code> works (TON provider healthy)</li>
+<li><strong>After rotation</strong></li>
+<li>- Monitor claim failures, seqno drift reports, and TON provider error rates</li>
+<li>- Audit access to the secret and rotate any operator credentials involved</li>
+</ul>
+<h2>Security incidents (common playbooks)</h2>
+<h3>Suspected oracle key compromise</h3>
+<ul>
+<li>- Rotate <code>ORACLE_PRIVATE_KEY_HEX</code> and update vault oracle key on-chain ASAP</li>
+<li>- Consider pausing or rate-limiting claims at the application layer (do not sign new claims)</li>
+<li>- Check logs for unusual claim amounts, bursty claims, or abnormal recipients</li>
+<li><strong>Follow-up</strong></li>
+<li>- Re-issue credentials for any operators/hosts that had access</li>
+<li>- Add allow-lists (vault address + jetton master + max amount + max claims/user/day) in the signing layer</li>
+</ul>
+<h3>Suspected admin auth compromise</h3>
+<ul>
+<li>Rotate admin password (update <code>ADMIN_PASSWORD_HASH</code>, remove plaintext <code>ADMIN_PASSWORD</code> in production)</li>
+<li>Audit admin actions via logs and ledger diffs</li>
+</ul>
+<h3>Telegram token compromise</h3>
+<ul>
+<li>Review <code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code> and ensure it remains conservative</li>
+</ul>
+<h2>Data migrations</h2>
+<ul>
+<li>Add indexes explicitly when introducing new lookup paths</li>
+<li>Backfill jobs should be idempotent and batched</li>
+</ul>
+<h2>Security checklist (pre-mainnet)</h2>
+<ul>
+<li>[ ] Production readiness enforced: <code>APP_ENV=prod</code> or <code>NODE_ENV=production</code> with full env (see <code>docs/mainnet-readiness.md</code>)</li>
+<li>[ ] CORS, Telegram initData age, admin hash, battle seed, vault/TON env set explicitly</li>
+<li>[ ] <code>ENABLE_LEGACY_PENDING_AIBA_DISPATCH</code> not set to <code>true</code> in production</li>
+<li>[ ] Monitoring and backups configured per <code>docs/monitoring.md</code> and runbook</li>
+</ul>
+  </div>
+</body>
+</html>
