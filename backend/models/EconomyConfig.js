@@ -43,6 +43,17 @@ const EconomyConfigSchema = new mongoose.Schema(
         // Boost: pay TON (nanoTON)
         boostCostTonNano: { type: Number, default: 0 },
 
+        // Create broker with TON (1–10 TON). Paid TON → CREATED_BROKERS_WALLET. Auto-lists on marketplace.
+        createBrokerCostTonNano: { type: Number, default: 1_000_000_000 },
+        // Default AIBA price when broker is auto-listed after create-with-TON (so it appears globally)
+        marketplaceDefaultNewBrokerPriceAIBA: { type: Number, default: 10 },
+
+        // Boost your profile (visibility): pay TON 1–10. → BOOST_PROFILE_WALLET
+        boostProfileCostTonNano: { type: Number, default: 1_000_000_000 },
+        boostProfileDurationDays: { type: Number, default: 7 },
+        // Gifts: pay TON 1–10 to send a gift to another user. → GIFTS_WALLET
+        giftCostTonNano: { type: Number, default: 1_000_000_000 },
+
         // Groups (guilds): pay TON to create or boost. 1–10 TON = 1e9–10e9 nano. Wallets: env LEADER_BOARD_WALLET, BOOST_GROUP_WALLET
         createGroupCostTonNano: { type: Number, default: 1_000_000_000 }, // 1 TON default
         boostGroupCostTonNano: { type: Number, default: 1_000_000_000 },  // 1 TON default

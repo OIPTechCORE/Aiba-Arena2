@@ -2,9 +2,11 @@ const router = require('express').Router();
 const { requireTelegram } = require('../middleware/requireTelegram');
 const Broker = require('../models/Broker');
 const BrokerMintJob = require('../models/BrokerMintJob');
+const Listing = require('../models/Listing');
 const ActionRunKey = require('../models/ActionRunKey');
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
 const { getConfig, debitNeurFromUser, debitAibaFromUser } = require('../engine/economy');
+const { verifyTonPayment } = require('../util/tonVerify');
 
 async function acquireActionLock({ scope, requestId, telegramId }) {
     const lockTtlMs = 15 * 60 * 1000;
@@ -79,6 +81,64 @@ router.post('/starter', requireTelegram, async (req, res) => {
         res.status(201).json(broker);
     } catch (err) {
         console.error('Error creating starter broker:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// POST /api/brokers/create-with-ton — Pay TON to create a new broker; auto-listed on marketplace (global recognition).
+// Body: { txHash }. Cost 1–10 TON (createBrokerCostTonNano); payment → CREATED_BROKERS_WALLET.
+router.post('/create-with-ton', requireTelegram, async (req, res) => {
+    try {
+        const telegramId = req.telegramId ? String(req.telegramId) : '';
+        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+
+        const txHash = String(req.body?.txHash || '').trim();
+        if (!txHash) return res.status(400).json({ error: 'txHash required' });
+
+        const cfg = await getConfig();
+        const costNano = Math.max(0, Number(cfg.createBrokerCostTonNano ?? 1_000_000_000));
+        const createdBrokersWallet = (process.env.CREATED_BROKERS_WALLET || '').trim();
+        if (costNano <= 0 || !createdBrokersWallet)
+            return res.status(503).json({ error: 'Create broker with TON not configured' });
+
+        const verified = await verifyTonPayment(txHash, createdBrokersWallet, costNano);
+        if (!verified) return res.status(400).json({ error: 'TON payment verification failed' });
+
+        const existing = await Broker.findOne({ createdWithTonTxHash: txHash }).lean();
+        if (existing) return res.status(409).json({ error: 'txHash already used', broker: existing });
+
+        const broker = await Broker.create({
+            ownerTelegramId: telegramId,
+            createdWithTonTxHash: txHash,
+            risk: 50,
+            intelligence: 50,
+            speed: 50,
+            specialty: 'crypto',
+            energy: 10,
+        });
+
+        if (process.env.PUBLIC_BASE_URL) {
+            broker.metadataUri = `${String(process.env.PUBLIC_BASE_URL).replace(/\/+$/, '')}/api/metadata/brokers/${broker._id}`;
+            await broker.save();
+        }
+
+        const defaultPriceAIBA = Math.max(0, Number(cfg.marketplaceDefaultNewBrokerPriceAIBA ?? 10));
+        await Listing.create({
+            brokerId: broker._id,
+            sellerTelegramId: telegramId,
+            priceAIBA: defaultPriceAIBA,
+            priceNEUR: 0,
+            status: 'active',
+        });
+
+        res.status(201).json({
+            broker: broker.toObject(),
+            listed: true,
+            defaultPriceAIBA,
+            message: 'Broker created and listed on marketplace (visible globally).',
+        });
+    } catch (err) {
+        console.error('Error create-with-ton broker:', err);
         res.status(500).json({ error: 'internal server error' });
     }
 });

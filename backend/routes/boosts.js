@@ -1,8 +1,11 @@
 const router = require('express').Router();
 const { requireTelegram } = require('../middleware/requireTelegram');
 const Boost = require('../models/Boost');
+const User = require('../models/User');
+const UsedTonTxHash = require('../models/UsedTonTxHash');
 const { getConfig, debitNeurFromUser } = require('../engine/economy');
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
+const { verifyTonPayment } = require('../util/tonVerify');
 
 // GET /api/boosts/mine — active boosts for current user
 router.get('/mine', requireTelegram, async (req, res) => {
@@ -121,6 +124,53 @@ router.post('/buy-with-ton', requireTelegram, async (req, res) => {
         res.status(201).json(boost);
     } catch (err) {
         console.error('Boosts buy-with-ton error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// POST /api/boosts/buy-profile-with-ton — Boost your profile (visibility). Pay TON 1–10 → BOOST_PROFILE_WALLET.
+router.post('/buy-profile-with-ton', requireTelegram, async (req, res) => {
+    try {
+        const telegramId = req.telegramId ? String(req.telegramId) : '';
+        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+
+        const txHash = String(req.body?.txHash || '').trim();
+        if (!txHash) return res.status(400).json({ error: 'txHash required' });
+
+        const cfg = await getConfig();
+        const costNano = Math.max(0, Number(cfg.boostProfileCostTonNano ?? 1_000_000_000));
+        const boostProfileWallet = (process.env.BOOST_PROFILE_WALLET || '').trim();
+        if (costNano <= 0 || !boostProfileWallet)
+            return res.status(503).json({ error: 'Profile boost with TON not configured' });
+
+        const verified = await verifyTonPayment(txHash, boostProfileWallet, costNano);
+        if (!verified) return res.status(400).json({ error: 'TON payment verification failed' });
+
+        try {
+            await UsedTonTxHash.create({ txHash, purpose: 'profile_boost', ownerTelegramId: telegramId });
+        } catch (e) {
+            if (String(e?.code) === '11000') return res.status(409).json({ error: 'txHash already used' });
+            throw e;
+        }
+
+        const durationDays = Math.max(1, Math.min(365, Number(cfg.boostProfileDurationDays ?? 7) || 7));
+        const boostedUntil = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+
+        const user = await User.findOneAndUpdate(
+            { telegramId },
+            { $set: { profileBoostedUntil: boostedUntil } },
+            { new: true },
+        ).lean();
+        if (!user) return res.status(404).json({ error: 'user not found' });
+
+        res.json({
+            ok: true,
+            profileBoostedUntil: boostedUntil,
+            durationDays,
+            message: 'Profile boosted. You now have boosted visibility.',
+        });
+    } catch (err) {
+        console.error('Boosts buy-profile-with-ton error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
 });

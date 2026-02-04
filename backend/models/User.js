@@ -33,6 +33,9 @@ const UserSchema = new mongoose.Schema(
 
         // On-chain claim replay protection (matches ArenaRewardVault per-recipient seqno)
         vaultClaimSeqno: { type: Number, default: 0 },
+
+        // Profile boost (pay TON): visibility/recognition until this date
+        profileBoostedUntil: { type: Date, default: null },
     },
     { timestamps: true },
 );

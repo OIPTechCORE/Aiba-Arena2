@@ -240,6 +240,87 @@ export default function HomePage() {
         }
     }
 
+    // Create broker with TON (pay 1–10 TON → auto-listed on marketplace)
+    const [createBrokerTxHash, setCreateBrokerTxHash] = useState('');
+    const [createBrokerMsg, setCreateBrokerMsg] = useState('');
+    async function createBrokerWithTon() {
+        if (!createBrokerTxHash.trim()) return;
+        setBusy(true);
+        setCreateBrokerMsg('');
+        try {
+            const res = await api.post('/api/brokers/create-with-ton', { txHash: createBrokerTxHash.trim() });
+            setCreateBrokerMsg(res.data?.message || 'Broker created and listed.');
+            setCreateBrokerTxHash('');
+            await refreshBrokers();
+            await refreshListings();
+            await refreshEconomy();
+        } catch (e) {
+            setCreateBrokerMsg(e?.response?.data?.error || 'Create failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // Boost profile with TON
+    const [profileBoostTxHash, setProfileBoostTxHash] = useState('');
+    const [profileBoostMsg, setProfileBoostMsg] = useState('');
+    async function buyProfileBoostWithTon() {
+        if (!profileBoostTxHash.trim()) return;
+        setBusy(true);
+        setProfileBoostMsg('');
+        try {
+            await api.post('/api/boosts/buy-profile-with-ton', { txHash: profileBoostTxHash.trim() });
+            setProfileBoostMsg('Profile boosted.');
+            setProfileBoostTxHash('');
+            await refreshEconomy();
+        } catch (e) {
+            setProfileBoostMsg(e?.response?.data?.error || 'Boost failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // Gifts (send with TON; received/sent lists)
+    const [giftTo, setGiftTo] = useState('');
+    const [giftTxHash, setGiftTxHash] = useState('');
+    const [giftMessage, setGiftMessage] = useState('');
+    const [giftMsg, setGiftMsg] = useState('');
+    const [giftsReceived, setGiftsReceived] = useState([]);
+    const [giftsSent, setGiftsSent] = useState([]);
+    async function refreshGifts() {
+        try {
+            const [rec, sent] = await Promise.all([
+                api.get('/api/gifts/received'),
+                api.get('/api/gifts/sent'),
+            ]);
+            setGiftsReceived(Array.isArray(rec.data) ? rec.data : []);
+            setGiftsSent(Array.isArray(sent.data) ? sent.data : []);
+        } catch {
+            setGiftsReceived([]);
+            setGiftsSent([]);
+        }
+    }
+    async function sendGift() {
+        if (!giftTxHash.trim() || !giftTo.trim()) return;
+        setBusy(true);
+        setGiftMsg('');
+        try {
+            const body = { txHash: giftTxHash.trim(), message: giftMessage.trim().slice(0, 200) };
+            if (/^\d+$/.test(giftTo.trim())) body.toTelegramId = giftTo.trim();
+            else body.toUsername = giftTo.trim().replace(/^@/, '');
+            await api.post('/api/gifts/send', body);
+            setGiftMsg('Gift sent.');
+            setGiftTo('');
+            setGiftTxHash('');
+            setGiftMessage('');
+            await refreshGifts();
+        } catch (e) {
+            setGiftMsg(e?.response?.data?.error || 'Send failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
     // Boosts
     const [boosts, setBoosts] = useState([]);
     const [boostMsg, setBoostMsg] = useState('');
@@ -472,6 +553,8 @@ export default function HomePage() {
         if (tab === 'charity') refreshCharityAll();
         if (tab === 'university') refreshUniversity();
         if (tab === 'updates') refreshUpdatesAll();
+        if (tab === 'market') refreshListings().catch(() => {});
+        if (tab === 'wallet') refreshGifts().catch(() => {});
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab]);
 
@@ -1485,6 +1568,18 @@ export default function HomePage() {
 
                 {/* ─── Market ─────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'market' ? 'is-active' : ''}`} aria-hidden={tab !== 'market'}>
+                    {Number(economyMe?.economy?.createBrokerCostTonNano) > 0 ? (
+                        <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                            <div className="card__title">Create your broker (pay TON)</div>
+                            <p className="card__hint">Pay TON to create a new broker. It is automatically listed on the marketplace so everyone can see it — you get global recognition.</p>
+                            <p className="card__hint" style={{ marginTop: 6 }}>Cost: <strong>{(economyMe.economy.createBrokerCostTonNano / 1e9).toFixed(1)} TON</strong>. Send exact amount to the wallet shown in the app, then paste the transaction hash below.</p>
+                            <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                <input className="input" value={createBrokerTxHash} onChange={(e) => setCreateBrokerTxHash(e.target.value)} placeholder="Transaction hash (tx hash)" style={{ flex: '1 1 200px', minWidth: 0 }} />
+                                <button type="button" className="btn btn--primary" onClick={createBrokerWithTon} disabled={busy || !createBrokerTxHash.trim()}><IconMint /> Create broker</button>
+                            </div>
+                            {createBrokerMsg ? <p className={`status-msg ${createBrokerMsg.includes('created') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{createBrokerMsg}</p> : null}
+                        </div>
+                    ) : null}
                     <div className="card card--elevated">
                         <div className="card__title">Marketplace</div>
                         <p className="card__hint">Sell brokers for AIBA or buy from others.</p>
@@ -1786,7 +1881,54 @@ export default function HomePage() {
                                 <span className="card__hint">No badges yet. Earn or get assigned by admins.</span>
                             )}
                         </div>
+                        {economyMe?.profileBoostedUntil && new Date(economyMe.profileBoostedUntil) > new Date() ? (
+                            <p className="card__hint" style={{ marginTop: 8, color: 'var(--accent-cyan)' }}>Profile boosted until {new Date(economyMe.profileBoostedUntil).toLocaleString()}</p>
+                        ) : null}
                     </div>
+                    {Number(economyMe?.economy?.boostProfileCostTonNano) > 0 ? (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                            <div className="card__title">Boost your profile</div>
+                            <p className="card__hint">Pay TON to boost your profile visibility. Cost: <strong>{(economyMe.economy.boostProfileCostTonNano / 1e9).toFixed(1)} TON</strong>. Send to the configured wallet, then paste the transaction hash.</p>
+                            <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                <input className="input" value={profileBoostTxHash} onChange={(e) => setProfileBoostTxHash(e.target.value)} placeholder="Transaction hash" style={{ flex: '1 1 180px', minWidth: 0 }} />
+                                <button type="button" className="btn btn--primary" onClick={buyProfileBoostWithTon} disabled={busy || !profileBoostTxHash.trim()}>Boost profile</button>
+                            </div>
+                            {profileBoostMsg ? <p className={`status-msg ${profileBoostMsg.includes('boosted') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{profileBoostMsg}</p> : null}
+                        </div>
+                    ) : null}
+                    {Number(economyMe?.economy?.giftCostTonNano) > 0 ? (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-magenta)' }}>
+                            <div className="card__title"><IconHeart /> Gifts</div>
+                            <p className="card__hint">Send a gift to another user (Telegram ID or @username). Cost: <strong>{(economyMe.economy.giftCostTonNano / 1e9).toFixed(1)} TON</strong> per gift. Pay, then paste tx hash.</p>
+                            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <input className="input" value={giftTo} onChange={(e) => setGiftTo(e.target.value)} placeholder="Recipient: Telegram ID or @username" />
+                                <input className="input" value={giftTxHash} onChange={(e) => setGiftTxHash(e.target.value)} placeholder="Transaction hash" />
+                                <input className="input" value={giftMessage} onChange={(e) => setGiftMessage(e.target.value)} placeholder="Message (optional)" />
+                                <button type="button" className="btn btn--primary" onClick={sendGift} disabled={busy || !giftTxHash.trim() || !giftTo.trim()}><IconHeart /> Send gift</button>
+                            </div>
+                            {giftMsg ? <p className={`status-msg ${giftMsg.includes('sent') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{giftMsg}</p> : null}
+                            {giftsReceived.length > 0 ? (
+                                <div style={{ marginTop: 12 }}>
+                                    <div className="card__title" style={{ marginBottom: 6 }}>Received</div>
+                                    {giftsReceived.slice(0, 10).map((g) => (
+                                        <div key={g._id} className="card__hint" style={{ padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                                            {(g.amountNano / 1e9).toFixed(1)} TON · {g.message ? `"${g.message}"` : 'No message'} · {g.createdAt ? new Date(g.createdAt).toLocaleDateString() : ''}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : null}
+                            {giftsSent.length > 0 ? (
+                                <div style={{ marginTop: 12 }}>
+                                    <div className="card__title" style={{ marginBottom: 6 }}>Sent</div>
+                                    {giftsSent.slice(0, 10).map((g) => (
+                                        <div key={g._id} className="card__hint" style={{ padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                                            {(g.amountNano / 1e9).toFixed(1)} TON → {g.toTelegramId} · {g.message ? `"${g.message}"` : ''} · {g.createdAt ? new Date(g.createdAt).toLocaleDateString() : ''}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : null}
+                        </div>
+                    ) : null}
                     <div className="card card--stars">
                         <div className="card__title"><IconStar /> Stars</div>
                         <p className="card__hint">Telegram Stars–style in-app currency. Earn from every battle win; use for digital value, tips & perks in the ecosystem.</p>

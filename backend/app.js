@@ -53,6 +53,7 @@ function createApp() {
     app.use('/api/staking', require('./routes/staking'));
     app.use('/api/dao', require('./routes/dao'));
     app.use('/api/daily', require('./routes/daily'));
+    app.use('/api/gifts', require('./routes/gifts'));
     app.use('/api/oracle', require('./routes/oracle'));
     app.use('/api/treasury', require('./routes/treasury'));
     app.use('/api/charity', require('./routes/charity'));

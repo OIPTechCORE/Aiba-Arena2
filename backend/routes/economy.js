@@ -142,11 +142,17 @@ router.get('/me', async (req, res) => {
             createGroupCostTonNano: cfg.createGroupCostTonNano,
             boostGroupCostTonNano: cfg.boostGroupCostTonNano,
             leaderboardTopFreeCreate: cfg.leaderboardTopFreeCreate,
+            createBrokerCostTonNano: cfg.createBrokerCostTonNano,
+            boostProfileCostTonNano: cfg.boostProfileCostTonNano,
+            boostProfileDurationDays: cfg.boostProfileDurationDays,
+            giftCostTonNano: cfg.giftCostTonNano,
+            marketplaceDefaultNewBrokerPriceAIBA: cfg.marketplaceDefaultNewBrokerPriceAIBA,
             starRewardPerBattle: cfg.starRewardPerBattle,
             diamondRewardFirstWin: cfg.diamondRewardFirstWin,
             courseCompletionBadgeMintCostTonNano: cfg.courseCompletionBadgeMintCostTonNano,
             fullCourseCompletionCertificateMintCostTonNano: cfg.fullCourseCompletionCertificateMintCostTonNano,
         },
+        profileBoostedUntil: user?.profileBoostedUntil || null,
     });
 });
 

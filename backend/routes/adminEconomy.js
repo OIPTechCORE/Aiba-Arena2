@@ -70,6 +70,11 @@ router.patch('/config', async (req, res) => {
         'createGroupCostTonNano',
         'boostGroupCostTonNano',
         'leaderboardTopFreeCreate',
+        'createBrokerCostTonNano',
+        'boostProfileCostTonNano',
+        'giftCostTonNano',
+        'marketplaceDefaultNewBrokerPriceAIBA',
+        'boostProfileDurationDays',
         'oracleAibaPerTon',
         'oracleNeurPerAiba',
         'dailyCapAibaByArena',
@@ -132,6 +137,23 @@ router.patch('/config', async (req, res) => {
             update.boostGroupCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
     }
     maybeNum('leaderboardTopFreeCreate');
+    if (req.body?.createBrokerCostTonNano !== undefined) {
+        const v = Number(req.body.createBrokerCostTonNano);
+        if (Number.isFinite(v) && v >= 0)
+            update.createBrokerCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+    }
+    if (req.body?.boostProfileCostTonNano !== undefined) {
+        const v = Number(req.body.boostProfileCostTonNano);
+        if (Number.isFinite(v) && v >= 0)
+            update.boostProfileCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+    }
+    if (req.body?.giftCostTonNano !== undefined) {
+        const v = Number(req.body.giftCostTonNano);
+        if (Number.isFinite(v) && v >= 0)
+            update.giftCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+    }
+    maybeNum('marketplaceDefaultNewBrokerPriceAIBA');
+    maybeNum('boostProfileDurationDays');
     maybeNum('oracleAibaPerTon');
     maybeNum('oracleNeurPerAiba');
     maybeNum('starRewardPerBattle');
