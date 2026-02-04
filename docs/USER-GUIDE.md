@@ -177,7 +177,14 @@ The **Market** tab is the unified marketplace. All payments here are in **TON** 
 - **Result:** A new broker is created and listed on the marketplace at the default AIBA price. Everyone can see it; you appear as the seller.
 - **Tip:** If you see “txHash already used,” that payment was already applied. Use a new TON payment for another broker.
 
-### 8.2 List and buy brokers (AIBA)
+### 8.2 Stars Store (buy Stars with AIBA or TON)
+
+- **What:** **Stars** are in-app recognition currency (you also earn them from battles). You can **buy** a pack of Stars with **AIBA** or **TON**.
+- **Where:** **Market** tab and **Wallet** tab → **Stars Store** card.
+- **Buy with AIBA:** Tap **Buy with AIBA** to buy one pack (size and price set by admins).
+- **Buy with TON:** Send the required TON to the Stars Store wallet, paste the **transaction hash**, tap **Buy with TON**. TON goes to Super Admin STARS_STORE_WALLET.
+
+### 8.3 List and buy brokers (AIBA)
 
 - **List:** Select one of **your** brokers (not in a guild pool), enter a **price in AIBA**, and tap **List**. Your broker appears globally. Withdraw it from a guild first if it’s deposited there.
 - **Buy:** Browse **listings** and tap **Buy** on a listing. You pay in **AIBA**; the broker is transferred to you. Your AIBA balance is debited.

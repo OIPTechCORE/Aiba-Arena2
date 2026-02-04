@@ -84,6 +84,10 @@ const EconomyConfigSchema = new mongoose.Schema(
 
         // Stars: per-battle reward (in-app recognition currency)
         starRewardPerBattle: { type: Number, default: 1 },
+        // Stars Store (Marketplace): buy Stars with AIBA or TON. Pack = N Stars for X AIBA or Y TON. TON → STARS_STORE_WALLET.
+        starsStorePackStars: { type: Number, default: 10 },
+        starsStorePackPriceAiba: { type: Number, default: 50 },
+        starsStorePackPriceTonNano: { type: Number, default: 1_000_000_000 }, // 1 TON default (1–10 TON clamp in admin)
         // Diamonds: one-time reward on first battle win (TON/Telegram premium)
         diamondRewardFirstWin: { type: Number, default: 1 },
 

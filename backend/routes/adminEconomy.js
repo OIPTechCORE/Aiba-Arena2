@@ -89,6 +89,9 @@ router.patch('/config', async (req, res) => {
         'nftStakingRewardPerDayAiba',
         'arenaLegendMintCostAiba',
         'arenaLegendUnlockWins',
+        'starsStorePackStars',
+        'starsStorePackPriceAiba',
+        'starsStorePackPriceTonNano',
     ]);
     const bodyKeys = req.body && typeof req.body === 'object' ? Object.keys(req.body) : [];
     const unknown = bodyKeys.filter((k) => !allowedTopLevel.has(k));
@@ -169,6 +172,14 @@ router.patch('/config', async (req, res) => {
     maybeNum('nftStakingRewardPerDayAiba');
     maybeNum('arenaLegendMintCostAiba');
     maybeNum('arenaLegendUnlockWins');
+    maybeNum('starsStorePackStars');
+    maybeNum('starsStorePackPriceAiba');
+    // Stars Store TON: 1–10 TON (1e9–10e9 nano) → STARS_STORE_WALLET
+    if (req.body?.starsStorePackPriceTonNano !== undefined) {
+        const v = Number(req.body.starsStorePackPriceTonNano);
+        if (Number.isFinite(v) && v >= 0)
+            update.starsStorePackPriceTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+    }
 
     const allowed = await getAllowedArenaKeys();
 

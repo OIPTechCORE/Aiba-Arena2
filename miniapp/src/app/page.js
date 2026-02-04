@@ -246,6 +246,49 @@ export default function HomePage() {
         }
     }
 
+    // Stars Store (Marketplace): buy Stars with AIBA or TON. TON → Super Admin STARS_STORE_WALLET.
+    const [starsStoreConfig, setStarsStoreConfig] = useState(null);
+    const [starsStoreMsg, setStarsStoreMsg] = useState('');
+    const [starsStoreTxHash, setStarsStoreTxHash] = useState('');
+    async function refreshStarsStoreConfig() {
+        try {
+            const res = await api.get('/api/stars-store/config');
+            setStarsStoreConfig(res.data || null);
+        } catch {
+            setStarsStoreConfig(null);
+        }
+    }
+    async function buyStarsWithAiba() {
+        setBusy(true);
+        setStarsStoreMsg('');
+        try {
+            const res = await api.post('/api/stars-store/buy-with-aiba', { requestId: uuid() });
+            setStarsStoreMsg(`Purchased ${res.data?.starsReceived ?? 0} Stars.`);
+            await refreshEconomy();
+            await refreshStarsStoreConfig();
+        } catch (e) {
+            setStarsStoreMsg(e?.response?.data?.error || 'Purchase failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function buyStarsWithTon() {
+        if (!starsStoreTxHash.trim()) return;
+        setBusy(true);
+        setStarsStoreMsg('');
+        try {
+            const res = await api.post('/api/stars-store/buy-with-ton', { txHash: starsStoreTxHash.trim() });
+            setStarsStoreMsg(`Purchased ${res.data?.starsReceived ?? 0} Stars.`);
+            setStarsStoreTxHash('');
+            await refreshEconomy();
+            await refreshStarsStoreConfig();
+        } catch (e) {
+            setStarsStoreMsg(e?.response?.data?.error || 'Purchase failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
     // Create broker with TON (pay 1–10 TON → auto-listed on marketplace)
     const [createBrokerTxHash, setCreateBrokerTxHash] = useState('');
     const [createBrokerMsg, setCreateBrokerMsg] = useState('');
@@ -623,9 +666,9 @@ export default function HomePage() {
         if (tab === 'charity') refreshCharityAll();
         if (tab === 'university') refreshUniversity();
         if (tab === 'updates') refreshUpdatesAll();
-        if (tab === 'market') refreshListings().catch(() => {});
+        if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); }
         if (tab === 'multiverse') refreshMultiverse().catch(() => {});
-        if (tab === 'wallet') refreshGifts().catch(() => {});
+        if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab]);
 
@@ -1652,6 +1695,26 @@ export default function HomePage() {
                             {createBrokerMsg ? <p className={`status-msg ${createBrokerMsg.includes('created') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{createBrokerMsg}</p> : null}
                         </div>
                     ) : null}
+                    {starsStoreConfig?.enabled ? (
+                        <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                            <div className="card__title">Stars Store</div>
+                            <p className="card__hint">Buy Stars with AIBA or TON. Stars are in-app recognition currency (also earned from battles).</p>
+                            <p className="card__hint" style={{ marginTop: 6 }}><strong>{starsStoreConfig.packStars} Stars</strong> per pack — {starsStoreConfig.packPriceAiba > 0 ? `${starsStoreConfig.packPriceAiba} AIBA` : ''}{starsStoreConfig.packPriceAiba > 0 && starsStoreConfig.packPriceTonNano > 0 ? ' or ' : ''}{starsStoreConfig.packPriceTonNano > 0 ? `${starsStoreConfig.packPriceTonFormatted} TON` : ''}</p>
+                            <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                                {starsStoreConfig.packPriceAiba > 0 ? (
+                                    <button type="button" className="btn btn--primary" onClick={buyStarsWithAiba} disabled={busy}><IconStar /> Buy with AIBA</button>
+                                ) : null}
+                                {starsStoreConfig.packPriceTonNano > 0 && starsStoreConfig.walletForTon ? (
+                                    <>
+                                        <span className="card__hint" style={{ margin: 0 }}>Or send {starsStoreConfig.packPriceTonFormatted} TON to the Stars Store wallet, then paste tx hash:</span>
+                                        <input className="input" value={starsStoreTxHash} onChange={(e) => setStarsStoreTxHash(e.target.value)} placeholder="Transaction hash" style={{ flex: '1 1 200px', minWidth: 0 }} />
+                                        <button type="button" className="btn btn--primary" onClick={buyStarsWithTon} disabled={busy || !starsStoreTxHash.trim()}>Buy with TON</button>
+                                    </>
+                                ) : null}
+                            </div>
+                            {starsStoreMsg ? <p className={`status-msg ${starsStoreMsg.includes('Purchased') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{starsStoreMsg}</p> : null}
+                        </div>
+                    ) : null}
                     <div className="card card--elevated">
                         <div className="card__title">Marketplace</div>
                         <p className="card__hint">Sell brokers for AIBA or buy from others.</p>
@@ -2019,6 +2082,22 @@ export default function HomePage() {
                                 <button type="button" className="btn btn--primary" onClick={buyProfileBoostWithTon} disabled={busy || !profileBoostTxHash.trim()}>Boost profile</button>
                             </div>
                             {profileBoostMsg ? <p className={`status-msg ${profileBoostMsg.includes('boosted') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{profileBoostMsg}</p> : null}
+                        </div>
+                    ) : null}
+                    {starsStoreConfig?.enabled ? (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                            <div className="card__title">Stars Store</div>
+                            <p className="card__hint">{starsStoreConfig.packStars} Stars for {starsStoreConfig.packPriceAiba > 0 ? `${starsStoreConfig.packPriceAiba} AIBA` : ''}{starsStoreConfig.packPriceAiba > 0 && starsStoreConfig.packPriceTonNano > 0 ? ' or ' : ''}{starsStoreConfig.packPriceTonNano > 0 ? `${starsStoreConfig.packPriceTonFormatted} TON` : ''}. Also in Market tab.</p>
+                            <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                                {starsStoreConfig.packPriceAiba > 0 ? <button type="button" className="btn btn--secondary" onClick={buyStarsWithAiba} disabled={busy}><IconStar /> Buy with AIBA</button> : null}
+                                {starsStoreConfig.packPriceTonNano > 0 && starsStoreConfig.walletForTon ? (
+                                    <>
+                                        <input className="input" value={starsStoreTxHash} onChange={(e) => setStarsStoreTxHash(e.target.value)} placeholder="Tx hash (TON)" style={{ flex: '1 1 160px', minWidth: 0 }} />
+                                        <button type="button" className="btn btn--secondary" onClick={buyStarsWithTon} disabled={busy || !starsStoreTxHash.trim()}>Buy with TON</button>
+                                    </>
+                                ) : null}
+                            </div>
+                            {starsStoreMsg ? <p className={`status-msg ${starsStoreMsg.includes('Purchased') ? 'status-msg--success' : ''}`} style={{ marginTop: 6 }}>{starsStoreMsg}</p> : null}
                         </div>
                     ) : null}
                     {Number(economyMe?.economy?.giftCostTonNano) > 0 ? (

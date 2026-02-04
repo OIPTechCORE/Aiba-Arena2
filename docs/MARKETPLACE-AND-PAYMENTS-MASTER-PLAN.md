@@ -27,6 +27,7 @@ Every TON payment type has its **own wallet** in the Super Admin dashboard (env 
 | **Battle boost** (reward multiplier, pay TON) | `BOOST_TON_WALLET` | `boostCostTonNano` | Yes |
 | **Create group** (pay TON if not top leader) | `LEADER_BOARD_WALLET` | `createGroupCostTonNano` (1–10 TON) | Yes |
 | **Boost group** | `BOOST_GROUP_WALLET` | `boostGroupCostTonNano` (1–10 TON) | Yes |
+| **Stars Store** (buy Stars with TON) | `STARS_STORE_WALLET` | `starsStorePackPriceTonNano` (1–10 TON per pack) | Yes |
 
 All costs in the 1–10 TON range are **clamped** in the backend when Super Admin saves Economy config.
 
@@ -38,7 +39,8 @@ All costs in the 1–10 TON range are **clamped** in the backend when Super Admi
   - **Browse** listings (brokers, future: items).
   - **Sell** brokers they own (list for **AIBA** and optionally NEUR).
   - **Buy** listed brokers with **AIBA** (buyer pays; seller receives AIBA minus fee; fee can burn or go to treasury to support AIBA value).
-- **Listing currency:** Primary **AIBA** (and optional NEUR). No TON as listing price (TON is for creation/boosts/gifts only).
+  - **Stars Store:** Buy **Stars** (in-app recognition currency) with **AIBA** or **TON**. When paying with TON, the TON goes to **STARS_STORE_WALLET** (Super Admin category wallet). Stars Store appears in the Market tab and in the Wallet tab.
+- **Listing currency:** Primary **AIBA** (and optional NEUR). No TON as listing price (TON is for creation/boosts/gifts/Stars Store only).
 - **Creation flow:** User pays **TON** once to **create** a new broker → that broker is **automatically listed** on the marketplace so it is visible globally. The creating user is the seller and gets **global recognition** (shown as seller on the listing).
 
 ---
@@ -98,6 +100,7 @@ All costs in the 1–10 TON range are **clamped** in the backend when Super Admi
 | Battle boost | TON | Super Admin (BOOST_TON_WALLET) | boostCostTonNano |
 | Create group | TON | Super Admin (LEADER_BOARD_WALLET) | createGroupCostTonNano |
 | Boost group | TON | Super Admin (BOOST_GROUP_WALLET) | boostGroupCostTonNano |
+| Buy Stars (Stars Store) | AIBA or TON | — (AIBA spent) / Super Admin (STARS_STORE_WALLET) | starsStorePackStars, starsStorePackPriceAiba, starsStorePackPriceTonNano |
 
 ---
 
@@ -118,6 +121,7 @@ All costs in the 1–10 TON range are **clamped** in the backend when Super Admi
 - [x] POST `/api/gifts/send`, GET `/api/gifts/received`, GET `/api/gifts/sent`: verify TON → record gift; list received/sent.
 - [x] Admin Economy: allow and clamp all new cost keys (1–10 TON range).
 - [x] Miniapp: Create broker (TON), Boost profile (TON), Gifts (TON) UI; Market tab lists + create broker card; Wallet tab profile boost + gifts.
+- [x] **Stars Store:** Buy Stars with AIBA or TON; TON → STARS_STORE_WALLET. Config: starsStorePackStars, starsStorePackPriceAiba, starsStorePackPriceTonNano (1–10 TON). GET `/api/stars-store/config`, POST `buy-with-aiba`, POST `buy-with-ton`. Stars Store card in Market tab and Wallet tab.
 
 ---
 
@@ -132,12 +136,12 @@ All costs in the 1–10 TON range are **clamped** in the backend when Super Admi
 | **Models** | `backend/models/Broker.js` | `createdWithTonTxHash` (idempotency for create-with-ton). |
 | | `backend/models/User.js` | `profileBoostedUntil` (Date). |
 | | `backend/models/Gift.js` | fromTelegramId, toTelegramId, amountNano, txHash, message. |
-| | `backend/models/UsedTonTxHash.js` | txHash, purpose, ownerTelegramId (idempotency for boost/gift). |
+| | `backend/models/UsedTonTxHash.js` | txHash, purpose, ownerTelegramId (idempotency for boost/gift/stars_store). |
 | **Economy config** | `backend/models/EconomyConfig.js` | createBrokerCostTonNano, boostProfileCostTonNano, giftCostTonNano, boostProfileDurationDays, marketplaceDefaultNewBrokerPriceAIBA. |
 | **Admin** | `backend/routes/adminEconomy.js` | New keys in allowedTopLevel; clamp 1e9–10e9 for TON costs. |
 | **Economy API** | `backend/routes/economy.js` | GET `/api/economy/me` exposes economy.* and profileBoostedUntil. |
 | **Miniapp** | `miniapp/src/app/page.js` | **Market tab:** “Create your broker (pay TON)” card (cost, txHash, submit). **Wallet tab:** “Boost your profile” card; “Gifts” card (send form + received/sent lists). Tab-based refresh: market → listings; wallet → gifts. |
-| **Env** | `backend/.env.example` | CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET. |
+| **Env** | `backend/.env.example` | CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET, STARS_STORE_WALLET. |
 
 Related docs: **PROJECT-DESCRIPTION-SYSTEMATIC.md** (full routes/models), **USER-GUIDE.md** (player flows, all tabs), **NFT-MULTIVERSE-MASTER-PLAN.md** (NFT Multiverse: own, stake, earn AIBA; benefits for User, AIBA token, Super Admin), **LEADERBOARD-AND-GROUPS-CHECK.md** (groups: pay to create, boost with TON), **deployment.md** / **mainnet-readiness.md** (env and wallets).
 

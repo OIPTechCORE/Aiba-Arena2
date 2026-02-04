@@ -176,6 +176,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - `/api/vault` — inventory, claim-status, last-seqno.
 - `/api/leaderboard` — global list (by score/aiba/neur/battles), my-rank.
 - `/api/marketplace` — listings, list, buy.
+- `/api/stars-store` — **config** (pack Stars, price AIBA, price TON, wallet), **buy-with-aiba** (one pack), **buy-with-ton** (txHash → TON to STARS_STORE_WALLET).
 - `/api/boosts` — mine, buy (NEUR), buy-with-ton, **buy-profile-with-ton** (pay TON → profile boost visibility).
 - `/api/staking` — summary, stake, unstake, claim.
 - `/api/dao` — proposals (list, create), vote, close, execute.

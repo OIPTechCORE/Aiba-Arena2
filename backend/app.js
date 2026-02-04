@@ -64,6 +64,7 @@ function createApp() {
     app.use('/api/admin/university', require('./routes/adminUniversity'));
     app.use('/api/admin/multiverse', require('./routes/adminMultiverse'));
     app.use('/api/multiverse', require('./routes/multiverse'));
+    app.use('/api/stars-store', require('./routes/starsStore'));
 
     app.get('/api/comms/status', (_req, res) =>
         res.json({ status: 'operational', updatedAt: new Date().toISOString() }));
