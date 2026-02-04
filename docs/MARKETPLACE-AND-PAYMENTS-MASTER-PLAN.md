@@ -139,7 +139,7 @@ All costs in the 1–10 TON range are **clamped** in the backend when Super Admi
 | **Miniapp** | `miniapp/src/app/page.js` | **Market tab:** “Create your broker (pay TON)” card (cost, txHash, submit). **Wallet tab:** “Boost your profile” card; “Gifts” card (send form + received/sent lists). Tab-based refresh: market → listings; wallet → gifts. |
 | **Env** | `backend/.env.example` | CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET. |
 
-Related docs: **PROJECT-DESCRIPTION-SYSTEMATIC.md** (full routes/models), **USER-GUIDE.md** (player flows, all tabs), **LEADERBOARD-AND-GROUPS-CHECK.md** (groups: pay to create, boost with TON), **deployment.md** / **mainnet-readiness.md** (env and wallets).
+Related docs: **PROJECT-DESCRIPTION-SYSTEMATIC.md** (full routes/models), **USER-GUIDE.md** (player flows, all tabs), **NFT-MULTIVERSE-MASTER-PLAN.md** (NFT Multiverse: own, stake, earn AIBA; benefits for User, AIBA token, Super Admin), **LEADERBOARD-AND-GROUPS-CHECK.md** (groups: pay to create, boost with TON), **deployment.md** / **mainnet-readiness.md** (env and wallets).
 
 ---
 

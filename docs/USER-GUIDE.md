@@ -17,15 +17,16 @@ This guide walks you through **how to play** AIBA Arena: from opening the app to
 11. Gifts  
 12. Referrals  
 13. Brokers Tab: Combine and Mint as NFT  
-14. Leaderboard  
-15. Charity (Unite for Good)  
-16. University  
-17. Updates (Announcements)  
-18. Wallet Tab (Full Picture)  
-19. Ads and Tasks  
-20. Vault Inventory  
-21. Troubleshooting  
-22. Quick Checklist (First Session)
+14. NFT Multiverse (Own, Stake, Earn)  
+15. Leaderboard  
+16. Charity (Unite for Good)  
+17. University  
+18. Updates (Announcements)  
+19. Wallet Tab (Full Picture)  
+20. Ads and Tasks  
+21. Vault Inventory  
+22. Troubleshooting  
+23. Quick Checklist (First Session)
 
 ---
 
@@ -33,7 +34,7 @@ This guide walks you through **how to play** AIBA Arena: from opening the app to
 
 - **Where:** AIBA Arena runs as a **Telegram Mini App**. Open it from a link or bot inside Telegram (e.g. from the project’s bot or a shared link).
 - **Requirements:** Telegram account; optionally a TON wallet (TonConnect) if you want to withdraw AIBA on-chain.
-- **First time:** You may see a **cinematic intro** (skip or watch) and a **tutorial** (steps for brokers, arena, battle). The app has a **tab bar** at the bottom: **Home**, **Brokers**, **Arenas**, **Guilds**, **Market**, **Charity**, **University**, **Updates**, **Wallet**. Tap a tab to switch. A **balance strip** at the top shows NEUR, AIBA credits, Stars, Diamonds, and a verified badge if you have one.
+- **First time:** You may see a **cinematic intro** (skip or watch) and a **tutorial** (steps for brokers, arena, battle). The app has a **tab bar** at the bottom: **Home**, **Brokers**, **Market**, **Multiverse**, **Arenas**, **Guilds**, **Charity**, **University**, **Updates**, **Wallet**. Tap a tab to switch. A **balance strip** at the top shows NEUR, AIBA credits, Stars, Diamonds, and a verified badge if you have one.
 
 ---
 
@@ -46,6 +47,7 @@ This guide walks you through **how to play** AIBA Arena: from opening the app to
 | **Arenas** | Arena selector, Run battle, Battle result (score, rewards, Stars/Diamond). |
 | **Guilds** | Groups (leaderboard rank, create or join, pay TON to create if not top N, boost group with TON), My groups, deposit/withdraw broker. |
 | **Market** | Create your broker (pay TON), Marketplace (list/buy brokers with AIBA), Boosts (buy reward multiplier with NEUR). |
+| **Multiverse** | NFT universes, **My NFTs** (Broker NFTs you own), **stake** to earn AIBA daily, **claim** staking rewards. Mint Broker NFTs from the Brokers tab (pay AIBA). |
 | **Charity** | Unite for Good: campaigns, donate NEUR or AIBA, your impact, charity leaderboard. |
 | **University** | Courses and modules, progress, graduate badge, mint course badge / full certificate (pay TON). |
 | **Updates** | Announcements, status, support. |
@@ -224,14 +226,23 @@ The **Market** tab is the unified marketplace. All payments here are in **TON** 
 
 ---
 
-## 14. Leaderboard
+## 14. NFT Multiverse (Own, Stake, Earn)
+
+- **Where:** **Multiverse** tab.
+- **What:** The **NFT Multiverse** lets you see all **NFT universes** (e.g. Broker NFT), **My NFTs** (brokers you’ve minted as NFT), and **stake** them to earn **AIBA daily**.
+- **Flow:** Mint a Broker NFT from the **Brokers** tab (pay AIBA). Then open **Multiverse** → **My NFTs** → tap **Stake** on a broker NFT. Rewards accumulate per day (e.g. 5 AIBA per NFT per day; configurable). Tap **Claim rewards** to credit pending AIBA to your balance. Tap **Unstake** to stop earning and keep the NFT.
+- **Benefit:** Ownership of on-chain NFTs, passive AIBA income from staking, and alignment with the ecosystem (see [NFT-MULTIVERSE-MASTER-PLAN.md](NFT-MULTIVERSE-MASTER-PLAN.md)).
+
+---
+
+## 15. Leaderboard
 
 - **Where:** **Home** tab → **Leaderboard** card.
 - **What:** Global ranks by **score**, **AIBA**, **NEUR**, or **battles** (dropdown). You see the top players; the list is the same for everyone worldwide. Your **my-rank** (e.g. “Your leaderboard rank: #42”) is shown in the **Guilds** tab and is used to decide if you can create a group for free (top N) or must pay TON.
 
 ---
 
-## 15. Charity (Unite for Good)
+## 16. Charity (Unite for Good)
 
 - **Where:** **Charity** tab.
 - **What:** **Active campaigns** (e.g. education, health, community). Each campaign has a name, description, cause, and progress (NEUR + AIBA raised, donor count). You can **donate** NEUR and/or AIBA from your balance to a campaign; optional message and anonymous option.
@@ -240,7 +251,7 @@ The **Market** tab is the unified marketplace. All payments here are in **TON** 
 
 ---
 
-## 16. University
+## 17. University
 
 - **Where:** **University** tab.
 - **What:** **Courses** and **modules** (learning content). You see your **progress** (e.g. X of Y modules completed). Tapping a module can mark it complete (POST progress). When you complete all, you get a **graduate** badge.
@@ -248,14 +259,14 @@ The **Market** tab is the unified marketplace. All payments here are in **TON** 
 
 ---
 
-## 17. Updates (Announcements)
+## 18. Updates (Announcements)
 
 - **Where:** **Updates** tab.
 - **What:** **Announcements** from the project (title, body, type). Stay informed about news, status, and support. No action required; read and dismiss.
 
 ---
 
-## 18. Wallet Tab (Full Picture)
+## 19. Wallet Tab (Full Picture)
 
 The **Wallet** tab contains:
 
@@ -271,21 +282,21 @@ The **Wallet** tab contains:
 
 ---
 
-## 19. Ads and Tasks
+## 20. Ads and Tasks
 
 - **Ads:** After some battles you may see a **Sponsored** image/link. Tapping it opens the advertiser’s link (in Telegram or browser). This doesn’t change your balances.
 - **Tasks:** The app or backend may list **tasks** (e.g. daily quests or external links). Follow the instructions shown for each task; completion may grant rewards (implementation depends on the project).
 
 ---
 
-## 20. Vault Inventory (Optional / Debug)
+## 21. Vault Inventory (Optional / Debug)
 
 - **Vault inventory** shows the vault’s TON balance and AIBA (jetton) balance. It’s mainly for checking whether the vault has enough to pay claims and enough TON for gas.
 - If “Claim on-chain” fails with “Vault inventory too low” or “insufficient TON,” an admin needs to top up the vault; you can use this section to confirm the state.
 
 ---
 
-## 21. Troubleshooting
+## 22. Troubleshooting
 
 | Problem | What to do |
 |--------|------------|
@@ -314,7 +325,7 @@ The **Wallet** tab contains:
 
 ---
 
-## 22. Quick Checklist (First Session)
+## 23. Quick Checklist (First Session)
 
 1. Open AIBA Arena in Telegram (skip intro/tutorial if shown).
 2. Connect wallet (TonConnect).

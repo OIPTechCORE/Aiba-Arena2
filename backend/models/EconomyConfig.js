@@ -94,6 +94,13 @@ const EconomyConfigSchema = new mongoose.Schema(
         courseCompletionBadgeMintCostTonNano: { type: Number, default: 10_000_000_000 }, // 10 TON default
         // Full course completion certificate: mintable with TON when all courses completed (adjustable from Super Admin)
         fullCourseCompletionCertificateMintCostTonNano: { type: Number, default: 15_000_000_000 }, // 15 TON default
+
+        // NFT Multiverse: staking NFTs (e.g. Broker NFT) to earn AIBA
+        nftStakingApyPercent: { type: Number, default: 12 },
+        nftStakingRewardPerDayAiba: { type: Number, default: 5 },
+        // Arena Legend universe (future): mint cost in AIBA and unlock condition (battle wins)
+        arenaLegendMintCostAiba: { type: Number, default: 500 },
+        arenaLegendUnlockWins: { type: Number, default: 100 },
     },
     { timestamps: true },
 );

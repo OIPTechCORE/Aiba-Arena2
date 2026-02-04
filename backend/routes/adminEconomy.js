@@ -85,6 +85,10 @@ router.patch('/config', async (req, res) => {
         'topLeaderBadgeTopN',
         'courseCompletionBadgeMintCostTonNano',
         'fullCourseCompletionCertificateMintCostTonNano',
+        'nftStakingApyPercent',
+        'nftStakingRewardPerDayAiba',
+        'arenaLegendMintCostAiba',
+        'arenaLegendUnlockWins',
     ]);
     const bodyKeys = req.body && typeof req.body === 'object' ? Object.keys(req.body) : [];
     const unknown = bodyKeys.filter((k) => !allowedTopLevel.has(k));
@@ -161,6 +165,10 @@ router.patch('/config', async (req, res) => {
     maybeNum('topLeaderBadgeTopN');
     maybeNum('courseCompletionBadgeMintCostTonNano');
     maybeNum('fullCourseCompletionCertificateMintCostTonNano');
+    maybeNum('nftStakingApyPercent');
+    maybeNum('nftStakingRewardPerDayAiba');
+    maybeNum('arenaLegendMintCostAiba');
+    maybeNum('arenaLegendUnlockWins');
 
     const allowed = await getAllowedArenaKeys();
 

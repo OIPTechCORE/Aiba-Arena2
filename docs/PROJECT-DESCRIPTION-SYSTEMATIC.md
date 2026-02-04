@@ -17,6 +17,7 @@ This document is a **complete, systematic description** of the Aiba-Arena2 proje
 - **User flow:** [USER-GUIDE.md](USER-GUIDE.md)  
 - **Vision vs implementation:** [VISION-VS-CODEBASE-CHECK.md](VISION-VS-CODEBASE-CHECK.md)  
 - **Marketplace & payments (360° plan):** [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md)  
+- **NFT Multiverse (own, stake, earn):** [NFT-MULTIVERSE-MASTER-PLAN.md](NFT-MULTIVERSE-MASTER-PLAN.md)  
 - **Leaderboard & groups:** [LEADERBOARD-AND-GROUPS-CHECK.md](LEADERBOARD-AND-GROUPS-CHECK.md)  
 - **Deployment:** [deployment.md](deployment.md)  
 - **Mainnet readiness:** [mainnet-readiness.md](mainnet-readiness.md)  
@@ -184,6 +185,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - `/api/charity` — campaigns, donate, impact.
 - `/api/announcements` — list (active).
 - `/api/gifts` — **send** (pay TON → gift to user by telegramId/username), **received**, **sent**.
+- `/api/multiverse` — **universes** (list NFT universes), **me** (my NFTs), **stake** (stake broker NFT), **unstake**, **staking/rewards**, **staking/claim** (claim AIBA from NFT staking).
 - `/api/university` — courses, progress (GET/POST), mint-course-badge-info, mint-course-badge, mint-full-certificate-info, mint-full-certificate.
 
 **Admin (JWT required):**
@@ -199,6 +201,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - `/api/admin/stats` — DAU, total users/battles, emitted today.
 - `/api/admin/charity` — manage charity campaigns.
 - `/api/admin/announcements` — manage announcements.
+- `/api/admin/multiverse` — **universes** (list), **universes/:slug** (PATCH), **stakes** (list NFT stakes).
 - `/api/admin/university` — stats, courses, graduates.
 
 ### 5.5 Backend Models (MongoDB / Mongoose)
@@ -233,6 +236,8 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 | **Announcement** | title, body, type, active, publishedAt. |
 | **UniversityProgress** | telegramId, completedKeys[], graduatedAt. |
 | **CourseBadgeMint**, **FullCertificateMint** | One-time mint records (telegramId) for course badge and full certificate. |
+| **NftUniverse** | slug, name, type, mintCostAiba, mintCostTonNano, feeBps, burnBps, stakingEnabled, active, order (NFT Multiverse config). |
+| **NftStake** | telegramId, universeSlug, brokerId, stakedAt, lastRewardAt (stake Broker NFT to earn AIBA daily). |
 
 ### 5.6 Backend Engine and Core Logic
 

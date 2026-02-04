@@ -102,6 +102,11 @@ const IconUniversity = () => (
         <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
     </svg>
 );
+const IconMultiverse = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="12" cy="12" r="3" /><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+    </svg>
+);
 /* Futuristic Stars (Telegram Stars–style) */
 const IconStar = () => (
     <svg className="icon-svg icon-svg--star" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -132,9 +137,10 @@ const BADGE_LABELS = {
 const TAB_LIST = [
     { id: 'home', label: 'Home', Icon: IconHome },
     { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
+    { id: 'market', label: 'Market', Icon: IconMarket },
+    { id: 'multiverse', label: 'Multiverse', Icon: IconMultiverse },
     { id: 'arenas', label: 'Arenas', Icon: IconArena },
     { id: 'guilds', label: 'Guilds', Icon: IconGuilds },
-    { id: 'market', label: 'Market', Icon: IconMarket },
     { id: 'charity', label: 'Charity', Icon: IconHeart },
     { id: 'university', label: 'University', Icon: IconUniversity },
     { id: 'updates', label: 'Updates', Icon: IconUpdates },
@@ -316,6 +322,70 @@ export default function HomePage() {
             await refreshGifts();
         } catch (e) {
             setGiftMsg(e?.response?.data?.error || 'Send failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // NFT Multiverse: universes, my NFTs, stake/unstake, claim staking rewards
+    const [multiverseUniverses, setMultiverseUniverses] = useState([]);
+    const [multiverseMyNfts, setMultiverseMyNfts] = useState([]);
+    const [multiverseStakingRewards, setMultiverseStakingRewards] = useState(null);
+    const [multiverseMsg, setMultiverseMsg] = useState('');
+    const [nftStakingRewardPerDay, setNftStakingRewardPerDay] = useState(5);
+    async function refreshMultiverse() {
+        try {
+            const [uRes, meRes, rewardsRes] = await Promise.all([
+                api.get('/api/multiverse/universes'),
+                api.get('/api/multiverse/me'),
+                api.get('/api/multiverse/staking/rewards'),
+            ]);
+            setMultiverseUniverses(Array.isArray(uRes.data?.universes) ? uRes.data.universes : []);
+            setNftStakingRewardPerDay(Number(uRes.data?.nftStakingRewardPerDayAiba) || 5);
+            setMultiverseMyNfts(Array.isArray(meRes.data?.nfts) ? meRes.data.nfts : []);
+            setMultiverseStakingRewards(rewardsRes.data || null);
+        } catch {
+            setMultiverseUniverses([]);
+            setMultiverseMyNfts([]);
+            setMultiverseStakingRewards(null);
+        }
+    }
+    async function stakeNft(brokerId) {
+        setBusy(true);
+        setMultiverseMsg('');
+        try {
+            await api.post('/api/multiverse/stake', { brokerId });
+            setMultiverseMsg('NFT staked. Earn AIBA daily.');
+            await refreshMultiverse();
+        } catch (e) {
+            setMultiverseMsg(e?.response?.data?.error || 'Stake failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function unstakeNft(brokerId) {
+        setBusy(true);
+        setMultiverseMsg('');
+        try {
+            await api.post('/api/multiverse/unstake', { brokerId });
+            setMultiverseMsg('Unstaked.');
+            await refreshMultiverse();
+        } catch (e) {
+            setMultiverseMsg(e?.response?.data?.error || 'Unstake failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function claimNftStaking() {
+        setBusy(true);
+        setMultiverseMsg('');
+        try {
+            const res = await api.post('/api/multiverse/staking/claim', { requestId: uuid() });
+            setMultiverseMsg(`Claimed ${res.data?.claimedAiba ?? 0} AIBA.`);
+            await refreshMultiverse();
+            await refreshEconomy();
+        } catch (e) {
+            setMultiverseMsg(e?.response?.data?.error || 'Claim failed.');
         } finally {
             setBusy(false);
         }
@@ -554,6 +624,7 @@ export default function HomePage() {
         if (tab === 'university') refreshUniversity();
         if (tab === 'updates') refreshUpdatesAll();
         if (tab === 'market') refreshListings().catch(() => {});
+        if (tab === 'multiverse') refreshMultiverse().catch(() => {});
         if (tab === 'wallet') refreshGifts().catch(() => {});
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab]);
@@ -1324,6 +1395,7 @@ export default function HomePage() {
                  tab === 'arenas' ? 'Choose arena and run battle. Guild Wars needs a guild.' :
                  tab === 'guilds' ? 'Create or join a group; deposit brokers to the pool.' :
                  tab === 'market' ? 'Sell a broker for AIBA or buy one. Withdraw from guild first to list.' :
+                 tab === 'multiverse' ? 'Own, stake & earn. Mint Broker NFTs with AIBA; stake to earn AIBA daily.' :
                  tab === 'charity' ? 'Unite for Good. Donate NEUR or AIBA to active campaigns.' :
                  tab === 'university' ? 'Learn the game. Courses and modules right here.' :
                  tab === 'updates' ? 'Stay informed. Announcements, status & support here.' :
@@ -1614,6 +1686,59 @@ export default function HomePage() {
                         </div>
                         {boostMsg ? <p className="status-msg status-msg--success" style={{ marginTop: 8 }}>{boostMsg}</p> : null}
                         {boosts.length > 0 ? <p className="card__hint" style={{ marginTop: 8 }}>Active: {boosts.map((b) => `${b.multiplier}x until ${new Date(b.expiresAt).toLocaleString()}`).join('; ')}</p> : <p className="guide-tip">Buy a boost to multiply battle rewards.</p>}
+                    </div>
+                </section>
+
+                {/* ─── Multiverse (NFT: own, stake, earn) ────────────────────────── */}
+                <section className={`tab-panel ${tab === 'multiverse' ? 'is-active' : ''}`} aria-hidden={tab !== 'multiverse'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">NFT Multiverse</div>
+                        <p className="card__hint">Own Broker NFTs, stake them to earn AIBA daily. Mint from Brokers tab (pay AIBA).</p>
+                        <div className="action-row">
+                            <button type="button" className="btn btn--secondary" onClick={refreshMultiverse} disabled={busy}><IconRefresh /> Refresh</button>
+                        </div>
+                        {multiverseMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{multiverseMsg}</p> : null}
+                    </div>
+                    {multiverseStakingRewards != null && (multiverseStakingRewards.stakedCount > 0 || (multiverseStakingRewards.pendingRewardAiba ?? 0) > 0) ? (
+                        <div className="card card--elevated">
+                            <div className="card__title">NFT staking rewards</div>
+                            <p className="card__hint">{nftStakingRewardPerDay} AIBA per NFT per day. Staked: {multiverseStakingRewards.stakedCount ?? 0}. Pending: <strong>{multiverseStakingRewards.pendingRewardAiba ?? 0} AIBA</strong></p>
+                            <button type="button" className="btn btn--primary" onClick={claimNftStaking} disabled={busy || (multiverseStakingRewards.pendingRewardAiba ?? 0) <= 0}><IconClaim /> Claim rewards</button>
+                        </div>
+                    ) : null}
+                    <div className="card">
+                        <div className="card__title">Universes</div>
+                        <p className="card__hint">Each universe has its own mint cost and staking.</p>
+                        {multiverseUniverses.length === 0 ? <p className="guide-tip">Loading…</p> : (
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                {multiverseUniverses.map((u) => (
+                                    <li key={u.slug} className="list-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 4, marginTop: 8 }}>
+                                        <strong>{u.name}</strong>
+                                        {u.description ? <span className="card__hint">{u.description}</span> : null}
+                                        <span className="card__hint">Mint: {u.mintCostAiba > 0 ? `${u.mintCostAiba} AIBA` : u.mintCostTonNano > 0 ? `${(u.mintCostTonNano / 1e9).toFixed(1)} TON` : '—'}. Staking: {u.stakingEnabled ? 'Yes' : 'No'}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                    <div className="card">
+                        <div className="card__title">My NFTs</div>
+                        <p className="card__hint">Broker NFTs you own. Stake to earn AIBA daily; unstake anytime.</p>
+                        {multiverseMyNfts.length === 0 ? <p className="guide-tip">No Broker NFTs. Mint one from the Brokers tab (pay AIBA for mint).</p> : (
+                            multiverseMyNfts.map((nft) => (
+                                <div key={nft.brokerId} className="list-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, marginTop: 10, padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                                        <span>Broker #{String(nft.brokerId).slice(-6)} · Lv{nft.level} INT{nft.intelligence} SPD{nft.speed} RISK{nft.risk}</span>
+                                        {nft.staked ? (
+                                            <button type="button" className="btn btn--secondary" onClick={() => unstakeNft(nft.brokerId)} disabled={busy}>Unstake</button>
+                                        ) : (
+                                            <button type="button" className="btn btn--primary" onClick={() => stakeNft(nft.brokerId)} disabled={busy}><IconStake /> Stake</button>
+                                        )}
+                                    </div>
+                                    {nft.staked ? <span className="card__hint">Staked · earning {nftStakingRewardPerDay} AIBA/day</span> : null}
+                                </div>
+                            ))
+                        )}
                     </div>
                 </section>
 
