@@ -20,6 +20,9 @@
 - `BOOST_TON_WALLET` (TON wallet address that receives boost payments; boost cost: Admin → Economy `boostCostTonNano`)
 - `LEADER_BOARD_WALLET` (Super Admin: receives TON when users pay to create a group; cost: Admin → Economy `createGroupCostTonNano`, 1–10 TON)
 - `BOOST_GROUP_WALLET` (Super Admin: receives TON when users boost a group; cost: Admin → Economy `boostGroupCostTonNano`, 1–10 TON)
+- `CREATED_BROKERS_WALLET` (Super Admin: receives TON when users pay to create a broker; cost: Admin → Economy `createBrokerCostTonNano`, 1–10 TON; broker is auto-listed on marketplace)
+- `BOOST_PROFILE_WALLET` (Super Admin: receives TON when users pay to boost their profile; cost: Admin → Economy `boostProfileCostTonNano`, 1–10 TON)
+- `GIFTS_WALLET` (Super Admin: receives TON when users send a gift; cost: Admin → Economy `giftCostTonNano`, 1–10 TON)
 - `TELEGRAM_INITDATA_MAX_AGE_SECONDS` (recommended 300–900; set explicitly for mainnet)
 - `BATTLE_SEED_SECRET`
 - `ADMIN_JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` (required for production readiness checks; do not use plaintext password)

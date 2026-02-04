@@ -10,6 +10,7 @@
 | Admin login | `ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH` | Prefer bcrypt hash; no plaintext in prod |
 | Telegram bot | `TELEGRAM_BOT_TOKEN` | Rotate in BotFather; update backend secret |
 | Battle determinism | `BATTLE_SEED_SECRET` | ≥ 32 chars; changing changes battle seeds |
+| Super Admin TON wallets | `CREATED_BROKERS_WALLET`, `BOOST_PROFILE_WALLET`, `GIFTS_WALLET`, `LEADER_BOARD_WALLET`, `BOOST_GROUP_WALLET`, `BOOST_TON_WALLET` | Receive TON for create broker, profile boost, gifts, guild create/boost, battle boost; see MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md |
 
 **Validation defaults:** When env vars are unset, backend uses defaults (e.g. Telegram initData age 900s, CORS allow-all). Production readiness checks **require** explicit values for CORS, Telegram age, admin hash, battle seed, and (when vault/claims are used) vault env and TON provider. See `docs/mainnet-readiness.md` (“Validation defaults” and “Checklist enforcement”).
 

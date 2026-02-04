@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>MARKETPLACE AND PAYMENTS MASTER PLAN — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>MARKETPLACE AND PAYMENTS MASTER PLAN</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Unified Marketplace &amp; Payments — 360° Master Plan</h1>
+<p>This document is the <strong>master plan</strong> for the super, futuristic marketplace and all payments. <strong>All payments are in TON or AIBA only.</strong> Goal: position <strong>AIBA</strong> for billions-of-dollars market cap by making it the primary in-app value and reward token, with TON as the on-ramp and Super Admin revenue.</p>
+<hr/>
+<h2>1. Payment Principles</h2>
+<table>
+<thead><tr>
+<th>Principle</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Dual currency</strong></td>
+<td><strong>TON</strong> — entry fees, creation fees, boosts, gifts, group create/boost. <strong>AIBA</strong> — marketplace purchases, upgrades, in-app rewards, staking, governance.</td>
+</tr>
+<tr>
+<td><strong>AIBA demand</strong></td>
+<td>Battle rewards, referrals, daily rewards, and marketplace <strong>sales</strong> are in AIBA. Buying brokers/items on the marketplace <strong>spends AIBA</strong>, increasing circulation and perceived value. Listing prices in AIBA drive demand.</td>
+</tr>
+<tr>
+<td><strong>TON as on-ramp</strong></td>
+<td>Users pay TON to create brokers, boost profile, send gifts, create/boost groups. All TON goes to <strong>Super Admin wallets</strong> (one per product group for accounting).</td>
+</tr>
+<tr>
+<td><strong>No other tokens</strong></td>
+<td>No NEUR for marketplace listings (NEUR stays gameplay-only). No third-party tokens. TON + AIBA only.</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>2. Super Admin Wallets (per product group)</h2>
+<p>Every TON payment type has its <strong>own wallet</strong> in the Super Admin dashboard (env vars). This gives clear accounting and optional future treasury splits.</p>
+<table>
+<thead><tr>
+<th>Product / feature</th>
+<th>Env var</th>
+<th>Cost (config)</th>
+<th>Adjustable in Super Admin</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Create broker</strong> (pay TON to mint a new broker)</td>
+<td><code>CREATED_BROKERS_WALLET</code></td>
+<td><code>createBrokerCostTonNano</code> (1–10 TON)</td>
+<td>Yes (Economy config)</td>
+</tr>
+<tr>
+<td><strong>Boost your profile</strong> (visibility/recognition)</td>
+<td><code>BOOST_PROFILE_WALLET</code></td>
+<td><code>boostProfileCostTonNano</code> (1–10 TON)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Gifts</strong> (send gift to another user)</td>
+<td><code>GIFTS_WALLET</code></td>
+<td><code>giftCostTonNano</code> (1–10 TON)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Battle boost</strong> (reward multiplier, pay TON)</td>
+<td><code>BOOST_TON_WALLET</code></td>
+<td><code>boostCostTonNano</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Create group</strong> (pay TON if not top leader)</td>
+<td><code>LEADER_BOARD_WALLET</code></td>
+<td><code>createGroupCostTonNano</code> (1–10 TON)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Boost group</strong></td>
+<td><code>BOOST_GROUP_WALLET</code></td>
+<td><code>boostGroupCostTonNano</code> (1–10 TON)</td>
+<td>Yes</td>
+</tr>
+</tbody></table>
+<p>All costs in the 1–10 TON range are <strong>clamped</strong> in the backend when Super Admin saves Economy config.</p>
+<hr/>
+<h2>3. Unified Marketplace — What it is</h2>
+<ul>
+<li>- <strong>Browse</strong> listings (brokers, future: items).</li>
+<li>- <strong>Sell</strong> brokers they own (list for <strong>AIBA</strong> and optionally NEUR).</li>
+<li>- <strong>Buy</strong> listed brokers with <strong>AIBA</strong> (buyer pays; seller receives AIBA minus fee; fee can burn or go to treasury to support AIBA value).</li>
+<li><strong>Listing currency:</strong> Primary <strong>AIBA</strong> (and optional NEUR). No TON as listing price (TON is for creation/boosts/gifts only).</li>
+<li><strong>Creation flow:</strong> User pays <strong>TON</strong> once to <strong>create</strong> a new broker → that broker is <strong>automatically listed</strong> on the marketplace so it is visible globally. The creating user is the seller and gets <strong>global recognition</strong> (shown as seller on the listing).</li>
+</ul>
+<hr/>
+<h2>4. Create broker with TON (flow)</h2>
+<ol>
+<li>Cost shown from config: <strong>1–10 TON</strong> (adjustable in Super Admin).</li>
+<li>User sends TON to <strong>CREATED_BROKERS_WALLET</strong> (amount ≥ cost).</li>
+<li>User submits <strong>txHash</strong> to backend.</li>
+<li>Backend verifies payment (on-chain), then:</li>
+<li>- Creates a new <strong>Broker</strong> (owner = user).</li>
+<li>- Creates a <strong>Listing</strong> (broker, seller = user, default price in <strong>AIBA</strong> from config so it appears on marketplace).</li>
+<li>Broker appears on <strong>global marketplace</strong>; user is shown as seller → <strong>global recognition</strong>.</li>
+</ol>
+<p><strong>Config:</strong> <code>createBrokerCostTonNano</code> (1e9–10e9), <code>marketplaceDefaultNewBrokerPriceAIBA</code> (e.g. min listing price so auto-listed brokers are visible).</p>
+<hr/>
+<h2>5. Marketplace — Buy / Sell (AIBA)</h2>
+<ul>
+<li><strong>Buy:</strong> Buyer pays in <strong>AIBA</strong>; seller receives AIBA minus marketplace fee. Fee can be burned or sent to treasury (config: <code>marketplaceFeeBps</code>, <code>marketplaceBurnBps</code>). Ownership transfers to buyer.</li>
+<li><strong>Recognition:</strong> When a user’s broker is listed, they are <strong>published globally</strong> as the seller (sellerTelegramId / username on listing). Top sellers can be surfaced in a “Creators” or “Sellers” spotlight (future).</li>
+</ul>
+<hr/>
+<h2>6. Boost your profile</h2>
+<ul>
+<li>Payment goes to <strong>BOOST_PROFILE_WALLET</strong>.</li>
+<li>In return, user gets <strong>profile boost</strong> (e.g. <code>profileBoostedUntil</code> on User). While boosted:</li>
+<li>- Badge or label “Boosted” on profile/leaderboard.</li>
+<li>- Optional: higher visibility (e.g. sort boost in discovery).</li>
+<li>Config: <code>boostProfileCostTonNano</code> (1–10 TON, clamped).</li>
+</ul>
+<hr/>
+<h2>7. Gifts system</h2>
+<ul>
+<li>Payment goes to <strong>GIFTS_WALLET</strong>.</li>
+<li>Backend records the gift (from, to, amount, txHash). Recipient can see “Gifts received” (count or list). Optional: badge “Gift receiver” or “Generous” for giver.</li>
+<li>Config: <code>giftCostTonNano</code> (1–10 TON, clamped).</li>
+</ul>
+<hr/>
+<h2>8. Payment flow summary (360°)</h2>
+<table>
+<thead><tr>
+<th>Action</th>
+<th>Currency</th>
+<th>Recipient (value)</th>
+<th>Backend / config</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Create broker</td>
+<td>TON</td>
+<td>Super Admin (CREATED_BROKERS_WALLET)</td>
+<td>createBrokerCostTonNano</td>
+</tr>
+<tr>
+<td>List broker</td>
+<td>—</td>
+<td>—</td>
+<td>price in AIBA (seller sets)</td>
+</tr>
+<tr>
+<td>Buy broker</td>
+<td>AIBA</td>
+<td>Seller (minus fee); fee → burn/treasury</td>
+<td>marketplaceFeeBps, marketplaceBurnBps</td>
+</tr>
+<tr>
+<td>Boost profile</td>
+<td>TON</td>
+<td>Super Admin (BOOST_PROFILE_WALLET)</td>
+<td>boostProfileCostTonNano</td>
+</tr>
+<tr>
+<td>Send gift</td>
+<td>TON</td>
+<td>Super Admin (GIFTS_WALLET)</td>
+<td>giftCostTonNano</td>
+</tr>
+<tr>
+<td>Battle boost</td>
+<td>TON</td>
+<td>Super Admin (BOOST_TON_WALLET)</td>
+<td>boostCostTonNano</td>
+</tr>
+<tr>
+<td>Create group</td>
+<td>TON</td>
+<td>Super Admin (LEADER_BOARD_WALLET)</td>
+<td>createGroupCostTonNano</td>
+</tr>
+<tr>
+<td>Boost group</td>
+<td>TON</td>
+<td>Super Admin (BOOST_GROUP_WALLET)</td>
+<td>boostGroupCostTonNano</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>9. AIBA market cap strategy (short)</h2>
+<ul>
+<li><strong>Supply control:</strong> Burns (marketplace fee burn, upgrade costs), caps, and treasury design support long-term value.</li>
+<li><strong>Single in-app token for value:</strong> All “value” transactions (buy/sell brokers, upgrades, stakes) in AIBA; TON reserved for “entry” and “Super Admin revenue” so AIBA is the heart of the economy.</li>
+</ul>
+<hr/>
+<h2>10. Implementation checklist</h2>
+<ul>
+<li>[x] Env: <code>CREATED_BROKERS_WALLET</code>, <code>BOOST_PROFILE_WALLET</code>, <code>GIFTS_WALLET</code>.</li>
+<li>[x] POST <code>/api/brokers/create-with-ton</code>: verify TON → create broker → auto-list on marketplace.</li>
+<li>[x] POST <code>/api/boosts/buy-profile-with-ton</code>: verify TON → set User.profileBoostedUntil.</li>
+<li>[x] POST <code>/api/gifts/send</code>, GET <code>/api/gifts/received</code>, GET <code>/api/gifts/sent</code>: verify TON → record gift; list received/sent.</li>
+<li>[x] Admin Economy: allow and clamp all new cost keys (1–10 TON range).</li>
+<li>[x] Miniapp: Create broker (TON), Boost profile (TON), Gifts (TON) UI; Market tab lists + create broker card; Wallet tab profile boost + gifts.</li>
+</ul>
+<hr/>
+<h2>11. Implementation reference (codebase)</h2>
+<table>
+<thead><tr>
+<th>Layer</th>
+<th>Location</th>
+<th>Details</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Backend routes</strong></td>
+<td><code>backend/routes/brokers.js</code></td>
+<td>POST <code>/api/brokers/create-with-ton</code> (txHash → Broker + Listing).</td>
+</tr>
+<tr>
+<td></td>
+<td><code>backend/routes/boosts.js</code></td>
+<td>POST <code>/api/boosts/buy-profile-with-ton</code> (txHash → User.profileBoostedUntil).</td>
+</tr>
+<tr>
+<td></td>
+<td><code>backend/routes/gifts.js</code></td>
+<td>POST <code>/api/gifts/send</code>, GET <code>/api/gifts/received</code>, GET <code>/api/gifts/sent</code>.</td>
+</tr>
+<tr>
+<td><strong>TON verification</strong></td>
+<td><code>backend/util/tonVerify.js</code></td>
+<td><code>verifyTonPayment(txHash, wallet, amountNano)</code> — on-chain check.</td>
+</tr>
+<tr>
+<td><strong>Models</strong></td>
+<td><code>backend/models/Broker.js</code></td>
+<td><code>createdWithTonTxHash</code> (idempotency for create-with-ton).</td>
+</tr>
+<tr>
+<td></td>
+<td><code>backend/models/User.js</code></td>
+<td><code>profileBoostedUntil</code> (Date).</td>
+</tr>
+<tr>
+<td></td>
+<td><code>backend/models/Gift.js</code></td>
+<td>fromTelegramId, toTelegramId, amountNano, txHash, message.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>backend/models/UsedTonTxHash.js</code></td>
+<td>txHash, purpose, ownerTelegramId (idempotency for boost/gift).</td>
+</tr>
+<tr>
+<td><strong>Economy config</strong></td>
+<td><code>backend/models/EconomyConfig.js</code></td>
+<td>createBrokerCostTonNano, boostProfileCostTonNano, giftCostTonNano, boostProfileDurationDays, marketplaceDefaultNewBrokerPriceAIBA.</td>
+</tr>
+<tr>
+<td><strong>Admin</strong></td>
+<td><code>backend/routes/adminEconomy.js</code></td>
+<td>New keys in allowedTopLevel; clamp 1e9–10e9 for TON costs.</td>
+</tr>
+<tr>
+<td><strong>Economy API</strong></td>
+<td><code>backend/routes/economy.js</code></td>
+<td>GET <code>/api/economy/me</code> exposes economy.* and profileBoostedUntil.</td>
+</tr>
+<tr>
+<td><strong>Miniapp</strong></td>
+<td><code>miniapp/src/app/page.js</code></td>
+<td><strong>Market tab:</strong> “Create your broker (pay TON)” card (cost, txHash, submit). <strong>Wallet tab:</strong> “Boost your profile” card; “Gifts” card (send form + received/sent lists). Tab-based refresh: market → listings; wallet → gifts.</td>
+</tr>
+<tr>
+<td><strong>Env</strong></td>
+<td><code>backend/.env.example</code></td>
+<td>CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET.</td>
+</tr>
+</tbody></table>
+<p>Related docs: <strong>PROJECT-DESCRIPTION-SYSTEMATIC.md</strong> (full routes/models), <strong>USER-GUIDE.md</strong> (player flows), <strong>deployment.md</strong> / <strong>mainnet-readiness.md</strong> (env and wallets).</p>
+<hr/>
+<p>This is the <strong>360° master plan</strong> for the unified marketplace and all payments (TON + AIBA only, Super Admin wallets per product group, AIBA toward billions market cap).</p>
+  </div>
+</body>
+</html>

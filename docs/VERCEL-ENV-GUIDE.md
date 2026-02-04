@@ -105,9 +105,12 @@ Below is the **full list** of backend environment variables. Set every **require
 |-----|-------------|------------------|------|
 | **PORT** | Port the server listens on. | `5000` (Vercel/serverless may ignore) | Often set by host. |
 | **RATE_LIMIT_PER_MINUTE** | Global rate limit (requests per minute per IP). | `600` (default) | Tune as needed. |
-| **BOOST_TON_WALLET** | TON address that receives boost payments (cost set in Admin → Economy). | TON address | Needed if boosts with TON are used. |
+| **BOOST_TON_WALLET** | TON address that receives **battle** boost payments (cost set in Admin → Economy). | TON address | Needed if boosts with TON are used. |
 | **LEADER_BOARD_WALLET** | TON address that receives payment when users **pay to create** a guild (not in top N). | TON address | Needed for paid guild create. |
 | **BOOST_GROUP_WALLET** | TON address that receives payment when users **boost** a guild. | TON address | Needed for guild boost. |
+| **CREATED_BROKERS_WALLET** | TON address that receives payment when users **create a broker with TON** (broker is auto-listed on marketplace). Cost: Admin → Economy `createBrokerCostTonNano` (1–10 TON). | TON address | Needed for “Create broker (pay TON)” in Market tab. |
+| **BOOST_PROFILE_WALLET** | TON address that receives payment when users **boost their profile**. Cost: Admin → Economy `boostProfileCostTonNano` (1–10 TON). | TON address | Needed for “Boost your profile” in Wallet tab. |
+| **GIFTS_WALLET** | TON address that receives payment when users **send a gift** to another user. Cost: Admin → Economy `giftCostTonNano` (1–10 TON). | TON address | Needed for Gifts in Wallet tab. |
 
 ### 3.3 On-chain reward claims (AIBA withdrawal)
 
@@ -229,17 +232,20 @@ If you add a custom domain later, add it to the same list.
 
 You **choose** a number. It is the maximum age (in seconds) of the Telegram Mini App `initData` before the backend rejects it. Recommended: **300** (5 minutes) to **900** (15 minutes). Example: `900`.
 
-### 4.8 TON wallets (BOOST_TON_WALLET, LEADER_BOARD_WALLET, BOOST_GROUP_WALLET)
+### 4.8 TON wallets (Super Admin — per product group)
 
-These are **TON blockchain addresses** that will receive TON when users pay for boosts or guild creation/boost.
+These are **TON blockchain addresses** that receive TON when users pay for various features. Each product group can have its own wallet for clear accounting (see [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md)).
 
 1. Create or use a TON wallet (e.g. [Tonkeeper](https://tonkeeper.com/), Telegram Wallet, or another TON-compatible wallet).
 2. Get the wallet’s **address** (starts with `EQ...` or `UQ...` in modern form).
-3. **BOOST_TON_WALLET** — address that receives boost payments (set in Admin → Economy as `boostCostTonNano`).
-4. **LEADER_BOARD_WALLET** — address that receives TON when users **pay to create** a guild (not in top N).
-5. **BOOST_GROUP_WALLET** — address that receives TON when users **boost** a guild.
+3. **BOOST_TON_WALLET** — receives **battle** boost payments (Admin → Economy `boostCostTonNano`).
+4. **LEADER_BOARD_WALLET** — receives TON when users **pay to create** a guild (not in top N); cost `createGroupCostTonNano` (1–10 TON).
+5. **BOOST_GROUP_WALLET** — receives TON when users **boost** a guild; cost `boostGroupCostTonNano` (1–10 TON).
+6. **CREATED_BROKERS_WALLET** — receives TON when users **create a broker** (pay TON → broker auto-listed on marketplace); cost `createBrokerCostTonNano` (1–10 TON).
+7. **BOOST_PROFILE_WALLET** — receives TON when users **boost their profile**; cost `boostProfileCostTonNano` (1–10 TON).
+8. **GIFTS_WALLET** — receives TON when users **send a gift** to another user; cost `giftCostTonNano` (1–10 TON).
 
-You can use the same address for all three, or different addresses for accounting. Copy-paste the address as-is into the env var.
+You can use one address for all, or separate addresses per feature. Copy-paste each address as-is into the corresponding env var.
 
 ### 4.9 On-chain claims (ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON_PROVIDER_URL, TON_API_KEY)
 
@@ -292,7 +298,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 | ADMIN_PASSWORD_HASH | bcrypt hash of your password (Node with bcryptjs or bcrypt generator) |
 | CORS_ORIGIN | You compose from miniapp + admin URLs |
 | TELEGRAM_INITDATA_MAX_AGE_SECONDS | You choose (e.g. 900) |
-| BOOST_*_WALLET, LEADER_BOARD_WALLET | TON wallet address(es) from your wallet app |
+| BOOST_*_WALLET, LEADER_BOARD_WALLET, CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET | TON wallet address(es) from your wallet app (Super Admin per-product wallets) |
 | ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER | Contract deploy script output |
 | ORACLE_PRIVATE_KEY_HEX | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | TON_PROVIDER_URL | toncenter.com or provider docs (mainnet/testnet URL) |
@@ -327,7 +333,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 | NEXT_PUBLIC_BACKEND_URL | Miniapp + Admin panel (both) |
 | NEXT_PUBLIC_TONCONNECT_MANIFEST_URL | Miniapp only |
 | NEXT_PUBLIC_APP_URL / APP_URL | Miniapp only (optional) |
-| MONGO_URI, APP_ENV, CORS_ORIGIN, TELEGRAM_*, ADMIN_*, BATTLE_SEED_SECRET, BOOST_*_WALLET, LEADER_BOARD_WALLET, ARENA_VAULT_*, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON_* | Backend only (Vercel backend project or Render/Railway/etc.) |
+| MONGO_URI, APP_ENV, CORS_ORIGIN, TELEGRAM_*, ADMIN_*, BATTLE_SEED_SECRET, BOOST_*_WALLET, LEADER_BOARD_WALLET, CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET, ARENA_VAULT_*, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON_* | Backend only (Vercel backend project or Render/Railway/etc.) |
 
 ---
 

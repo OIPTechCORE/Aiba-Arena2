@@ -16,6 +16,8 @@ This document is a **complete, systematic description** of the Aiba-Arena2 proje
 - **Game mechanics:** [GAME-EXPLAINED.md](GAME-EXPLAINED.md)  
 - **User flow:** [USER-GUIDE.md](USER-GUIDE.md)  
 - **Vision vs implementation:** [VISION-VS-CODEBASE-CHECK.md](VISION-VS-CODEBASE-CHECK.md)  
+- **Marketplace & payments (360° plan):** [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md)  
+- **Leaderboard & groups:** [LEADERBOARD-AND-GROUPS-CHECK.md](LEADERBOARD-AND-GROUPS-CHECK.md)  
 - **Deployment:** [deployment.md](deployment.md)  
 - **Mainnet readiness:** [mainnet-readiness.md](mainnet-readiness.md)  
 - **Ops:** [runbook.md](runbook.md), [monitoring.md](monitoring.md)  
@@ -173,7 +175,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - `/api/vault` — inventory, claim-status, last-seqno.
 - `/api/leaderboard` — global list (by score/aiba/neur/battles), my-rank.
 - `/api/marketplace` — listings, list, buy.
-- `/api/boosts` — mine, buy (NEUR), buy-with-ton.
+- `/api/boosts` — mine, buy (NEUR), buy-with-ton, **buy-profile-with-ton** (pay TON → profile boost visibility).
 - `/api/staking` — summary, stake, unstake, claim.
 - `/api/dao` — proposals (list, create), vote, close, execute.
 - `/api/daily` — status, claim (daily NEUR).
@@ -181,6 +183,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - `/api/treasury` — summary.
 - `/api/charity` — campaigns, donate, impact.
 - `/api/announcements` — list (active).
+- `/api/gifts` — **send** (pay TON → gift to user by telegramId/username), **received**, **sent**.
 - `/api/university` — courses, progress (GET/POST), mint-course-badge-info, mint-course-badge, mint-full-certificate-info, mint-full-certificate.
 
 **Admin (JWT required):**
@@ -202,20 +205,22 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 
 | Model | Purpose |
 |-------|--------|
-| **User** | telegramId (unique), username, telegram (username, firstName, lastName, languageCode, photoUrl), lastSeenAt, lastDailyClaimAt, wallet, aibaBalance, pendingAIBA, neurBalance, starsBalance, diamondsBalance, firstWinDiamondAwardedAt, badges[], bannedUntil, bannedReason, anomalyFlags, vaultClaimSeqno. |
-| **Broker** | ownerTelegramId, risk, intelligence, speed, specialty, level, xp, energy, energyUpdatedAt, lastBattleAt, cooldowns (Map), anomalyFlags, banned, banReason, lastRequestId, nftCollectionAddress, nftItemAddress, nftItemIndex, metadataUri, guildId. |
+| **User** | telegramId (unique), username, telegram (…), lastSeenAt, lastDailyClaimAt, wallet, aibaBalance, pendingAIBA, neurBalance, starsBalance, diamondsBalance, firstWinDiamondAwardedAt, badges[], **profileBoostedUntil**, bannedUntil, bannedReason, anomalyFlags, vaultClaimSeqno. |
+| **Broker** | ownerTelegramId, **createdWithTonTxHash** (optional; idempotency for create-with-ton), risk, intelligence, speed, specialty, level, xp, energy, energyUpdatedAt, lastBattleAt, cooldowns (Map), anomalyFlags, banned, banReason, lastRequestId, nftCollectionAddress, nftItemAddress, nftItemIndex, metadataUri, guildId. |
 | **Battle** | requestId (unique), ownerTelegramId, brokerId, arena, league, modeKey, seedHex, score, rewardAiba, rewardNeur, guildId, opponentGuildId, guildShareNeur, anomaly, anomalyReason, claim (vaultAddress, toAddress, amount, seqno, validUntil, signatureBase64, payloadBocBase64). |
 | **BattleRunKey** | Idempotency lock for battle run (requestId, ownerTelegramId, status, expiresAt, battleId). TTL index for expiry. |
 | **ActionRunKey** | Generic action lock (scope, requestId, ownerTelegramId, status, expiresAt). Used e.g. for claim mutex. |
 | **GameMode** | key (unique), name, description, enabled, arena, league, energyCost, cooldownSeconds, entryNeurCost, entryAibaCost, rewardMultiplierAiba/Neur, rules. |
-| **EconomyConfig** | Single-doc config: dailyCapAiba/Neur, dailyCap*ByArena, baseRewardAibaPerScore, baseRewardNeurPerScore, emissionStartHourUtc/EndHourUtc, emissionWindowsUtc, upgradeAibaCost, trainNeurCost, repairNeurCost, combineNeurCost, marketplaceFeeBps/BurnBps, referral rewards (NEUR/AIBA referrer/referee), dailyRewardNeur, mintAibaCost, boostCostTonNano, createGroupCostTonNano, boostGroupCostTonNano, leaderboardTopFreeCreate, oracle knobs, boostCostNeur/DurationHours/Multiplier, stakingApyPercent, battle* (maxEnergy, regen, anomaly thresholds, auto-ban flags/minutes), charityImpactAibaMultiplier, starRewardPerBattle, diamondRewardFirstWin, topLeaderBadgeTopN, courseCompletionBadgeMintCostTonNano, fullCourseCompletionCertificateMintCostTonNano. |
+| **EconomyConfig** | Single-doc config: dailyCapAiba/Neur, baseReward*, trainNeurCost, repairNeurCost, combineNeurCost, marketplaceFeeBps/BurnBps, referral rewards, dailyRewardNeur, mintAibaCost, boostCostTonNano, createGroupCostTonNano, boostGroupCostTonNano, leaderboardTopFreeCreate, **createBrokerCostTonNano**, **boostProfileCostTonNano**, **boostProfileDurationDays**, **giftCostTonNano**, **marketplaceDefaultNewBrokerPriceAIBA**, boostCostNeur/DurationHours/Multiplier, stakingApyPercent, battle* (maxEnergy, regen, anomaly thresholds), charityImpactAibaMultiplier, starRewardPerBattle, diamondRewardFirstWin, topLeaderBadgeTopN, courseCompletionBadgeMintCostTonNano, fullCourseCompletionCertificateMintCostTonNano. |
 | **EconomyDay** | Per-day aggregates (UTC day key) for emission caps and tracking. |
 | **LedgerEntry** | telegramId, currency (NEUR|AIBA|STARS|DIAMONDS), direction (credit|debit), amount, reason, arena, league, sourceType, sourceId, requestId, battleId, applied, meta. Unique index on (sourceType, sourceId, telegramId, currency, direction, reason) for idempotency. |
 | **Guild** | name (unique), ownerTelegramId, members[], bio, active, pooledBrokers[], vaultNeur, vaultAiba, paidCreateTxHash, boostCount, boostedUntil, boostTxHashes[]. |
 | **Referral** | One per user: code, ownerTelegramId. |
 | **ReferralUse** | Referral use event (referrerTelegramId, refereeTelegramId, etc.). |
 | **Listing** | brokerId, sellerTelegramId, price, status, etc. (off-chain marketplace). |
-| **Boost** | telegramId, type, expiresAt (NEUR or TON boost). |
+| **Boost** | telegramId, type, multiplier, expiresAt (NEUR or TON boost). |
+| **Gift** | fromTelegramId, toTelegramId, amountNano, txHash, message; timestamps. |
+| **UsedTonTxHash** | txHash (unique), purpose (e.g. gift, profile_boost), ownerTelegramId; idempotency for TON-paid actions. |
 | **Staking** | telegramId, amount, lockedAt, etc. (off-chain staking). |
 | **Proposal** | DAO proposal (title, description, status, treasuryAmount, etc.). |
 | **Vote** | proposalId, telegramId, choice (unique per proposal per user). |
@@ -245,6 +250,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - **ton/signRewardClaim.js** — Parses ORACLE_PRIVATE_KEY_HEX (32-byte hex), builds canonical claim payload cell (vault, jettonMaster, to, amount, seqno, validUntil), signs with nacl (ed25519), returns payloadBocBase64 and signatureBase64. Used when creating a claim for user.
 - **ton/vaultRead.js** — Reads vault state (e.g. last seqno for recipient) via TON provider.
 - **ton/sendAiba.js** — Legacy: send AIBA from admin wallet (used only if ENABLE_LEGACY_PENDING_AIBA_DISPATCH=true).
+- **util/tonVerify.js** — `verifyTonPayment(txHash, walletAddress, amountNano)`: verifies on-chain that a TON transfer of at least amountNano was received by walletAddress; used by create-with-ton, buy-profile-with-ton, gifts, guild boost/create.
 
 ### 5.8 Security and Middleware
 
@@ -298,7 +304,8 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 ## 7. Economy Summary
 
 - **NEUR:** Ledger-only. Credits from battle, daily claim, referrals; debits for entry, train, repair, combine, boosts. Capped by dailyCapNeur and per-arena caps; emission windows (UTC hours) can restrict when rewards are granted.
-- **AIBA:** Off-chain balance; same units as jetton smallest unit. Credits from battle (and referrals); debits for upgrade, marketplace fee; can be withdrawn on-chain via signed claim. Capped by dailyCapAiba and per-arena; emission windows apply.
+- **AIBA:** Off-chain balance; same units as jetton smallest unit. Credits from battle (and referrals); debits for upgrade, marketplace fee; can be withdrawn on-chain via signed claim. Capped by dailyCapAiba and per-arena; emission windows apply. **Marketplace:** List/buy brokers in AIBA; create broker with TON → new broker auto-listed at default AIBA price.
+- **TON (payments to Super Admin):** All TON flows use dedicated env wallets (see [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md)): create broker → CREATED_BROKERS_WALLET; boost profile → BOOST_PROFILE_WALLET; gifts → GIFTS_WALLET; create/boost group → LEADER_BOARD_WALLET, BOOST_GROUP_WALLET; battle boost (TON) → BOOST_TON_WALLET. Costs 1–10 TON are configurable in Admin Economy and clamped in backend.
 - **STARS / DIAMONDS:** In-app recognition (Stars: per battle; Diamonds: first win one-time); ledger entries and user balances; optional badges (verified, early_adopter, top_donor, guild_leader, top_leader, champion, diamond_holder, university_graduate, course_completion, full_course_completion_certificate).
 - **Ledger:** Every credit/debit is a LedgerEntry (sourceType/sourceId/reason for idempotency); balance updates applied after ledger row created to avoid double-credit on retry.
 
@@ -311,11 +318,11 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - **Brokers:** My brokers (combine, mint NFT, select).
 - **Arenas:** Arena select; Run battle; result.
 - **Guilds:** My rank, Discover all; create (with optional TON + txHash), join; list with Join/Boost (txHash).
-- **Market:** Listings, list broker, buy; Boosts.
+- **Market:** **Create your broker (pay TON)** — cost from config, txHash → new broker auto-listed globally; listings, list broker (AIBA), buy (AIBA); Boosts (NEUR or TON).
 - **Charity:** Campaigns, donate, impact.
 - **University:** Progress (X/Y modules), courses/modules, graduate badge; mint course badge / full certificate (TON).
 - **Updates:** Announcements feed.
-- **Wallet:** Daily claim, Vault, Staking, DAO, on-chain claim (create claim + Claim on-chain via TonConnect); profile with badges; Stars and Diamonds cards.
+- **Wallet:** Profile with badges and **profileBoostedUntil**; **Boost your profile** (pay TON, txHash); **Gifts** (send to Telegram ID/username with TON, view received/sent); Daily claim, Vault, Staking, DAO, on-chain claim (create claim + Claim on-chain via TonConnect); Stars and Diamonds cards.
 - **UI:** Futuristic theme (globals.css): glass, glow, Orbitron/Exo 2, balance strip (NEUR, AIBA, Stars, Diamonds + verified badge), guide tips, icons. TonConnectButton; API via createApi(BACKEND_URL) with x-telegram-init-data or x-telegram-id (dev). Claim payload built via `lib/tonRewardClaim.js` (buildRewardClaimPayload) and sent with TonConnect.
 
 ---
@@ -344,7 +351,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - **ADMIN_SIGNER_TYPE** (stub vs real), **TON_PROVIDER_URL**, **TON_API_KEY**
 - **ADMIN_WALLET**, **ADMIN_MNEMONIC**, **ADMIN_JETTON_WALLET** (legacy send)
 - **TELEGRAM_BOT_TOKEN**, **TELEGRAM_INITDATA_MAX_AGE_SECONDS**
-- **BOOST_TON_WALLET**, **LEADER_BOARD_WALLET**, **BOOST_GROUP_WALLET**
+- **BOOST_TON_WALLET**, **LEADER_BOARD_WALLET**, **BOOST_GROUP_WALLET**, **CREATED_BROKERS_WALLET**, **BOOST_PROFILE_WALLET**, **GIFTS_WALLET** (Super Admin wallets for create broker, profile boost, gifts; see MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md)
 - **ADMIN_JWT_SECRET**, **ADMIN_EMAIL**, **ADMIN_PASSWORD_HASH**, **ADMIN_PASSWORD** (dev only)
 - **BATTLE_SEED_SECRET**
 - **ARENA_VAULT_ADDRESS**, **AIBA_JETTON_MASTER**, **ORACLE_PRIVATE_KEY_HEX**
@@ -384,6 +391,8 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - **monitoring.md** — Logs, uptime, Prometheus /metrics, suggested alerts and metrics.
 - **PROJECT-ASSESSMENT.md** — Repo-wide assessment (contracts, backend, miniapp, admin, risks).
 - **TELEGRAM-MINI-APP-SETUP-GUIDE.md** — Telegram Mini App setup.
+- **MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md** — Unified marketplace and payments (TON + AIBA only, Super Admin wallets, create broker, boost profile, gifts).
+- **LEADERBOARD-AND-GROUPS-CHECK.md** — Leaderboard and groups (global, pay-to-create/boost, wallets).
 - **CHARITY-ECOSYSTEM-PLAN.md**, **AIBA-ARENA-UNIVERSITY-PLAN.md**, **STARS-BADGES-DIAMONDS-*.md**, **UNIFIED-COMMS-ECOSYSTEM.md**, **ECOSYSTEMS-AUDIT.md** — Feature and ecosystem plans.
 
 ---

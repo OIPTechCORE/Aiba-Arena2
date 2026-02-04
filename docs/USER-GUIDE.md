@@ -122,7 +122,56 @@ To turn **AIBA credits** into **real AIBA jettons** in your TON wallet:
 
 ---
 
-## 8. Referrals
+## 8. Marketplace (Create Broker, List, Buy)
+
+The **Market** tab is the unified marketplace. All payments here are in **TON** (to create a broker) or **AIBA** (to list and buy brokers). See [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md) for the full plan.
+
+### 8.1 Create your broker with TON
+
+- **What:** Pay TON once to create a **new broker** that is **automatically listed** on the global marketplace. You get **global recognition** as the seller.
+- **Where:** Market tab → **Create your broker (pay TON)** card (shown only when the feature is configured).
+- **Steps:**
+  1. Note the **cost** (e.g. 1–10 TON; set by admins).
+  2. Send that exact amount of TON to the **wallet address** shown or communicated by the project (Super Admin “Created Brokers” wallet).
+  3. After the transaction confirms, copy the **transaction hash** (tx hash).
+  4. Paste the tx hash into the input and tap **Create broker**.
+- **Result:** A new broker is created and listed on the marketplace at the default AIBA price. Everyone can see it; you appear as the seller.
+- **Tip:** If you see “txHash already used,” that payment was already applied. Use a new TON payment for another broker.
+
+### 8.2 List and buy brokers (AIBA)
+
+- **List:** Select one of **your** brokers (not in a guild pool), enter a **price in AIBA**, and tap **List**. Your broker appears globally. Withdraw it from a guild first if it’s deposited there.
+- **Buy:** Browse **listings** and tap **Buy** on a listing. You pay in **AIBA**; the broker is transferred to you. Your AIBA balance is debited.
+- **Refresh:** Tap **Refresh** to load the latest listings.
+
+---
+
+## 9. Boost your profile
+
+- **What:** Pay TON to **boost your profile** so you get higher visibility (e.g. “Boosted” badge, better placement).
+- **Where:** Wallet tab → **Boost your profile** card (shown when the feature is configured).
+- **Steps:**
+  1. Note the **cost** (e.g. 1–10 TON).
+  2. Send that amount of TON to the project’s **Boost Profile** wallet.
+  3. Paste the **transaction hash** and tap **Boost profile**.
+- **Result:** Your profile is boosted until the configured end date. The Profile card shows “Profile boosted until &lt;date&gt;.”
+
+---
+
+## 10. Gifts
+
+- **What:** Send a **gift** to another user by paying TON. The recipient sees it in “Gifts received”; you see yours in “Gifts sent.”
+- **Where:** Wallet tab → **Gifts** card.
+- **Send a gift:**
+  1. Enter the recipient: **Telegram ID** (numeric) or **@username**.
+  2. Note the **cost** (e.g. 1–10 TON per gift).
+  3. Send that amount of TON to the project’s **Gifts** wallet.
+  4. Paste the **transaction hash**, optionally add a **message**, and tap **Send gift**.
+- **Received / Sent:** The same card shows **Received** (gifts you got) and **Sent** (gifts you sent). You can’t send a gift to yourself.
+
+---
+
+## 11. Referrals
 
 - **Create your code:** Tap **Create my referral code**. Your code appears (e.g. uppercase). Share it with friends.
 - **Use someone else’s code:** Paste their code into **Enter referral code** and tap **Apply**. You (and they) may get NEUR bonuses; applying usually requires a **connected wallet** (anti-sybil). Each code is typically one-time per user/wallet.
@@ -130,14 +179,14 @@ To turn **AIBA credits** into **real AIBA jettons** in your TON wallet:
 
 ---
 
-## 9. Ads and Tasks
+## 12. Ads and Tasks
 
 - **Ads:** After some battles you may see a **Sponsored** image/link. Tapping it opens the advertiser’s link (in Telegram or browser). This doesn’t change your balances.
 - **Tasks:** The app or backend may list **tasks** (e.g. daily quests or external links). Follow the instructions shown for each task; completion may grant rewards (implementation depends on the project).
 
 ---
 
-## 10. Vault Inventory (Optional / Debug)
+## 13. Vault Inventory (Optional / Debug)
 
 - **Vault inventory** shows the vault’s TON balance and AIBA (jetton) balance. It’s mainly for checking whether the vault has enough to pay claims and enough TON for gas.
 - If “Claim on-chain” fails with “Vault inventory too low” or “insufficient TON,” an admin needs to top up the vault; you can use this section to confirm the state.
@@ -160,10 +209,14 @@ To turn **AIBA credits** into **real AIBA jettons** in your TON wallet:
 | “No claim created” / “Could not create claim” | Backend may not have vault/oracle configured, or your AIBA balance is 0; check Balances and try again after earning more. |
 | “Guild required” for guildWars | Join or create a guild, then run battle in **guildWars**. |
 | “Referral failed (already used?…)” | Ensure wallet is connected, code is correct, and you haven’t already applied a referral. |
+| “Create failed” / “TON payment verification failed” (create broker) | Ensure you sent the exact cost in TON to the correct wallet and paste the tx hash for that transfer; each tx hash can only be used once. |
+| “txHash already used” (create broker / boost / gift) | That payment was already applied; use a new TON transfer and new tx hash for another action. |
+| “recipient not found” (gift) | The Telegram ID or @username doesn’t exist in the system; they may need to open the app once. |
+| “Gifts not configured” / “Create broker with TON not configured” | The project hasn’t set the wallet and cost in the backend; the feature is disabled. |
 
 ---
 
-## 12. Quick Checklist (First Session)
+## 15. Quick Checklist (First Session)
 
 1. Open AIBA Arena in Telegram.
 2. Connect wallet (TonConnect).
@@ -173,5 +226,7 @@ To turn **AIBA credits** into **real AIBA jettons** in your TON wallet:
 6. (Optional) Enable **Auto-claim AIBA on battle** and tap **Claim on-chain** after the next battle.
 7. (Optional) Create/join a guild and try **guildWars**.
 8. (Optional) Create referral code or apply a friend’s code.
+9. (Optional) **Market:** Create a broker with TON (pay → paste tx hash) or list/buy brokers with AIBA.
+10. (Optional) **Wallet:** Boost your profile (TON) or send a gift (TON) to another user.
 
-For more on **how the game works** (brokers, arenas, battles, economy, claims), see **docs/GAME-EXPLAINED.md**.
+For more on **how the game works** (brokers, arenas, battles, economy, claims), see **docs/GAME-EXPLAINED.md**. For **marketplace and all payments** (TON + AIBA, Super Admin wallets), see **docs/MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md**.

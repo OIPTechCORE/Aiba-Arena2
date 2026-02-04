@@ -117,18 +117,58 @@
 <li>- If you see “Vault inventory too low” or “Vault has insufficient TON,” the project needs to top up the vault; you can try again later.</li>
 </ul>
 <hr/>
-<h2>8. Referrals</h2>
+<h2>8. Marketplace (Create Broker, List, Buy)</h2>
+<p>The <strong>Market</strong> tab is the unified marketplace. All payments here are in <strong>TON</strong> (to create a broker) or <strong>AIBA</strong> (to list and buy brokers). See <a href="MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md">MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</a> for the full plan.</p>
+<h3>8.1 Create your broker with TON</h3>
+<ul>
+<li><strong>Where:</strong> Market tab → <strong>Create your broker (pay TON)</strong> card (shown only when the feature is configured).</li>
+<li><strong>Steps:</strong></li>
+<li>1. Note the <strong>cost</strong> (e.g. 1–10 TON; set by admins).</li>
+<li>2. Send that exact amount of TON to the <strong>wallet address</strong> shown or communicated by the project (Super Admin “Created Brokers” wallet).</li>
+<li>3. After the transaction confirms, copy the <strong>transaction hash</strong> (tx hash).</li>
+<li>4. Paste the tx hash into the input and tap <strong>Create broker</strong>.</li>
+<li><strong>Result:</strong> A new broker is created and listed on the marketplace at the default AIBA price. Everyone can see it; you appear as the seller.</li>
+<li><strong>Tip:</strong> If you see “txHash already used,” that payment was already applied. Use a new TON payment for another broker.</li>
+</ul>
+<h3>8.2 List and buy brokers (AIBA)</h3>
+<ul>
+<li><strong>Buy:</strong> Browse <strong>listings</strong> and tap <strong>Buy</strong> on a listing. You pay in <strong>AIBA</strong>; the broker is transferred to you. Your AIBA balance is debited.</li>
+<li><strong>Refresh:</strong> Tap <strong>Refresh</strong> to load the latest listings.</li>
+</ul>
+<hr/>
+<h2>9. Boost your profile</h2>
+<ul>
+<li><strong>Where:</strong> Wallet tab → <strong>Boost your profile</strong> card (shown when the feature is configured).</li>
+<li><strong>Steps:</strong></li>
+<li>1. Note the <strong>cost</strong> (e.g. 1–10 TON).</li>
+<li>2. Send that amount of TON to the project’s <strong>Boost Profile</strong> wallet.</li>
+<li>3. Paste the <strong>transaction hash</strong> and tap <strong>Boost profile</strong>.</li>
+<li><strong>Result:</strong> Your profile is boosted until the configured end date. The Profile card shows “Profile boosted until &amp;lt;date&amp;gt;.”</li>
+</ul>
+<hr/>
+<h2>10. Gifts</h2>
+<ul>
+<li><strong>Where:</strong> Wallet tab → <strong>Gifts</strong> card.</li>
+<li><strong>Send a gift:</strong></li>
+<li>1. Enter the recipient: <strong>Telegram ID</strong> (numeric) or <strong>@username</strong>.</li>
+<li>2. Note the <strong>cost</strong> (e.g. 1–10 TON per gift).</li>
+<li>3. Send that amount of TON to the project’s <strong>Gifts</strong> wallet.</li>
+<li>4. Paste the <strong>transaction hash</strong>, optionally add a <strong>message</strong>, and tap <strong>Send gift</strong>.</li>
+<li><strong>Received / Sent:</strong> The same card shows <strong>Received</strong> (gifts you got) and <strong>Sent</strong> (gifts you sent). You can’t send a gift to yourself.</li>
+</ul>
+<hr/>
+<h2>11. Referrals</h2>
 <ul>
 <li><strong>Use someone else’s code:</strong> Paste their code into <strong>Enter referral code</strong> and tap <strong>Apply</strong>. You (and they) may get NEUR bonuses; applying usually requires a <strong>connected wallet</strong> (anti-sybil). Each code is typically one-time per user/wallet.</li>
 <li><strong>Note:</strong> If it says “Referral failed (already used? wallet required? invalid code?)”, check: wallet connected, code correct, and that you haven’t already used a referral.</li>
 </ul>
 <hr/>
-<h2>9. Ads and Tasks</h2>
+<h2>12. Ads and Tasks</h2>
 <ul>
 <li><strong>Tasks:</strong> The app or backend may list <strong>tasks</strong> (e.g. daily quests or external links). Follow the instructions shown for each task; completion may grant rewards (implementation depends on the project).</li>
 </ul>
 <hr/>
-<h2>10. Vault Inventory (Optional / Debug)</h2>
+<h2>13. Vault Inventory (Optional / Debug)</h2>
 <ul>
 <li>If “Claim on-chain” fails with “Vault inventory too low” or “insufficient TON,” an admin needs to top up the vault; you can use this section to confirm the state.</li>
 </ul>
@@ -188,9 +228,25 @@
 <td>“Referral failed (already used?…)”</td>
 <td>Ensure wallet is connected, code is correct, and you haven’t already applied a referral.</td>
 </tr>
+<tr>
+<td>“Create failed” / “TON payment verification failed” (create broker)</td>
+<td>Ensure you sent the exact cost in TON to the correct wallet and paste the tx hash for that transfer; each tx hash can only be used once.</td>
+</tr>
+<tr>
+<td>“txHash already used” (create broker / boost / gift)</td>
+<td>That payment was already applied; use a new TON transfer and new tx hash for another action.</td>
+</tr>
+<tr>
+<td>“recipient not found” (gift)</td>
+<td>The Telegram ID or @username doesn’t exist in the system; they may need to open the app once.</td>
+</tr>
+<tr>
+<td>“Gifts not configured” / “Create broker with TON not configured”</td>
+<td>The project hasn’t set the wallet and cost in the backend; the feature is disabled.</td>
+</tr>
 </tbody></table>
 <hr/>
-<h2>12. Quick Checklist (First Session)</h2>
+<h2>15. Quick Checklist (First Session)</h2>
 <ol>
 <li>Connect wallet (TonConnect).</li>
 <li>Create starter broker and select it.</li>
@@ -199,8 +255,10 @@
 <li>(Optional) Enable <strong>Auto-claim AIBA on battle</strong> and tap <strong>Claim on-chain</strong> after the next battle.</li>
 <li>(Optional) Create/join a guild and try <strong>guildWars</strong>.</li>
 <li>(Optional) Create referral code or apply a friend’s code.</li>
+<li>(Optional) <strong>Market:</strong> Create a broker with TON (pay → paste tx hash) or list/buy brokers with AIBA.</li>
+<li>(Optional) <strong>Wallet:</strong> Boost your profile (TON) or send a gift (TON) to another user.</li>
 </ol>
-<p>For more on <strong>how the game works</strong> (brokers, arenas, battles, economy, claims), see <strong>docs/GAME-EXPLAINED.md</strong>.</p>
+<p>For more on <strong>how the game works</strong> (brokers, arenas, battles, economy, claims), see <strong>docs/GAME-EXPLAINED.md</strong>. For <strong>marketplace and all payments</strong> (TON + AIBA, Super Admin wallets), see <strong>docs/MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</strong>.</p>
   </div>
 </body>
 </html>

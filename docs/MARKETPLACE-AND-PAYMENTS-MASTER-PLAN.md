@@ -111,12 +111,36 @@ All costs in the 1–10 TON range are **clamped** in the backend when Super Admi
 
 ## 10. Implementation checklist
 
-- [x] Economy config: `createBrokerCostTonNano`, `boostProfileCostTonNano`, `giftCostTonNano` (1–10 TON), `marketplaceDefaultNewBrokerPriceAIBA`.
+- [x] Economy config: `createBrokerCostTonNano`, `boostProfileCostTonNano`, `giftCostTonNano` (1–10 TON), `boostProfileDurationDays`, `marketplaceDefaultNewBrokerPriceAIBA`.
 - [x] Env: `CREATED_BROKERS_WALLET`, `BOOST_PROFILE_WALLET`, `GIFTS_WALLET`.
 - [x] POST `/api/brokers/create-with-ton`: verify TON → create broker → auto-list on marketplace.
-- [x] POST `/api/profile/boost-with-ton`: verify TON → set User.profileBoostedUntil.
-- [x] POST `/api/gifts/send`: verify TON → record gift (from, to).
-- [x] Admin Economy: allow and clamp all new cost keys.
-- [ ] Miniapp: Create broker (TON), Boost profile (TON), Gifts (TON) UI and marketplace prominence.
+- [x] POST `/api/boosts/buy-profile-with-ton`: verify TON → set User.profileBoostedUntil.
+- [x] POST `/api/gifts/send`, GET `/api/gifts/received`, GET `/api/gifts/sent`: verify TON → record gift; list received/sent.
+- [x] Admin Economy: allow and clamp all new cost keys (1–10 TON range).
+- [x] Miniapp: Create broker (TON), Boost profile (TON), Gifts (TON) UI; Market tab lists + create broker card; Wallet tab profile boost + gifts.
+
+---
+
+## 11. Implementation reference (codebase)
+
+| Layer | Location | Details |
+|-------|----------|---------|
+| **Backend routes** | `backend/routes/brokers.js` | POST `/api/brokers/create-with-ton` (txHash → Broker + Listing). |
+| | `backend/routes/boosts.js` | POST `/api/boosts/buy-profile-with-ton` (txHash → User.profileBoostedUntil). |
+| | `backend/routes/gifts.js` | POST `/api/gifts/send`, GET `/api/gifts/received`, GET `/api/gifts/sent`. |
+| **TON verification** | `backend/util/tonVerify.js` | `verifyTonPayment(txHash, wallet, amountNano)` — on-chain check. |
+| **Models** | `backend/models/Broker.js` | `createdWithTonTxHash` (idempotency for create-with-ton). |
+| | `backend/models/User.js` | `profileBoostedUntil` (Date). |
+| | `backend/models/Gift.js` | fromTelegramId, toTelegramId, amountNano, txHash, message. |
+| | `backend/models/UsedTonTxHash.js` | txHash, purpose, ownerTelegramId (idempotency for boost/gift). |
+| **Economy config** | `backend/models/EconomyConfig.js` | createBrokerCostTonNano, boostProfileCostTonNano, giftCostTonNano, boostProfileDurationDays, marketplaceDefaultNewBrokerPriceAIBA. |
+| **Admin** | `backend/routes/adminEconomy.js` | New keys in allowedTopLevel; clamp 1e9–10e9 for TON costs. |
+| **Economy API** | `backend/routes/economy.js` | GET `/api/economy/me` exposes economy.* and profileBoostedUntil. |
+| **Miniapp** | `miniapp/src/app/page.js` | **Market tab:** “Create your broker (pay TON)” card (cost, txHash, submit). **Wallet tab:** “Boost your profile” card; “Gifts” card (send form + received/sent lists). Tab-based refresh: market → listings; wallet → gifts. |
+| **Env** | `backend/.env.example` | CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET. |
+
+Related docs: **PROJECT-DESCRIPTION-SYSTEMATIC.md** (full routes/models), **USER-GUIDE.md** (player flows), **deployment.md** / **mainnet-readiness.md** (env and wallets).
+
+---
 
 This is the **360° master plan** for the unified marketplace and all payments (TON + AIBA only, Super Admin wallets per product group, AIBA toward billions market cap).

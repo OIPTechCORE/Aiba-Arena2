@@ -58,7 +58,10 @@ These defaults apply when env vars are unset; **production should set them expli
 
 - `MONGO_URI`
 - `TELEGRAM_BOT_TOKEN` (auth + push notifications)
-- `BOOST_TON_WALLET` (optional; TON wallet for boost payments; cost set in Admin → Economy as `boostCostTonNano`)
+- `BOOST_TON_WALLET` (optional; TON wallet for battle boost payments; cost set in Admin → Economy as `boostCostTonNano`)
+- `CREATED_BROKERS_WALLET` (optional; TON wallet for create-broker-with-TON payments; cost `createBrokerCostTonNano`, 1–10 TON)
+- `BOOST_PROFILE_WALLET` (optional; TON wallet for profile boost payments; cost `boostProfileCostTonNano`, 1–10 TON)
+- `GIFTS_WALLET` (optional; TON wallet for gift payments; cost `giftCostTonNano`, 1–10 TON)
 - `TELEGRAM_INITDATA_MAX_AGE_SECONDS` (set explicitly; do not rely on defaults)
 - `BATTLE_SEED_SECRET` (must be a strong secret; never use dev defaults)
 - `ADMIN_JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`

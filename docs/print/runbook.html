@@ -51,6 +51,11 @@
 <td><code>BATTLE_SEED_SECRET</code></td>
 <td>≥ 32 chars; changing changes battle seeds</td>
 </tr>
+<tr>
+<td>Super Admin TON wallets</td>
+<td><code>CREATED_BROKERS_WALLET</code>, <code>BOOST_PROFILE_WALLET</code>, <code>GIFTS_WALLET</code>, <code>LEADER_BOARD_WALLET</code>, <code>BOOST_GROUP_WALLET</code>, <code>BOOST_TON_WALLET</code></td>
+<td>Receive TON for create broker, profile boost, gifts, guild create/boost, battle boost; see MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</td>
+</tr>
 </tbody></table>
 <p><strong>Validation defaults:</strong> When env vars are unset, backend uses defaults (e.g. Telegram initData age 900s, CORS allow-all). Production readiness checks <strong>require</strong> explicit values for CORS, Telegram age, admin hash, battle seed, and (when vault/claims are used) vault env and TON provider. See <code>docs/mainnet-readiness.md</code> (“Validation defaults” and “Checklist enforcement”).</p>
 <h2>Incident response (quick checklist)</h2>

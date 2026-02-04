@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>LEADERBOARD AND GROUPS CHECK — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>LEADERBOARD AND GROUPS CHECK</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Leaderboard &amp; Groups — Deep Check</h1>
+<p>This document verifies the codebase against the <strong>leaderboard and groups</strong> requirements. Each requirement is checked against routes, models, config, and UI.</p>
+<hr/>
+<h2>1. All users globally should be able to see the leaderboard</h2>
+<table>
+<thead><tr>
+<th>Requirement</th>
+<th>Status</th>
+<th>Where</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Leaderboard visible to all app users</td>
+<td><strong>Implemented</strong></td>
+<td><code>GET /api/leaderboard</code> — requires Telegram auth (<code>requireTelegram</code>). Any user who can open the miniapp (authenticated) can call this.</td>
+</tr>
+<tr>
+<td>No country or region filter</td>
+<td><strong>Implemented</strong></td>
+<td><code>backend/routes/leaderboard.js</code>: aggregation is over <strong>all</strong> battles/users; no <code>country</code> or <code>region</code> filter in the pipeline. Comment in code: <em>&quot;Global leaderboard: all users worldwide, no country filter.&quot;</em></td>
+</tr>
+<tr>
+<td>Miniapp shows leaderboard</td>
+<td><strong>Implemented</strong></td>
+<td><code>miniapp/src/app/page.js</code>: Home tab fetches `/api/leaderboard?by=score</td>
+<td>aiba</td>
+<td>neur</td>
+<td>battles&amp;limit=100` and displays top entries (e.g. slice 0–12).</td>
+</tr>
+</tbody></table>
+<p><strong>Conclusion:</strong> All users (globally, any country) who use the app can see the leaderboard once authenticated.</p>
+<hr/>
+<h2>2. The leaderboard should show every user from every country worldwide</h2>
+<table>
+<thead><tr>
+<th>Requirement</th>
+<th>Status</th>
+<th>Where</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>No geographic filtering</td>
+<td><strong>Implemented</strong></td>
+<td>Leaderboard aggregates by <code>ownerTelegramId</code> from <strong>all</strong> battles; no filter by country, locale, or IP.</td>
+</tr>
+<tr>
+<td>Users from any country appear</td>
+<td><strong>Implemented</strong></td>
+<td>User/country is not stored or used in the leaderboard query. Every user with battle activity is ranked.</td>
+</tr>
+</tbody></table>
+<p><strong>Conclusion:</strong> The leaderboard is global; it shows every user worldwide with no country-based filtering.</p>
+<hr/>
+<h2>3. Top-most leaders should be able to create groups</h2>
+<table>
+<thead><tr>
+<th>Requirement</th>
+<th>Status</th>
+<th>Where</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Top N by score can create a group</td>
+<td><strong>Implemented</strong></td>
+<td><code>POST /api/guilds/create</code>: uses <code>leaderboardTopFreeCreate</code> (default 50). User’s rank is computed (by total score); if <code>rank &lt;= topFree</code>, they can create <strong>without</strong> paying TON.</td>
+</tr>
+<tr>
+<td>Rank source</td>
+<td><strong>Implemented</strong></td>
+<td>Rank = count of users with <strong>higher</strong> total score + 1. Same logic as <code>GET /api/leaderboard/my-rank</code>.</td>
+</tr>
+</tbody></table>
+<p><strong>Conclusion:</strong> Top N leaders (by total score) can create a group for free. N is configurable in Super Admin (Economy config: <code>leaderboardTopFreeCreate</code>).</p>
+<hr/>
+<h2>4. Created group(s) should have a multitude of benefits</h2>
+<table>
+<thead><tr>
+<th>Benefit</th>
+<th>Status</th>
+<th>Where</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Guild Wars arena</td>
+<td><strong>Implemented</strong></td>
+<td>Game mode <code>guildWars</code> requires guild membership. Battle route checks guild for guildWars; rewards split (e.g. 80% to user, 20% to guild vault).</td>
+</tr>
+<tr>
+<td>Guild vault (NEUR)</td>
+<td><strong>Implemented</strong></td>
+<td><code>Guild.vaultNeur</code> (and <code>vaultAiba</code>). Guild Wars reward share is credited to the guild.</td>
+</tr>
+<tr>
+<td>Pooled brokers</td>
+<td><strong>Implemented</strong></td>
+<td>Members can deposit brokers into the guild pool (<code>POST /api/guilds/deposit-broker</code>); used for guild wars / matchmaking.</td>
+</tr>
+<tr>
+<td>Boost count &amp; visibility</td>
+<td><strong>Implemented</strong></td>
+<td><code>Guild.boostCount</code>, <code>boostedUntil</code>. Groups list is sorted by <code>boostCount</code> then <code>createdAt</code> — boosted groups appear higher.</td>
+</tr>
+<tr>
+<td>Join/leave, membership</td>
+<td><strong>Implemented</strong></td>
+<td>Any user can join (<code>POST /api/guilds/join</code>) or leave (<code>POST /api/guilds/leave</code>).</td>
+</tr>
+</tbody></table>
+<p><strong>Conclusion:</strong> Groups provide: Guild Wars access, guild vault (NEUR share), broker pool, boost-based visibility, and membership. Multiple benefits are in place.</p>
+<hr/>
+<h2>5. There should be an option of paying to create a group</h2>
+<table>
+<thead><tr>
+<th>Requirement</th>
+<th>Status</th>
+<th>Where</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Pay TON to create if not top N</td>
+<td><strong>Implemented</strong></td>
+<td><code>POST /api/guilds/create</code>: if user’s rank &amp;gt; <code>leaderboardTopFreeCreate</code>, they must send <code>txHash</code> proving TON payment.</td>
+</tr>
+<tr>
+<td>Payment verification</td>
+<td><strong>Implemented</strong></td>
+<td><code>verifyTonPayment(txHash, leaderBoardWallet, costNano)</code> — checks tx on-chain (value ≥ cost, recipient = LEADER_BOARD_WALLET).</td>
+</tr>
+</tbody></table>
+<p><strong>Conclusion:</strong> Users not in the top N can create a group by paying TON; payment is verified on-chain.</p>
+<hr/>
+<h2>6. Create-group cost: 1–10 TON, adjustable, TON → Super Admin’s leader board wallet</h2>
+<table>
+<thead><tr>
+<th>Requirement</th>
+<th>Status</th>
+<th>Where</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Cost between 1 TON and 10 TON</td>
+<td><strong>Implemented</strong></td>
+<td><code>EconomyConfig.createGroupCostTonNano</code> (default 1e9 = 1 TON). <strong>Admin PATCH</strong> clamps value to <strong>1e9–10e9</strong> (1–10 TON) in <code>adminEconomy.js</code>.</td>
+</tr>
+<tr>
+<td>Adjustable in Super Admin dashboard</td>
+<td><strong>Implemented</strong></td>
+<td>Admin → Economy tab loads full config (GET <code>/api/admin/economy/config</code>); JSON includes <code>createGroupCostTonNano</code>. Saving (PATCH) updates it. Backend accepts the key and clamps to 1–10 TON.</td>
+</tr>
+<tr>
+<td>Paid TON goes to Super Admin’s leader board wallet</td>
+<td><strong>Implemented</strong></td>
+<td><code>LEADER_BOARD_WALLET</code> env var. Payment is verified to that address in <code>verifyTonPayment(txHash, leaderBoardWallet, costNano)</code>.</td>
+</tr>
+</tbody></table>
+<p><strong>Conclusion:</strong> Create-group cost is 1–10 TON (enforced on save), adjustable in Super Admin Economy config, and paid TON goes to <code>LEADER_BOARD_WALLET</code>.</p>
+<hr/>
+<h2>7. Groups should be seen by all users globally</h2>
+<table>
+<thead><tr>
+<th>Requirement</th>
+<th>Status</th>
+<th>Where</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>All groups visible globally</td>
+<td><strong>Implemented</strong></td>
+<td><code>GET /api/guilds/list</code>: returns <code>Guild.find({ active: true })</code>, sorted by <code>boostCount</code>, <code>createdAt</code>; limit up to 300. No country or region filter.</td>
+</tr>
+<tr>
+<td>Miniapp shows all groups</td>
+<td><strong>Implemented</strong></td>
+<td>Guilds tab fetches <code>/api/guilds/list?limit=200</code> and displays “Discover all” with Join and Boost per group.</td>
+</tr>
+</tbody></table>
+<p><strong>Conclusion:</strong> All active groups are visible to every user globally via the list endpoint and miniapp.</p>
+<hr/>
+<h2>8. All users globally are free to join any group</h2>
+<table>
+<thead><tr>
+<th>Requirement</th>
+<th>Status</th>
+<th>Where</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Join without payment</td>
+<td><strong>Implemented</strong></td>
+<td><code>POST /api/guilds/join</code> with <code>guildId</code>; no payment or fee. User is added to <code>guild.members</code>.</td>
+</tr>
+<tr>
+<td>No restriction by country or role</td>
+<td><strong>Implemented</strong></td>
+<td>No check for country or prior membership elsewhere; any authenticated user can join any active guild.</td>
+</tr>
+</tbody></table>
+<p><strong>Conclusion:</strong> Joining a group is free and open to all users globally.</p>
+<hr/>
+<h2>9. Any user in any group can boost the group (and cost 1–10 TON, adjustable, TON → Boost Group wallet)</h2>
+<table>
+<thead><tr>
+<th>Requirement</th>
+<th>Status</th>
+<th>Where</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Any user can boost a group</td>
+<td><strong>Implemented</strong></td>
+<td><code>POST /api/guilds/:guildId/boost</code> with <code>txHash</code>. No check that the user is a member; <strong>any</strong> authenticated user can boost <strong>any</strong> group.</td>
+</tr>
+<tr>
+<td>Cost between 1 TON and 10 TON</td>
+<td><strong>Implemented</strong></td>
+<td><code>EconomyConfig.boostGroupCostTonNano</code> (default 1e9). <strong>Admin PATCH</strong> clamps to <strong>1e9–10e9</strong> (1–10 TON) in <code>adminEconomy.js</code>.</td>
+</tr>
+<tr>
+<td>Adjustable in Super Admin dashboard</td>
+<td><strong>Implemented</strong></td>
+<td>Same Economy config JSON; <code>boostGroupCostTonNano</code> is included and updated on save (with clamp).</td>
+</tr>
+<tr>
+<td>Paid TON goes to Super Admin’s boost group wallet</td>
+<td><strong>Implemented</strong></td>
+<td><code>BOOST_GROUP_WALLET</code> env var. <code>verifyTonPayment(txHash, boostWallet, costNano)</code> verifies payment to this address.</td>
+</tr>
+</tbody></table>
+<p><strong>Conclusion:</strong> Any user can boost any group; cost is 1–10 TON (enforced on save), adjustable in Super Admin Economy, and paid TON goes to <code>BOOST_GROUP_WALLET</code>.</p>
+<hr/>
+<h2>Summary table</h2>
+<table>
+<thead><tr>
+<th>#</th>
+<th>Requirement</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>All users globally can see the leaderboard</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Leaderboard shows every user from every country worldwide</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Top-most leaders can create groups</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Created groups have a multitude of benefits</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Option of paying to create a group</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Create cost 1–10 TON; adjustable; TON → Leader Board wallet</td>
+<td>✅ Implemented (clamp added in admin)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Groups seen by all users globally</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>8</td>
+<td>All users globally free to join any group</td>
+<td>✅ Implemented</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Any user can boost a group; cost 1–10 TON; adjustable; TON → Boost Group wallet</td>
+<td>✅ Implemented (clamp added in admin)</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>Code references (quick)</h2>
+<ul>
+<li><strong>Guilds:</strong> <code>backend/routes/guilds.js</code> (create, join, list, boost, deposit/withdraw broker).</li>
+<li><strong>Economy config:</strong> <code>backend/models/EconomyConfig.js</code> (<code>createGroupCostTonNano</code>, <code>boostGroupCostTonNano</code>, <code>leaderboardTopFreeCreate</code>).</li>
+<li><strong>Admin Economy:</strong> <code>backend/routes/adminEconomy.js</code> (PATCH config; create/boost cost clamped to 1–10 TON).</li>
+<li><strong>Env:</strong> <code>LEADER_BOARD_WALLET</code>, <code>BOOST_GROUP_WALLET</code> in <code>backend/.env.example</code>.</li>
+<li><strong>Miniapp:</strong> <code>miniapp/src/app/page.js</code> (leaderboard fetch/display; guilds list, create, join, boost).</li>
+</ul>
+<hr/>
+<h2>Fix applied in this check</h2>
+<ul>
+<li><strong>1–10 TON range:</strong> When Super Admin sets create or boost cost, the backend now <strong>clamps</strong> the value to 1e9–10e9 nano (1–10 TON) so the cost always stays within the required range.</li>
+</ul>
+<p>All requirements are met; the leaderboard is global, groups are visible and joinable by everyone, top leaders can create for free, others can pay 1–10 TON to create (or boost), and both costs are adjustable in the Super Admin dashboard with TON going to the correct wallets.</p>
+  </div>
+</body>
+</html>

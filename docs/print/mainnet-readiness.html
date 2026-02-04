@@ -65,7 +65,10 @@
 <h2>Secrets &amp; required production env (backend)</h2>
 <ul>
 <li><code>TELEGRAM_BOT_TOKEN</code> (auth + push notifications)</li>
-<li><code>BOOST_TON_WALLET</code> (optional; TON wallet for boost payments; cost set in Admin → Economy as <code>boostCostTonNano</code>)</li>
+<li><code>BOOST_TON_WALLET</code> (optional; TON wallet for battle boost payments; cost set in Admin → Economy as <code>boostCostTonNano</code>)</li>
+<li><code>CREATED_BROKERS_WALLET</code> (optional; TON wallet for create-broker-with-TON payments; cost <code>createBrokerCostTonNano</code>, 1–10 TON)</li>
+<li><code>BOOST_PROFILE_WALLET</code> (optional; TON wallet for profile boost payments; cost <code>boostProfileCostTonNano</code>, 1–10 TON)</li>
+<li><code>GIFTS_WALLET</code> (optional; TON wallet for gift payments; cost <code>giftCostTonNano</code>, 1–10 TON)</li>
 <li><code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code> (set explicitly; do not rely on defaults)</li>
 <li><code>BATTLE_SEED_SECRET</code> (must be a strong secret; never use dev defaults)</li>
 <li><code>ADMIN_JWT_SECRET</code>, <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD_HASH</code></li>
