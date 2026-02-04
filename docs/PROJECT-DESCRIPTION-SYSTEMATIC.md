@@ -18,6 +18,7 @@ This document is a **complete, systematic description** of the Aiba-Arena2 proje
 - **Vision vs implementation:** [VISION-VS-CODEBASE-CHECK.md](VISION-VS-CODEBASE-CHECK.md)  
 - **Marketplace & payments (360° plan):** [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md)  
 - **NFT Multiverse (own, stake, earn):** [NFT-MULTIVERSE-MASTER-PLAN.md](NFT-MULTIVERSE-MASTER-PLAN.md)  
+- **Autonomous Racing (Car & Motorcycle):** [AUTONOMOUS-RACING-MASTER-PLAN.md](AUTONOMOUS-RACING-MASTER-PLAN.md)  
 - **Leaderboard & groups:** [LEADERBOARD-AND-GROUPS-CHECK.md](LEADERBOARD-AND-GROUPS-CHECK.md)  
 - **Deployment:** [deployment.md](deployment.md)  
 - **Mainnet readiness:** [mainnet-readiness.md](mainnet-readiness.md)  
