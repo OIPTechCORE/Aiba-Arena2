@@ -31,9 +31,7 @@
 <li><strong>Auto-ban spikes</strong>: <code>rate(aiba_auto_bans_total{entity=~&quot;user|broker&quot;}[15m])</code> spikes</li>
 <li><strong>Emission denials</strong>: <code>rate(aiba_economy_emissions_total{result!=&quot;ok&quot;}[10m])</code> spikes (labels: <code>currency</code>, <code>arena</code>, <code>league</code>)</li>
 <li><strong>Sink spikes</strong>: <code>rate(aiba_economy_sinks_total[10m])</code> spikes (labels: <code>currency</code>, <code>reason</code>)</li>
-<li><strong>Withdrawal failures</strong>: <code>rate(aiba_economy_withdrawals_total{result!=&quot;ok&quot;}[10m])</code> above baseline## Metrics endpoint</li>
-</ul>
-<ul>
+<li><strong>Withdrawal failures</strong>: <code>rate(aiba_economy_withdrawals_total{result!=&quot;ok&quot;}[10m])</code> above baseline## Metrics endpoint- <strong>Backend</strong>: <code>GET /metrics</code> (Prometheus format)</li>
 <li>Includes:</li>
 <li>- Default Node.js/process metrics (prefixed <code>aiba_...</code>)</li>
 <li>- HTTP request duration histogram: <code>aiba_http_request_duration_seconds</code></li>

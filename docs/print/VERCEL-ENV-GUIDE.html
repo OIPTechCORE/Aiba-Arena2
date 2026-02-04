@@ -13,7 +13,7 @@
   </div>
   <div class="doc-body">
 <h1>Vercel Environment Variables — Systematic Guide</h1>
-<p>This guide tells you <strong>exactly which environment variables</strong> to set, <strong>in which Vercel project</strong>, and <strong>where to place them</strong> in the Vercel dashboard. Nothing is omitted.</p>
+<p>This guide tells you <strong>exactly which environment variables</strong> to set, <strong>in which Vercel project</strong>, <strong>where to place them</strong> in the Vercel dashboard, and <strong>how to obtain or generate</strong> each value. Nothing is omitted.</p>
 <hr/>
 <h2>Your Vercel Projects (Reference)</h2>
 <table>
@@ -333,8 +333,179 @@
 </tr>
 </tbody></table>
 <hr/>
-<h2>4. Cross-Reference Summary</h2>
-<h3>URLs that must match</h3>
+<h2>4. How to Get Each Environment Variable</h2>
+<p>This section explains <strong>where to obtain</strong> or <strong>how to generate</strong> every value. Do this <em>before</em> or <em>while</em> filling in the Vercel (or backend host) Environment Variables.</p>
+<h3>4.1 Frontend variables (miniapp + admin panel)</h3>
+<table>
+<thead><tr>
+<th>Variable</th>
+<th>How to get it</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>NEXT_PUBLIC_BACKEND_URL</strong></td>
+<td><strong>After</strong> you deploy the backend: use the URL your backend host gives you. <strong>Vercel:</strong> Deploy a project with root <code>backend</code> → your backend URL is <code>https://&lt;project-name&gt;.vercel.app</code>. <strong>Render / Railway:</strong> Create a Web Service, connect the repo, set root to <code>backend</code> → they show the live URL (e.g. <code>https://aiba-arena2-api.onrender.com</code>). Copy that URL (no trailing slash).</td>
+</tr>
+<tr>
+<td><strong>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</strong></td>
+<td>Optional. Your miniapp’s public URL + path: <code>https://&lt;your-miniapp-domain&gt;/api/tonconnect-manifest</code>. Same as your miniapp deployment URL (e.g. <code>https://aiba-arena2.vercel.app/api/tonconnect-manifest</code>).</td>
+</tr>
+<tr>
+<td><strong>NEXT_PUBLIC_APP_URL</strong> / <strong>APP_URL</strong></td>
+<td>Your miniapp’s public URL: e.g. <code>https://aiba-arena2.vercel.app</code> or your custom domain. Set only if you need to override auto-detection.</td>
+</tr>
+</tbody></table>
+<h3>4.2 MongoDB — MONGO_URI</h3>
+<p><strong>Option A: MongoDB Atlas (recommended for production)</strong></p>
+<ol>
+<li><strong>Create a free cluster:</strong> Clusters → Build a Database → choose M0 (free) → pick a region → Create.</li>
+<li><strong>Create a database user:</strong> Database Access → Add New Database User → choose “Password” auth, set a username and a strong password (save them). Give “Atlas admin” or “Read and write to any database”.</li>
+<li><strong>Allow network access:</strong> Network Access → Add IP Address → “Allow Access from Anywhere” (0.0.0.0/0) for Vercel/Render, or add your host’s IPs.</li>
+<li><strong>Get the connection string:</strong> Databases → Connect on your cluster → “Drivers” (or “Connect your application”) → copy the URI. It looks like <code>mongodb+srv://&lt;username&gt;:&lt;password&gt;@cluster0.xxxxx.mongodb.net/?retryWrites=true&amp;w=majority</code>. Replace <code>&lt;username&gt;</code> and <code>&lt;password&gt;</code> with your DB user (URL-encode the password if it has special characters). Add the database name: <code>.../aiba_arena?retryWrites=...</code>.</li>
+</ol>
+<p><strong>Option B: Local MongoDB</strong></p>
+<ul>
+</ul>
+<h3>4.3 Telegram — TELEGRAM_BOT_TOKEN</h3>
+<ol>
+<li>Send <strong>/newbot</strong> (or use <strong>/mybots</strong> if you already have a bot).</li>
+<li>Follow the prompts: choose a name and a username (must end in <code>bot</code>, e.g. <code>MyAibaArenaBot</code>).</li>
+<li>BotFather replies with a message containing <strong>“Use this token to access the HTTP API”</strong> and a long string like <code>7123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code>. That string is your <strong>TELEGRAM_BOT_TOKEN</strong>. Copy it and store it securely.</li>
+</ol>
+<h3>4.4 Secrets you generate (ADMIN_JWT_SECRET, BATTLE_SEED_SECRET)</h3>
+<p>These must be <strong>long, random strings</strong> (at least 32 characters). Never use the example placeholders in production.</p>
+<p><strong>Option A: Node.js (one-liner)</strong></p>
+<p>Run in a terminal (from any folder):</p>
+<pre><code>node -e &quot;console.log(require('crypto').randomBytes(32).toString('hex'))&quot;</code></pre>
+<p>You get a 64-character hex string. Use one for <strong>ADMIN_JWT_SECRET</strong> and a different one for <strong>BATTLE_SEED_SECRET</strong> (run the command twice, or run once and use the first 32 chars for one and the last 32 for the other).</p>
+<p><strong>Option B: OpenSSL</strong></p>
+<pre><code>openssl rand -hex 32</code></pre>
+<p>Use the output as the secret. Generate two separate values for JWT and battle seed.</p>
+<h3>4.5 Admin login — ADMIN_EMAIL and ADMIN_PASSWORD_HASH</h3>
+<ul>
+<li><strong>ADMIN_PASSWORD_HASH:</strong> You must store a <strong>bcrypt hash</strong> of your password, not the plain password.</li>
+</ul>
+<p><strong>How to generate the hash:</strong></p>
+<p><strong>Option A: Node.js (with bcryptjs, already in the backend)</strong></p>
+<p>From the project root:</p>
+<pre><code>cd backend
+node -e &quot;const bcrypt=require('bcryptjs'); bcrypt.hash('YOUR_CHOSEN_PASSWORD', 10).then(h=&gt;console.log(h))&quot;</code></pre>
+<p>Replace <code>YOUR_CHOSEN_PASSWORD</code> with your real admin password. The script prints a string like <code>$2a$10$...</code> — that is <strong>ADMIN_PASSWORD_HASH</strong>. Copy it into your env.</p>
+<p><strong>Option B: Online bcrypt generator</strong></p>
+<p>Use a trusted bcrypt generator (e.g. <a href="https://bcrypt-generator.com/">bcrypt-generator.com</a> with round 10). Enter your password and copy the hash. Prefer doing this on a trusted machine and never reuse that password elsewhere.</p>
+<h3>4.6 CORS_ORIGIN</h3>
+<p>You <strong>compose</strong> this yourself from your frontend URLs:</p>
+<ul>
+<li>Admin panel URL (e.g. <code>https://aiba-arena2-admin-panel.vercel.app</code>)</li>
+</ul>
+<p>Format: comma-separated, <strong>no spaces</strong>, no trailing slashes. Example:</p>
+<p><code>https://aiba-arena2.vercel.app,https://aiba-arena2-admin-panel.vercel.app</code></p>
+<p>If you add a custom domain later, add it to the same list.</p>
+<h3>4.7 TELEGRAM_INITDATA_MAX_AGE_SECONDS</h3>
+<p>You <strong>choose</strong> a number. It is the maximum age (in seconds) of the Telegram Mini App <code>initData</code> before the backend rejects it. Recommended: <strong>300</strong> (5 minutes) to <strong>900</strong> (15 minutes). Example: <code>900</code>.</p>
+<h3>4.8 TON wallets (BOOST_TON_WALLET, LEADER_BOARD_WALLET, BOOST_GROUP_WALLET)</h3>
+<p>These are <strong>TON blockchain addresses</strong> that will receive TON when users pay for boosts or guild creation/boost.</p>
+<ol>
+<li>Get the wallet’s <strong>address</strong> (starts with <code>EQ...</code> or <code>UQ...</code> in modern form).</li>
+<li><strong>BOOST_TON_WALLET</strong> — address that receives boost payments (set in Admin → Economy as <code>boostCostTonNano</code>).</li>
+<li><strong>LEADER_BOARD_WALLET</strong> — address that receives TON when users <strong>pay to create</strong> a guild (not in top N).</li>
+<li><strong>BOOST_GROUP_WALLET</strong> — address that receives TON when users <strong>boost</strong> a guild.</li>
+</ol>
+<p>You can use the same address for all three, or different addresses for accounting. Copy-paste the address as-is into the env var.</p>
+<h3>4.9 On-chain claims (ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON_PROVIDER_URL, TON_API_KEY)</h3>
+<p><strong>When you need these:</strong> Only if you want users to <strong>withdraw AIBA</strong> from the app to their TON wallet via the ArenaRewardVault contract.</p>
+<p><strong>ARENA_VAULT_ADDRESS and AIBA_JETTON_MASTER</strong></p>
+<ul>
+</ul>
+<pre><code>  npx blueprint build
+  npx blueprint run deployAibaArena</code></pre>
+<ul>
+<li>- <strong>AibaToken</strong> (jetton master) address → <strong>AIBA_JETTON_MASTER</strong></li>
+<li>- <strong>ArenaRewardVault</strong> address → <strong>ARENA_VAULT_ADDRESS</strong></li>
+</ul>
+<p><strong>ORACLE_PRIVATE_KEY_HEX</strong></p>
+<ul>
+</ul>
+<p><strong>Generate it:</strong></p>
+<pre><code>node -e &quot;console.log(require('crypto').randomBytes(32).toString('hex'))&quot;</code></pre>
+<ul>
+<li>When you deploy the vault, the deploy script will ask for this key (or its public key). Use the <strong>same</strong> key: the backend signs with the private key; the vault must have the matching public key stored (the deploy script usually derives the public key from this private key and configures the contract).</li>
+</ul>
+<p><strong>TON_PROVIDER_URL</strong></p>
+<ul>
+<li><strong>Testnet:</strong> <code>https://testnet.toncenter.com/api/v2/jsonRPC</code></li>
+<li>Or use another TON API provider; put their JSON-RPC URL here. For production with claims, the backend enforces a mainnet URL when vault/claims are configured.</li>
+</ul>
+<p><strong>TON_API_KEY</strong></p>
+<ul>
+</ul>
+<h3>4.10 Summary: where each value comes from</h3>
+<table>
+<thead><tr>
+<th>Variable(s)</th>
+<th>Source</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>NEXT_PUBLIC_BACKEND_URL</td>
+<td>Your backend deployment URL (Vercel/Render/Railway)</td>
+</tr>
+<tr>
+<td>APP_ENV</td>
+<td>You choose: <code>prod</code> for production, <code>dev</code> for local/staging only</td>
+</tr>
+<tr>
+<td>MONGO_URI</td>
+<td>MongoDB Atlas connection string, or <code>mongodb://localhost:27017/aiba_arena</code></td>
+</tr>
+<tr>
+<td>TELEGRAM_BOT_TOKEN</td>
+<td>@BotFather in Telegram</td>
+</tr>
+<tr>
+<td>ADMIN_JWT_SECRET, BATTLE_SEED_SECRET</td>
+<td><code>node -e &quot;console.log(require('crypto').randomBytes(32).toString('hex'))&quot;</code> (run twice)</td>
+</tr>
+<tr>
+<td>ADMIN_EMAIL</td>
+<td>You choose</td>
+</tr>
+<tr>
+<td>ADMIN_PASSWORD_HASH</td>
+<td>bcrypt hash of your password (Node with bcryptjs or bcrypt generator)</td>
+</tr>
+<tr>
+<td>CORS_ORIGIN</td>
+<td>You compose from miniapp + admin URLs</td>
+</tr>
+<tr>
+<td>TELEGRAM_INITDATA_MAX_AGE_SECONDS</td>
+<td>You choose (e.g. 900)</td>
+</tr>
+<tr>
+<td>BOOST_*_WALLET, LEADER_BOARD_WALLET</td>
+<td>TON wallet address(es) from your wallet app</td>
+</tr>
+<tr>
+<td>ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER</td>
+<td>Contract deploy script output</td>
+</tr>
+<tr>
+<td>ORACLE_PRIVATE_KEY_HEX</td>
+<td><code>node -e &quot;console.log(require('crypto').randomBytes(32).toString('hex'))&quot;</code></td>
+</tr>
+<tr>
+<td>TON_PROVIDER_URL</td>
+<td>toncenter.com or provider docs (mainnet/testnet URL)</td>
+</tr>
+<tr>
+<td>TON_API_KEY</td>
+<td>toncenter.com or provider sign-up</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>5. Cross-Reference Summary</h2>
+<h3>URLs that must match (see also <a href="#4-how-to-get-each-environment-variable">Section 4</a>)</h3>
 <ol>
 <li>- Same value in:</li>
 <li>- Miniapp: <strong>NEXT_PUBLIC_BACKEND_URL</strong></li>
@@ -376,7 +547,8 @@
 </tr>
 </tbody></table>
 <hr/>
-<h2>5. Step-by-Step (Copy-Paste Order)</h2>
+<h2>6. Step-by-Step (Copy-Paste Order)</h2>
+<p><strong>Tip:</strong> Get the values first using <a href="#4-how-to-get-each-environment-variable">Section 4</a>, then paste them here.</p>
 <h3>Step 1: Miniapp (aiba-arena2)</h3>
 <ol>
 <li>Add:</li>
@@ -404,7 +576,7 @@
 <li>Backend logs: no CORS errors; Telegram auth and admin login work.</li>
 </ul>
 <hr/>
-<h2>6. If Backend Is Also on Vercel</h2>
+<h2>7. If Backend Is Also on Vercel</h2>
 <p>If you create a <strong>third</strong> Vercel project for the backend (e.g. <strong>aiba-arena2-backend</strong>):</p>
 <ul>
 <li><strong>Build:</strong> Vercel will use <code>backend/vercel.json</code> (serverless via <code>api/index.js</code>).</li>
@@ -413,7 +585,7 @@
 </ul>
 <p>No environment variables from Section 3 belong in the miniapp or admin-panel Vercel projects—only in the backend project or your external backend host.</p>
 <hr/>
-<p>This is the full set: nothing omitted. Use the checklists and tables above to configure both Vercel frontends and your backend.</p>
+<p>This is the full set: nothing omitted. Use <strong>Section 4</strong> to obtain or generate each value, then the checklists and tables above to place them in the right project (Vercel or backend host).</p>
   </div>
 </body>
 </html>
