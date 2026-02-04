@@ -1,4 +1,4 @@
-/* Printable docs — screen and print */
+/* Printable docs — screen and print. All content kept inside printable area. */
 :root {
   --print-ink: #1a1a1a;
   --print-muted: #444;
@@ -19,6 +19,8 @@ body {
   max-width: 800px;
   margin: 0 auto;
   padding: 1.5rem 2rem;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 /* Screen: comfortable reading */
@@ -75,15 +77,20 @@ li {
 table {
   border-collapse: collapse;
   width: 100%;
+  max-width: 100%;
   margin: 1em 0;
   font-size: 0.95em;
   page-break-inside: avoid;
+  table-layout: fixed;
 }
 
 th, td {
   border: 1px solid var(--print-border);
   padding: 0.4em 0.6em;
   text-align: left;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 th {
@@ -105,9 +112,12 @@ pre {
   border: 1px solid var(--print-border);
   border-radius: 4px;
   padding: 1em;
-  overflow-x: auto;
+  max-width: 100%;
   white-space: pre-wrap;
+  word-wrap: break-word;
   word-break: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
   margin: 1em 0;
   page-break-inside: avoid;
 }
@@ -132,6 +142,9 @@ blockquote {
   padding: 0.5em 1em;
   border-left: 4px solid var(--print-border);
   color: var(--print-muted);
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 hr {
@@ -140,12 +153,34 @@ hr {
   margin: 1.5em 0;
 }
 
-/* Print-specific */
+/* Print-specific: keep all content inside printable area, nothing cut off */
 @media print {
-  body {
-    padding: 0.75in 1in;
+  @page {
+    margin: 0.5in;
+    size: letter; /* Use Print dialog to switch to A4 if needed */
+  }
+
+  @page :first {
+    margin-top: 0.5in;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0.25in 0.4in !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
     font-size: 10pt;
-    max-width: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .doc-body {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-wrap: break-word !important;
   }
 
   .no-print {
@@ -154,18 +189,43 @@ hr {
 
   h1, h2, h3, h4, h5, h6 {
     page-break-after: avoid;
+    max-width: 100%;
   }
 
-  pre, table, blockquote {
+  pre, blockquote {
+    page-break-inside: avoid;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  table {
+    max-width: 100% !important;
     page-break-inside: avoid;
   }
 
-  @page {
-    margin: 0.75in;
+  /* Allow large tables to break across pages with header repeat */
+  thead {
+    display: table-header-group;
   }
 
-  @page :first {
-    margin-top: 0.5in;
+  tr {
+    page-break-inside: avoid;
+  }
+
+  p, li, td, th, code, a {
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+  }
+
+  a[href]::after {
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+
+  /* Reduce orphans/widows so blocks don't look cut off */
+  p, li {
+    orphans: 2;
+    widows: 2;
   }
 }
 
@@ -174,6 +234,9 @@ hr {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--print-border);
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .doc-header h1 {
