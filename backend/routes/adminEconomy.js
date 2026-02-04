@@ -67,6 +67,9 @@ router.patch('/config', async (req, res) => {
         'dailyRewardNeur',
         'mintAibaCost',
         'boostCostTonNano',
+        'createGroupCostTonNano',
+        'boostGroupCostTonNano',
+        'leaderboardTopFreeCreate',
         'oracleAibaPerTon',
         'oracleNeurPerAiba',
         'dailyCapAibaByArena',
@@ -117,8 +120,17 @@ router.patch('/config', async (req, res) => {
     maybeNum('dailyRewardNeur');
     maybeNum('mintAibaCost');
     maybeNum('boostCostTonNano');
-    maybeNum('createGroupCostTonNano');
-    maybeNum('boostGroupCostTonNano');
+    // Groups: 1–10 TON (1e9–10e9 nano) for create/boost; clamp to range so Super Admin stays within spec.
+    if (req.body?.createGroupCostTonNano !== undefined) {
+        const v = Number(req.body.createGroupCostTonNano);
+        if (Number.isFinite(v) && v >= 0)
+            update.createGroupCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+    }
+    if (req.body?.boostGroupCostTonNano !== undefined) {
+        const v = Number(req.body.boostGroupCostTonNano);
+        if (Number.isFinite(v) && v >= 0)
+            update.boostGroupCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+    }
     maybeNum('leaderboardTopFreeCreate');
     maybeNum('oracleAibaPerTon');
     maybeNum('oracleNeurPerAiba');
