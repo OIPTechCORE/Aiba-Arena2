@@ -171,7 +171,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - `/api/referrals` — create code, use (apply referral).
 - `/api/metadata` — metadata for app.
 - `/api/battle` — **POST /run** (requestId, brokerId, arena, league, modeKey; optional auto-claim).
-- `/api/brokers` — mine, create starter, train, repair, upgrade, combine, mint-nft.
+- `/api/brokers` — mine, create starter, **create-with-ton** (pay TON → new broker + auto-list), train, repair, upgrade, combine, mint-nft.
 - `/api/vault` — inventory, claim-status, last-seqno.
 - `/api/leaderboard` — global list (by score/aiba/neur/battles), my-rank.
 - `/api/marketplace` — listings, list, buy.

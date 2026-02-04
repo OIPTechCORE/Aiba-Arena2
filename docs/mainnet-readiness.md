@@ -62,6 +62,8 @@ These defaults apply when env vars are unset; **production should set them expli
 - `CREATED_BROKERS_WALLET` (optional; TON wallet for create-broker-with-TON payments; cost `createBrokerCostTonNano`, 1–10 TON)
 - `BOOST_PROFILE_WALLET` (optional; TON wallet for profile boost payments; cost `boostProfileCostTonNano`, 1–10 TON)
 - `GIFTS_WALLET` (optional; TON wallet for gift payments; cost `giftCostTonNano`, 1–10 TON)
+- `LEADER_BOARD_WALLET` (optional; TON when users pay to create a group; cost `createGroupCostTonNano`, 1–10 TON)
+- `BOOST_GROUP_WALLET` (optional; TON when users boost a group; cost `boostGroupCostTonNano`, 1–10 TON)
 - `TELEGRAM_INITDATA_MAX_AGE_SECONDS` (set explicitly; do not rely on defaults)
 - `BATTLE_SEED_SECRET` (must be a strong secret; never use dev defaults)
 - `ADMIN_JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`

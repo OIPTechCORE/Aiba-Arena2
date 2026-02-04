@@ -164,7 +164,7 @@ This document compares the **AI Broker Battle Arena** product vision against the
 | /api/referrals | create, use |
 | /api/battle | run |
 | /api/brokers | mine, starter, **create-with-ton** (txHash → broker + auto-list), train, repair, upgrade, combine, mint-nft |
-| /api/vault | inventory, claim-status |
+| /api/vault | inventory, claim-status, last-seqno |
 | /api/leaderboard | GET / (global), GET /my-rank |
 | /api/marketplace | listings, list, buy |
 | /api/boosts | mine, buy, buy-with-ton, **buy-profile-with-ton** (txHash → profileBoostedUntil) |
@@ -174,7 +174,11 @@ This document compares the **AI Broker Battle Arena** product vision against the
 | /api/daily | status, claim |
 | /api/oracle | price |
 | /api/treasury | summary |
+| /api/charity | campaigns, donate, impact (Unite for Good) |
+| /api/announcements | list (active) — Updates tab |
 | /api/university | courses, progress (GET/POST), mint-course-badge-info, mint-course-badge, mint-full-certificate-info, mint-full-certificate |
+| /api/admin/charity | manage charity campaigns |
+| /api/admin/announcements | manage announcements |
 | /api/admin/university | stats, courses, graduates |
 | /api/admin/* | auth, tasks, ads, game-modes, economy, mod, treasury, stats, brokers (mint-jobs) |
 
@@ -196,18 +200,22 @@ This document compares the **AI Broker Battle Arena** product vision against the
 | Treasury, StabilityReserve, BuybackPool | Treasury / reserve / buyback |
 | BrokerMintJob | NFT mint queue |
 | UniversityProgress | University: telegramId, completedKeys[], graduatedAt |
+| CharityCampaign, CharityDonation | Charity: campaigns, donations (NEUR/AIBA), impact |
+| Announcement | Announcements (Updates tab) |
 | Task, Ad | Tasks, ads |
 
 ### Miniapp structure
 
-- **Tabs:** Home, Brokers, Arenas, Guilds, Market, Wallet, University (tab-content + tab-panel).
+- **Tabs:** Home, Brokers, Arenas, Guilds, Market, Charity, University, Updates, Wallet (tab-content + tab-panel).
 - **Home:** Actions (New broker, Refresh, Run battle, Vault); Arena & battle card; battle result + victory card; Referrals; Leaderboard.
 - **Brokers:** My brokers (combine, mint NFT, select).
 - **Arenas:** Arena select; Run battle; battle result.
 - **Guilds:** My rank, Discover all, create (with optional pay TON + txHash), join; all groups list with Join + Boost (txHash).
 - **Market:** **Create your broker (pay TON)** (cost, txHash → new broker auto-listed); Listings refresh, list broker, buy (AIBA); Boosts (NEUR or TON).
-- **Wallet:** Profile with badges and **profileBoostedUntil**; **Boost your profile** (pay TON, txHash); **Gifts** (send to Telegram ID/username with TON, view received/sent); Daily claim, Vault, Staking, DAO, on-chain claim (when battle + lastClaim); Stars and Diamonds cards (Telegram Stars–style, TON Diamonds).
+- **Charity:** Unite for Good — campaigns, donate NEUR/AIBA, your impact, charity leaderboard.
 - **University:** Hero (progress X / Y modules), expandable courses and modules; POST progress on module expand; graduate badge; optional mint course badge / full certificate (TON).
+- **Updates:** Announcements feed (GET /api/announcements); status, support.
+- **Wallet:** Profile with badges and **profileBoostedUntil**; **Boost your profile** (pay TON, txHash); **Gifts** (send to Telegram ID/username with TON, view received/sent); Daily claim, Vault, Staking, DAO, on-chain claim (when battle + lastClaim); Stars and Diamonds cards (Telegram Stars–style, TON Diamonds).
 - **UI:** globals.css futuristic theme; icons (Home, Brokers, Arena, Guilds, Market, Wallet, University, Run, Refresh, Claim, Mint, Stake, List, Buy, Share, Vault, Star, Diamond); balance strip (NEUR, AIBA, Stars, Diamonds + verified badge); guide tips per tab.
 
 ---

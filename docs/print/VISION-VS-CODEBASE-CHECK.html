@@ -513,7 +513,7 @@
 </tr>
 <tr>
 <td>/api/vault</td>
-<td>inventory, claim-status</td>
+<td>inventory, claim-status, last-seqno</td>
 </tr>
 <tr>
 <td>/api/leaderboard</td>
@@ -552,8 +552,24 @@
 <td>summary</td>
 </tr>
 <tr>
+<td>/api/charity</td>
+<td>campaigns, donate, impact (Unite for Good)</td>
+</tr>
+<tr>
+<td>/api/announcements</td>
+<td>list (active) — Updates tab</td>
+</tr>
+<tr>
 <td>/api/university</td>
 <td>courses, progress (GET/POST), mint-course-badge-info, mint-course-badge, mint-full-certificate-info, mint-full-certificate</td>
+</tr>
+<tr>
+<td>/api/admin/charity</td>
+<td>manage charity campaigns</td>
+</tr>
+<tr>
+<td>/api/admin/announcements</td>
+<td>manage announcements</td>
 </tr>
 <tr>
 <td>/api/admin/university</td>
@@ -628,6 +644,14 @@
 <td>University: telegramId, completedKeys[], graduatedAt</td>
 </tr>
 <tr>
+<td>CharityCampaign, CharityDonation</td>
+<td>Charity: campaigns, donations (NEUR/AIBA), impact</td>
+</tr>
+<tr>
+<td>Announcement</td>
+<td>Announcements (Updates tab)</td>
+</tr>
+<tr>
 <td>Task, Ad</td>
 <td>Tasks, ads</td>
 </tr>
@@ -639,8 +663,10 @@
 <li><strong>Arenas:</strong> Arena select; Run battle; battle result.</li>
 <li><strong>Guilds:</strong> My rank, Discover all, create (with optional pay TON + txHash), join; all groups list with Join + Boost (txHash).</li>
 <li><strong>Market:</strong> <strong>Create your broker (pay TON)</strong> (cost, txHash → new broker auto-listed); Listings refresh, list broker, buy (AIBA); Boosts (NEUR or TON).</li>
-<li><strong>Wallet:</strong> Profile with badges and <strong>profileBoostedUntil</strong>; <strong>Boost your profile</strong> (pay TON, txHash); <strong>Gifts</strong> (send to Telegram ID/username with TON, view received/sent); Daily claim, Vault, Staking, DAO, on-chain claim (when battle + lastClaim); Stars and Diamonds cards (Telegram Stars–style, TON Diamonds).</li>
+<li><strong>Charity:</strong> Unite for Good — campaigns, donate NEUR/AIBA, your impact, charity leaderboard.</li>
 <li><strong>University:</strong> Hero (progress X / Y modules), expandable courses and modules; POST progress on module expand; graduate badge; optional mint course badge / full certificate (TON).</li>
+<li><strong>Updates:</strong> Announcements feed (GET /api/announcements); status, support.</li>
+<li><strong>Wallet:</strong> Profile with badges and <strong>profileBoostedUntil</strong>; <strong>Boost your profile</strong> (pay TON, txHash); <strong>Gifts</strong> (send to Telegram ID/username with TON, view received/sent); Daily claim, Vault, Staking, DAO, on-chain claim (when battle + lastClaim); Stars and Diamonds cards (Telegram Stars–style, TON Diamonds).</li>
 <li><strong>UI:</strong> globals.css futuristic theme; icons (Home, Brokers, Arena, Guilds, Market, Wallet, University, Run, Refresh, Claim, Mint, Stake, List, Buy, Share, Vault, Star, Diamond); balance strip (NEUR, AIBA, Stars, Diamonds + verified badge); guide tips per tab.</li>
 </ul>
 <hr/>

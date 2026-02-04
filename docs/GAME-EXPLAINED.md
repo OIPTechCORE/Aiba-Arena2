@@ -1,6 +1,6 @@
 # AIBA Arena — Deep Game Explanation
 
-This document explains **what the game is**, **how it works**, and **how the pieces fit together** (brokers, arenas, battles, economy, on-chain claims, guilds, referrals).
+This document explains **what the game is**, **how it works**, and **how the pieces fit together** (brokers, arenas, battles, economy, on-chain claims, guilds, referrals, marketplace, TON payments, boost profile, gifts).
 
 ---
 
@@ -42,6 +42,7 @@ You can have **multiple brokers**. You pick one for each battle. New users get a
   - **Prediction** — intelligence-weighted (e.g. 70% int, 20% speed, 10% risk).
   - **Simulation** — more balanced (50% int, 30% speed, 20% risk).
   - **Strategy Wars** — risk matters more (60% int, 10% speed, 30% risk).
+  - **Arbitrage** — available in game modes (energy/cooldown/rewards per mode).
   - **Guild Wars** — requires guild membership; rewards split (e.g. 80% to you, 20% to guild treasury); brokers can be deposited in the guild pool.
 - **Leagues** (rookie, pro, elite):
   - Higher league = higher score multiplier and often higher energy/cooldown cost.

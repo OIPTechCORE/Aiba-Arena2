@@ -1,6 +1,6 @@
 # Aiba-Arena2
 
-- **Game explanation:** [docs/GAME-EXPLAINED.md](docs/GAME-EXPLAINED.md) — what the game is, brokers, arenas, battles, economy, claims, guilds, referrals.
+- **Game explanation:** [docs/GAME-EXPLAINED.md](docs/GAME-EXPLAINED.md) — what the game is, brokers, arenas, battles, economy, claims, guilds, referrals, marketplace, TON payments, boost profile, gifts.
 - **User guide:** [docs/USER-GUIDE.md](docs/USER-GUIDE.md) — how to play: connect wallet, create broker, run battles, earn NEUR/AIBA, withdraw AIBA on-chain, guilds, marketplace (create broker with TON, list/buy with AIBA), boost profile, gifts, referrals, troubleshooting.
 - **Marketplace & payments (360° plan):** [docs/MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](docs/MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md) — TON + AIBA only, Super Admin wallets per product, create broker, boost profile, gifts.
 - **Vision vs codebase:** [docs/VISION-VS-CODEBASE-CHECK.md](docs/VISION-VS-CODEBASE-CHECK.md) — deep check of the AI Broker Battle Arena vision/spec against the repo (implemented, partial, not implemented, misalignments).
