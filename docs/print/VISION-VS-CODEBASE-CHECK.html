@@ -86,6 +86,11 @@
 <td><strong>Implemented</strong></td>
 </tr>
 <tr>
+<td>Create broker with TON (auto-listed)</td>
+<td>POST /api/brokers/create-with-ton (txHash); CREATED_BROKERS_WALLET; createBrokerCostTonNano (1–10 TON); broker + Listing created; miniapp Market “Create your broker (pay TON)”.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
 <td>Sell brokers on marketplace</td>
 <td>Listing model; POST /api/marketplace/list, /buy; miniapp Market tab (list/buy). Off-chain only; on-chain escrow contract exists (BrokerMarketplaceEscrow).</td>
 <td><strong>Implemented</strong> (off-chain); on-chain settlement partial</td>
@@ -328,6 +333,31 @@
 </tr>
 </tbody></table>
 <hr/>
+<h2>6b. Boost profile &amp; Gifts (Vision Extensions)</h2>
+<table>
+<thead><tr>
+<th>Vision</th>
+<th>Codebase</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Boost your profile (pay TON)</td>
+<td>POST /api/boosts/buy-profile-with-ton (txHash); BOOST_PROFILE_WALLET; boostProfileCostTonNano (1–10 TON); User.profileBoostedUntil. Miniapp Wallet: “Boost your profile” card.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Gifts (pay TON to send to user)</td>
+<td>POST /api/gifts/send (txHash, toTelegramId or toUsername, message); GET /api/gifts/received, /sent; GIFTS_WALLET; giftCostTonNano (1–10 TON); Gift model; UsedTonTxHash idempotency. Miniapp Wallet: Gifts card (send, received, sent).</td>
+<td><strong>Implemented</strong></td>
+</tr>
+<tr>
+<td>Super Admin: costs + wallets</td>
+<td>Admin Economy: boostProfileCostTonNano, boostProfileDurationDays, giftCostTonNano. Env: BOOST_PROFILE_WALLET, GIFTS_WALLET.</td>
+<td><strong>Implemented</strong></td>
+</tr>
+</tbody></table>
+<hr/>
 <h2>7. Admin Panel</h2>
 <table>
 <thead><tr>
@@ -479,7 +509,7 @@
 </tr>
 <tr>
 <td>/api/brokers</td>
-<td>mine, starter, train, repair, upgrade, combine, mint-nft</td>
+<td>mine, starter, <strong>create-with-ton</strong> (txHash → broker + auto-list), train, repair, upgrade, combine, mint-nft</td>
 </tr>
 <tr>
 <td>/api/vault</td>
@@ -495,7 +525,11 @@
 </tr>
 <tr>
 <td>/api/boosts</td>
-<td>mine, buy, buy-with-ton</td>
+<td>mine, buy, buy-with-ton, <strong>buy-profile-with-ton</strong> (txHash → profileBoostedUntil)</td>
+</tr>
+<tr>
+<td>/api/gifts</td>
+<td><strong>send</strong> (txHash, toTelegramId or toUsername, message), <strong>received</strong>, <strong>sent</strong></td>
 </tr>
 <tr>
 <td>/api/staking</td>
@@ -539,7 +573,7 @@
 <tbody>
 <tr>
 <td>User, Broker, Battle, BattleRunKey</td>
-<td>Core game</td>
+<td>Core game; User.profileBoostedUntil; Broker.createdWithTonTxHash</td>
 </tr>
 <tr>
 <td>GameMode</td>
@@ -564,6 +598,14 @@
 <tr>
 <td>Boost</td>
 <td>Reward multiplier (NEUR or TON)</td>
+</tr>
+<tr>
+<td>Gift</td>
+<td>fromTelegramId, toTelegramId, amountNano, txHash, message (gifts with TON)</td>
+</tr>
+<tr>
+<td>UsedTonTxHash</td>
+<td>txHash, purpose, ownerTelegramId (idempotency for gift, profile_boost)</td>
 </tr>
 <tr>
 <td>Staking</td>
@@ -596,8 +638,8 @@
 <li><strong>Brokers:</strong> My brokers (combine, mint NFT, select).</li>
 <li><strong>Arenas:</strong> Arena select; Run battle; battle result.</li>
 <li><strong>Guilds:</strong> My rank, Discover all, create (with optional pay TON + txHash), join; all groups list with Join + Boost (txHash).</li>
-<li><strong>Market:</strong> Listings refresh, list broker, buy; Boosts.</li>
-<li><strong>Wallet:</strong> Daily claim, Vault, Staking, DAO, on-chain claim (when battle + lastClaim); Profile with badges; Stars and Diamonds cards (Telegram Stars–style, TON Diamonds).</li>
+<li><strong>Market:</strong> <strong>Create your broker (pay TON)</strong> (cost, txHash → new broker auto-listed); Listings refresh, list broker, buy (AIBA); Boosts (NEUR or TON).</li>
+<li><strong>Wallet:</strong> Profile with badges and <strong>profileBoostedUntil</strong>; <strong>Boost your profile</strong> (pay TON, txHash); <strong>Gifts</strong> (send to Telegram ID/username with TON, view received/sent); Daily claim, Vault, Staking, DAO, on-chain claim (when battle + lastClaim); Stars and Diamonds cards (Telegram Stars–style, TON Diamonds).</li>
 <li><strong>University:</strong> Hero (progress X / Y modules), expandable courses and modules; POST progress on module expand; graduate badge; optional mint course badge / full certificate (TON).</li>
 <li><strong>UI:</strong> globals.css futuristic theme; icons (Home, Brokers, Arena, Guilds, Market, Wallet, University, Run, Refresh, Claim, Mint, Stake, List, Buy, Share, Vault, Star, Diamond); balance strip (NEUR, AIBA, Stars, Diamonds + verified badge); guide tips per tab.</li>
 </ul>
@@ -685,6 +727,18 @@
 <td>Implemented</td>
 </tr>
 <tr>
+<td>Create broker with TON (auto-listed, global recognition)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Boost your profile (pay TON)</td>
+<td>Implemented</td>
+</tr>
+<tr>
+<td>Gifts (pay TON to send to user; received/sent)</td>
+<td>Implemented</td>
+</tr>
+<tr>
 <td>Broker NFT (mint with AIBA, job queue)</td>
 <td>Implemented</td>
 </tr>
@@ -738,7 +792,7 @@
 <ul>
 <li><strong>UX:</strong> Modular tabbed miniapp with futuristic 3D styling, icons, and per-tab guidance; cinematic intro and tutorial; shareable victory cards; push notifications on win.</li>
 <li><strong>Main deliberate difference:</strong> battles are <strong>deterministic simulation</strong> from broker stats and server seed, not “AI analyzing real market data.”</li>
-<li><strong>Remaining gaps:</strong> on-chain DAO/staking/marketplace settlement and on-chain burn/buyback are not wired; real-time market data is out of scope per current design.</li>
+<li><strong>Remaining gaps:</strong> on-chain DAO/staking/marketplace settlement and on-chain burn/buyback are not wired; real-time market data is out of scope per current design. <strong>Payment design:</strong> All TON flows (create broker, boost profile, gifts, create/boost group, battle boost) use Super Admin wallets per product; see <a href="MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md">MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</a>.</li>
 </ul>
 <p>Use this document to align product docs with the built product or to prioritize any remaining on-chain or data integrations.</p>
   </div>

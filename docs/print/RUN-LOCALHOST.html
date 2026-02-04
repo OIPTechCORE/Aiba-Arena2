@@ -59,7 +59,7 @@ cp backend/.env.example backend/.env</code></pre>
 <td>Any password (only in dev; backend accepts plaintext when APP_ENV=dev and ADMIN_PASSWORD_HASH is empty)</td>
 </tr>
 </tbody></table>
-<p>Optional for local: <code>ADMIN_JWT_SECRET</code>, <code>BATTLE_SEED_SECRET</code> — if unset, the example defaults may be used in dev (production readiness is skipped when APP_ENV=dev).</p>
+<p>Optional for local: <code>ADMIN_JWT_SECRET</code>, <code>BATTLE_SEED_SECRET</code> — if unset, the example defaults may be used in dev (production readiness is skipped when APP_ENV=dev). To test <strong>create broker with TON</strong>, <strong>boost profile</strong>, or <strong>gifts</strong>, set <code>CREATED_BROKERS_WALLET</code>, <code>BOOST_PROFILE_WALLET</code>, and/or <code>GIFTS_WALLET</code> (TON addresses) and configure costs in Admin → Economy (see <a href="MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md">MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</a>).</p>
 <h3>1.2 Start the backend</h3>
 <pre><code>cd backend
 npm start</code></pre>

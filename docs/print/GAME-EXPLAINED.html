@@ -87,6 +87,14 @@
 <li><strong>Claim flow:</strong></li>
 </ul>
 <p>Credits → backend creates signed claim → you send 1 tx to vault with payload → vault transfers AIBA to your TON address. So <strong>AIBA credits</strong> are “withdrawable” as <strong>real AIBA jettons</strong> when the project has deployed the vault and configured the backend (ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON provider).</p>
+<h3>3.3 TON payments (Super Admin)</h3>
+<ul>
+<li><strong>Create broker with TON:</strong> Pay TON → new broker is created and <strong>auto-listed</strong> on the global marketplace; you get <strong>global recognition</strong> as seller. Wallet: <code>CREATED_BROKERS_WALLET</code>; config: <code>createBrokerCostTonNano</code>.</li>
+<li><strong>Boost your profile:</strong> Pay TON → your profile is “boosted” (visibility/badge until a set date). Wallet: <code>BOOST_PROFILE_WALLET</code>; config: <code>boostProfileCostTonNano</code>, <code>boostProfileDurationDays</code>.</li>
+<li><strong>Gifts:</strong> Pay TON to send a <strong>gift</strong> to another user (by Telegram ID or @username). Wallet: <code>GIFTS_WALLET</code>; config: <code>giftCostTonNano</code>. Recipient sees “Gifts received”; you see “Gifts sent.”</li>
+<li><strong>Create/boost group:</strong> Pay TON to create a guild (if not in top N) or to boost a guild. Wallets: <code>LEADER_BOARD_WALLET</code>, <code>BOOST_GROUP_WALLET</code>.</li>
+<li><strong>Battle boost (TON):</strong> Pay TON for a reward multiplier. Wallet: <code>BOOST_TON_WALLET</code>.</li>
+</ul>
 <hr/>
 <h2>4. Guilds</h2>
 <ul>
@@ -101,15 +109,23 @@
 <li>Referral is one-time per referee (wallet/account).</li>
 </ul>
 <hr/>
-<h2>6. Ads</h2>
+<h2>6. Marketplace (unified)</h2>
+<ul>
+<li><strong>Create broker with TON:</strong> You pay TON (1–10, configurable) to the project’s “Created Brokers” wallet, then submit the <strong>transaction hash</strong>. The backend verifies the payment and creates a new broker <strong>and</strong> a <strong>listing</strong> at a default AIBA price so it appears globally. You are the seller → <strong>global recognition</strong>.</li>
+<li><strong>List your broker:</strong> Choose a broker you own (not in a guild pool), set a <strong>price in AIBA</strong>, and list. The listing is visible to everyone.</li>
+<li><strong>Buy a listing:</strong> Pay in <strong>AIBA</strong>; the broker transfers to you. Marketplace fee (configurable) can go to burn or treasury to support AIBA value.</li>
+<li><strong>Full plan:</strong> See <a href="MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md">MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</a> for the 360° payment strategy (TON + AIBA only, Super Admin wallets per product, AIBA market cap vision).</li>
+</ul>
+<hr/>
+<h2>7. Ads</h2>
 <ul>
 </ul>
 <hr/>
-<h2>7. Tasks</h2>
+<h2>8. Tasks</h2>
 <ul>
 </ul>
 <hr/>
-<h2>8. Security and Fairness (short)</h2>
+<h2>9. Security and Fairness (short)</h2>
 <ul>
 <li><strong>Idempotency:</strong> each battle is tied to a <strong>requestId</strong>; repeating the same requestId returns the same battle result (no double reward).</li>
 <li><strong>Rate limits:</strong> battle endpoint is rate-limited per user; cooldowns and energy prevent spam.</li>
@@ -117,7 +133,7 @@
 <li><strong>Bans:</strong> users or brokers can be banned (or auto-banned after too many anomaly flags). Banned users get 403 on battle run.</li>
 </ul>
 <hr/>
-<h2>9. End-to-End Flow (summary)</h2>
+<h2>10. End-to-End Flow (summary)</h2>
 <ol>
 <li><strong>Connect wallet</strong> (TonConnect) → backend saves your TON address.</li>
 <li><strong>Create a starter broker</strong> (or use an existing one).</li>
@@ -130,8 +146,9 @@
 <li>- <strong>Create claim</strong> later (amount or “all”), then <strong>Claim on-chain (TonConnect)</strong> with the same flow.</li>
 <li><strong>Referrals:</strong> create code, share it; others apply with wallet to get NEUR bonuses.</li>
 <li><strong>Ads</strong> may appear between battles; <strong>tasks</strong> can be shown for future engagement.</li>
+<li><strong>Optional:</strong> <strong>Market</strong> — create a broker with TON (pay → paste tx hash → broker auto-listed); list/buy brokers with AIBA. <strong>Wallet</strong> — boost your profile (TON); send gifts (TON) to another user; view received/sent gifts.</li>
 </ol>
-<p>This is the <strong>full picture</strong> of the game: brokers, arenas, leagues, deterministic battles, NEUR/AIBA economy, on-chain AIBA withdrawal via signed claims, guilds, referrals, and supporting features (ads, tasks).</p>
+<p>This is the <strong>full picture</strong> of the game: brokers, arenas, leagues, deterministic battles, NEUR/AIBA economy, on-chain AIBA withdrawal via signed claims, guilds, referrals, <strong>unified marketplace</strong> (create broker with TON, list/buy with AIBA), <strong>boost profile</strong> and <strong>gifts</strong> (TON), and supporting features (ads, tasks). See <a href="USER-GUIDE.md">USER-GUIDE.md</a> for step-by-step play and <a href="MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md">MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</a> for payment design.</p>
   </div>
 </body>
 </html>

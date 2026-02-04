@@ -42,7 +42,7 @@ Edit `backend/.env` and set at least:
 | **ADMIN_EMAIL** | Any email you use to log in to the admin panel (e.g. `admin@test.local`) |
 | **ADMIN_PASSWORD** | Any password (only in dev; backend accepts plaintext when APP_ENV=dev and ADMIN_PASSWORD_HASH is empty) |
 
-Optional for local: `ADMIN_JWT_SECRET`, `BATTLE_SEED_SECRET` — if unset, the example defaults may be used in dev (production readiness is skipped when APP_ENV=dev).
+Optional for local: `ADMIN_JWT_SECRET`, `BATTLE_SEED_SECRET` — if unset, the example defaults may be used in dev (production readiness is skipped when APP_ENV=dev). To test **create broker with TON**, **boost profile**, or **gifts**, set `CREATED_BROKERS_WALLET`, `BOOST_PROFILE_WALLET`, and/or `GIFTS_WALLET` (TON addresses) and configure costs in Admin → Economy (see [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md)).
 
 ### 1.2 Start the backend
 

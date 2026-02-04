@@ -10,8 +10,8 @@ This document **deep-checks** whether the AIBA Arena project has the following f
 
 | Layer | Status | Details |
 |-------|--------|---------|
-| **Backend** | ✅ Present | Broker NFT mint: `POST /api/brokers/mint-nft` (pay AIBA → create `BrokerMintJob`). Admin: link-nft, mint-jobs, complete job. `Broker`: `nftCollectionAddress`, `nftItemAddress`, `nftItemIndex`. `EconomyConfig.mintAibaCost`. Metadata: NFT description for broker. |
-| **Miniapp** | ✅ Present | Brokers tab: "Mint as NFT" card (cost, button, status). One broker at a time; no dedicated NFT gallery or creator hub. |
+| **Backend** | ✅ Present | Broker NFT mint: `POST /api/brokers/mint-nft` (pay AIBA → create `BrokerMintJob`). **Create broker with TON:** `POST /api/brokers/create-with-ton` (pay TON → new broker + auto-listed on marketplace; global recognition). Admin: link-nft, mint-jobs, complete job. `Broker`: `nftCollectionAddress`, `nftItemAddress`, `nftItemIndex`, `createdWithTonTxHash`. `EconomyConfig.mintAibaCost`, `createBrokerCostTonNano`. Metadata: NFT description for broker. |
+| **Miniapp** | ✅ Present | Brokers tab: "Mint as NFT" card (cost, button, status). **Market tab:** "Create your broker (pay TON)" card (cost, tx hash → new broker auto-listed). One broker at a time; no dedicated NFT gallery or creator hub. |
 | **Branding / UX** | 🔶 Partial | No dedicated "NFT Creator Ecosystem" tab or section. No gallery of minted NFTs, no "Creator Lab" or "NFT Studio" narrative. Functional flow exists; not packaged as a super futuristic ecosystem. |
 
 ### Verdict

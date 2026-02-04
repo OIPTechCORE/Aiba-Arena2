@@ -29,6 +29,7 @@ This document compares the **AI Broker Battle Arena** product vision against the
 | Upgrade brokers | POST /api/brokers/upgrade (AIBA cost, +1 stat, level). upgradeAibaCost in EconomyConfig. | **Implemented** |
 | Train brokers | POST /api/brokers/train (NEUR, +1 to one stat). | **Implemented** |
 | Combine brokers | POST /api/brokers/combine (base + sacrifice → blended stats; NEUR cost). | **Implemented** |
+| Create broker with TON (auto-listed) | POST /api/brokers/create-with-ton (txHash); CREATED_BROKERS_WALLET; createBrokerCostTonNano (1–10 TON); broker + Listing created; miniapp Market “Create your broker (pay TON)”. | **Implemented** |
 | Sell brokers on marketplace | Listing model; POST /api/marketplace/list, /buy; miniapp Market tab (list/buy). Off-chain only; on-chain escrow contract exists (BrokerMarketplaceEscrow). | **Implemented** (off-chain); on-chain settlement partial |
 | Broker as NFT on-chain | Broker.nftItemAddress, nftCollectionAddress; POST /api/brokers/mint-nft (AIBA); BrokerMintJob; admin mint-jobs complete. | **Implemented** (in-app mint flow) |
 
@@ -106,6 +107,16 @@ This document compares the **AI Broker Battle Arena** product vision against the
 
 ---
 
+## 6b. Boost profile & Gifts (Vision Extensions)
+
+| Vision | Codebase | Status |
+|--------|----------|--------|
+| Boost your profile (pay TON) | POST /api/boosts/buy-profile-with-ton (txHash); BOOST_PROFILE_WALLET; boostProfileCostTonNano (1–10 TON); User.profileBoostedUntil. Miniapp Wallet: “Boost your profile” card. | **Implemented** |
+| Gifts (pay TON to send to user) | POST /api/gifts/send (txHash, toTelegramId or toUsername, message); GET /api/gifts/received, /sent; GIFTS_WALLET; giftCostTonNano (1–10 TON); Gift model; UsedTonTxHash idempotency. Miniapp Wallet: Gifts card (send, received, sent). | **Implemented** |
+| Super Admin: costs + wallets | Admin Economy: boostProfileCostTonNano, boostProfileDurationDays, giftCostTonNano. Env: BOOST_PROFILE_WALLET, GIFTS_WALLET. | **Implemented** |
+
+---
+
 ## 7. Admin Panel
 
 | Vision | Codebase | Status |
@@ -152,11 +163,12 @@ This document compares the **AI Broker Battle Arena** product vision against the
 | /api/guilds | create (with optional txHash), join, leave, deposit/withdraw broker, list, top, :guildId/boost |
 | /api/referrals | create, use |
 | /api/battle | run |
-| /api/brokers | mine, starter, train, repair, upgrade, combine, mint-nft |
+| /api/brokers | mine, starter, **create-with-ton** (txHash → broker + auto-list), train, repair, upgrade, combine, mint-nft |
 | /api/vault | inventory, claim-status |
 | /api/leaderboard | GET / (global), GET /my-rank |
 | /api/marketplace | listings, list, buy |
-| /api/boosts | mine, buy, buy-with-ton |
+| /api/boosts | mine, buy, buy-with-ton, **buy-profile-with-ton** (txHash → profileBoostedUntil) |
+| /api/gifts | **send** (txHash, toTelegramId or toUsername, message), **received**, **sent** |
 | /api/staking | summary, stake, unstake, claim |
 | /api/dao | proposals (list, create), vote, close, execute |
 | /api/daily | status, claim |
@@ -170,13 +182,15 @@ This document compares the **AI Broker Battle Arena** product vision against the
 
 | Model | Purpose |
 |-------|--------|
-| User, Broker, Battle, BattleRunKey | Core game |
+| User, Broker, Battle, BattleRunKey | Core game; User.profileBoostedUntil; Broker.createdWithTonTxHash |
 | GameMode | Arena/league modes |
 | LedgerEntry, EconomyConfig, EconomyDay | Economy & caps |
 | Guild | Groups; paidCreateTxHash, boostCount, boostedUntil, boostTxHashes |
 | Referral, ReferralUse | Referrals |
 | Listing | Marketplace (off-chain) |
 | Boost | Reward multiplier (NEUR or TON) |
+| Gift | fromTelegramId, toTelegramId, amountNano, txHash, message (gifts with TON) |
+| UsedTonTxHash | txHash, purpose, ownerTelegramId (idempotency for gift, profile_boost) |
 | Staking | Off-chain staking |
 | Proposal, Vote | DAO |
 | Treasury, StabilityReserve, BuybackPool | Treasury / reserve / buyback |
@@ -191,8 +205,8 @@ This document compares the **AI Broker Battle Arena** product vision against the
 - **Brokers:** My brokers (combine, mint NFT, select).
 - **Arenas:** Arena select; Run battle; battle result.
 - **Guilds:** My rank, Discover all, create (with optional pay TON + txHash), join; all groups list with Join + Boost (txHash).
-- **Market:** Listings refresh, list broker, buy; Boosts.
-- **Wallet:** Daily claim, Vault, Staking, DAO, on-chain claim (when battle + lastClaim); Profile with badges; Stars and Diamonds cards (Telegram Stars–style, TON Diamonds).
+- **Market:** **Create your broker (pay TON)** (cost, txHash → new broker auto-listed); Listings refresh, list broker, buy (AIBA); Boosts (NEUR or TON).
+- **Wallet:** Profile with badges and **profileBoostedUntil**; **Boost your profile** (pay TON, txHash); **Gifts** (send to Telegram ID/username with TON, view received/sent); Daily claim, Vault, Staking, DAO, on-chain claim (when battle + lastClaim); Stars and Diamonds cards (Telegram Stars–style, TON Diamonds).
 - **University:** Hero (progress X / Y modules), expandable courses and modules; POST progress on module expand; graduate badge; optional mint course badge / full certificate (TON).
 - **UI:** globals.css futuristic theme; icons (Home, Brokers, Arena, Guilds, Market, Wallet, University, Run, Refresh, Claim, Mint, Stake, List, Buy, Share, Vault, Star, Diamond); balance strip (NEUR, AIBA, Stars, Diamonds + verified badge); guide tips per tab.
 
@@ -224,6 +238,9 @@ This document compares the **AI Broker Battle Arena** product vision against the
 | Ads, Tasks, Game modes (admin + app) | Implemented |
 | Broker train / repair / upgrade / combine | Implemented |
 | Marketplace (list/buy/sell brokers, off-chain) | Implemented |
+| Create broker with TON (auto-listed, global recognition) | Implemented |
+| Boost your profile (pay TON) | Implemented |
+| Gifts (pay TON to send to user; received/sent) | Implemented |
 | Broker NFT (mint with AIBA, job queue) | Implemented |
 | DAO (proposals, votes, treasury execute) | Implemented (off-chain) |
 | Staking APY | Implemented (off-chain) |
@@ -241,9 +258,9 @@ This document compares the **AI Broker Battle Arena** product vision against the
 
 ## 12. Conclusion
 
-- **The codebase implements the full intended product loop:** own brokers, arenas (including arbitrage), battles, NEUR/AIBA rewards, on-chain AIBA claim, guilds with pay-to-create and boost (TON), global leaderboard, referrals, daily, marketplace, staking, DAO, boosts, admin control, and production safeguards.
+- **The codebase implements the full intended product loop:** own brokers, arenas (including arbitrage), battles, NEUR/AIBA rewards, on-chain AIBA claim, guilds with pay-to-create and boost (TON), global leaderboard, referrals, daily, **unified marketplace** (create broker with TON [auto-listed], list/buy with AIBA), **boost your profile** (TON), **gifts** (TON), staking, DAO, boosts, admin control, and production safeguards.
 - **UX:** Modular tabbed miniapp with futuristic 3D styling, icons, and per-tab guidance; cinematic intro and tutorial; shareable victory cards; push notifications on win.
 - **Main deliberate difference:** battles are **deterministic simulation** from broker stats and server seed, not “AI analyzing real market data.”
-- **Remaining gaps:** on-chain DAO/staking/marketplace settlement and on-chain burn/buyback are not wired; real-time market data is out of scope per current design.
+- **Remaining gaps:** on-chain DAO/staking/marketplace settlement and on-chain burn/buyback are not wired; real-time market data is out of scope per current design. **Payment design:** All TON flows (create broker, boost profile, gifts, create/boost group, battle boost) use Super Admin wallets per product; see [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md).
 
 Use this document to align product docs with the built product or to prioritize any remaining on-chain or data integrations.

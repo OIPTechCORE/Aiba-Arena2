@@ -382,8 +382,8 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 
 ## 13. Documentation Index
 
-- **GAME-EXPLAINED.md** — What the game is (brokers, arenas, battles, NEUR/AIBA, claims, guilds, referrals).
-- **USER-GUIDE.md** — How to play (connect wallet, broker, battle, balances, guilds, claim, referrals, troubleshooting).
+- **GAME-EXPLAINED.md** — What the game is (brokers, arenas, battles, NEUR/AIBA, claims, guilds, referrals, marketplace, TON payments, boost profile, gifts).
+- **USER-GUIDE.md** — How to play (connect wallet, broker, battle, balances, guilds, claim, marketplace create broker/list/buy, boost profile, gifts, referrals, troubleshooting).
 - **VISION-VS-CODEBASE-CHECK.md** — Vision vs implementation (implemented/partial/not implemented).
 - **deployment.md** — Components, backend env, miniapp/admin env.
 - **mainnet-readiness.md** — Key management, validation defaults, checklist enforcement, required env.
@@ -393,6 +393,9 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - **TELEGRAM-MINI-APP-SETUP-GUIDE.md** — Telegram Mini App setup.
 - **MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md** — Unified marketplace and payments (TON + AIBA only, Super Admin wallets, create broker, boost profile, gifts).
 - **LEADERBOARD-AND-GROUPS-CHECK.md** — Leaderboard and groups (global, pay-to-create/boost, wallets).
+- **RUN-LOCALHOST.md** — Step-by-step: backend, miniapp, admin on localhost; optional TON wallets for create broker/boost/gifts.
+- **PRINT.md** — How to generate and use printable HTML from docs (npm run build:print-docs; docs/print/index.html).
+- **VERCEL-ENV-GUIDE.md** — How to get each env var (miniapp, admin, backend; TON wallets, vault, Telegram, etc.).
 - **CHARITY-ECOSYSTEM-PLAN.md**, **AIBA-ARENA-UNIVERSITY-PLAN.md**, **STARS-BADGES-DIAMONDS-*.md**, **UNIFIED-COMMS-ECOSYSTEM.md**, **ECOSYSTEMS-AUDIT.md** — Feature and ecosystem plans.
 
 ---

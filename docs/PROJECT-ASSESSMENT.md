@@ -89,7 +89,7 @@ Previous fixes (from conversation history) addressed passing a proper `Deploy` m
 - **Routes:**  
   `wallet`, `game`, `tasks`, `ads`, `economy`, `gameModes`, `guilds`, `referrals`, `metadata`,  
   `admin/auth`, `admin`, `admin/brokers`, `admin/ads`, `admin/game-modes`, `admin/economy`, `admin/mod`,  
-  `battle`, `brokers`, `vault`.  
+  `battle`, `brokers` (incl. **create-with-ton**), `vault`, `leaderboard`, `marketplace`, `boosts` (incl. **buy-profile-with-ton**), `gifts`, `staking`, `dao`, `daily`, `oracle`, `treasury`, `charity`, `announcements`, `university`; admin sub-routes for charity, announcements, university.  
 - **Endpoints:** `/health`, `/metrics` (Prometheus).
 
 ### 4.3 Backend tests
@@ -100,7 +100,7 @@ Previous fixes (from conversation history) addressed passing a proper `Deploy` m
 
 ### 4.4 Configuration & env
 
-- **backend/.env.example** documents: `MONGO_URI`, `APP_ENV`, `CORS_ORIGIN`, TON provider, Telegram, admin auth, `BATTLE_SEED_SECRET`, economy caps, vault/claim (`ARENA_VAULT_ADDRESS`, `AIBA_JETTON_MASTER`, `ORACLE_PRIVATE_KEY_HEX`), legacy dispatch flag.
+- **backend/.env.example** documents: `MONGO_URI`, `APP_ENV`, `CORS_ORIGIN`, TON provider, Telegram, admin auth, `BATTLE_SEED_SECRET`, economy caps, vault/claim (`ARENA_VAULT_ADDRESS`, `AIBA_JETTON_MASTER`, `ORACLE_PRIVATE_KEY_HEX`), legacy dispatch flag; **Super Admin TON wallets:** `CREATED_BROKERS_WALLET`, `BOOST_PROFILE_WALLET`, `GIFTS_WALLET`, `LEADER_BOARD_WALLET`, `BOOST_GROUP_WALLET`, `BOOST_TON_WALLET` (see [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md)).
 - **Production readiness** (see `backend/security/productionReadiness.js`): when `APP_ENV=prod` or `NODE_ENV=production`, requires CORS, Telegram token, initData max age, strong admin JWT/password hash, battle seed, and “all-or-nothing” vault env + non-testnet TON URL if claims enabled.
 
 ### 4.5 Risk summary (backend)
@@ -122,9 +122,11 @@ Previous fixes (from conversation history) addressed passing a proper `Deploy` m
 ### 5.2 Features (from page.js / lib)
 
 - TonConnect wallet connect; Telegram initData or dev fallback (`x-telegram-id`) via `api.js` interceptor.
-- **Brokers:** list “mine”, select broker, arena (e.g. prediction).
+- **Brokers:** list “mine”, select broker, arena (e.g. prediction); **create broker with TON** (Market tab: pay TON → paste tx hash → broker auto-listed).
 - **Battle:** run battle, optional auto-claim on battle.
-- **Economy:** `GET /api/economy/me`.
+- **Economy:** `GET /api/economy/me` (includes economy config and profileBoostedUntil).
+- **Marketplace:** list/buy brokers (AIBA); create broker (TON) card when configured.
+- **Wallet:** **boost your profile** (pay TON, tx hash); **gifts** (send to Telegram ID/username with TON; view received/sent).
 - **Ads:** weighted pick from `GET /api/ads?placement=between_battles`.
 - **Reward claim:** `buildRewardClaimPayload` (tonRewardClaim.js), send to vault with backend-signed claim.
 - **Vault info:** display vault balance/inventory when available.
@@ -152,11 +154,17 @@ Previous fixes (from conversation history) addressed passing a proper `Deploy` m
 
 ## 7. Documentation & Ops
 
-- **README.md** — Structure, build/test/deploy, backend env, Vercel backend, battle+claim flow, frontends, deployment/ops links, autocommit scripts. **Accurate**; only deployment.md still says “server.js” without mentioning Vercel entry.
-- **docs/deployment.md** — Testnet baseline; components; backend (Render/Railway) env; miniapp + admin on Vercel. **Minor:** Backend line could say “Local/Render: server.js; Vercel: api/index.js”.
-- **docs/mainnet-readiness.md** — Key separation, validations, idempotency, rate limiting, required env, checklist enforcement, security review steps. **Strong.**
-- **docs/runbook.md** — Incident response, production safety checks, key rotation (including oracle), security playbooks, data migrations. **Useful.**
+- **README.md** — Structure, build/test/deploy, backend env, Vercel backend, battle+claim flow, frontends, deployment/ops links, autocommit scripts; **marketplace & payments** link (MARKETPLACE-AND-PAYMENTS-MASTER-PLAN). **Accurate.**
+- **docs/deployment.md** — Testnet baseline; components; backend (Render/Railway/Vercel) env; **CREATED_BROKERS_WALLET**, **BOOST_PROFILE_WALLET**, **GIFTS_WALLET**; miniapp + admin on Vercel. **Up to date.**
+- **docs/mainnet-readiness.md** — Key separation, validations, idempotency, rate limiting, required env (incl. optional TON wallets for create broker, boost profile, gifts), checklist enforcement, security review steps. **Strong.**
+- **docs/runbook.md** — Incident response, production safety checks, key rotation (including oracle), **Super Admin TON wallets** (create broker, boost profile, gifts, leaderboard, boost group, boost TON); security playbooks, data migrations. **Useful.**
 - **docs/monitoring.md** — Logs, uptime, Prometheus, suggested alerts and metric names. **Good baseline.**
+- **docs/MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md** — 360° plan: TON + AIBA only, Super Admin wallets per product, create broker, boost profile, gifts, implementation reference. **Exhaustive.**
+- **docs/USER-GUIDE.md** — Step-by-step play; **marketplace** (create broker TON, list/buy AIBA), **boost profile**, **gifts**; troubleshooting. **Up to date.**
+- **docs/GAME-EXPLAINED.md** — What the game is; **marketplace & TON payments** (create broker, boost, gifts); economy, guilds, referrals, flow. **Up to date.**
+- **docs/VISION-VS-CODEBASE-CHECK.md** — Vision vs codebase; **create-with-ton**, **boost profile**, **gifts**; routes, models, miniapp. **Up to date.**
+- **docs/LEADERBOARD-AND-GROUPS-CHECK.md** — Leaderboard and groups (global, pay-to-create/boost). **Up to date.**
+- **docs/VERCEL-ENV-GUIDE.md** — How to get each env var; **CREATED_BROKERS_WALLET**, **BOOST_PROFILE_WALLET**, **GIFTS_WALLET** in TON wallets section. **Up to date.**
 
 ---
 

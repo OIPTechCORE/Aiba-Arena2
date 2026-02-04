@@ -27,12 +27,12 @@
 <tr>
 <td><strong>Backend</strong></td>
 <td>✅ Present</td>
-<td>Broker NFT mint: <code>POST /api/brokers/mint-nft</code> (pay AIBA → create <code>BrokerMintJob</code>). Admin: link-nft, mint-jobs, complete job. <code>Broker</code>: <code>nftCollectionAddress</code>, <code>nftItemAddress</code>, <code>nftItemIndex</code>. <code>EconomyConfig.mintAibaCost</code>. Metadata: NFT description for broker.</td>
+<td>Broker NFT mint: <code>POST /api/brokers/mint-nft</code> (pay AIBA → create <code>BrokerMintJob</code>). <strong>Create broker with TON:</strong> <code>POST /api/brokers/create-with-ton</code> (pay TON → new broker + auto-listed on marketplace; global recognition). Admin: link-nft, mint-jobs, complete job. <code>Broker</code>: <code>nftCollectionAddress</code>, <code>nftItemAddress</code>, <code>nftItemIndex</code>, <code>createdWithTonTxHash</code>. <code>EconomyConfig.mintAibaCost</code>, <code>createBrokerCostTonNano</code>. Metadata: NFT description for broker.</td>
 </tr>
 <tr>
 <td><strong>Miniapp</strong></td>
 <td>✅ Present</td>
-<td>Brokers tab: &quot;Mint as NFT&quot; card (cost, button, status). One broker at a time; no dedicated NFT gallery or creator hub.</td>
+<td>Brokers tab: &quot;Mint as NFT&quot; card (cost, button, status). <strong>Market tab:</strong> &quot;Create your broker (pay TON)&quot; card (cost, tx hash → new broker auto-listed). One broker at a time; no dedicated NFT gallery or creator hub.</td>
 </tr>
 <tr>
 <td><strong>Branding / UX</strong></td>

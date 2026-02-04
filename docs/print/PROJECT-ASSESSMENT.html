@@ -132,7 +132,7 @@
 <li><strong>Security:</strong> <code>enforceProductionReadiness(process.env)</code> — <strong>fail-fast in production</strong>; with <code>APP_ENV=dev</code> (or <code>test</code>) prod checks are <strong>skipped</strong> (allows Vercel with incomplete prod env).</li>
 <li><strong>Routes:</strong></li>
 </ul>
-<p><code>wallet</code>, <code>game</code>, <code>tasks</code>, <code>ads</code>, <code>economy</code>, <code>gameModes</code>, <code>guilds</code>, <code>referrals</code>, <code>metadata</code>, <code>admin/auth</code>, <code>admin</code>, <code>admin/brokers</code>, <code>admin/ads</code>, <code>admin/game-modes</code>, <code>admin/economy</code>, <code>admin/mod</code>, <code>battle</code>, <code>brokers</code>, <code>vault</code>.</p>
+<p><code>wallet</code>, <code>game</code>, <code>tasks</code>, <code>ads</code>, <code>economy</code>, <code>gameModes</code>, <code>guilds</code>, <code>referrals</code>, <code>metadata</code>, <code>admin/auth</code>, <code>admin</code>, <code>admin/brokers</code>, <code>admin/ads</code>, <code>admin/game-modes</code>, <code>admin/economy</code>, <code>admin/mod</code>, <code>battle</code>, <code>brokers</code> (incl. <strong>create-with-ton</strong>), <code>vault</code>, <code>leaderboard</code>, <code>marketplace</code>, <code>boosts</code> (incl. <strong>buy-profile-with-ton</strong>), <code>gifts</code>, <code>staking</code>, <code>dao</code>, <code>daily</code>, <code>oracle</code>, <code>treasury</code>, <code>charity</code>, <code>announcements</code>, <code>university</code>; admin sub-routes for charity, announcements, university.</p>
 <ul>
 </ul>
 <h3>4.3 Backend tests</h3>
@@ -158,9 +158,11 @@
 </ul>
 <h3>5.2 Features (from page.js / lib)</h3>
 <ul>
-<li><strong>Brokers:</strong> list “mine”, select broker, arena (e.g. prediction).</li>
+<li><strong>Brokers:</strong> list “mine”, select broker, arena (e.g. prediction); <strong>create broker with TON</strong> (Market tab: pay TON → paste tx hash → broker auto-listed).</li>
 <li><strong>Battle:</strong> run battle, optional auto-claim on battle.</li>
-<li><strong>Economy:</strong> <code>GET /api/economy/me</code>.</li>
+<li><strong>Economy:</strong> <code>GET /api/economy/me</code> (includes economy config and profileBoostedUntil).</li>
+<li><strong>Marketplace:</strong> list/buy brokers (AIBA); create broker (TON) card when configured.</li>
+<li><strong>Wallet:</strong> <strong>boost your profile</strong> (pay TON, tx hash); <strong>gifts</strong> (send to Telegram ID/username with TON; view received/sent).</li>
 <li><strong>Ads:</strong> weighted pick from <code>GET /api/ads?placement=between_battles</code>.</li>
 <li><strong>Reward claim:</strong> <code>buildRewardClaimPayload</code> (tonRewardClaim.js), send to vault with backend-signed claim.</li>
 <li><strong>Vault info:</strong> display vault balance/inventory when available.</li>
@@ -182,10 +184,16 @@
 <hr/>
 <h2>7. Documentation &amp; Ops</h2>
 <ul>
-<li><strong>docs/deployment.md</strong> — Testnet baseline; components; backend (Render/Railway) env; miniapp + admin on Vercel. <strong>Minor:</strong> Backend line could say “Local/Render: server.js; Vercel: api/index.js”.</li>
-<li><strong>docs/mainnet-readiness.md</strong> — Key separation, validations, idempotency, rate limiting, required env, checklist enforcement, security review steps. <strong>Strong.</strong></li>
-<li><strong>docs/runbook.md</strong> — Incident response, production safety checks, key rotation (including oracle), security playbooks, data migrations. <strong>Useful.</strong></li>
+<li><strong>docs/deployment.md</strong> — Testnet baseline; components; backend (Render/Railway/Vercel) env; <strong>CREATED_BROKERS_WALLET</strong>, <strong>BOOST_PROFILE_WALLET</strong>, <strong>GIFTS_WALLET</strong>; miniapp + admin on Vercel. <strong>Up to date.</strong></li>
+<li><strong>docs/mainnet-readiness.md</strong> — Key separation, validations, idempotency, rate limiting, required env (incl. optional TON wallets for create broker, boost profile, gifts), checklist enforcement, security review steps. <strong>Strong.</strong></li>
+<li><strong>docs/runbook.md</strong> — Incident response, production safety checks, key rotation (including oracle), <strong>Super Admin TON wallets</strong> (create broker, boost profile, gifts, leaderboard, boost group, boost TON); security playbooks, data migrations. <strong>Useful.</strong></li>
 <li><strong>docs/monitoring.md</strong> — Logs, uptime, Prometheus, suggested alerts and metric names. <strong>Good baseline.</strong></li>
+<li><strong>docs/MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</strong> — 360° plan: TON + AIBA only, Super Admin wallets per product, create broker, boost profile, gifts, implementation reference. <strong>Exhaustive.</strong></li>
+<li><strong>docs/USER-GUIDE.md</strong> — Step-by-step play; <strong>marketplace</strong> (create broker TON, list/buy AIBA), <strong>boost profile</strong>, <strong>gifts</strong>; troubleshooting. <strong>Up to date.</strong></li>
+<li><strong>docs/GAME-EXPLAINED.md</strong> — What the game is; <strong>marketplace &amp; TON payments</strong> (create broker, boost, gifts); economy, guilds, referrals, flow. <strong>Up to date.</strong></li>
+<li><strong>docs/VISION-VS-CODEBASE-CHECK.md</strong> — Vision vs codebase; <strong>create-with-ton</strong>, <strong>boost profile</strong>, <strong>gifts</strong>; routes, models, miniapp. <strong>Up to date.</strong></li>
+<li><strong>docs/LEADERBOARD-AND-GROUPS-CHECK.md</strong> — Leaderboard and groups (global, pay-to-create/boost). <strong>Up to date.</strong></li>
+<li><strong>docs/VERCEL-ENV-GUIDE.md</strong> — How to get each env var; <strong>CREATED_BROKERS_WALLET</strong>, <strong>BOOST_PROFILE_WALLET</strong>, <strong>GIFTS_WALLET</strong> in TON wallets section. <strong>Up to date.</strong></li>
 </ul>
 <hr/>
 <h2>8. CI/CD</h2>
