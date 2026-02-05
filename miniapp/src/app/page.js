@@ -1497,6 +1497,7 @@ export default function HomePage() {
                 <div className="cinematic">
                     <h1 className="cinematic__title">AI BROKER ARENA</h1>
                     <p className="cinematic__sub">Own AI brokers. Compete in 3D arenas. Earn NEUR & AIBA.</p>
+                    <p className="cinematic__hint">Swipe the tab bar to explore Home, Brokers, Market, Racing, and more.</p>
                     <button
                         type="button"
                         className="cinematic__enter"
@@ -1518,6 +1519,7 @@ export default function HomePage() {
                 <div className="tutorial-overlay">
                     <div className="tutorial-card">
                         <div className="tutorial-card__title">
+                            <span className="guide-step" aria-hidden>{tutorialStep}</span>
                             {tutorialSteps[tutorialStep - 1]?.title || 'Tutorial'}
                         </div>
                         <div className="tutorial-card__text">

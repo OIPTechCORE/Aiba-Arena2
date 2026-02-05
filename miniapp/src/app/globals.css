@@ -27,6 +27,10 @@
     --glow-gold: 0 0 16px rgba(255, 215, 0, 0.35);
     --shadow-deep: 0 8px 32px rgba(0, 0, 0, 0.5);
     --shadow-3d: 0 4px 0 rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4);
+    /* 3D futuristic experience: depth and perspective */
+    --shadow-3d-button: 0 5px 0 rgba(0, 0, 0, 0.35), 0 10px 30px rgba(0, 0, 0, 0.4);
+    --shadow-3d-card: 0 8px 0 rgba(0, 0, 0, 0.2), 0 16px 48px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --perspective-view: 1200px;
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
@@ -39,7 +43,9 @@
     box-sizing: border-box;
 }
 
-body {
+/* Unified shell: both body classes get the same futuristic base */
+body,
+.aiba-miniapp {
     margin: 0;
     min-height: 100vh;
     font-family: var(--font-body);
@@ -50,6 +56,8 @@ body {
         radial-gradient(ellipse 120% 80% at 50% -20%, rgba(0, 240, 255, 0.08) 0%, transparent 50%),
         radial-gradient(ellipse 80% 60% at 80% 100%, rgba(224, 64, 251, 0.06) 0%, transparent 50%),
         linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-space) 100%);
+    /* Subtle 3D context for the whole app */
+    perspective: var(--perspective-view);
 }
 
 /* ─── App shell ─────────────────────────────────────────────────────────── */
@@ -59,15 +67,18 @@ body {
     padding-bottom: 32px;
     max-width: 560px;
     margin: 0 auto;
+    transform-style: preserve-3d;
 }
 
-/* Compact header: title + wallet + status — clean & seamless */
+/* Compact header: title + wallet + status — clean, seamless, layered */
 .app-header {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 12px 18px;
     margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .app-header__brand {
@@ -107,7 +118,7 @@ body {
 
 .tab-panel {
     display: none;
-    animation: tabIn 0.25s ease;
+    animation: tabIn 0.3s ease;
 }
 
 .tab-panel.is-active {
@@ -115,17 +126,21 @@ body {
 }
 
 @keyframes tabIn {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(8px) translateZ(-8px); }
+    to { opacity: 1; transform: translateY(0) translateZ(0); }
 }
 
-/* Elevated card — bolder 3D depth for key sections */
+/* Elevated card — bolder 3D depth for key sections (eye-catching) */
 .card--elevated {
-    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25), 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.25), 0 16px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     border-color: var(--border-glass);
 }
 
-/* ─── Futuristic buttons ────────────────────────────────────────────────── */
+.card--elevated:hover {
+    box-shadow: 0 10px 0 rgba(0, 0, 0, 0.22), 0 20px 56px rgba(0, 0, 0, 0.42), 0 0 20px rgba(0, 240, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Futuristic 3D buttons (bold, eye-catching) ────────────────────────── */
 .btn {
     font-family: var(--font-body);
     font-weight: 600;
@@ -134,15 +149,18 @@ body {
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: transform 0.12s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    position: relative;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
 }
 
-.btn:active {
-    transform: scale(0.98);
+.btn:active:not(:disabled) {
+    transform: translateY(2px) scale(0.98);
 }
 
 .btn:disabled {
@@ -151,51 +169,70 @@ body {
     transform: none;
 }
 
-/* Primary — cyan glow, 3D lift, strong contrast */
+/* Primary — cyan glow, strong 3D step, lift on hover */
 .btn--primary {
     background: linear-gradient(180deg, #00e5ef 0%, #00a8b8 100%);
     color: #001a1f;
-    box-shadow: 0 4px 0 #006670, var(--glow-cyan);
+    box-shadow: 0 5px 0 #006670, 0 10px 30px rgba(0, 0, 0, 0.35), var(--glow-cyan);
 }
 
 .btn--primary:hover:not(:disabled) {
     filter: brightness(1.12);
-    box-shadow: 0 4px 0 #006670, 0 0 32px rgba(0, 240, 255, 0.55);
+    transform: translateY(-2px);
+    box-shadow: 0 7px 0 #006670, 0 14px 36px rgba(0, 0, 0, 0.4), 0 0 32px rgba(0, 240, 255, 0.55);
 }
 
-/* Secondary — glass outline */
+.btn--primary:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #006670, 0 6px 20px rgba(0, 0, 0, 0.35), var(--glow-cyan);
+}
+
+/* Secondary — glass outline, 3D depth */
 .btn--secondary {
     background: var(--bg-glass);
     color: var(--accent-cyan);
     border: 1px solid var(--border-glass);
     backdrop-filter: blur(8px);
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .btn--secondary:hover:not(:disabled) {
     background: rgba(0, 240, 255, 0.12);
-    box-shadow: var(--glow-cyan);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25), var(--glow-cyan), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
 }
 
 /* Success / CTA */
 .btn--success {
     background: linear-gradient(180deg, #00e676 0%, #00a852 100%);
     color: #002a12;
-    box-shadow: 0 4px 0 #006b3a, 0 0 16px rgba(0, 230, 118, 0.35);
+    box-shadow: 0 5px 0 #006b3a, 0 0 16px rgba(0, 230, 118, 0.35);
 }
 
 .btn--success:hover:not(:disabled) {
     filter: brightness(1.1);
-    box-shadow: 0 4px 0 #006b3a, 0 0 24px rgba(0, 230, 118, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 7px 0 #006b3a, 0 0 24px rgba(0, 230, 118, 0.5);
+}
+
+.btn--success:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #006b3a, 0 0 20px rgba(0, 230, 118, 0.4);
 }
 
 /* Danger / caution */
 .btn--danger {
     background: linear-gradient(180deg, #ff5252 0%, #c62828 100%);
     color: #fff;
-    box-shadow: 0 4px 0 #8b0000;
+    box-shadow: 0 5px 0 #8b0000;
 }
 
-/* Ghost — minimal, for tabs */
+.btn--danger:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 0 #8b0000, 0 0 16px rgba(255, 82, 82, 0.35);
+}
+
+/* Ghost — minimal, for tabs; active state is bold 3D */
 .btn--ghost {
     background: transparent;
     color: var(--text-secondary);
@@ -207,7 +244,7 @@ body {
     background: rgba(255, 255, 255, 0.06);
 }
 
-/* ─── Tab bar (pill, 3D) — scrollable on small screens for clean single-row ─── */
+/* ─── Tab bar (pill, 3D futuristic) — scrollable, clean, multi-tabbed ──────── */
 .tab-bar {
     display: flex;
     gap: 8px;
@@ -215,11 +252,12 @@ body {
     overflow-x: auto;
     overflow-y: hidden;
     margin: 14px 0 18px 0;
-    padding: 8px 6px;
+    padding: 10px 8px;
     background: var(--bg-glass);
     border-radius: var(--radius-pill);
     border: 1px solid var(--border-subtle);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
 }
@@ -241,25 +279,30 @@ body {
 }
 
 .tab-bar .btn--active {
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(224, 64, 251, 0.15) 100%);
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.28) 0%, rgba(224, 64, 251, 0.18) 100%);
     color: var(--accent-cyan);
     border: 1px solid var(--border-glass);
-    box-shadow: 0 0 14px rgba(0, 240, 255, 0.3);
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25), 0 0 18px rgba(0, 240, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Futuristic tab icons (inline SVG) */
+.tab-bar .btn--active:hover:not(:disabled) {
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25), 0 0 22px rgba(0, 240, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Futuristic 3D tab icons (inline SVG with depth + glow) */
 .tab-bar .icon-svg {
     width: 18px;
     height: 18px;
     flex-shrink: 0;
     opacity: 0.95;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
 }
 
 .tab-bar .btn--active .icon-svg {
-    filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.6));
+    filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.6)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
-/* ─── Cards / panels (glass, 3D depth) ─────────────────────────────────────── */
+/* ─── Cards / panels (glass, 3D depth — modular multi-card UI) ────────────── */
 .card {
     background: var(--bg-glass);
     border: 1px solid var(--border-subtle);
@@ -267,7 +310,12 @@ body {
     padding: 18px;
     margin-top: 16px;
     backdrop-filter: blur(12px);
-    box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: var(--shadow-3d-card), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 10px 0 rgba(0, 0, 0, 0.18), 0 20px 52px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .card__title {
@@ -339,7 +387,7 @@ body {
     box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.15);
 }
 
-/* ─── Cinematic intro (full-screen 3D) ────────────────────────────────────── */
+/* ─── Cinematic intro (full-screen 3D futuristic experience) ────────────── */
 .cinematic {
     position: fixed;
     inset: 0;
@@ -350,8 +398,8 @@ body {
     justify-content: center;
     padding: 24px;
     background:
-        radial-gradient(ellipse 100% 60% at 50% 20%, rgba(0, 240, 255, 0.12) 0%, transparent 50%),
-        radial-gradient(ellipse 80% 50% at 50% 80%, rgba(224, 64, 251, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse 100% 60% at 50% 20%, rgba(0, 240, 255, 0.14) 0%, transparent 50%),
+        radial-gradient(ellipse 80% 50% at 50% 80%, rgba(224, 64, 251, 0.12) 0%, transparent 50%),
         linear-gradient(180deg, #050510 0%, #0a0a1a 50%, #050510 100%);
     color: var(--text-primary);
 }
@@ -367,15 +415,23 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+    filter: drop-shadow(0 0 24px rgba(0, 240, 255, 0.4));
 }
 
 .cinematic__sub {
     font-size: 0.9rem;
     color: var(--text-secondary);
     text-align: center;
-    margin-bottom: 28px;
+    margin-bottom: 12px;
     max-width: 280px;
+}
+
+.cinematic__hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 28px;
+    max-width: 260px;
 }
 
 .cinematic__enter {
@@ -390,21 +446,21 @@ body {
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
-    box-shadow: 0 6px 0 #006670, 0 0 30px rgba(0, 240, 255, 0.5);
-    transition: transform 0.12s, box-shadow 0.2s;
+    box-shadow: 0 6px 0 #006670, 0 10px 36px rgba(0, 0, 0, 0.35), 0 0 30px rgba(0, 240, 255, 0.5);
+    transition: transform 0.15s, box-shadow 0.2s;
 }
 
 .cinematic__enter:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 0 #006670, 0 0 40px rgba(0, 240, 255, 0.6);
+    transform: translateY(-3px);
+    box-shadow: 0 9px 0 #006670, 0 14px 40px rgba(0, 0, 0, 0.4), 0 0 44px rgba(0, 240, 255, 0.6);
 }
 
 .cinematic__enter:active {
     transform: translateY(2px);
-    box-shadow: 0 4px 0 #006670, 0 0 24px rgba(0, 240, 255, 0.5);
+    box-shadow: 0 4px 0 #006670, 0 6px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(0, 240, 255, 0.5);
 }
 
-/* ─── Tutorial overlay (glass modal) ──────────────────────────────────────── */
+/* ─── Tutorial overlay (glass modal, 3D futuristic) ───────────────────────── */
 .tutorial-overlay {
     position: fixed;
     inset: 0;
@@ -413,17 +469,17 @@ body {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: rgba(0, 5, 15, 0.85);
-    backdrop-filter: blur(6px);
+    background: rgba(0, 5, 15, 0.88);
+    backdrop-filter: blur(10px);
 }
 
 .tutorial-card {
     background: var(--bg-glass);
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-lg);
-    padding: 22px;
+    padding: 24px;
     max-width: 360px;
-    box-shadow: var(--shadow-deep), var(--glow-cyan);
+    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.25), 0 20px 48px rgba(0, 0, 0, 0.4), 0 0 24px rgba(0, 240, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .tutorial-card__title {
@@ -432,22 +488,25 @@ body {
     font-size: 1.1rem;
     margin-bottom: 8px;
     color: var(--accent-cyan);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .tutorial-card__text {
     color: var(--text-secondary);
     font-size: 0.9rem;
-    line-height: 1.5;
+    line-height: 1.55;
     margin-bottom: 18px;
 }
 
 .tutorial-card__actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     justify-content: flex-end;
 }
 
-/* ─── Balance strip (wallet bar) ──────────────────────────────────────────── */
+/* ─── Balance strip (wallet bar — 3D futuristic) ──────────────────────────── */
 .balance-strip {
     display: flex;
     flex-wrap: wrap;
@@ -459,6 +518,8 @@ body {
     border-radius: var(--radius-md);
     margin-top: 12px;
     font-size: 0.85rem;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
 }
 
 .balance-strip__label {
@@ -676,7 +737,7 @@ body {
     margin-top: 14px;
 }
 
-/* ─── Futuristic icons (used in buttons and cards) ────────────────────────── */
+/* ─── Futuristic 3D icons (used in buttons and cards) ────────────────────── */
 .guide-icon,
 .icon-wrap {
     display: inline-flex;
@@ -692,20 +753,65 @@ body {
     height: 22px;
 }
 
+/* Global 3D icon effect: depth + subtle glow for futuristic feel */
+.icon-svg {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35)) drop-shadow(0 0 4px rgba(0, 240, 255, 0.15));
+}
+
 .btn .icon-svg {
     width: 18px;
     height: 18px;
 }
 
-/* ─── Checklist / tips (deep guidance) ────────────────────────────────────── */
+.btn--primary .icon-svg,
+.btn--success .icon-svg {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.25));
+}
+
+/* ─── Deep guidance: tips, section intros, onboarding ─────────────────────── */
 .guide-tip {
     font-size: 0.8rem;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     margin-top: 10px;
     padding: 12px 14px;
-    background: rgba(0, 240, 255, 0.06);
-    border-left: 3px solid var(--accent-cyan);
+    background: rgba(0, 240, 255, 0.08);
+    border-left: 4px solid var(--accent-cyan);
     border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    line-height: 1.45;
+}
+
+/* Section intro block for tab/screen-level guidance (bold, eye-catching) */
+.guide-section-intro {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0 0 14px 0;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.06) 0%, rgba(224, 64, 251, 0.04) 100%);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--accent-cyan);
+    line-height: 1.5;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Step indicator for tutorials / multi-step flows */
+.guide-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.7rem;
+    color: var(--accent-cyan);
+    background: rgba(0, 240, 255, 0.15);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-pill);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
 }
 
 /* ─── List items (leaderboard, listings) ─────────────────────────────────── */
