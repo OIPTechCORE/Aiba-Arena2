@@ -226,4 +226,17 @@ You must still create `backend/.env` (and optionally `miniapp/.env.local`, `admi
 
 - **Console error `ton-connect.mytokenpocket.vip` / ERR_CERT_DATE_INVALID:** TonConnect calls third-party wallet bridges. If TokenPocket's bridge has an invalid SSL certificate, the browser shows this. You can ignore it; other wallets (e.g. Tonkeeper) still work. It is not a bug in your app.
 
+### 7.1 Using ngrok for HTTPS (optional)
+
+To expose your local miniapp over HTTPS (so Connect Wallet and Telegram Mini App can use it):
+
+1. **Install ngrok:** [ngrok.com/download](https://ngrok.com/download) or `npm install -g ngrok` (or use the project script below).
+2. **Start the miniapp** on port 3000 (e.g. `npm run dev:miniapp` from repo root, or `npm run dev` in `miniapp`).
+3. **In another terminal**, start the tunnel:
+   - From repo root: `npm run tunnel` (if you use the project’s optional script), or
+   - Direct: `ngrok http 3000`
+4. ngrok will print an **HTTPS URL** (e.g. `https://abc123.ngrok-free.app`). Open that URL in the browser or set your Telegram bot’s Mini App URL to it. Connect Wallet and TonConnect will work because the manifest is served over HTTPS.
+
+**Optional project script:** From repo root you can run `npm run tunnel` to start ngrok on port 3000. It uses the optional devDependency `ngrok`; if you don’t have it, run `npm install` first or install ngrok globally and run `ngrok http 3000` yourself.
+
 You now have everything needed to run the project on localhost.
