@@ -53,4 +53,12 @@ This document summarizes the UI/UX deep check and improvements applied so the mi
 
 ---
 
-*Last updated: UI/UX deep check and enhancements applied.*
+---
+
+## Up-to-date verification (Feb 2025)
+
+- **Miniapp:** `miniapp/src/app/page.js` — 12 tabs (Home, Brokers, Market, Car Racing, Bike Racing, Multiverse, Arenas, Guilds, Charity, University, Updates, Wallet); cinematic intro + 4-step tutorial; guide-tip per tab. **Aligned.**
+- **Styles:** `miniapp/src/app/globals.css` — 3D variables, buttons, cards, tab bar, balance strip, guide styles, cinematic/tutorial as described above. **Aligned.**
+- **Layout:** `miniapp/src/app/layout.js` — body `aiba-miniapp`; globals.css targets both `body` and `.aiba-miniapp`. **Aligned.**
+
+*Last updated: UI/UX deep check and enhancements applied. Verified Feb 2025.*
