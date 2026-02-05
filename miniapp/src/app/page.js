@@ -863,9 +863,18 @@ export default function HomePage() {
 
     async function createStarterBroker() {
         setBusy(true);
+        setStatus('');
         try {
             await api.post('/api/brokers/starter', {});
             await refreshBrokers();
+            setStatus('Starter broker created.');
+        } catch (e) {
+            const isNetworkError = e?.code === 'ERR_NETWORK' || e?.message === 'Network Error';
+            if (isNetworkError) {
+                setStatus(`Backend unreachable at ${BACKEND_URL}. Start it: cd backend && npm start`);
+            } else {
+                setStatus(e?.response?.data?.error || e?.message || 'Failed to create broker.');
+            }
         } finally {
             setBusy(false);
         }
