@@ -4,6 +4,48 @@ This guide gets the **backend**, **miniapp**, and **admin panel** running on you
 
 ---
 
+## Quick reference
+
+| Service      | URL                     | Command (from its directory) |
+|-------------|-------------------------|------------------------------|
+| Backend     | http://localhost:5000   | `npm start`                  |
+| Miniapp     | http://localhost:3000   | `npm run dev`                |
+| Admin panel | http://localhost:3001   | `npm run dev`                |
+
+**One-time setup (from repo root):**
+
+```bash
+# Backend env
+cp backend/.env.example backend/.env
+# Edit backend/.env: set MONGO_URI, APP_ENV=dev, ADMIN_EMAIL, ADMIN_PASSWORD
+
+# Miniapp env (optional; defaults to localhost:5000)
+cp miniapp/.env.local.example miniapp/.env.local
+# Content: NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+
+# Admin env (optional)
+cp admin-panel/.env.local.example admin-panel/.env.local
+# Content: NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+```
+
+**Windows (PowerShell)** — use `Copy-Item` instead of `cp`:
+```powershell
+Copy-Item backend/.env.example backend/.env
+Copy-Item miniapp/.env.local.example miniapp/.env.local
+Copy-Item admin-panel/.env.local.example admin-panel/.env.local
+```
+
+**Run all three from root** (start backend first in one terminal, then miniapp and admin in two more; or use one command from root):
+
+```bash
+npm install
+npm run dev
+```
+
+This starts backend (5000), miniapp (3000), and admin (3001) via `concurrently`. You must have `backend/.env` created first.
+
+---
+
 ## Prerequisites
 
 - **Node.js** 18+ (20 recommended). Check: `node -v`
