@@ -24,6 +24,8 @@
 <li><strong>User flow:</strong> <a href="USER-GUIDE.md">USER-GUIDE.md</a></li>
 <li><strong>Vision vs implementation:</strong> <a href="VISION-VS-CODEBASE-CHECK.md">VISION-VS-CODEBASE-CHECK.md</a></li>
 <li><strong>Marketplace &amp; payments (360° plan):</strong> <a href="MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md">MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</a></li>
+<li><strong>NFT Multiverse (own, stake, earn):</strong> <a href="NFT-MULTIVERSE-MASTER-PLAN.md">NFT-MULTIVERSE-MASTER-PLAN.md</a></li>
+<li><strong>Autonomous Racing (Car &amp; Motorcycle):</strong> <a href="AUTONOMOUS-RACING-MASTER-PLAN.md">AUTONOMOUS-RACING-MASTER-PLAN.md</a></li>
 <li><strong>Leaderboard &amp; groups:</strong> <a href="LEADERBOARD-AND-GROUPS-CHECK.md">LEADERBOARD-AND-GROUPS-CHECK.md</a></li>
 <li><strong>Deployment:</strong> <a href="deployment.md">deployment.md</a></li>
 <li><strong>Mainnet readiness:</strong> <a href="mainnet-readiness.md">mainnet-readiness.md</a></li>
@@ -57,7 +59,7 @@
 </tr>
 <tr>
 <td><code>miniapp/</code></td>
-<td>Next.js Telegram Mini App: TonConnect, tabs (Home, Brokers, Arenas, Guilds, Market, Charity, University, Updates, Wallet).</td>
+<td>Next.js Telegram Mini App: TonConnect, tabs (Home, Brokers, Arenas, Guilds, Market, Charity, University, Stars Store, Car Racing, Bike Racing, Updates, Wallet).</td>
 </tr>
 <tr>
 <td><code>admin-panel/</code></td>
@@ -225,16 +227,20 @@
 <li><code>/api/brokers</code> — mine, create starter, <strong>create-with-ton</strong> (pay TON → new broker + auto-list), train, repair, upgrade, combine, mint-nft.</li>
 <li><code>/api/vault</code> — inventory, claim-status, last-seqno.</li>
 <li><code>/api/leaderboard</code> — global list (by score/aiba/neur/battles), my-rank.</li>
-<li><code>/api/marketplace</code> — listings, list, buy.</li>
+<li><code>/api/marketplace</code> — listings, list, delist, buy.</li>
+<li><code>/api/car-racing</code> — tracks, races, cars (mine), create (AIBA), create-with-ton (txHash), enter (raceId, carId), race/:id, leaderboard, config, listings, list, buy-car.</li>
+<li><code>/api/bike-racing</code> — tracks, races, bikes (mine), create (AIBA), create-with-ton (txHash), enter (raceId, bikeId), race/:id, leaderboard, config, listings, list, buy-bike.</li>
+<li><code>/api/stars-store</code> — <strong>config</strong> (pack Stars, price AIBA, price TON, wallet), <strong>buy-with-aiba</strong> (one pack), <strong>buy-with-ton</strong> (txHash → TON to STARS_STORE_WALLET).</li>
 <li><code>/api/boosts</code> — mine, buy (NEUR), buy-with-ton, <strong>buy-profile-with-ton</strong> (pay TON → profile boost visibility).</li>
 <li><code>/api/staking</code> — summary, stake, unstake, claim.</li>
 <li><code>/api/dao</code> — proposals (list, create), vote, close, execute.</li>
 <li><code>/api/daily</code> — status, claim (daily NEUR).</li>
 <li><code>/api/oracle</code> — price (oracle display).</li>
 <li><code>/api/treasury</code> — summary.</li>
-<li><code>/api/charity</code> — campaigns, donate, impact.</li>
+<li><code>/api/charity</code> — campaigns, campaigns/:id, donate, leaderboard, my-impact, stats.</li>
 <li><code>/api/announcements</code> — list (active).</li>
 <li><code>/api/gifts</code> — <strong>send</strong> (pay TON → gift to user by telegramId/username), <strong>received</strong>, <strong>sent</strong>.</li>
+<li><code>/api/multiverse</code> — <strong>universes</strong> (list NFT universes), <strong>me</strong> (my NFTs), <strong>stake</strong> (stake broker NFT), <strong>unstake</strong>, <strong>staking/rewards</strong>, <strong>staking/claim</strong> (claim AIBA from NFT staking).</li>
 <li><code>/api/university</code> — courses, progress (GET/POST), mint-course-badge-info, mint-course-badge, mint-full-certificate-info, mint-full-certificate.</li>
 </ul>
 <p><strong>Admin (JWT required):</strong></p>
@@ -244,11 +250,12 @@
 <li><code>/api/admin/ads</code> — CRUD ads.</li>
 <li><code>/api/admin/game-modes</code> — CRUD game modes.</li>
 <li><code>/api/admin/economy</code> — get/update config, simulate.</li>
-<li><code>/api/admin/mod</code> — moderation (ban/unban by telegramId).</li>
+<li><code>/api/admin/mod</code> — flagged-brokers, recent-anomalies, flagged-users, ban-user, unban-user, ban-broker, unban-broker, user (get by telegramId), sync-top-leader-badges, user-badges (set badges by telegramId).</li>
 <li><code>/api/admin/treasury</code> — fund Treasury, StabilityReserve, BuybackPool.</li>
 <li><code>/api/admin/stats</code> — DAU, total users/battles, emitted today.</li>
 <li><code>/api/admin/charity</code> — manage charity campaigns.</li>
 <li><code>/api/admin/announcements</code> — manage announcements.</li>
+<li><code>/api/admin/multiverse</code> — <strong>universes</strong> (list), <strong>universes/:slug</strong> (PATCH), <strong>stakes</strong> (list NFT stakes).</li>
 <li><code>/api/admin/university</code> — stats, courses, graduates.</li>
 </ul>
 <h3>5.5 Backend Models (MongoDB / Mongoose)</h3>
@@ -373,6 +380,34 @@
 <tr>
 <td><strong>CourseBadgeMint</strong>, <strong>FullCertificateMint</strong></td>
 <td>One-time mint records (telegramId) for course badge and full certificate.</td>
+</tr>
+<tr>
+<td><strong>NftUniverse</strong></td>
+<td>slug, name, type, mintCostAiba, mintCostTonNano, feeBps, burnBps, stakingEnabled, active, order (NFT Multiverse config).</td>
+</tr>
+<tr>
+<td><strong>NftStake</strong></td>
+<td>telegramId, universeSlug, brokerId, stakedAt, lastRewardAt (stake Broker NFT to earn AIBA daily).</td>
+</tr>
+<tr>
+<td><strong>RacingCar</strong>, <strong>RacingMotorcycle</strong></td>
+<td>ownerTelegramId, topSpeed, acceleration, handling, durability, level, xp, energy, createdWithTonTxHash (autonomous racing vehicles).</td>
+</tr>
+<tr>
+<td><strong>CarTrack</strong>, <strong>BikeTrack</strong></td>
+<td>trackId, name, length, difficulty, league, active.</td>
+</tr>
+<tr>
+<td><strong>CarRace</strong>, <strong>BikeRace</strong></td>
+<td>trackId, league, status (open/running/completed), entryFeeAiba, rewardPool, maxEntries, seed, startedAt, completedAt.</td>
+</tr>
+<tr>
+<td><strong>CarRaceEntry</strong>, <strong>BikeRaceEntry</strong></td>
+<td>raceId, carId/bikeId, telegramId, position, finishTime, points, aibaReward.</td>
+</tr>
+<tr>
+<td><strong>CarListing</strong>, <strong>BikeListing</strong></td>
+<td>carId/bikeId, sellerTelegramId, priceAIBA, status (marketplace for vehicles).</td>
 </tr>
 </tbody></table>
 <h3>5.6 Backend Engine and Core Logic</h3>

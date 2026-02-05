@@ -95,22 +95,32 @@
 <li><strong>Gifts:</strong> Pay TON to send a <strong>gift</strong> to another user (by Telegram ID or @username). Wallet: <code>GIFTS_WALLET</code>; config: <code>giftCostTonNano</code>. Recipient sees “Gifts received”; you see “Gifts sent.”</li>
 <li><strong>Create/boost group:</strong> Pay TON to create a guild (if not in top N) or to boost a guild. Wallets: <code>LEADER_BOARD_WALLET</code>, <code>BOOST_GROUP_WALLET</code>.</li>
 <li><strong>Battle boost (TON):</strong> Pay TON for a reward multiplier. Wallet: <code>BOOST_TON_WALLET</code>.</li>
+<li><strong>Stars Store:</strong> Buy Telegram Stars–style packs with AIBA or TON. Wallet: <code>STARS_STORE_WALLET</code>; config: <code>starsStorePackPriceTonNano</code>.</li>
+<li><strong>Car Racing:</strong> Create a car with AIBA or TON (1–10 TON). Wallet: <code>CAR_RACING_WALLET</code>; config: <code>createCarCostTonNano</code>.</li>
+<li><strong>Bike Racing:</strong> Create a bike with AIBA or TON (1–10 TON). Wallet: <code>MOTORCYCLE_RACING_WALLET</code>; config: <code>createBikeCostTonNano</code>.</li>
 </ul>
 <hr/>
-<h2>4. Guilds</h2>
+<h2>4. Autonomous Racing (Car &amp; Bike)</h2>
+<ul>
+<li><strong>Create vehicle:</strong> Pay <strong>AIBA</strong> or <strong>TON</strong> (1–10 TON to Super Admin wallet) to create a car or bike. It appears in “My Cars” or “My Bikes.”</li>
+<li><strong>Enter race:</strong> Pick an open race (track + league), select your vehicle, pay <strong>AIBA</strong> entry fee. When the race fills or timer ends, the server runs the simulation and ranks by finish position/time. <strong>Rewards</strong> in <strong>AIBA</strong> by position (share of pool).</li>
+<li><strong>Leaderboards &amp; marketplace:</strong> Global and per-league leaderboards; you can <strong>list</strong> your car/bike for <strong>AIBA</strong> and <strong>buy</strong> others’ vehicles. See <a href="AUTONOMOUS-RACING-MASTER-PLAN.md">AUTONOMOUS-RACING-MASTER-PLAN.md</a> for full spec.</li>
+</ul>
+<hr/>
+<h2>5. Guilds</h2>
 <ul>
 <li><strong>Guild Wars</strong> arena requires you to be in a guild. Rewards (NEUR) are split (e.g. 80% to you, 20% to guild treasury).</li>
 <li>You can <strong>deposit</strong> a broker into a guild’s pool or <strong>withdraw</strong> it back to “yours.” Guild wars may use pooled brokers for matchmaking (e.g. guild vs guild).</li>
 <li>Guild has a <strong>vault</strong> (NEUR) that grows from the guild’s share of guild war rewards.</li>
 </ul>
 <hr/>
-<h2>5. Referrals</h2>
+<h2>6. Referrals</h2>
 <ul>
 <li>Others <strong>apply</strong> your code (they need a connected wallet; anti-sybil baseline). When they apply, both you and they can get <strong>NEUR</strong> bonuses (amounts set in economy config: referralRewardNeurReferrer, referralRewardNeurReferee).</li>
 <li>Referral is one-time per referee (wallet/account).</li>
 </ul>
 <hr/>
-<h2>6. Marketplace (unified)</h2>
+<h2>7. Marketplace (unified)</h2>
 <ul>
 <li><strong>Create broker with TON:</strong> You pay TON (1–10, configurable) to the project’s “Created Brokers” wallet, then submit the <strong>transaction hash</strong>. The backend verifies the payment and creates a new broker <strong>and</strong> a <strong>listing</strong> at a default AIBA price so it appears globally. You are the seller → <strong>global recognition</strong>.</li>
 <li><strong>List your broker:</strong> Choose a broker you own (not in a guild pool), set a <strong>price in AIBA</strong>, and list. The listing is visible to everyone.</li>
@@ -134,7 +144,7 @@
 <li><strong>Bans:</strong> users or brokers can be banned (or auto-banned after too many anomaly flags). Banned users get 403 on battle run.</li>
 </ul>
 <hr/>
-<h2>10. End-to-End Flow (summary)</h2>
+<h2>11. End-to-End Flow (summary)</h2>
 <ol>
 <li><strong>Connect wallet</strong> (TonConnect) → backend saves your TON address.</li>
 <li><strong>Create a starter broker</strong> (or use an existing one).</li>
@@ -147,9 +157,9 @@
 <li>- <strong>Create claim</strong> later (amount or “all”), then <strong>Claim on-chain (TonConnect)</strong> with the same flow.</li>
 <li><strong>Referrals:</strong> create code, share it; others apply with wallet to get NEUR bonuses.</li>
 <li><strong>Ads</strong> may appear between battles; <strong>tasks</strong> can be shown for future engagement.</li>
-<li><strong>Optional:</strong> <strong>Market</strong> — create a broker with TON (pay → paste tx hash → broker auto-listed); list/buy brokers with AIBA. <strong>Wallet</strong> — boost your profile (TON); send gifts (TON) to another user; view received/sent gifts.</li>
+<li><strong>Optional:</strong> <strong>Market</strong> — create a broker with TON (pay → paste tx hash → broker auto-listed); list/buy brokers with AIBA. <strong>Wallet</strong> — boost your profile (TON); send gifts (TON) to another user; view received/sent gifts. <strong>Car Racing / Bike Racing</strong> — create a car or bike (AIBA or TON), enter races, earn AIBA by position; list/buy vehicles on the racing marketplace.</li>
 </ol>
-<p>This is the <strong>full picture</strong> of the game: brokers, arenas, leagues, deterministic battles, NEUR/AIBA economy, on-chain AIBA withdrawal via signed claims, guilds, referrals, <strong>unified marketplace</strong> (create broker with TON, list/buy with AIBA), <strong>boost profile</strong> and <strong>gifts</strong> (TON), and supporting features (ads, tasks). See <a href="USER-GUIDE.md">USER-GUIDE.md</a> for step-by-step play and <a href="MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md">MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</a> for payment design.</p>
+<p>This is the <strong>full picture</strong> of the game: brokers, arenas, leagues, deterministic battles, NEUR/AIBA economy, on-chain AIBA withdrawal via signed claims, guilds, referrals, <strong>unified marketplace</strong> (create broker with TON, list/buy with AIBA), <strong>boost profile</strong> and <strong>gifts</strong> (TON), <strong>autonomous car and bike racing</strong> (create with AIBA or TON, enter races, AIBA rewards, vehicle marketplace), Stars Store, and supporting features (ads, tasks). See <a href="USER-GUIDE.md">USER-GUIDE.md</a> for step-by-step play, <a href="MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md">MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</a> for payment design, and <a href="AUTONOMOUS-RACING-MASTER-PLAN.md">AUTONOMOUS-RACING-MASTER-PLAN.md</a> for racing economy and benefits.</p>
   </div>
 </body>
 </html>

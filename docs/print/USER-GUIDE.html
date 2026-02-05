@@ -28,6 +28,7 @@
 <li>Gifts</li>
 <li>Referrals</li>
 <li>Brokers Tab: Combine and Mint as NFT</li>
+<li>NFT Multiverse (Own, Stake, Earn)</li>
 <li>Leaderboard</li>
 <li>Charity (Unite for Good)</li>
 <li>University</li>
@@ -42,7 +43,7 @@
 <h2>1. Opening the Game</h2>
 <ul>
 <li><strong>Requirements:</strong> Telegram account; optionally a TON wallet (TonConnect) if you want to withdraw AIBA on-chain.</li>
-<li><strong>First time:</strong> You may see a <strong>cinematic intro</strong> (skip or watch) and a <strong>tutorial</strong> (steps for brokers, arena, battle). The app has a <strong>tab bar</strong> at the bottom: <strong>Home</strong>, <strong>Brokers</strong>, <strong>Arenas</strong>, <strong>Guilds</strong>, <strong>Market</strong>, <strong>Charity</strong>, <strong>University</strong>, <strong>Updates</strong>, <strong>Wallet</strong>. Tap a tab to switch. A <strong>balance strip</strong> at the top shows NEUR, AIBA credits, Stars, Diamonds, and a verified badge if you have one.</li>
+<li><strong>First time:</strong> You may see a <strong>cinematic intro</strong> (skip or watch) and a <strong>tutorial</strong> (steps for brokers, arena, battle). The app has a <strong>tab bar</strong> at the bottom: <strong>Home</strong>, <strong>Brokers</strong>, <strong>Market</strong>, <strong>Car Racing</strong>, <strong>Bike Racing</strong>, <strong>Multiverse</strong>, <strong>Arenas</strong>, <strong>Guilds</strong>, <strong>Charity</strong>, <strong>University</strong>, <strong>Updates</strong>, <strong>Wallet</strong> (12 tabs). Tap a tab to switch. A <strong>balance strip</strong> at the top shows NEUR, AIBA credits, Stars, Diamonds, and a verified badge if you have one.</li>
 </ul>
 <hr/>
 <h2>2. How the App Is Organized (Tabs)</h2>
@@ -61,16 +62,28 @@
 <td>My brokers (select, combine two for NEUR, mint one as NFT for AIBA).</td>
 </tr>
 <tr>
+<td><strong>Market</strong></td>
+<td>Create your broker (pay TON), Marketplace (list/buy brokers with AIBA), Boosts (buy reward multiplier with NEUR).</td>
+</tr>
+<tr>
+<td><strong>Car Racing</strong></td>
+<td>Autonomous car racing: tracks, races, my cars, create car (AIBA or TON), enter race, leaderboard, marketplace (list/buy cars).</td>
+</tr>
+<tr>
+<td><strong>Bike Racing</strong></td>
+<td>Autonomous bike racing: tracks, races, my bikes, create bike (AIBA or TON), enter race, leaderboard, marketplace (list/buy bikes).</td>
+</tr>
+<tr>
+<td><strong>Multiverse</strong></td>
+<td>NFT universes, <strong>My NFTs</strong> (Broker NFTs you own), <strong>stake</strong> to earn AIBA daily, <strong>claim</strong> staking rewards. Mint Broker NFTs from the Brokers tab (pay AIBA).</td>
+</tr>
+<tr>
 <td><strong>Arenas</strong></td>
 <td>Arena selector, Run battle, Battle result (score, rewards, Stars/Diamond).</td>
 </tr>
 <tr>
 <td><strong>Guilds</strong></td>
 <td>Groups (leaderboard rank, create or join, pay TON to create if not top N, boost group with TON), My groups, deposit/withdraw broker.</td>
-</tr>
-<tr>
-<td><strong>Market</strong></td>
-<td>Create your broker (pay TON), Marketplace (list/buy brokers with AIBA), Boosts (buy reward multiplier with NEUR).</td>
 </tr>
 <tr>
 <td><strong>Charity</strong></td>
@@ -194,7 +207,13 @@
 <li><strong>Result:</strong> A new broker is created and listed on the marketplace at the default AIBA price. Everyone can see it; you appear as the seller.</li>
 <li><strong>Tip:</strong> If you see “txHash already used,” that payment was already applied. Use a new TON payment for another broker.</li>
 </ul>
-<h3>8.2 List and buy brokers (AIBA)</h3>
+<h3>8.2 Stars Store (buy Stars with AIBA or TON)</h3>
+<ul>
+<li><strong>Where:</strong> <strong>Market</strong> tab and <strong>Wallet</strong> tab → <strong>Stars Store</strong> card.</li>
+<li><strong>Buy with AIBA:</strong> Tap <strong>Buy with AIBA</strong> to buy one pack (size and price set by admins).</li>
+<li><strong>Buy with TON:</strong> Send the required TON to the Stars Store wallet, paste the <strong>transaction hash</strong>, tap <strong>Buy with TON</strong>. TON goes to Super Admin STARS_STORE_WALLET.</li>
+</ul>
+<h3>8.3 List and buy brokers (AIBA)</h3>
 <ul>
 <li><strong>Buy:</strong> Browse <strong>listings</strong> and tap <strong>Buy</strong> on a listing. You pay in <strong>AIBA</strong>; the broker is transferred to you. Your AIBA balance is debited.</li>
 <li><strong>Refresh:</strong> Tap <strong>Refresh</strong> to load the latest listings.</li>
@@ -233,30 +252,37 @@
 <li><strong>Mint as NFT:</strong> Select one broker and tap <strong>Mint as NFT</strong>. Cost: <strong>AIBA</strong> (amount shown). The backend queues a <strong>mint job</strong>; when an admin completes it, the broker is linked to an on-chain NFT. Status appears in the app.</li>
 </ul>
 <hr/>
-<h2>14. Leaderboard</h2>
+<h2>14. NFT Multiverse (Own, Stake, Earn)</h2>
+<ul>
+<li><strong>What:</strong> The <strong>NFT Multiverse</strong> lets you see all <strong>NFT universes</strong> (e.g. Broker NFT), <strong>My NFTs</strong> (brokers you’ve minted as NFT), and <strong>stake</strong> them to earn <strong>AIBA daily</strong>.</li>
+<li><strong>Flow:</strong> Mint a Broker NFT from the <strong>Brokers</strong> tab (pay AIBA). Then open <strong>Multiverse</strong> → <strong>My NFTs</strong> → tap <strong>Stake</strong> on a broker NFT. Rewards accumulate per day (e.g. 5 AIBA per NFT per day; configurable). Tap <strong>Claim rewards</strong> to credit pending AIBA to your balance. Tap <strong>Unstake</strong> to stop earning and keep the NFT.</li>
+<li><strong>Benefit:</strong> Ownership of on-chain NFTs, passive AIBA income from staking, and alignment with the ecosystem (see <a href="NFT-MULTIVERSE-MASTER-PLAN.md">NFT-MULTIVERSE-MASTER-PLAN.md</a>).</li>
+</ul>
+<hr/>
+<h2>15. Leaderboard</h2>
 <ul>
 <li><strong>What:</strong> Global ranks by <strong>score</strong>, <strong>AIBA</strong>, <strong>NEUR</strong>, or <strong>battles</strong> (dropdown). You see the top players; the list is the same for everyone worldwide. Your <strong>my-rank</strong> (e.g. “Your leaderboard rank: #42”) is shown in the <strong>Guilds</strong> tab and is used to decide if you can create a group for free (top N) or must pay TON.</li>
 </ul>
 <hr/>
-<h2>15. Charity (Unite for Good)</h2>
+<h2>16. Charity (Unite for Good)</h2>
 <ul>
 <li><strong>What:</strong> <strong>Active campaigns</strong> (e.g. education, health, community). Each campaign has a name, description, cause, and progress (NEUR + AIBA raised, donor count). You can <strong>donate</strong> NEUR and/or AIBA from your balance to a campaign; optional message and anonymous option.</li>
 <li><strong>Your impact:</strong> The tab shows how much you’ve donated (NEUR, AIBA, impact score) and per-campaign breakdown.</li>
 <li><strong>Charity leaderboard:</strong> Optional leaderboard of donors by impact.</li>
 </ul>
 <hr/>
-<h2>16. University</h2>
+<h2>17. University</h2>
 <ul>
 <li><strong>What:</strong> <strong>Courses</strong> and <strong>modules</strong> (learning content). You see your <strong>progress</strong> (e.g. X of Y modules completed). Tapping a module can mark it complete (POST progress). When you complete all, you get a <strong>graduate</strong> badge.</li>
 <li><strong>Mint course badge / full certificate:</strong> After completing requirements, you can <strong>mint</strong> a course completion badge or full course certificate by <strong>paying TON</strong> (cost shown). Send TON to the configured wallet, paste the tx hash, and submit. See the University tab for the exact flow and wallet.</li>
 </ul>
 <hr/>
-<h2>17. Updates (Announcements)</h2>
+<h2>18. Updates (Announcements)</h2>
 <ul>
 <li><strong>What:</strong> <strong>Announcements</strong> from the project (title, body, type). Stay informed about news, status, and support. No action required; read and dismiss.</li>
 </ul>
 <hr/>
-<h2>18. Wallet Tab (Full Picture)</h2>
+<h2>19. Wallet Tab (Full Picture)</h2>
 <p>The <strong>Wallet</strong> tab contains:</p>
 <ul>
 <li><strong>Boost your profile:</strong> See section 10. Pay TON → paste tx hash.</li>
@@ -269,17 +295,17 @@
 <li><strong>Stars and Diamonds:</strong> Display of your Stars and Diamonds balances (earned from battles).</li>
 </ul>
 <hr/>
-<h2>19. Ads and Tasks</h2>
+<h2>20. Ads and Tasks</h2>
 <ul>
 <li><strong>Tasks:</strong> The app or backend may list <strong>tasks</strong> (e.g. daily quests or external links). Follow the instructions shown for each task; completion may grant rewards (implementation depends on the project).</li>
 </ul>
 <hr/>
-<h2>20. Vault Inventory (Optional / Debug)</h2>
+<h2>21. Vault Inventory (Optional / Debug)</h2>
 <ul>
 <li>If “Claim on-chain” fails with “Vault inventory too low” or “insufficient TON,” an admin needs to top up the vault; you can use this section to confirm the state.</li>
 </ul>
 <hr/>
-<h2>21. Troubleshooting</h2>
+<h2>22. Troubleshooting</h2>
 <table>
 <thead><tr>
 <th>Problem</th>
@@ -376,7 +402,7 @@
 </tr>
 </tbody></table>
 <hr/>
-<h2>22. Quick Checklist (First Session)</h2>
+<h2>23. Quick Checklist (First Session)</h2>
 <ol>
 <li>Connect wallet (TonConnect).</li>
 <li>Create starter broker and select it in <strong>My brokers</strong>.</li>

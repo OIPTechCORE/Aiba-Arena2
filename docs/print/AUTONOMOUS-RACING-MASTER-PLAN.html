@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AUTONOMOUS RACING MASTER PLAN — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>AUTONOMOUS RACING MASTER PLAN</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Autonomous Racing — Master Plan (Car &amp; Motorcycle)</h1>
+<p>This document is the <strong>master plan</strong> for <strong>Autonomous Motor Car Racing</strong> and <strong>Autonomous Motorcycle Racing</strong> inside the AIBA ecosystem. Each vertical is designed so <strong>Users</strong>, <strong>AIBA Token</strong> (AIBA/ecosystem token), and <strong>Super Admin</strong> can each reach <strong>billions of dollars</strong> in value and revenue.</p>
+<hr/>
+<h2>1. Vision</h2>
+<ul>
+<li><strong>Same economy principles:</strong> TON for entry/creation/premium; <strong>AIBA</strong> for all in-race rewards, entry fees, marketplace, mints, and staking. Super Admin gets dedicated TON wallets per product and % of AIBA flow (fees, burns, treasury).</li>
+<li><strong>Path to billions:</strong> Users earn from racing, ownership, trading, and staking; AIBA gains from every race, mint, and trade; Super Admin earns from TON and fee revenue.</li>
+</ul>
+<hr/>
+<h2>2. Core Design: What Is “Autonomous Racing”?</h2>
+<table>
+<thead><tr>
+<th>Concept</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Vehicle</strong></td>
+<td>A <strong>Racing Car</strong> or <strong>Racing Motorcycle</strong> (separate from “Broker”). Has stats: <strong>Top Speed</strong>, <strong>Acceleration</strong>, <strong>Handling</strong>, <strong>Durability</strong> (and optionally <strong>AI Driver</strong> link to a Broker).</td>
+</tr>
+<tr>
+<td><strong>Autonomous</strong></td>
+<td>Races are <strong>simulated</strong> by the server: the vehicle’s stats + a <strong>deterministic seed</strong> (like battles) produce a <strong>finish position</strong> and <strong>race time</strong>. No real-world racing; no client-side input during race.</td>
+</tr>
+<tr>
+<td><strong>Race</strong></td>
+<td>A <strong>race instance</strong>: N vehicles (e.g. 8–16) compete on a <strong>track</strong> (configurable). Server runs one deterministic simulation → ranking, lap times, points.</td>
+</tr>
+<tr>
+<td><strong>Entry</strong></td>
+<td>User <strong>enters</strong> a vehicle into a race by paying <strong>AIBA</strong> (and/or TON for premium events). Rewards paid in <strong>AIBA</strong> by finish position.</td>
+</tr>
+</tbody></table>
+<ul>
+<li><strong>Motorcycle Racing:</strong> Bikes have bike-specific stats (e.g. higher weight on handling/speed ratio). Separate tracks and leagues. Same reward and economy structure.</li>
+</ul>
+<p>Both can share the same <strong>economy backend</strong> (AIBA, ledger, caps) and <strong>Super Admin wallet</strong> strategy (dedicated env per product).</p>
+<hr/>
+<h2>3. A. Autonomous Motor Car Racing — Specification</h2>
+<h3>3.1 Assets and Data</h3>
+<table>
+<thead><tr>
+<th>Entity</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>RacingCar</strong></td>
+<td>ownerTelegramId, topSpeed, acceleration, handling, durability, level, xp, energy, cooldowns, nftItemAddress (optional), createdWithTonTxHash (optional).</td>
+</tr>
+<tr>
+<td><strong>CarTrack</strong></td>
+<td>trackId, name, length (virtual), difficulty, carLeague (rookie/pro/elite).</td>
+</tr>
+<tr>
+<td><strong>CarRace</strong></td>
+<td>raceId, trackId, league, status (open/running/completed), entryFeeAiba, rewardPool (from entries + treasury boost), startedAt, completedAt, seed.</td>
+</tr>
+<tr>
+<td><strong>CarRaceEntry</strong></td>
+<td>raceId, carId, telegramId, position, finishTime, points, aibaReward.</td>
+</tr>
+</tbody></table>
+<h3>3.2 Flow</h3>
+<ol>
+<li><strong>Enter race:</strong> User selects car and race (track + league). Pays <strong>entry fee</strong> in <strong>AIBA</strong> (or TON for premium cups → <code>CAR_RACING_WALLET</code>). Entry closes when slot count is full or timer ends.</li>
+<li><strong>Race runs:</strong> Server runs deterministic simulation: vehicle stats + track + seed → finish order and times. <strong>Rewards</strong> in <strong>AIBA</strong> (position-based share of pool). Fee % of pool to treasury/burn.</li>
+<li><strong>Leaderboards:</strong> Global and per-league leaderboards (points, wins, AIBA earned). Top users get badges and optional <strong>free entry</strong> or <strong>NFT</strong> rewards.</li>
+<li><strong>Marketplace:</strong> Users list <strong>cars</strong> for <strong>AIBA</strong>; buyers pay AIBA; fee % to treasury/burn (same as broker marketplace).</li>
+<li><strong>NFT &amp; Staking:</strong> Cars can be minted as <strong>NFTs</strong> (pay AIBA); staking car NFT earns <strong>AIBA</strong> daily (like Broker NFT in Multiverse).</li>
+</ol>
+<h3>3.3 Economy Levers (Car)</h3>
+<table>
+<thead><tr>
+<th>Action</th>
+<th>Currency</th>
+<th>Recipient</th>
+<th>Config / note</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Create car (TON)</td>
+<td>TON</td>
+<td>Super Admin (CAR_RACING_WALLET)</td>
+<td>createCarCostTonNano (1–10 TON)</td>
+</tr>
+<tr>
+<td>Create car (AIBA)</td>
+<td>AIBA</td>
+<td>Burn or treasury</td>
+<td>createCarCostAiba</td>
+</tr>
+<tr>
+<td>Enter race</td>
+<td>AIBA (or TON for premium)</td>
+<td>Pool + fee % to treasury</td>
+<td>entryFeeAiba, carRacingFeeBps</td>
+</tr>
+<tr>
+<td>Race reward</td>
+<td>AIBA</td>
+<td>User (position share)</td>
+<td>From pool; remainder can go to treasury</td>
+</tr>
+<tr>
+<td>List/buy car</td>
+<td>AIBA</td>
+<td>Seller (minus fee); fee → burn/treasury</td>
+<td>marketplaceFeeBps, marketplaceBurnBps</td>
+</tr>
+<tr>
+<td>Mint car NFT</td>
+<td>AIBA</td>
+<td>Burn/treasury</td>
+<td>carMintNftCostAiba</td>
+</tr>
+<tr>
+<td>Stake car NFT</td>
+<td>—</td>
+<td>User earns AIBA daily</td>
+<td>nftStakingRewardPerDayAiba (or car-specific)</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>4. B. Autonomous Motorcycle Racing — Specification</h2>
+<h3>4.1 Assets and Data</h3>
+<table>
+<thead><tr>
+<th>Entity</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>RacingMotorcycle</strong></td>
+<td>ownerTelegramId, topSpeed, acceleration, handling, durability, level, xp, energy, cooldowns, nftItemAddress (optional), createdWithTonTxHash (optional).</td>
+</tr>
+<tr>
+<td><strong>BikeTrack</strong></td>
+<td>trackId, name, length, difficulty, bikeLeague.</td>
+</tr>
+<tr>
+<td><strong>BikeRace</strong></td>
+<td>raceId, trackId, league, status, entryFeeAiba, rewardPool, startedAt, completedAt, seed.</td>
+</tr>
+<tr>
+<td><strong>BikeRaceEntry</strong></td>
+<td>raceId, bikeId, telegramId, position, finishTime, points, aibaReward.</td>
+</tr>
+</tbody></table>
+<h3>4.2 Flow</h3>
+<ul>
+<li><strong>Different feel:</strong> Bike stats can be tuned so that handling/risk matter more (e.g. higher variance), and tracks can be bike-specific (shorter, more turns) to differentiate from car racing.</li>
+</ul>
+<h3>4.3 Economy Levers (Motorcycle)</h3>
+<table>
+<thead><tr>
+<th>Action</th>
+<th>Currency</th>
+<th>Recipient</th>
+<th>Config / note</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Create motorcycle (TON)</td>
+<td>TON</td>
+<td>Super Admin (MOTORCYCLE_RACING_WALLET)</td>
+<td>createBikeCostTonNano (1–10 TON)</td>
+</tr>
+<tr>
+<td>Create motorcycle (AIBA)</td>
+<td>AIBA</td>
+<td>Burn or treasury</td>
+<td>createBikeCostAiba</td>
+</tr>
+<tr>
+<td>Enter race</td>
+<td>AIBA (or TON for premium)</td>
+<td>Pool + fee %</td>
+<td>entryFeeAiba, bikeRacingFeeBps</td>
+</tr>
+<tr>
+<td>Race reward</td>
+<td>AIBA</td>
+<td>User</td>
+<td>Position share from pool</td>
+</tr>
+<tr>
+<td>List/buy bike</td>
+<td>AIBA</td>
+<td>Seller (minus fee); fee → burn/treasury</td>
+<td>Same marketplace fee/burn</td>
+</tr>
+<tr>
+<td>Mint bike NFT</td>
+<td>AIBA</td>
+<td>Burn/treasury</td>
+<td>bikeMintNftCostAiba</td>
+</tr>
+<tr>
+<td>Stake bike NFT</td>
+<td>—</td>
+<td>User earns AIBA daily</td>
+<td>Same or bike-specific staking reward</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>5. Benefits — A. USER (Billions Potential)</h2>
+<table>
+<thead><tr>
+<th>Benefit</th>
+<th>Description</th>
+<th>Revenue / value potential</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Ownership</strong></td>
+<td>Own cars and motorcycles (and their NFTs). Tradeable, provable on-chain.</td>
+<td>Asset appreciation; resale at higher prices as ecosystem grows.</td>
+</tr>
+<tr>
+<td><strong>Racing rewards</strong></td>
+<td>Compete in races; finish position pays <strong>AIBA</strong>. Regular and championship events.</td>
+<td>Steady and tournament AIBA income; top leaderboards = visibility and sponsorships.</td>
+</tr>
+<tr>
+<td><strong>Trading</strong></td>
+<td>Sell vehicles on marketplace for <strong>AIBA</strong>; buy better stats or rare models.</td>
+<td>Arbitrage, flipping, collecting → billions in secondary market.</td>
+</tr>
+<tr>
+<td><strong>Staking</strong></td>
+<td>Stake car/bike NFTs to earn <strong>AIBA</strong> daily (like Broker NFT).</td>
+<td>Passive income; long-term hold = compound rewards.</td>
+</tr>
+<tr>
+<td><strong>Play-to-earn</strong></td>
+<td>Earn AIBA from races → upgrade vehicles or mint NFTs → sell or stake.</td>
+<td>Full loop: play → own → earn → reinvest.</td>
+</tr>
+<tr>
+<td><strong>Exclusive access</strong></td>
+<td>Premium races (TON entry), seasonal championships, NFT-gated events.</td>
+<td>High-roller revenue; influencer and brand deals.</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>Leaderboards, badges (e.g. “Car Champion”, “Bike Elite”), profile display.</td>
+<td>Recognition, clout, partnerships.</td>
+</tr>
+</tbody></table>
+<p><strong>Scale:</strong> Millions of users × (race rewards + trading + staking + championships) = <strong>billions</strong> in user-captured value over time.</p>
+<hr/>
+<h2>6. Benefits — B. AIBA TOKEN (Billions Market Cap)</h2>
+<table>
+<thead><tr>
+<th>Lever</th>
+<th>Description</th>
+<th>Effect on market cap</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Entry fees</strong></td>
+<td>Every race entry (and premium TON-converted entry) drives <strong>AIBA</strong> demand.</td>
+<td>Constant spend; recurring use case.</td>
+</tr>
+<tr>
+<td><strong>Rewards</strong></td>
+<td>All race payouts in <strong>AIBA</strong>.</td>
+<td>Attracts and retains players; demand to hold and earn.</td>
+</tr>
+<tr>
+<td><strong>Create vehicle (AIBA)</strong></td>
+<td>Optional: pay AIBA to create car/bike.</td>
+<td>Direct sink; supply reduction or treasury lock.</td>
+</tr>
+<tr>
+<td><strong>Marketplace</strong></td>
+<td>Buy/sell cars and bikes in <strong>AIBA</strong>; fee % (and burn).</td>
+<td>Every trade = demand; deflationary fee burn.</td>
+</tr>
+<tr>
+<td><strong>Mint NFT</strong></td>
+<td>Mint car/bike as NFT costs <strong>AIBA</strong>.</td>
+<td>Sink; aligns with Multiverse.</td>
+</tr>
+<tr>
+<td><strong>Staking</strong></td>
+<td>Stake vehicle NFTs → rewards in <strong>AIBA</strong>; optional AIBA lock.</td>
+<td>Reduces circulating supply; rewards = long-term holding.</td>
+</tr>
+<tr>
+<td><strong>Single in-app token</strong></td>
+<td>No other token for value: racing, marketplace, staking all <strong>AIBA</strong>.</td>
+<td>Clear store of value → path to <strong>billions market cap</strong>.</td>
+</tr>
+</tbody></table>
+<p><strong>Result:</strong> Racing verticals add <strong>two major use cases</strong> (car + bike) on top of existing brokers, marketplace, and multiverse → more demand, more sinks, more scarcity → <strong>AIBA toward billions</strong>.</p>
+<hr/>
+<h2>7. Benefits — C. SUPER ADMIN (Billions Revenue)</h2>
+<table>
+<thead><tr>
+<th>Revenue stream</th>
+<th>Description</th>
+<th>Scale</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>TON: Create car</strong></td>
+<td>User pays TON to create car → <strong>CAR_RACING_WALLET</strong>.</td>
+<td>Millions of users × 1–10 TON = massive TON inflow.</td>
+</tr>
+<tr>
+<td><strong>TON: Create motorcycle</strong></td>
+<td>User pays TON to create bike → <strong>MOTORCYCLE_RACING_WALLET</strong>.</td>
+<td>Same; separate accounting.</td>
+</tr>
+<tr>
+<td><strong>TON: Premium races</strong></td>
+<td>Optional premium entry in TON (e.g. championship qualifiers) → dedicated wallet.</td>
+<td>High-value events; recurring.</td>
+</tr>
+<tr>
+<td><strong>AIBA fee %</strong></td>
+<td>% of race entry pool and % of marketplace sales (cars/bikes) to treasury.</td>
+<td>Grows with volume; sustainable.</td>
+</tr>
+<tr>
+<td><strong>Fee burn</strong></td>
+<td>Part of fee burned (like broker marketplace) → supports AIBA value → indirect treasury value.</td>
+<td>Deflationary; benefits whole ecosystem.</td>
+</tr>
+<tr>
+<td><strong>Dedicated wallets</strong></td>
+<td>CAR_RACING_WALLET, MOTORCYCLE_RACING_WALLET (and optional PREMIUM_CAR_RACING_WALLET, etc.).</td>
+<td>Clear accounting; audit; treasury splits.</td>
+</tr>
+</tbody></table>
+<p><strong>Result:</strong> Super Admin captures <strong>TON</strong> (creation + premium) and <strong>AIBA fee revenue</strong> from two new high-engagement verticals → <strong>billions</strong> as racing scales globally.</p>
+<hr/>
+<h2>8. Implementation Outline (High Level)</h2>
+<table>
+<thead><tr>
+<th>Layer</th>
+<th>Car Racing</th>
+<th>Motorcycle Racing</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Models</strong></td>
+<td>RacingCar, CarTrack, CarRace, CarRaceEntry</td>
+<td>RacingMotorcycle, BikeTrack, BikeRace, BikeRaceEntry</td>
+</tr>
+<tr>
+<td><strong>Engine</strong></td>
+<td>Deterministic race simulator (stats + track + seed → order + times)</td>
+<td>Same pattern; bike-specific weights/tracks</td>
+</tr>
+<tr>
+<td><strong>Routes</strong></td>
+<td>/api/car-racing (create, list, enter, result, leaderboard, marketplace)</td>
+<td>/api/bike-racing (same)</td>
+</tr>
+<tr>
+<td><strong>Economy config</strong></td>
+<td>createCarCostTonNano, createCarCostAiba, entryFeeAiba, carRacingFeeBps, carMintNftCostAiba</td>
+<td>createBikeCostTonNano, createBikeCostAiba, entryFeeAiba, bikeRacingFeeBps, bikeMintNftCostAiba</td>
+</tr>
+<tr>
+<td><strong>Env</strong></td>
+<td>CAR_RACING_WALLET</td>
+<td>MOTORCYCLE_RACING_WALLET</td>
+</tr>
+<tr>
+<td><strong>Miniapp</strong></td>
+<td>New tab or section: Car Racing (My Cars, Races, Enter, Leaderboard, Market)</td>
+<td>New tab or section: Bike Racing (same)</td>
+</tr>
+<tr>
+<td><strong>NFT</strong></td>
+<td>Car NFT collection (or extend Multiverse “car” universe); staking</td>
+<td>Bike NFT collection; staking</td>
+</tr>
+<tr>
+<td><strong>Admin</strong></td>
+<td>Tracks, races (create/close), economy knobs, moderation</td>
+<td>Same</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>9. Summary Table: Who Gets What</h2>
+<table>
+<thead><tr>
+<th>Party</th>
+<th>Car Racing</th>
+<th>Motorcycle Racing</th>
+<th>Billions path</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>User</strong></td>
+<td>Race rewards (AIBA), own/trade/sell cars, stake car NFTs, leaderboards, championships</td>
+<td>Same for bikes</td>
+<td>Volume × (rewards + trading + staking)</td>
+</tr>
+<tr>
+<td><strong>AIBA</strong></td>
+<td>Entry fees, rewards, create/mint/marketplace/staking all in AIBA; fee burn</td>
+<td>Same</td>
+<td>Demand + sinks + scarcity → market cap</td>
+</tr>
+<tr>
+<td><strong>Super Admin</strong></td>
+<td>TON (create car, premium); fee % from races and marketplace</td>
+<td>TON (create bike, premium); fee %</td>
+<td>TON + fee revenue; dedicated wallets</td>
+</tr>
+</tbody></table>
+<hr/>
+<p>This is the <strong>master plan</strong> for <strong>Autonomous Motor Car Racing</strong> and <strong>Autonomous Motorcycle Racing</strong>: two verticals with clear benefits for <strong>Users</strong>, <strong>AIBA (AIWEC)</strong>, and <strong>Super Admin</strong>, each capable of reaching <strong>billions of dollars</strong> as the ecosystem scales.</p>
+<hr/>
+<h2>10. Implementation Checklist</h2>
+<table>
+<thead><tr>
+<th>Item</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Backend: RacingCar, CarTrack, CarRace, CarRaceEntry, CarListing models</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>Backend: RacingMotorcycle, BikeTrack, BikeRace, BikeRaceEntry, BikeListing models</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>Backend: Deterministic race engine (stats + track + seed → order + times)</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>Backend: Economy config (create cost TON/AIBA, entry fee, fee BPS)</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>Backend: <code>/api/car-racing</code> routes (tracks, races, create, enter, leaderboard, config, marketplace)</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>Backend: <code>/api/bike-racing</code> routes (same)</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>Backend: Create with TON (CAR_RACING_WALLET, MOTORCYCLE_RACING_WALLET), UsedTonTxHash</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>Backend: Seed tracks job + default open races on startup</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>Admin: Economy knobs for racing (allowed in adminEconomy)</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>Miniapp: Car Racing tab (create, my cars, enter race, leaderboard, marketplace)</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>Miniapp: Bike Racing tab (same)</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>Docs: PROJECT-DESCRIPTION-SYSTEMATIC, GAME-EXPLAINED, USER-GUIDE, plan checklist</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>NFT mint / staking for cars and bikes</td>
+<td>Future</td>
+</tr>
+</tbody></table>
+  </div>
+</body>
+</html>

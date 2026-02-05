@@ -86,6 +86,12 @@
 <td><code>boostGroupCostTonNano</code> (1–10 TON)</td>
 <td>Yes</td>
 </tr>
+<tr>
+<td><strong>Stars Store</strong> (buy Stars with TON)</td>
+<td><code>STARS_STORE_WALLET</code></td>
+<td><code>starsStorePackPriceTonNano</code> (1–10 TON per pack)</td>
+<td>Yes</td>
+</tr>
 </tbody></table>
 <p>All costs in the 1–10 TON range are <strong>clamped</strong> in the backend when Super Admin saves Economy config.</p>
 <hr/>
@@ -94,7 +100,8 @@
 <li>- <strong>Browse</strong> listings (brokers, future: items).</li>
 <li>- <strong>Sell</strong> brokers they own (list for <strong>AIBA</strong> and optionally NEUR).</li>
 <li>- <strong>Buy</strong> listed brokers with <strong>AIBA</strong> (buyer pays; seller receives AIBA minus fee; fee can burn or go to treasury to support AIBA value).</li>
-<li><strong>Listing currency:</strong> Primary <strong>AIBA</strong> (and optional NEUR). No TON as listing price (TON is for creation/boosts/gifts only).</li>
+<li>- <strong>Stars Store:</strong> Buy <strong>Stars</strong> (in-app recognition currency) with <strong>AIBA</strong> or <strong>TON</strong>. When paying with TON, the TON goes to <strong>STARS_STORE_WALLET</strong> (Super Admin category wallet). Stars Store appears in the Market tab and in the Wallet tab.</li>
+<li><strong>Listing currency:</strong> Primary <strong>AIBA</strong> (and optional NEUR). No TON as listing price (TON is for creation/boosts/gifts/Stars Store only).</li>
 <li><strong>Creation flow:</strong> User pays <strong>TON</strong> once to <strong>create</strong> a new broker → that broker is <strong>automatically listed</strong> on the marketplace so it is visible globally. The creating user is the seller and gets <strong>global recognition</strong> (shown as seller on the listing).</li>
 </ul>
 <hr/>
@@ -189,6 +196,12 @@
 <td>Super Admin (BOOST_GROUP_WALLET)</td>
 <td>boostGroupCostTonNano</td>
 </tr>
+<tr>
+<td>Buy Stars (Stars Store)</td>
+<td>AIBA or TON</td>
+<td>— (AIBA spent) / Super Admin (STARS_STORE_WALLET)</td>
+<td>starsStorePackStars, starsStorePackPriceAiba, starsStorePackPriceTonNano</td>
+</tr>
 </tbody></table>
 <hr/>
 <h2>9. AIBA market cap strategy (short)</h2>
@@ -205,6 +218,7 @@
 <li>[x] POST <code>/api/gifts/send</code>, GET <code>/api/gifts/received</code>, GET <code>/api/gifts/sent</code>: verify TON → record gift; list received/sent.</li>
 <li>[x] Admin Economy: allow and clamp all new cost keys (1–10 TON range).</li>
 <li>[x] Miniapp: Create broker (TON), Boost profile (TON), Gifts (TON) UI; Market tab lists + create broker card; Wallet tab profile boost + gifts.</li>
+<li>[x] <strong>Stars Store:</strong> Buy Stars with AIBA or TON; TON → STARS_STORE_WALLET. Config: starsStorePackStars, starsStorePackPriceAiba, starsStorePackPriceTonNano (1–10 TON). GET <code>/api/stars-store/config</code>, POST <code>buy-with-aiba</code>, POST <code>buy-with-ton</code>. Stars Store card in Market tab and Wallet tab.</li>
 </ul>
 <hr/>
 <h2>11. Implementation reference (codebase)</h2>
@@ -253,7 +267,7 @@
 <tr>
 <td></td>
 <td><code>backend/models/UsedTonTxHash.js</code></td>
-<td>txHash, purpose, ownerTelegramId (idempotency for boost/gift).</td>
+<td>txHash, purpose, ownerTelegramId (idempotency for boost/gift/stars_store).</td>
 </tr>
 <tr>
 <td><strong>Economy config</strong></td>
@@ -278,10 +292,10 @@
 <tr>
 <td><strong>Env</strong></td>
 <td><code>backend/.env.example</code></td>
-<td>CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET.</td>
+<td>CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET, STARS_STORE_WALLET.</td>
 </tr>
 </tbody></table>
-<p>Related docs: <strong>PROJECT-DESCRIPTION-SYSTEMATIC.md</strong> (full routes/models), <strong>USER-GUIDE.md</strong> (player flows, all tabs), <strong>LEADERBOARD-AND-GROUPS-CHECK.md</strong> (groups: pay to create, boost with TON), <strong>deployment.md</strong> / <strong>mainnet-readiness.md</strong> (env and wallets).</p>
+<p>Related docs: <strong>PROJECT-DESCRIPTION-SYSTEMATIC.md</strong> (full routes/models), <strong>USER-GUIDE.md</strong> (player flows, all tabs), <strong>NFT-MULTIVERSE-MASTER-PLAN.md</strong> (NFT Multiverse: own, stake, earn AIBA; benefits for User, AIBA token, Super Admin), <strong>LEADERBOARD-AND-GROUPS-CHECK.md</strong> (groups: pay to create, boost with TON), <strong>deployment.md</strong> / <strong>mainnet-readiness.md</strong> (env and wallets).</p>
 <hr/>
 <p>This is the <strong>360° master plan</strong> for the unified marketplace and all payments (TON + AIBA only, Super Admin wallets per product group, AIBA toward billions market cap).</p>
   </div>

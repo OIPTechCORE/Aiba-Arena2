@@ -254,8 +254,8 @@
 <td><strong>Implemented</strong></td>
 </tr>
 <tr>
-<td>Main tabs: Home, Brokers, Arenas, Guilds, Market, Wallet</td>
-<td>Tab bar: home, brokers, arenas, guilds, market, wallet. Tab panels; only active panel visible.</td>
+<td>Main tabs: Home, Brokers, Market, Racing, Arenas, Guilds, etc.</td>
+<td>Tab bar: home, brokers, market, carRacing, bikeRacing, multiverse, arenas, guilds, charity, university, updates, wallet (12 tabs). Tab panels; only active panel visible.</td>
 <td><strong>Implemented</strong></td>
 </tr>
 <tr>
@@ -521,7 +521,15 @@
 </tr>
 <tr>
 <td>/api/marketplace</td>
-<td>listings, list, buy</td>
+<td>listings, list, delist, buy</td>
+</tr>
+<tr>
+<td>/api/car-racing</td>
+<td>tracks, races, cars, create, create-with-ton, enter, race/:id, leaderboard, config, listings, list, buy-car</td>
+</tr>
+<tr>
+<td>/api/bike-racing</td>
+<td>tracks, races, bikes, create, create-with-ton, enter, race/:id, leaderboard, config, listings, list, buy-bike</td>
 </tr>
 <tr>
 <td>/api/boosts</td>
@@ -553,7 +561,7 @@
 </tr>
 <tr>
 <td>/api/charity</td>
-<td>campaigns, donate, impact (Unite for Good)</td>
+<td>campaigns, campaigns/:id, donate, leaderboard, my-impact, stats</td>
 </tr>
 <tr>
 <td>/api/announcements</td>
@@ -562,6 +570,14 @@
 <tr>
 <td>/api/university</td>
 <td>courses, progress (GET/POST), mint-course-badge-info, mint-course-badge, mint-full-certificate-info, mint-full-certificate</td>
+</tr>
+<tr>
+<td>/api/multiverse</td>
+<td>universes, me, stake, unstake, staking/rewards, staking/claim</td>
+</tr>
+<tr>
+<td>/api/stars-store</td>
+<td>config, buy-with-aiba, buy-with-ton</td>
 </tr>
 <tr>
 <td>/api/admin/charity</td>
@@ -655,6 +671,18 @@
 <td>Task, Ad</td>
 <td>Tasks, ads</td>
 </tr>
+<tr>
+<td>NftUniverse, NftStake</td>
+<td>Multiverse: universes, stake/unstake broker NFT, staking rewards</td>
+</tr>
+<tr>
+<td>RacingCar, CarTrack, CarRace, CarRaceEntry, CarListing</td>
+<td>Autonomous car racing: create car (AIBA or TON), enter races, leaderboard, marketplace</td>
+</tr>
+<tr>
+<td>RacingMotorcycle, BikeTrack, BikeRace, BikeRaceEntry, BikeListing</td>
+<td>Autonomous bike racing: create bike (AIBA or TON), enter races, leaderboard, marketplace</td>
+</tr>
 </tbody></table>
 <h3>Miniapp structure</h3>
 <ul>
@@ -663,6 +691,9 @@
 <li><strong>Arenas:</strong> Arena select; Run battle; battle result.</li>
 <li><strong>Guilds:</strong> My rank, Discover all, create (with optional pay TON + txHash), join; all groups list with Join + Boost (txHash).</li>
 <li><strong>Market:</strong> <strong>Create your broker (pay TON)</strong> (cost, txHash → new broker auto-listed); Listings refresh, list broker, buy (AIBA); Boosts (NEUR or TON).</li>
+<li><strong>Car Racing:</strong> Tracks, races (open/running/completed), my cars, create car (AIBA or TON), enter race, leaderboard, marketplace (list/buy car).</li>
+<li><strong>Bike Racing:</strong> Tracks, races, my bikes, create bike (AIBA or TON), enter race, leaderboard, marketplace (list/buy bike).</li>
+<li><strong>Multiverse:</strong> Universes, my NFTs (Broker NFTs), stake/unstake, staking rewards, claim AIBA.</li>
 <li><strong>Charity:</strong> Unite for Good — campaigns, donate NEUR/AIBA, your impact, charity leaderboard.</li>
 <li><strong>University:</strong> Hero (progress X / Y modules), expandable courses and modules; POST progress on module expand; graduate badge; optional mint course badge / full certificate (TON).</li>
 <li><strong>Updates:</strong> Announcements feed (GET /api/announcements); status, support.</li>
@@ -789,7 +820,7 @@
 <td>Implemented</td>
 </tr>
 <tr>
-<td>Main tabs (Home, Brokers, Arenas, Guilds, Market, Wallet)</td>
+<td>Main tabs (12: Home, Brokers, Market, Car/Bike Racing, Multiverse, Arenas, Guilds, Charity, University, Updates, Wallet)</td>
 <td>Implemented</td>
 </tr>
 <tr>

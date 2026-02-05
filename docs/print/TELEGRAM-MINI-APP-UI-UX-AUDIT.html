@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>TELEGRAM MINI APP UI UX AUDIT — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>TELEGRAM MINI APP UI UX AUDIT</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Telegram Mini App — UI/UX Audit &amp; Alignment</h1>
+<p>This document summarizes the UI/UX deep check and improvements applied so the mini app meets the target: <strong>futuristic, intuitive, 3D, bold, with deep guidance</strong>.</p>
+<hr/>
+<h2>Design Principles (Target vs Implemented)</h2>
+<table>
+<thead><tr>
+<th>Principle</th>
+<th>Status</th>
+<th>Implementation</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Futuristic</strong></td>
+<td>✅</td>
+<td>Orbitron + Exo 2, cyan/magenta/gold palette, glass panels, glow accents</td>
+</tr>
+<tr>
+<td><strong>Very intuitive &amp; beautiful</strong></td>
+<td>✅</td>
+<td>Clear hierarchy, contextual guide-tip per tab, step indicators in tutorial</td>
+</tr>
+<tr>
+<td><strong>3D futuristic experience</strong></td>
+<td>✅</td>
+<td>CSS perspective, 3D shadows on cards/buttons, translateZ in tab animation, depth on icons</td>
+</tr>
+<tr>
+<td><strong>Bold &amp; eye-catching</strong></td>
+<td>✅</td>
+<td>Stronger button 3D step shadows, hover lift, cyan glow, elevated cards with border-glass</td>
+</tr>
+<tr>
+<td><strong>Deep guidance</strong></td>
+<td>✅</td>
+<td>4-step tutorial with detailed copy, cinematic hint (swipe tabs), per-tab guide-tip, <code>.guide-section-intro</code> and <code>.guide-step</code> styles</td>
+</tr>
+<tr>
+<td><strong>Futuristic images &amp; icons (3D)</strong></td>
+<td>✅</td>
+<td>Global icon drop-shadow + subtle glow; tab active state adds cyan glow; Star/Diamond icons already had glow</td>
+</tr>
+<tr>
+<td><strong>Futuristic buttons (3D)</strong></td>
+<td>✅</td>
+<td>Primary/secondary/success use step shadow + hover translateY; active press state; ghost tabs get 3D when active</td>
+</tr>
+<tr>
+<td><strong>Clean, seamless, modular, multi-card, multi-tabbed</strong></td>
+<td>✅</td>
+<td>Single-page multi-tab layout, card-based sections, tab bar with scroll, consistent spacing and borders</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>Files Touched</h2>
+<ul>
+<li>- 3D variables (<code>--shadow-3d-button</code>, <code>--shadow-3d-card</code>, <code>--perspective-view</code>).</li>
+<li>- Body + <code>.aiba-miniapp</code> unified; perspective on body.</li>
+<li>- Buttons: stronger 3D step, hover lift, active press.</li>
+<li>- Tab bar: 3D pill, active state with step shadow and glow.</li>
+<li>- Cards: <code>--shadow-3d-card</code>, hover depth.</li>
+<li>- Icons: global 3D drop-shadow + glow on primary/success.</li>
+<li>- Balance strip: 3D shadow + backdrop blur.</li>
+<li>- Guide: <code>.guide-tip</code> enhancement, <code>.guide-section-intro</code>, <code>.guide-step</code>.</li>
+<li>- Cinematic: <code>.cinematic__hint</code>, stronger enter button 3D.</li>
+<li>- Tutorial card: 3D shadow, step indicator ready.</li>
+<li>- Tab panel: <code>tabIn</code> with translateZ.</li>
+<li>- App header: subtle border for separation.</li>
+</ul>
+<ul>
+<li>- Cinematic: added hint line (“Swipe the tab bar to explore…”).</li>
+<li>- Tutorial: expanded all 4 steps with concrete, actionable copy; added step number in title via <code>.guide-step</code>.</li>
+</ul>
+<ul>
+<li>- No change; body keeps <code>className=&quot;aiba-miniapp&quot;</code> (styled in globals).</li>
+</ul>
+<hr/>
+<h2>Optional Next Steps</h2>
+<ul>
+<li>Add <strong>Telegram Web App</strong> theme params (<code>themeParams</code>) for status bar and accent alignment with Telegram.</li>
+<li>Consider <strong>lazy-loading</strong> tab content for very heavy tabs (e.g. long lists).</li>
+<li>Add <strong>reduced-motion</strong> media query to simplify animations for accessibility.</li>
+</ul>
+<hr/>
+<hr/>
+<h2>Up-to-date verification (Feb 2025)</h2>
+<ul>
+<li><strong>Styles:</strong> <code>miniapp/src/app/globals.css</code> — 3D variables, buttons, cards, tab bar, balance strip, guide styles, cinematic/tutorial as described above. <strong>Aligned.</strong></li>
+<li><strong>Layout:</strong> <code>miniapp/src/app/layout.js</code> — body <code>aiba-miniapp</code>; globals.css targets both <code>body</code> and <code>.aiba-miniapp</code>. <strong>Aligned.</strong></li>
+</ul>
+<p><em>Last updated: UI/UX deep check and enhancements applied. Verified Feb 2025.</em></p>
+  </div>
+</body>
+</html>
