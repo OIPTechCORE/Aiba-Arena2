@@ -4,6 +4,8 @@ This document records a **cross-check of docs vs code** so the repo is clearly u
 
 **Check date:** February 2025
 
+**Exhaustive doc update (same period):** PROJECT-DESCRIPTION-SYSTEMATIC (routes: car-racing, bike-racing, marketplace delist, charity endpoints, admin/mod detail), deployment.md (STARS_STORE_WALLET, CAR_RACING_WALLET, MOTORCYCLE_RACING_WALLET), VISION-VS-CODEBASE-CHECK (12 tabs, car/bike racing routes and models, multiverse/stars-store, miniapp structure), USER-GUIDE (12 tabs list and table with Car Racing, Bike Racing), GAME-EXPLAINED (section 4 Autonomous Racing, TON wallets for Stars/Car/Bike, section renumbering 5–11).
+
 ---
 
 ## 1. Run / ports / env
@@ -56,4 +58,4 @@ This document records a **cross-check of docs vs code** so the repo is clearly u
 - **Deployment and env:** deployment.md and VERCEL-ENV-GUIDE match backend/miniapp/admin env usage.
 - **Racing / University / Multiverse:** Plans and vision docs match implemented features.
 
-**Conclusion:** Docs and code are deeply up to date as of this check. Re-run this verification after large feature or doc changes.
+**Conclusion:** Docs and code are deeply up to date as of this check. An exhaustive pass updated PROJECT-DESCRIPTION-SYSTEMATIC, deployment.md, VISION-VS-CODEBASE-CHECK, USER-GUIDE, and GAME-EXPLAINED so all routes, env vars, tabs, and features (including car/bike racing, stars store, admin mod, charity) match the codebase. Re-run this verification after large feature or doc changes.

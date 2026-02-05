@@ -176,7 +176,9 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - `/api/brokers` — mine, create starter, **create-with-ton** (pay TON → new broker + auto-list), train, repair, upgrade, combine, mint-nft.
 - `/api/vault` — inventory, claim-status, last-seqno.
 - `/api/leaderboard` — global list (by score/aiba/neur/battles), my-rank.
-- `/api/marketplace` — listings, list, buy.
+- `/api/marketplace` — listings, list, delist, buy.
+- `/api/car-racing` — tracks, races, cars (mine), create (AIBA), create-with-ton (txHash), enter (raceId, carId), race/:id, leaderboard, config, listings, list, buy-car.
+- `/api/bike-racing` — tracks, races, bikes (mine), create (AIBA), create-with-ton (txHash), enter (raceId, bikeId), race/:id, leaderboard, config, listings, list, buy-bike.
 - `/api/stars-store` — **config** (pack Stars, price AIBA, price TON, wallet), **buy-with-aiba** (one pack), **buy-with-ton** (txHash → TON to STARS_STORE_WALLET).
 - `/api/boosts` — mine, buy (NEUR), buy-with-ton, **buy-profile-with-ton** (pay TON → profile boost visibility).
 - `/api/staking` — summary, stake, unstake, claim.
@@ -184,7 +186,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - `/api/daily` — status, claim (daily NEUR).
 - `/api/oracle` — price (oracle display).
 - `/api/treasury` — summary.
-- `/api/charity` — campaigns, donate, impact.
+- `/api/charity` — campaigns, campaigns/:id, donate, leaderboard, my-impact, stats.
 - `/api/announcements` — list (active).
 - `/api/gifts` — **send** (pay TON → gift to user by telegramId/username), **received**, **sent**.
 - `/api/multiverse` — **universes** (list NFT universes), **me** (my NFTs), **stake** (stake broker NFT), **unstake**, **staking/rewards**, **staking/claim** (claim AIBA from NFT staking).
@@ -198,7 +200,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - `/api/admin/ads` — CRUD ads.
 - `/api/admin/game-modes` — CRUD game modes.
 - `/api/admin/economy` — get/update config, simulate.
-- `/api/admin/mod` — moderation (ban/unban by telegramId).
+- `/api/admin/mod` — flagged-brokers, recent-anomalies, flagged-users, ban-user, unban-user, ban-broker, unban-broker, user (get by telegramId), sync-top-leader-badges, user-badges (set badges by telegramId).
 - `/api/admin/treasury` — fund Treasury, StabilityReserve, BuybackPool.
 - `/api/admin/stats` — DAU, total users/battles, emitted today.
 - `/api/admin/charity` — manage charity campaigns.

@@ -34,7 +34,7 @@ This guide walks you through **how to play** AIBA Arena: from opening the app to
 
 - **Where:** AIBA Arena runs as a **Telegram Mini App**. Open it from a link or bot inside Telegram (e.g. from the project’s bot or a shared link).
 - **Requirements:** Telegram account; optionally a TON wallet (TonConnect) if you want to withdraw AIBA on-chain.
-- **First time:** You may see a **cinematic intro** (skip or watch) and a **tutorial** (steps for brokers, arena, battle). The app has a **tab bar** at the bottom: **Home**, **Brokers**, **Market**, **Multiverse**, **Arenas**, **Guilds**, **Charity**, **University**, **Updates**, **Wallet**. Tap a tab to switch. A **balance strip** at the top shows NEUR, AIBA credits, Stars, Diamonds, and a verified badge if you have one.
+- **First time:** You may see a **cinematic intro** (skip or watch) and a **tutorial** (steps for brokers, arena, battle). The app has a **tab bar** at the bottom: **Home**, **Brokers**, **Market**, **Car Racing**, **Bike Racing**, **Multiverse**, **Arenas**, **Guilds**, **Charity**, **University**, **Updates**, **Wallet** (12 tabs). Tap a tab to switch. A **balance strip** at the top shows NEUR, AIBA credits, Stars, Diamonds, and a verified badge if you have one.
 
 ---
 
@@ -44,10 +44,12 @@ This guide walks you through **how to play** AIBA Arena: from opening the app to
 |-----|--------------|
 | **Home** | TonConnect, Vault info, Arena & battle (pick broker, arena, Run battle), Battle result, Referrals, Leaderboard. |
 | **Brokers** | My brokers (select, combine two for NEUR, mint one as NFT for AIBA). |
+| **Market** | Create your broker (pay TON), Marketplace (list/buy brokers with AIBA), Boosts (buy reward multiplier with NEUR). |
+| **Car Racing** | Autonomous car racing: tracks, races, my cars, create car (AIBA or TON), enter race, leaderboard, marketplace (list/buy cars). |
+| **Bike Racing** | Autonomous bike racing: tracks, races, my bikes, create bike (AIBA or TON), enter race, leaderboard, marketplace (list/buy bikes). |
+| **Multiverse** | NFT universes, **My NFTs** (Broker NFTs you own), **stake** to earn AIBA daily, **claim** staking rewards. Mint Broker NFTs from the Brokers tab (pay AIBA). |
 | **Arenas** | Arena selector, Run battle, Battle result (score, rewards, Stars/Diamond). |
 | **Guilds** | Groups (leaderboard rank, create or join, pay TON to create if not top N, boost group with TON), My groups, deposit/withdraw broker. |
-| **Market** | Create your broker (pay TON), Marketplace (list/buy brokers with AIBA), Boosts (buy reward multiplier with NEUR). |
-| **Multiverse** | NFT universes, **My NFTs** (Broker NFTs you own), **stake** to earn AIBA daily, **claim** staking rewards. Mint Broker NFTs from the Brokers tab (pay AIBA). |
 | **Charity** | Unite for Good: campaigns, donate NEUR or AIBA, your impact, charity leaderboard. |
 | **University** | Courses and modules, progress, graduate badge, mint course badge / full certificate (pay TON). |
 | **Updates** | Announcements, status, support. |

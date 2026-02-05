@@ -103,10 +103,22 @@ So: **battle = one deterministic simulation → score → NEUR + AIBA credits (a
 - **Gifts:** Pay TON to send a **gift** to another user (by Telegram ID or @username). Wallet: `GIFTS_WALLET`; config: `giftCostTonNano`. Recipient sees “Gifts received”; you see “Gifts sent.”
 - **Create/boost group:** Pay TON to create a guild (if not in top N) or to boost a guild. Wallets: `LEADER_BOARD_WALLET`, `BOOST_GROUP_WALLET`.
 - **Battle boost (TON):** Pay TON for a reward multiplier. Wallet: `BOOST_TON_WALLET`.
+- **Stars Store:** Buy Telegram Stars–style packs with AIBA or TON. Wallet: `STARS_STORE_WALLET`; config: `starsStorePackPriceTonNano`.
+- **Car Racing:** Create a car with AIBA or TON (1–10 TON). Wallet: `CAR_RACING_WALLET`; config: `createCarCostTonNano`.
+- **Bike Racing:** Create a bike with AIBA or TON (1–10 TON). Wallet: `MOTORCYCLE_RACING_WALLET`; config: `createBikeCostTonNano`.
 
 ---
 
-## 4. Guilds
+## 4. Autonomous Racing (Car & Bike)
+
+- **Two verticals:** **Autonomous Car Racing** and **Autonomous Bike Racing**. You own vehicles (cars or bikes) with stats (top speed, acceleration, handling, durability). Races are **deterministic simulations** (server runs the race; no live input).
+- **Create vehicle:** Pay **AIBA** or **TON** (1–10 TON to Super Admin wallet) to create a car or bike. It appears in “My Cars” or “My Bikes.”
+- **Enter race:** Pick an open race (track + league), select your vehicle, pay **AIBA** entry fee. When the race fills or timer ends, the server runs the simulation and ranks by finish position/time. **Rewards** in **AIBA** by position (share of pool).
+- **Leaderboards & marketplace:** Global and per-league leaderboards; you can **list** your car/bike for **AIBA** and **buy** others’ vehicles. See [AUTONOMOUS-RACING-MASTER-PLAN.md](AUTONOMOUS-RACING-MASTER-PLAN.md) for full spec.
+
+---
+
+## 5. Guilds
 
 - **Guild** = a group; you can create one (name, optional bio) or join by **Guild ID**.
 - **Guild Wars** arena requires you to be in a guild. Rewards (NEUR) are split (e.g. 80% to you, 20% to guild treasury).
@@ -115,7 +127,7 @@ So: **battle = one deterministic simulation → score → NEUR + AIBA credits (a
 
 ---
 
-## 5. Referrals
+## 6. Referrals
 
 - You can **create** a referral code (one per user).
 - Others **apply** your code (they need a connected wallet; anti-sybil baseline). When they apply, both you and they can get **NEUR** bonuses (amounts set in economy config: referralRewardNeurReferrer, referralRewardNeurReferee).
@@ -123,7 +135,7 @@ So: **battle = one deterministic simulation → score → NEUR + AIBA credits (a
 
 ---
 
-## 6. Marketplace (unified)
+## 7. Marketplace (unified)
 
 - **One global marketplace:** list and buy **brokers** (and future items). **Payments:** **TON** only for **creating** a new broker (pay once → broker auto-listed); **AIBA** for **listing** and **buying**.
 - **Create broker with TON:** You pay TON (1–10, configurable) to the project’s “Created Brokers” wallet, then submit the **transaction hash**. The backend verifies the payment and creates a new broker **and** a **listing** at a default AIBA price so it appears globally. You are the seller → **global recognition**.
@@ -155,7 +167,7 @@ So: **battle = one deterministic simulation → score → NEUR + AIBA credits (a
 
 ---
 
-## 10. End-to-End Flow (summary)
+## 11. End-to-End Flow (summary)
 
 1. Open the **Telegram Mini App** (AIBA Arena).
 2. **Connect wallet** (TonConnect) → backend saves your TON address.
@@ -169,6 +181,6 @@ So: **battle = one deterministic simulation → score → NEUR + AIBA credits (a
    - **Create claim** later (amount or “all”), then **Claim on-chain (TonConnect)** with the same flow.
 9. **Referrals:** create code, share it; others apply with wallet to get NEUR bonuses.
 10. **Ads** may appear between battles; **tasks** can be shown for future engagement.
-11. **Optional:** **Market** — create a broker with TON (pay → paste tx hash → broker auto-listed); list/buy brokers with AIBA. **Wallet** — boost your profile (TON); send gifts (TON) to another user; view received/sent gifts.
+11. **Optional:** **Market** — create a broker with TON (pay → paste tx hash → broker auto-listed); list/buy brokers with AIBA. **Wallet** — boost your profile (TON); send gifts (TON) to another user; view received/sent gifts. **Car Racing / Bike Racing** — create a car or bike (AIBA or TON), enter races, earn AIBA by position; list/buy vehicles on the racing marketplace.
 
-This is the **full picture** of the game: brokers, arenas, leagues, deterministic battles, NEUR/AIBA economy, on-chain AIBA withdrawal via signed claims, guilds, referrals, **unified marketplace** (create broker with TON, list/buy with AIBA), **boost profile** and **gifts** (TON), and supporting features (ads, tasks). See [USER-GUIDE.md](USER-GUIDE.md) for step-by-step play, [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md) for payment design, and [AUTONOMOUS-RACING-MASTER-PLAN.md](AUTONOMOUS-RACING-MASTER-PLAN.md) for racing economy and benefits.
+This is the **full picture** of the game: brokers, arenas, leagues, deterministic battles, NEUR/AIBA economy, on-chain AIBA withdrawal via signed claims, guilds, referrals, **unified marketplace** (create broker with TON, list/buy with AIBA), **boost profile** and **gifts** (TON), **autonomous car and bike racing** (create with AIBA or TON, enter races, AIBA rewards, vehicle marketplace), Stars Store, and supporting features (ads, tasks). See [USER-GUIDE.md](USER-GUIDE.md) for step-by-step play, [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md) for payment design, and [AUTONOMOUS-RACING-MASTER-PLAN.md](AUTONOMOUS-RACING-MASTER-PLAN.md) for racing economy and benefits.
