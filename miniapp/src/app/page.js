@@ -1577,7 +1577,14 @@ export default function HomePage() {
                     <h1 className="aiba-app__title">AIBA Arena</h1>
                 </div>
                 <TonConnectButton />
-                {IS_DEV ? <p className="aiba-app__sub">Backend: {BACKEND_URL}</p> : null}
+                {IS_DEV ? (
+                    <p className="aiba-app__sub" style={{ marginTop: 4 }}>
+                        Backend: {BACKEND_URL}
+                        <span style={{ display: 'block', marginTop: 2, color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+                            Connect Wallet: works best on deployed HTTPS app. On localhost use a wallet extension or ngrok.
+                        </span>
+                    </p>
+                ) : null}
                 {status ? <p className={`status-msg ${status.toLowerCase().includes('fail') ? 'status-msg--error' : ''}`} style={{ margin: 0, width: '100%' }}>{status}</p> : null}
             </header>
 
