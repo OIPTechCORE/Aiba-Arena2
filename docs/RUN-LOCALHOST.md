@@ -224,4 +224,6 @@ You must still create `backend/.env` (and optionally `miniapp/.env.local`, `admi
 - **TonConnect:** Works from localhost; the miniapp’s manifest is served at http://localhost:3000/api/tonconnect-manifest. Some wallets may require HTTPS in production; for local testing, HTTP is usually fine.
 - **Telegram Mini App:** To test inside the real Telegram Mini App, use a tunnel (e.g. ngrok, localtunnel) to expose http://localhost:3000 via HTTPS and point your Telegram bot’s Mini App URL to that. With `APP_ENV=dev`, you can still test the app in a normal browser without Telegram.
 
+- **Console error `ton-connect.mytokenpocket.vip` / ERR_CERT_DATE_INVALID:** TonConnect calls third-party wallet bridges. If TokenPocket's bridge has an invalid SSL certificate, the browser shows this. You can ignore it; other wallets (e.g. Tonkeeper) still work. It is not a bug in your app.
+
 You now have everything needed to run the project on localhost.
