@@ -215,6 +215,7 @@ You must still create `backend/.env` (and optionally `miniapp/.env.local`, `admi
 | Miniapp/Admin shows "Backend unreachable" or CORS errors | Ensure backend is running on port 5000; with `APP_ENV=dev`, CORS allows all origins if `CORS_ORIGIN` is empty. |
 | Admin login fails | Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `backend/.env` and use those to log in. |
 | Port already in use | Change port: backend `PORT=5001` in `.env` (and set `NEXT_PUBLIC_BACKEND_URL=http://localhost:5001` in frontends); miniapp `npm run dev -- -p 3010`; admin `npm run dev -- -p 3011`. |
+| Miniapp build: **Cannot find module 'caniuse-lite/dist/unpacker/index.js'** | The `caniuse-lite` install is incomplete. **Fix:** Close the dev server and any editor using the miniapp folder, then delete `miniapp/node_modules`, run `cd miniapp` and `npm install`. The miniapp `package.json` includes an `overrides` for `caniuse-lite` to avoid a bad version; a clean install should fix it. |
 
 ---
 
