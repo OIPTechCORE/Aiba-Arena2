@@ -70,6 +70,26 @@
                 "external": false
             },
             "mode": "full"
+        },
+        {
+            "name": "AiAssetRegistry",
+            "path": "contracts/ai_asset_registry.tact",
+            "output": "build\\AiAssetRegistry",
+            "options": {
+                "debug": false,
+                "external": false
+            },
+            "mode": "full"
+        },
+        {
+            "name": "AiAssetMarketplaceEscrow",
+            "path": "contracts/ai_asset_marketplace_escrow.tact",
+            "output": "build\\AiAssetMarketplaceEscrow",
+            "options": {
+                "debug": false,
+                "external": false
+            },
+            "mode": "full"
         }
     ]
 }
