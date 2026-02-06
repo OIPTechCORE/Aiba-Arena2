@@ -137,7 +137,7 @@ Optional (recommended for debugging):
 
 ## Frontends
 
-Both apps use `NEXT_PUBLIC_BACKEND_URL` (default `http://localhost:5000`).
+Both apps use `NEXT_PUBLIC_BACKEND_URL` (default `http://localhost:5000`). In the miniapp, **Connect Wallet** opens a responsive modal with the list of TON-supported wallets (Tonkeeper, TonHub, etc.); see [RUN-LOCALHOST.md](docs/RUN-LOCALHOST.md) §7 for localhost/HTTPS notes.
 
 To override locally:
 

@@ -6,6 +6,13 @@ export const metadata = {
     description: 'AI Broker Battle Arena',
 };
 
+export const viewport = {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    viewportFit: 'cover',
+};
+
 export default function RootLayout({ children }) {
     return (
         <html lang="en">

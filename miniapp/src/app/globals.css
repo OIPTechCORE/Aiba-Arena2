@@ -1026,9 +1026,39 @@ body,
     cursor: pointer;
 }
 
-/* ─── TonConnect: wallet list modal above all content ───────────────────── */
+/* ─── TonConnect: wallet list modal — seamlessly responsive ─────────────── */
 #tc-widget-root {
+    position: fixed;
+    inset: 0;
     z-index: 10000;
+    width: 100%;
+    /* Dynamic viewport height for mobile (address bar show/hide) */
+    height: 100%;
+    height: 100dvh;
+    min-height: -webkit-fill-available;
+    min-height: 100vh;
+    box-sizing: border-box;
+    /* Safe area for notches and home indicator */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    /* Smooth scroll when modal content overflows */
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+/* Modal backdrop: full width and scrollable on small screens */
+#tc-widget-root [data-tc-modal="true"] {
+    min-height: 100%;
+    min-height: 100dvh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    box-sizing: border-box;
+}
+
+@media (max-width: 440px) {
+    #tc-widget-root [data-tc-modal="true"] {
+        width: 100%;
+        max-width: 100vw;
+    }
 }
 
 /* ─── TonConnect button wrapper (match theme) ────────────────────────────── */
@@ -1045,6 +1075,17 @@ body,
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* Header wallet area responsive: wrap or shrink on narrow screens */
+@media (max-width: 360px) {
+    .app-header__wallet .connect-wallet-btn span {
+        display: none;
+    }
+    .app-header__wallet .connect-wallet-btn {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
 }
 
 /* ─── Status message ────────────────────────────────────────────────────── */

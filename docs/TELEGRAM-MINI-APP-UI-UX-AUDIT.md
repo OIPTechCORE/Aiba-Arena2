@@ -40,7 +40,7 @@ This document summarizes the UI/UX deep check and improvements applied so the mi
   - Tutorial: expanded all 4 steps with concrete, actionable copy; added step number in title via `.guide-step`.
 
 - **miniapp/src/app/layout.js**  
-  - No change; body keeps `className="aiba-miniapp"` (styled in globals).
+  - `viewport` export: `viewportFit: 'cover'`, `width: 'device-width'`, `initialScale: 1` for safe-area support on notched devices (Connect Wallet modal and full app).
 
 ---
 
@@ -55,10 +55,15 @@ This document summarizes the UI/UX deep check and improvements applied so the mi
 
 ---
 
+## Connect Wallet (TonConnect) — responsive modal
+
+- **Behavior:** Header "Connect Wallet" button opens the TonConnect modal with the list of TON-supported wallets (Tonkeeper, TonHub, etc.). When connected, the standard TonConnect button is shown.
+- **Responsive:** Modal container `#tc-widget-root` uses full viewport (100dvh), safe-area insets, smooth scroll; at ≤440px modal content is full-width; at ≤360px header shows wallet icon only. Layout viewport `viewportFit: 'cover'` ensures safe-area insets apply on notched devices.
+
 ## Up-to-date verification (Feb 2025)
 
-- **Miniapp:** `miniapp/src/app/page.js` — 12 tabs (Home, Brokers, Market, Car Racing, Bike Racing, Multiverse, Arenas, Guilds, Charity, University, Updates, Wallet); cinematic intro + 4-step tutorial; guide-tip per tab. **Aligned.**
-- **Styles:** `miniapp/src/app/globals.css` — 3D variables, buttons, cards, tab bar, balance strip, guide styles, cinematic/tutorial as described above. **Aligned.**
-- **Layout:** `miniapp/src/app/layout.js` — body `aiba-miniapp`; globals.css targets both `body` and `.aiba-miniapp`. **Aligned.**
+- **Miniapp:** `miniapp/src/app/page.js` — 12 tabs; cinematic intro + 4-step tutorial; guide-tip per tab; Connect Wallet opens wallet list modal. **Aligned.**
+- **Styles:** `miniapp/src/app/globals.css` — 3D variables, buttons, cards, tab bar, balance strip, guide styles, cinematic/tutorial; TonConnect modal responsive (#tc-widget-root, safe-area, 100dvh). **Aligned.**
+- **Layout:** `miniapp/src/app/layout.js` — body `aiba-miniapp`; viewport with viewportFit cover. **Aligned.**
 
-*Last updated: UI/UX deep check and enhancements applied. Verified Feb 2025.*
+*Last updated: UI/UX deep check; Connect Wallet modal + responsive. Verified Feb 2025.*

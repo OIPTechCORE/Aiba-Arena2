@@ -221,7 +221,7 @@ You must still create `backend/.env` (and optionally `miniapp/.env.local`, `admi
 
 ## 7. Optional: TonConnect and Telegram on localhost
 
-- **TonConnect (Connect Wallet):** The manifest is served at `http://localhost:3000/api/tonconnect-manifest`. Many wallets (especially mobile) cannot load it from localhost. For local testing: use a browser wallet extension, or set `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL=https://aiba-arena2.vercel.app/api/tonconnect-manifest` in `.env.local`, or use an HTTPS tunnel (e.g. ngrok).
+- **TonConnect (Connect Wallet):** Clicking **Connect Wallet** in the miniapp header opens a modal with the list of TON-supported wallets (Tonkeeper, TonHub, etc.); the modal is responsive (safe-area, full viewport on mobile). The app manifest is served at `http://localhost:3000/api/tonconnect-manifest`. Many wallets (especially mobile) cannot load it from localhost. For local testing: use a browser wallet extension, or set `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL=https://aiba-arena2.vercel.app/api/tonconnect-manifest` in `.env.local`, or use an HTTPS tunnel (e.g. ngrok).
 - **Telegram Mini App:** To test inside the real Telegram Mini App, use a tunnel (e.g. ngrok, localtunnel) to expose http://localhost:3000 via HTTPS and point your Telegram bot’s Mini App URL to that. With `APP_ENV=dev`, you can still test the app in a normal browser without Telegram.
 
 - **Console error `ton-connect.mytokenpocket.vip` / ERR_CERT_DATE_INVALID:** TonConnect calls third-party wallet bridges. If TokenPocket's bridge has an invalid SSL certificate, the browser shows this. You can ignore it; other wallets (e.g. Tonkeeper) still work. It is not a bug in your app.
