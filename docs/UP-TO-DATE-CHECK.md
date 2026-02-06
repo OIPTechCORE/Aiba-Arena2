@@ -10,6 +10,8 @@ This document records a **cross-check of docs vs code** so the repo is clearly u
 
 **Connect Wallet (Feb 2025):** Clicking "Connect Wallet" opens the TonConnect modal with the full list of TON-supported wallets (Tonkeeper, TonHub, etc.). Custom button in header calls `openModal()` when not connected; when connected, TonConnectButton is shown. Modal is **seamlessly responsive:** `#tc-widget-root` uses `100dvh`, safe-area insets, smooth scroll; `layout.js` exports `viewport` with `viewportFit: 'cover'` for notched devices; at ≤440px modal is full-width; at ≤360px header shows wallet icon only. See miniapp `page.js`, `providers.js`, `globals.css`, `layout.js`.
 
+**Phases 1–5 implemented (Feb 2025):** Models for realms, missions, mentors, assets, marketplace, governance, treasury ops; new contracts `AiAssetRegistry` and `AiAssetMarketplaceEscrow` + tests and deploy scripts; backend routes for realms/missions/mentors/assets/marketplace/governance/treasury ops + admin endpoints; miniapp tabs for Realms/Assets/Governance; admin tabs for Realms/Marketplace/Treasury Ops. Specs in `UNIVERSAL-SPEC.md` and `API-CONTRACT.md`.
+
 **Exhaustive doc update (same period):** PROJECT-DESCRIPTION-SYSTEMATIC (routes: car-racing, bike-racing, marketplace delist, charity endpoints, admin/mod detail), deployment.md (STARS_STORE_WALLET, CAR_RACING_WALLET, MOTORCYCLE_RACING_WALLET), VISION-VS-CODEBASE-CHECK (12 tabs, car/bike racing routes and models, multiverse/stars-store, miniapp structure), USER-GUIDE (12 tabs list and table with Car Racing, Bike Racing), GAME-EXPLAINED (section 4 Autonomous Racing, TON wallets for Stars/Car/Bike, section renumbering 5–11).
 
 **Later (Connect Wallet on localhost):** RUN-LOCALHOST §7 (TonConnect: many wallets cannot load manifest from localhost; options: browser extension, `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL` to deployed URL, or ngrok), miniapp `providers.js` (SSR-safe manifest URL with `window` guard and fallback), `page.js` (dev-only hint under TonConnect button), `miniapp/.env.local.example` (optional TonConnect manifest URL comment), VERCEL-DEPLOYMENT-CHECKLIST and VERCEL-ENV-GUIDE (TonConnect manifest env).
@@ -88,3 +90,5 @@ This document records a **cross-check of docs vs code** so the repo is clearly u
 **If you have local changes in backend (engine, jobs, models, routes, util) or plan docs** that were left uncommitted, run from repo root: `.\scripts\commit-backend-docs-sync.ps1` to stage, commit, and push them in one "Backend and docs sync" commit.
 
 **Deep inspection:** For a full project-wide review (structure, backend, frontends, contracts, docs, security), see [DEEP-INSPECTION-REPORT.md](DEEP-INSPECTION-REPORT.md).
+
+**Test plan:** Functional validation steps for realms/assets/governance are in [TEST-PLAN.md](TEST-PLAN.md).

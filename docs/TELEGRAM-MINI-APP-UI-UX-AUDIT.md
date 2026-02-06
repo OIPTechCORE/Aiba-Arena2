@@ -62,7 +62,7 @@ This document summarizes the UI/UX deep check and improvements applied so the mi
 
 ## Up-to-date verification (Feb 2025)
 
-- **Miniapp:** `miniapp/src/app/page.js` — 12 tabs; cinematic intro + 4-step tutorial; guide-tip per tab; Connect Wallet opens wallet list modal. **Aligned.**
+- **Miniapp:** `miniapp/src/app/page.js` — 15 tabs (Home, Brokers, Market, Car Racing, Bike Racing, Multiverse, Arenas, Guilds, Charity, University, Realms, Assets, Governance, Updates, Wallet); cinematic intro + 4-step tutorial; guide-tip per tab; Connect Wallet opens wallet list modal. **Aligned.**
 - **Styles:** `miniapp/src/app/globals.css` — 3D variables, buttons, cards, tab bar, balance strip, guide styles, cinematic/tutorial; TonConnect modal responsive (#tc-widget-root, safe-area, 100dvh). **Aligned.**
 - **Layout:** `miniapp/src/app/layout.js` — body `aiba-miniapp`; viewport with viewportFit cover. **Aligned.**
 

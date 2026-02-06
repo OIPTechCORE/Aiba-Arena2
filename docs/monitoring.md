@@ -14,6 +14,7 @@ This repo is instrumented primarily via logs. For production, add:
 - **Vault low inventory**: `jettonBalance` below threshold
 - **Vault low TON**: `tonBalanceNano` below threshold for gas
 - **Mongo connection issues**: backend startup failures, reconnection loops
+- **Treasury ops spikes**: unusually high burn/treasury/reward/staking totals
 
 ### Suggested alerts (Prometheus metrics)
 
@@ -27,6 +28,7 @@ This repo is instrumented primarily via logs. For production, add:
 ## Metrics endpoint
 
 - **Backend**: `GET /metrics` (Prometheus format)
+- **Treasury ops** (API): `GET /api/treasury/ops` (latest burn/treasury/rewards/staking ledger)
 - Includes:
     - Default Node.js/process metrics (prefixed `aiba_...`)
     - HTTP request duration histogram: `aiba_http_request_duration_seconds`

@@ -35,13 +35,13 @@ This document is a **complete, systematic description** of the Aiba-Arena2 proje
 |------|--------|
 | `contracts/` | Tact smart contracts (TON): AIBA token, reward vault, broker NFT, marketplace escrow, jetton wallet/messages. |
 | `scripts/` | Blueprint runnable scripts: deploy token/vault/NFT/escrow, mint AIBA to vault, mint broker NFT, increment jetton. |
-| `tests/` | Contract tests (Jest + TON sandbox): AibaJetton, ArenaRewardVault, BrokerMarketplaceEscrow (and purchase flow). |
+| `tests/` | Contract tests (Jest + TON sandbox): AibaJetton, ArenaRewardVault, BrokerMarketplaceEscrow, AiAssetRegistry, AiAssetMarketplaceEscrow. |
 | `backend/` | Express + MongoDB API: auth, battles, economy, brokers, guilds, referrals, vault claims, admin, cron. |
-| `miniapp/` | Next.js Telegram Mini App: TonConnect, tabs (Home, Brokers, Arenas, Guilds, Market, Charity, University, Stars Store, Car Racing, Bike Racing, Updates, Wallet). |
+| `miniapp/` | Next.js Telegram Mini App: TonConnect, tabs (Home, Brokers, Market, Car Racing, Bike Racing, Multiverse, Arenas, Guilds, Charity, University, Realms, Assets, Governance, Updates, Wallet). |
 | `admin-panel/` | Next.js admin UI: tasks, ads, game modes, economy config, moderation, stats, treasury, charity, university, announcements. |
 | `docs/` | All project documentation (game, user guide, vision check, deployment, runbook, monitoring, plans). |
 | `.github/workflows/ci.yml` | CI: lint, Blueprint build, contract tests, backend tests, miniapp + admin build. |
-| `tact.config.json` | Tact compiler config: seven projects (AibaJetton, AibaJettonSupply, ArenaVault, AibaToken, ArenaRewardVault, BrokerNFT, BrokerMarketplaceEscrow). |
+| `tact.config.json` | Tact compiler config: nine projects (AibaJetton, AibaJettonSupply, ArenaVault, AibaToken, ArenaRewardVault, BrokerNFT, BrokerMarketplaceEscrow, AiAssetRegistry, AiAssetMarketplaceEscrow). |
 | `jest.config.ts`, `jest.setup.ts` | Jest config for contract tests. |
 | `cronWorker.js` | Optional root-level cron entry (if used; main cron lives in `backend/server.js`). |
 
@@ -104,6 +104,8 @@ All built via Blueprint/Tact; config in `tact.config.json`. Output under `build/
 | **ArenaRewardVault** | `contracts/arena_reward_vault.tact` | **Reward vault**: receives signed `RewardClaim` (to, amount, seqno, validUntil, signature); verifies ed25519 oracle signature and per-recipient seqno; transfers AIBA from vault jetton wallet to `to`. |
 | **BrokerNFT** | `contracts/broker_nft.tact` | **Broker NFT collection + items**: owner mints `MintBroker(to, metadata)`; TEP-62 style. |
 | **BrokerMarketplaceEscrow** | `contracts/broker_marketplace_escrow.tact` | **Marketplace**: seller sends broker NFT with price in forward payload → listing; buyer pays AIBA to escrow jetton wallet with listingId → FinalizePurchase; fee/treasury/burn configurable. |
+| **AiAssetRegistry** | `contracts/ai_asset_registry.tact` | **AI asset registry**: register and transfer AI assets on-chain (owner → new owner). |
+| **AiAssetMarketplaceEscrow** | `contracts/ai_asset_marketplace_escrow.tact` | **AI asset marketplace escrow**: listing + buy flow with fee/burn split (TON-based placeholder for AIBA jettons). |
 
 Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_messages.tact` (messages and wallet used by token/vault/NFT/escrow).
 
@@ -127,6 +129,16 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - **Owner**, **brokerCollection**, **jettonMaster**, **treasury**, **feeBps**, **burnBps**.
 - **Pending listings** by NFT item (seller, price); **listings** by id (nftItem, seller, price, active).
 - **payments**: buyer → (listingId → amount paid).
+
+### 4.5 AiAssetRegistry (new)
+
+- **Owner‑gated** asset registration; asset record includes `owner` + `metadata`.
+- **TransferAsset** allows current owner to transfer to a new owner.
+
+### 4.6 AiAssetMarketplaceEscrow (new)
+
+- **CreateListing** and **BuyListing** for AI assets.
+- **Fee split** between treasury + burn (burn is implicit by not forwarding).
 - Seller: transfer NFT to escrow with price in forward payload → pending then listing.
 - Buyer: send AIBA to escrow jetton wallet with listingId in forward payload; then **FinalizePurchase(listingId)** to receive NFT; jettons to seller minus fee; optional **RefundPayment** if finalization failed.
 

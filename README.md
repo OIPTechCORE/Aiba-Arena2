@@ -7,6 +7,9 @@
 - **Printable docs:** Run `npm run build:print-docs`, then open **docs/print/index.html** in a browser to print or save as PDF — [docs/PRINT.md](docs/PRINT.md).
 - **Deep inspection:** [docs/DEEP-INSPECTION-REPORT.md](docs/DEEP-INSPECTION-REPORT.md) — full project structure, backend, frontends, contracts, docs, security, and consistency check.
 - **AI Learning Multiverse (economics):** [docs/AI-LEARNING-MULTIVERSE-ECONOMICS.md](docs/AI-LEARNING-MULTIVERSE-ECONOMICS.md) — token flow, asset marketplace, earning paths, and balancing model.
+- **Universal spec:** [docs/UNIVERSAL-SPEC.md](docs/UNIVERSAL-SPEC.md) — architecture, domain glossary, phase matrix.
+- **API contract:** [docs/API-CONTRACT.md](docs/API-CONTRACT.md) — endpoints for realms, mentors, assets, marketplace, governance, treasury.
+- **Test plan:** [docs/TEST-PLAN.md](docs/TEST-PLAN.md) — functional checks for realms, assets, governance, marketplace, admin.
 
 ## Project structure
 
