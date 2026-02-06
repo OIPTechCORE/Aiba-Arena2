@@ -5,6 +5,8 @@
 - **Marketplace & payments (360° plan):** [docs/MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](docs/MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md) — TON + AIBA only, Super Admin wallets per product, create broker, boost profile, gifts.
 - **Vision vs codebase:** [docs/VISION-VS-CODEBASE-CHECK.md](docs/VISION-VS-CODEBASE-CHECK.md) — deep check of the AI Broker Battle Arena vision/spec against the repo (implemented, partial, not implemented, misalignments).
 - **Printable docs:** Run `npm run build:print-docs`, then open **docs/print/index.html** in a browser to print or save as PDF — [docs/PRINT.md](docs/PRINT.md).
+- **Deep inspection:** [docs/DEEP-INSPECTION-REPORT.md](docs/DEEP-INSPECTION-REPORT.md) — full project structure, backend, frontends, contracts, docs, security, and consistency check.
+- **AI Learning Multiverse (economics):** [docs/AI-LEARNING-MULTIVERSE-ECONOMICS.md](docs/AI-LEARNING-MULTIVERSE-ECONOMICS.md) — token flow, asset marketplace, earning paths, and balancing model.
 
 ## Project structure
 

@@ -315,3 +315,17 @@ Bronze → Silver → Gold → Platinum → Diamond → Master → Grandmaster �
 ---
 
 This “AI Learning Multiverse” vision is the **strategic north star** for the University. The current implementation (courses + progress + badge) remains the MVP layer; this section defines the **civilization‑scale expansion plan** and economic superstructure.
+
+---
+
+## 12. Deep Systems — Implementable Specifications
+
+This section **implements** the 4 deep systems requested:
+
+1) **Exact token flow diagram**  
+2) **AI asset marketplace structure**  
+3) **Earning paths for beginners vs elites**  
+4) **Economic balancing model for long‑term growth**
+
+For the full diagrams, data models, and UX flow, see:
+**`docs/AI-LEARNING-MULTIVERSE-ECONOMICS.md`**
