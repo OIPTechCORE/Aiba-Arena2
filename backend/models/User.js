@@ -25,6 +25,11 @@ const UserSchema = new mongoose.Schema(
         firstWinDiamondAwardedAt: { type: Date, default: null },
         // Profile badges (X-style: verified, early_adopter, top_donor, etc.)
         badges: { type: [String], default: [] },
+        roles: { type: [String], default: [] }, // user, mentor, council, admin
+        reputation: { type: Number, default: 0 },
+        mentorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Mentor', default: null },
+        realmProgress: { type: Map, of: Number, default: {} }, // realmKey -> progress score
+        assetCount: { type: Number, default: 0 },
 
         // Moderation
         bannedUntil: { type: Date, default: null },

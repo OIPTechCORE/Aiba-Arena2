@@ -28,6 +28,21 @@ const EconomyConfigSchema = new mongoose.Schema(
         marketplaceFeeBps: { type: Number, default: 300 }, // 3%
         marketplaceBurnBps: { type: Number, default: 0 },
 
+        // Economy split (basis points). Should sum to 10000.
+        tokenSplitBurnBps: { type: Number, default: 1500 },
+        tokenSplitTreasuryBps: { type: Number, default: 2500 },
+        tokenSplitRewardsBps: { type: Number, default: 5000 },
+        tokenSplitStakingBps: { type: Number, default: 1000 },
+
+        // AI Asset economy
+        assetMintFeeAiba: { type: Number, default: 100 },
+        assetUpgradeFeeAiba: { type: Number, default: 50 },
+        assetRentalFeeBps: { type: Number, default: 500 }, // 5%
+
+        // Governance / mentor access
+        governanceStakeMinAiba: { type: Number, default: 1000 },
+        mentorTierStakeAiba: { type: Map, of: Number, default: {} }, // tier -> stake requirement
+
         // Referrals (off-chain rewards)
         referralRewardNeurReferrer: { type: Number, default: 250 },
         referralRewardNeurReferee: { type: Number, default: 150 },
