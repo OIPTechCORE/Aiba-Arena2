@@ -78,7 +78,7 @@ Edit `backend/.env` and set at least:
 
 | Variable | Value for localhost |
 |----------|---------------------|
-| **MONGO_URI** | `mongodb://localhost:27017/aiba_arena` (local) or your Atlas URI (e.g. `mongodb+srv://user:pass@cluster.mongodb.net/aiba_arena`) |
+| **MONGO_URI** | Local: `mongodb://localhost:27017/aiba_arena`. Atlas: `mongodb+srv://user:pass@cluster.mongodb.net/aiba_arena?retryWrites=true&w=majority` (use database name `aiba_arena`) |
 | **APP_ENV** | `dev` (required for local: skips Telegram initData verification and production checks) |
 | **CORS_ORIGIN** | Leave **empty** to allow all origins (localhost:3000, localhost:3001), or set `http://localhost:3000,http://localhost:3001` |
 | **ADMIN_EMAIL** | Any email you use to log in to the admin panel (e.g. `admin@test.local`) |
@@ -210,7 +210,7 @@ You must still create `backend/.env` (and optionally `miniapp/.env.local`, `admi
 
 | Problem | What to do |
 |--------|------------|
-| Backend fails with "MONGO_URI not configured" | Create `backend/.env` from `backend/.env.example` and set `MONGO_URI`. |
+| Backend fails with "MONGO_URI not configured" | Create `backend/.env` from `backend/.env.example` and set `MONGO_URI`. For Atlas, include the database name (e.g. `/aiba_arena` before `?`) and use `retryWrites=true&w=majority`. |
 | Backend fails with production readiness errors | Set `APP_ENV=dev` in `backend/.env`. |
 | Miniapp/Admin shows "Backend unreachable" or CORS errors | Ensure backend is running on port 5000; with `APP_ENV=dev`, CORS allows all origins if `CORS_ORIGIN` is empty. |
 | Admin login fails | Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `backend/.env` and use those to log in. |

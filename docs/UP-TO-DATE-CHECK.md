@@ -2,7 +2,9 @@
 
 This document records a **cross-check of docs vs code** so the repo is clearly up to date.
 
-**Check date:** February 4, 2025
+**Check date:** February 6, 2025
+
+**Deep update (Feb 2025):** Backend: MONGO_URI uses database name `aiba_arena` and Atlas-friendly options (`retryWrites=true&w=majority`). `.env.example` sanitized (Atlas placeholder, safe ADMIN_EMAIL/ADMIN_PASSWORD placeholders). Docs: README, RUN-LOCALHOST, deployment.md, VERCEL-DEPLOYMENT-CHECKLIST aligned for MongoDB (local + Atlas) and env setup.
 
 **Exhaustive doc update (same period):** PROJECT-DESCRIPTION-SYSTEMATIC (routes: car-racing, bike-racing, marketplace delist, charity endpoints, admin/mod detail), deployment.md (STARS_STORE_WALLET, CAR_RACING_WALLET, MOTORCYCLE_RACING_WALLET), VISION-VS-CODEBASE-CHECK (12 tabs, car/bike racing routes and models, multiverse/stars-store, miniapp structure), USER-GUIDE (12 tabs list and table with Car Racing, Bike Racing), GAME-EXPLAINED (section 4 Autonomous Racing, TON wallets for Stars/Car/Bike, section renumbering 5–11).
 

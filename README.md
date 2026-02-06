@@ -19,8 +19,8 @@
 
 To run the full stack (backend + miniapp + admin panel) on your machine:
 
-1. **Prerequisites:** Node.js 18+, MongoDB (local or [Atlas](https://www.mongodb.com/cloud/atlas)).
-2. **Backend:** Copy `backend/.env.example` to `backend/.env`, set `MONGO_URI` and `APP_ENV=dev`, then run:
+1. **Prerequisites:** Node.js 18+, MongoDB (local or [MongoDB Atlas](https://www.mongodb.com/cloud/atlas); use connection string with database name `aiba_arena`).
+2. **Backend:** Copy `backend/.env.example` to `backend/.env`, set `MONGO_URI` (local or Atlas) and `APP_ENV=dev`, then run:
    ```bash
    cd backend && npm install && npm start
    ```

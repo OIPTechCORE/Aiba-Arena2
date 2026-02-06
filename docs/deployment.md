@@ -15,7 +15,7 @@
 
 ### Minimum env for testnet end-to-end
 
-- `MONGO_URI`
+- `MONGO_URI` (local: `mongodb://localhost:27017/aiba_arena`; Atlas: `mongodb+srv://user:pass@cluster.mongodb.net/aiba_arena?retryWrites=true&w=majority`)
 - `TELEGRAM_BOT_TOKEN` (production Telegram auth and push notifications, e.g. battle win)
 - `BOOST_TON_WALLET` (TON wallet address that receives boost payments; boost cost: Admin → Economy `boostCostTonNano`)
 - `LEADER_BOARD_WALLET` (Super Admin: receives TON when users pay to create a group; cost: Admin → Economy `createGroupCostTonNano`, 1–10 TON)
