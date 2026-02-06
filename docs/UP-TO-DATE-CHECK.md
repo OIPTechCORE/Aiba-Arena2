@@ -6,7 +6,7 @@ This document records a **cross-check of docs vs code** so the repo is clearly u
 
 **Universal update (Feb 2025):** Full repo sync: backend (engine, jobs, models, routes, util, package.json/package-lock.json), docs (AUTONOMOUS-RACING-MASTER-PLAN, LEADERBOARD-AND-GROUPS-CHECK, MARKETPLACE-AND-PAYMENTS-MASTER-PLAN, NFT-MULTIVERSE-MASTER-PLAN, VERCEL-DEPLOYMENT-CHECKLIST, monitoring), and root/miniapp lockfiles committed and pushed. Codebase and docs aligned.
 
-**Deep update (Feb 2025):** Backend: MONGO_URI uses database name `aiba_arena` and Atlas-friendly options (`retryWrites=true&w=majority`). `.env.example` sanitized (Atlas placeholder, safe ADMIN_EMAIL/ADMIN_PASSWORD placeholders). Docs: README, RUN-LOCALHOST, deployment.md, VERCEL-DEPLOYMENT-CHECKLIST aligned for MongoDB (local + Atlas) and env setup.
+**Deep update (Feb 2025):** Backend: MONGO_URI uses database name `aiba_arena` and Atlas-friendly options (`retryWrites=true&w=majority`). `.env.example` sanitized (Atlas placeholder, safe ADMIN_EMAIL/ADMIN_PASSWORD placeholders). Docs: README, RUN-LOCALHOST, deployment.md, VERCEL-DEPLOYMENT-CHECKLIST aligned for MongoDB (local + Atlas) and env setup. **University vision upgraded**: AI Learning Multiverse architecture added to `AIBA-ARENA-UNIVERSITY-PLAN.md`.
 
 **Connect Wallet (Feb 2025):** Clicking "Connect Wallet" opens the TonConnect modal with the full list of TON-supported wallets (Tonkeeper, TonHub, etc.). Custom button in header calls `openModal()` when not connected; when connected, TonConnectButton is shown. Modal is **seamlessly responsive:** `#tc-widget-root` uses `100dvh`, safe-area insets, smooth scroll; `layout.js` exports `viewport` with `viewportFit: 'cover'` for notched devices; at ≤440px modal is full-width; at ≤360px header shows wallet icon only. See miniapp `page.js`, `providers.js`, `globals.css`, `layout.js`.
 
@@ -84,3 +84,7 @@ This document records a **cross-check of docs vs code** so the repo is clearly u
 - **Connect Wallet on localhost:** RUN-LOCALHOST §7, providers.js (SSR-safe manifest), page.js (dev hint), .env.local.example (optional manifest URL), and Vercel env docs are aligned.
 
 **Conclusion:** Docs and code are deeply up to date as of this check. Backend (MongoDB Atlas, .env.example), deployment docs, miniapp (12 tabs, 3D UI, tutorial), and Connect Wallet flow are aligned: Connect Wallet opens the TonConnect modal with TON wallet list; the modal is seamlessly responsive (100dvh, safe-area, viewportFit cover, full-width on small screens). Re-run this verification after large feature or doc changes.
+
+**If you have local changes in backend (engine, jobs, models, routes, util) or plan docs** that were left uncommitted, run from repo root: `.\scripts\commit-backend-docs-sync.ps1` to stage, commit, and push them in one "Backend and docs sync" commit.
+
+**Deep inspection:** For a full project-wide review (structure, backend, frontends, contracts, docs, security), see [DEEP-INSPECTION-REPORT.md](DEEP-INSPECTION-REPORT.md).
