@@ -42,6 +42,21 @@ const IconWallet = () => (
         <rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" /><path d="M16 14h.01" />
     </svg>
 );
+const IconWorld = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <circle cx="12" cy="12" r="10" /><path d="M2 12h20" /><path d="M12 2c3 3 3 17 0 20" /><path d="M12 2c-3 3-3 17 0 20" />
+    </svg>
+);
+const IconAsset = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M12 2l8 4v12l-8 4-8-4V6l8-4z" /><path d="M12 22V12" /><path d="M20 6l-8 4-8-4" />
+    </svg>
+);
+const IconGov = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M6 4h12" /><path d="M8 4v6" /><path d="M16 4v6" /><path d="M4 10h16" /><path d="M7 10l-3 6h6l-3-6z" /><path d="M17 10l-3 6h6l-3-6z" />
+    </svg>
+);
 const IconRun = () => (
     <svg className="icon-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
         <path d="M8 5v14l11-7z" />
@@ -155,6 +170,9 @@ const TAB_LIST = [
     { id: 'guilds', label: 'Guilds', Icon: IconGuilds },
     { id: 'charity', label: 'Charity', Icon: IconHeart },
     { id: 'university', label: 'University', Icon: IconUniversity },
+    { id: 'realms', label: 'Realms', Icon: IconWorld },
+    { id: 'assets', label: 'Assets', Icon: IconAsset },
+    { id: 'governance', label: 'Governance', Icon: IconGov },
     { id: 'updates', label: 'Updates', Icon: IconUpdates },
     { id: 'wallet', label: 'Wallet', Icon: IconWallet },
 ];
@@ -193,6 +211,18 @@ export default function HomePage() {
     const [dailyStatus, setDailyStatus] = useState(null);
     const [showCinematicIntro, setShowCinematicIntro] = useState(false);
     const [mintNftMsg, setMintNftMsg] = useState('');
+    const [realms, setRealms] = useState([]);
+    const [selectedRealmKey, setSelectedRealmKey] = useState('');
+    const [missions, setMissions] = useState([]);
+    const [mentors, setMentors] = useState([]);
+    const [assets, setAssets] = useState([]);
+    const [marketListings, setMarketListings] = useState([]);
+    const [assetCategory, setAssetCategory] = useState('agent');
+    const [assetName, setAssetName] = useState('');
+    const [listingPrice, setListingPrice] = useState('');
+    const [proposals, setProposals] = useState([]);
+    const [proposalTitle, setProposalTitle] = useState('');
+    const [proposalDescription, setProposalDescription] = useState('');
 
     // Leaderboard
     const [leaderboard, setLeaderboard] = useState([]);
@@ -840,6 +870,9 @@ export default function HomePage() {
         if (tab === 'carRacing') refreshCarRacing().catch(() => {});
         if (tab === 'bikeRacing') refreshBikeRacing().catch(() => {});
         if (tab === 'multiverse') refreshMultiverse().catch(() => {});
+        if (tab === 'realms') { refreshRealms().catch(() => {}); refreshMissions(selectedRealmKey).catch(() => {}); refreshMentors().catch(() => {}); }
+        if (tab === 'assets') { refreshAssets().catch(() => {}); refreshMarketListings().catch(() => {}); }
+        if (tab === 'governance') { refreshProposals().catch(() => {}); }
         if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab]);
@@ -1221,6 +1254,182 @@ export default function HomePage() {
             } catch {
                 // ignore
             }
+        }
+    }
+
+    async function refreshRealms() {
+        try {
+            const res = await api.get('/api/realms');
+            const list = Array.isArray(res.data?.realms) ? res.data.realms : [];
+            setRealms(list);
+            if (!selectedRealmKey && list[0]?.key) {
+                setSelectedRealmKey(list[0].key);
+                refreshMissions(list[0].key).catch(() => {});
+            }
+        } catch {
+            setRealms([]);
+        }
+    }
+    async function refreshMissions(realmKey) {
+        try {
+            const res = await api.get('/api/missions', { params: { realmKey } });
+            setMissions(Array.isArray(res.data?.missions) ? res.data.missions : []);
+        } catch {
+            setMissions([]);
+        }
+    }
+    async function refreshMentors() {
+        try {
+            const res = await api.get('/api/mentors');
+            setMentors(Array.isArray(res.data?.mentors) ? res.data.mentors : []);
+        } catch {
+            setMentors([]);
+        }
+    }
+    async function refreshAssets() {
+        try {
+            const res = await api.get('/api/assets/mine');
+            setAssets(Array.isArray(res.data?.assets) ? res.data.assets : []);
+        } catch {
+            setAssets([]);
+        }
+    }
+    async function refreshMarketListings() {
+        try {
+            const res = await api.get('/api/asset-marketplace/listings');
+            setMarketListings(Array.isArray(res.data?.listings) ? res.data.listings : []);
+        } catch {
+            setMarketListings([]);
+        }
+    }
+    async function refreshProposals() {
+        try {
+            const res = await api.get('/api/governance/proposals');
+            setProposals(Array.isArray(res.data?.proposals) ? res.data.proposals : []);
+        } catch {
+            setProposals([]);
+        }
+    }
+    async function assignMentor(mentorId) {
+        setBusy(true);
+        try {
+            await api.post('/api/mentors/assign', { mentorId });
+            setStatus('Mentor assigned.');
+        } catch (e) {
+            setStatus(e?.response?.data?.error || 'Mentor assignment failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function completeMission(missionId) {
+        setBusy(true);
+        try {
+            const res = await api.post('/api/missions/complete', { missionId });
+            if (res.data?.rewardAiba || res.data?.rewardNeur) {
+                setStatus(`Mission complete: +${res.data.rewardAiba || 0} AIBA, +${res.data.rewardNeur || 0} NEUR`);
+            }
+            await refreshEconomy();
+        } catch (e) {
+            setStatus(e?.response?.data?.error || 'Mission completion failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function mintAsset() {
+        setBusy(true);
+        try {
+            const res = await api.post('/api/assets/mint', {
+                category: assetCategory,
+                name: assetName.trim(),
+                realmKey: selectedRealmKey,
+            });
+            setAssetName('');
+            await refreshAssets();
+            await refreshEconomy();
+            if (res.data?.asset) setStatus('Asset minted.');
+        } catch (e) {
+            setStatus(e?.response?.data?.error || 'Asset mint failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function upgradeAsset(assetId) {
+        setBusy(true);
+        try {
+            await api.post('/api/assets/upgrade', { assetId });
+            await refreshAssets();
+            await refreshEconomy();
+        } catch (e) {
+            setStatus(e?.response?.data?.error || 'Asset upgrade failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function listAsset(assetId) {
+        const price = Math.floor(Number(listingPrice) || 0);
+        if (!price) return;
+        setBusy(true);
+        try {
+            await api.post('/api/asset-marketplace/list', { assetId, priceAiba: price, listingType: 'secondary_sale' });
+            setListingPrice('');
+            await refreshMarketListings();
+        } catch (e) {
+            setStatus(e?.response?.data?.error || 'Listing failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function buyListing(listingId) {
+        setBusy(true);
+        try {
+            await api.post('/api/asset-marketplace/buy', { listingId });
+            await refreshMarketListings();
+            await refreshAssets();
+            await refreshEconomy();
+        } catch (e) {
+            setStatus(e?.response?.data?.error || 'Buy failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function rentListing(listingId) {
+        setBusy(true);
+        try {
+            await api.post('/api/asset-marketplace/rent', { listingId, durationHours: 24 });
+            await refreshMarketListings();
+            await refreshEconomy();
+        } catch (e) {
+            setStatus(e?.response?.data?.error || 'Rent failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function propose() {
+        setBusy(true);
+        try {
+            await api.post('/api/governance/propose', {
+                title: proposalTitle.trim(),
+                description: proposalDescription.trim(),
+                actions: [],
+            });
+            setProposalTitle('');
+            setProposalDescription('');
+            await refreshProposals();
+        } catch (e) {
+            setStatus(e?.response?.data?.error || 'Proposal failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function voteOnProposal(proposalId, vote) {
+        setBusy(true);
+        try {
+            await api.post('/api/governance/vote', { proposalId, vote });
+            await refreshProposals();
+        } catch (e) {
+            setStatus(e?.response?.data?.error || 'Vote failed.');
+        } finally {
+            setBusy(false);
         }
     }
 
@@ -1647,6 +1856,9 @@ export default function HomePage() {
                  tab === 'multiverse' ? 'Own, stake & earn. Mint Broker NFTs with AIBA; stake to earn AIBA daily.' :
                  tab === 'charity' ? 'Unite for Good. Donate NEUR or AIBA to active campaigns.' :
                  tab === 'university' ? 'Learn the game. Courses and modules right here.' :
+                 tab === 'realms' ? 'Explore AI Realms and complete missions to earn rewards.' :
+                 tab === 'assets' ? 'Mint, upgrade, list, buy, and rent AI assets.' :
+                 tab === 'governance' ? 'Propose and vote on ecosystem changes.' :
                  tab === 'updates' ? 'Stay informed. Announcements, status & support here.' :
                  'Daily NEUR, stake AIBA, or claim on-chain after a battle.'}
             </p>
@@ -2319,6 +2531,183 @@ export default function HomePage() {
                             </div>
                         </div>
                     ) : null}
+                </section>
+
+                {/* ─── Realms ───────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'realms' ? 'is-active' : ''}`} aria-hidden={tab !== 'realms'}>
+                    <div className="card card--elevated">
+                        <div className="card__title">AI Realms</div>
+                        <p className="card__hint">Select a realm and complete missions to earn rewards.</p>
+                        <select
+                            value={selectedRealmKey}
+                            onChange={(e) => {
+                                const key = e.target.value;
+                                setSelectedRealmKey(key);
+                                refreshMissions(key).catch(() => {});
+                            }}
+                            style={{ padding: 8, minWidth: 220 }}
+                        >
+                            {realms.map((r) => (
+                                <option key={r.key} value={r.key}>{r.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="card card--elevated" style={{ marginTop: 12 }}>
+                        <div className="card__title">Missions</div>
+                        {missions.length === 0 ? (
+                            <p className="card__hint">No missions available for this realm.</p>
+                        ) : (
+                            <div className="list">
+                                {missions.map((m) => (
+                                    <div key={m._id || m.title} className="list-item">
+                                        <div className="list-item__main">
+                                            <div className="list-item__title">{m.title}</div>
+                                            <div className="list-item__desc">{m.description}</div>
+                                        </div>
+                                        <button type="button" className="btn btn--success" onClick={() => completeMission(m._id)} disabled={busy}>Complete</button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="card card--elevated" style={{ marginTop: 12 }}>
+                        <div className="card__title">Mentors</div>
+                        {mentors.length === 0 ? (
+                            <p className="card__hint">No mentors available.</p>
+                        ) : (
+                            <div className="list">
+                                {mentors.map((m) => (
+                                    <div key={m._id || m.key} className="list-item">
+                                        <div className="list-item__main">
+                                            <div className="list-item__title">{m.name}</div>
+                                            <div className="list-item__desc">{m.description}</div>
+                                        </div>
+                                        <button type="button" className="btn btn--ghost" onClick={() => assignMentor(m._id)} disabled={busy}>Assign</button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* ─── Assets ───────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'assets' ? 'is-active' : ''}`} aria-hidden={tab !== 'assets'}>
+                    <div className="card card--elevated">
+                        <div className="card__title">Mint AI Asset</div>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <select value={assetCategory} onChange={(e) => setAssetCategory(e.target.value)} style={{ padding: 8 }}>
+                                <option value="agent">AI Agent</option>
+                                <option value="brain">AI Brain</option>
+                                <option value="creator">AI Creator</option>
+                                <option value="workflow">AI Workflow</option>
+                                <option value="system">AI System</option>
+                            </select>
+                            <input
+                                type="text"
+                                placeholder="Asset name"
+                                value={assetName}
+                                onChange={(e) => setAssetName(e.target.value)}
+                                style={{ padding: 8, flex: '1 1 200px', minWidth: 0 }}
+                            />
+                            <button type="button" className="btn btn--primary" onClick={mintAsset} disabled={busy || !assetName.trim()}>Mint</button>
+                        </div>
+                    </div>
+
+                    <div className="card card--elevated" style={{ marginTop: 12 }}>
+                        <div className="card__title">My Assets</div>
+                        {assets.length === 0 ? (
+                            <p className="card__hint">No assets yet. Mint your first asset above.</p>
+                        ) : (
+                            <div className="list">
+                                {assets.map((a) => (
+                                    <div key={a._id} className="list-item">
+                                        <div className="list-item__main">
+                                            <div className="list-item__title">{a.name}</div>
+                                            <div className="list-item__desc">{a.category} · L{a.level} · {a.status}</div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                placeholder="List price"
+                                                value={listingPrice}
+                                                onChange={(e) => setListingPrice(e.target.value)}
+                                                style={{ width: 120, padding: 6 }}
+                                            />
+                                            <button type="button" className="btn btn--ghost" onClick={() => listAsset(a._id)} disabled={busy}>List</button>
+                                            <button type="button" className="btn btn--secondary" onClick={() => upgradeAsset(a._id)} disabled={busy}>Upgrade</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="card card--elevated" style={{ marginTop: 12 }}>
+                        <div className="card__title">Marketplace Listings</div>
+                        {marketListings.length === 0 ? (
+                            <p className="card__hint">No listings available.</p>
+                        ) : (
+                            <div className="list">
+                                {marketListings.map((l) => (
+                                    <div key={l._id} className="list-item">
+                                        <div className="list-item__main">
+                                            <div className="list-item__title">Listing #{String(l._id).slice(-6)}</div>
+                                            <div className="list-item__desc">{l.listingType} · {l.priceAiba} AIBA</div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: 8 }}>
+                                            <button type="button" className="btn btn--primary" onClick={() => buyListing(l._id)} disabled={busy}>Buy</button>
+                                            <button type="button" className="btn btn--ghost" onClick={() => rentListing(l._id)} disabled={busy}>Rent</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* ─── Governance ───────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'governance' ? 'is-active' : ''}`} aria-hidden={tab !== 'governance'}>
+                    <div className="card card--elevated">
+                        <div className="card__title">Create Proposal</div>
+                        <input
+                            type="text"
+                            placeholder="Proposal title"
+                            value={proposalTitle}
+                            onChange={(e) => setProposalTitle(e.target.value)}
+                            style={{ padding: 8, width: '100%' }}
+                        />
+                        <textarea
+                            placeholder="Proposal description"
+                            value={proposalDescription}
+                            onChange={(e) => setProposalDescription(e.target.value)}
+                            style={{ padding: 8, width: '100%', minHeight: 80, marginTop: 8 }}
+                        />
+                        <button type="button" className="btn btn--primary" onClick={propose} disabled={busy || !proposalTitle.trim()}>Propose</button>
+                    </div>
+                    <div className="card card--elevated" style={{ marginTop: 12 }}>
+                        <div className="card__title">Active Proposals</div>
+                        {proposals.length === 0 ? (
+                            <p className="card__hint">No proposals yet.</p>
+                        ) : (
+                            <div className="list">
+                                {proposals.map((p) => (
+                                    <div key={p._id} className="list-item">
+                                        <div className="list-item__main">
+                                            <div className="list-item__title">{p.title}</div>
+                                            <div className="list-item__desc">{p.description}</div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: 8 }}>
+                                            <button type="button" className="btn btn--success" onClick={() => voteOnProposal(p._id, 'for')} disabled={busy}>Vote For</button>
+                                            <button type="button" className="btn btn--ghost" onClick={() => voteOnProposal(p._id, 'against')} disabled={busy}>Vote Against</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </section>
 
                 {/* ─── Updates (Unified Comms) ────────────────────────────────── */}
