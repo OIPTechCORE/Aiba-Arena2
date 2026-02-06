@@ -7,11 +7,17 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:500
 
 export default function AdminHome() {
     const [token, setToken] = useState('');
-    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod | stats | treasury | comms
+    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod | stats | treasury | realms | marketplace | treasuryOps | charity | comms | university
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [authError, setAuthError] = useState('');
+    const [realms, setRealms] = useState([]);
+    const [realmKey, setRealmKey] = useState('');
+    const [realmName, setRealmName] = useState('');
+    const [realmLevel, setRealmLevel] = useState(1);
+    const [marketMetrics, setMarketMetrics] = useState(null);
+    const [treasuryOpsSummary, setTreasuryOpsSummary] = useState(null);
 
     const api = useMemo(() => {
         const a = axios.create({ baseURL: BACKEND_URL });
@@ -50,6 +56,48 @@ export default function AdminHome() {
             localStorage.removeItem('aiba_admin_token');
         } catch {
             // ignore
+        }
+    };
+
+    // ----- Realms -----
+    const fetchRealms = async () => {
+        try {
+            const res = await api.get('/api/admin/realms');
+            setRealms(Array.isArray(res.data?.realms) ? res.data.realms : []);
+        } catch {
+            setRealms([]);
+        }
+    };
+    const upsertRealm = async () => {
+        if (!realmKey.trim() || !realmName.trim()) return;
+        await api.post('/api/admin/realms', {
+            key: realmKey.trim(),
+            name: realmName.trim(),
+            level: Number(realmLevel) || 1,
+            active: true,
+        });
+        setRealmKey('');
+        setRealmName('');
+        await fetchRealms();
+    };
+
+    // ----- Marketplace metrics -----
+    const fetchMarketMetrics = async () => {
+        try {
+            const res = await api.get('/api/admin/marketplace/metrics');
+            setMarketMetrics(res.data || null);
+        } catch {
+            setMarketMetrics(null);
+        }
+    };
+
+    // ----- Treasury ops metrics -----
+    const fetchTreasuryOpsMetrics = async () => {
+        try {
+            const res = await api.get('/api/admin/treasury-ops/metrics');
+            setTreasuryOpsSummary(res.data?.summary || null);
+        } catch {
+            setTreasuryOpsSummary(null);
         }
     };
 
@@ -532,6 +580,9 @@ export default function AdminHome() {
         }
         if (tab === 'stats') fetchAdminStats();
         if (tab === 'treasury') fetchTreasury();
+        if (tab === 'realms') fetchRealms();
+        if (tab === 'marketplace') fetchMarketMetrics();
+        if (tab === 'treasuryOps') fetchTreasuryOpsMetrics();
         if (tab === 'charity') {
             fetchCharityCampaigns();
             fetchCharityStats();
@@ -591,6 +642,15 @@ export default function AdminHome() {
                         </button>
                         <button onClick={() => setTab('treasury')} style={{ padding: '8px 12px' }}>
                             Treasury
+                        </button>
+                        <button onClick={() => setTab('realms')} style={{ padding: '8px 12px' }}>
+                            Realms
+                        </button>
+                        <button onClick={() => setTab('marketplace')} style={{ padding: '8px 12px' }}>
+                            Marketplace
+                        </button>
+                        <button onClick={() => setTab('treasuryOps')} style={{ padding: '8px 12px' }}>
+                            Treasury Ops
                         </button>
                         <button onClick={() => setTab('charity')} style={{ padding: '8px 12px' }}>
                             Charity
@@ -1152,6 +1212,54 @@ export default function AdminHome() {
                                         <div>AIBA: {buybackData.aibaBalance ?? 0} | NEUR: {buybackData.neurBalance ?? 0} | Total bought back: {buybackData.totalBoughtBackAiba ?? 0}</div>
                                     </div>
                                 ) : null}
+                            </>
+                        ) : null}
+
+                        {tab === 'realms' ? (
+                            <>
+                                <button onClick={fetchRealms} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Create / Update Realm</div>
+                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                        <input value={realmKey} onChange={(e) => setRealmKey(e.target.value)} placeholder="realm key" style={{ padding: 8 }} />
+                                        <input value={realmName} onChange={(e) => setRealmName(e.target.value)} placeholder="realm name" style={{ padding: 8 }} />
+                                        <input value={realmLevel} onChange={(e) => setRealmLevel(e.target.value)} type="number" min="1" max="3" placeholder="level" style={{ padding: 8, width: 80 }} />
+                                        <button onClick={upsertRealm} style={{ padding: '8px 12px' }}>Save</button>
+                                    </div>
+                                </div>
+                                <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
+                                    {realms.map((r) => (
+                                        <div key={r.key} style={{ padding: 10, border: '1px solid #f2f2f2', borderRadius: 8 }}>
+                                            <div style={{ fontWeight: 600 }}>{r.name} ({r.key})</div>
+                                            <div style={{ color: '#666', fontSize: 12 }}>Level {r.level} · active {String(r.active)}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === 'marketplace' ? (
+                            <>
+                                <button onClick={fetchMarketMetrics} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8, maxWidth: 420 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Marketplace metrics</div>
+                                    <div>Active listings: {marketMetrics?.activeListings ?? 0}</div>
+                                    <div>Sold listings: {marketMetrics?.soldListings ?? 0}</div>
+                                    <div>Active rentals: {marketMetrics?.activeRentals ?? 0}</div>
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === 'treasuryOps' ? (
+                            <>
+                                <button onClick={fetchTreasuryOpsMetrics} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8, maxWidth: 420 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Treasury ops summary</div>
+                                    <div>Burn: {treasuryOpsSummary?.burn ?? 0}</div>
+                                    <div>Treasury: {treasuryOpsSummary?.treasury ?? 0}</div>
+                                    <div>Rewards: {treasuryOpsSummary?.rewards ?? 0}</div>
+                                    <div>Staking: {treasuryOpsSummary?.staking ?? 0}</div>
+                                </div>
                             </>
                         ) : null}
 
