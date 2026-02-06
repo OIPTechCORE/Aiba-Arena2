@@ -1026,9 +1026,25 @@ body,
     cursor: pointer;
 }
 
+/* ─── TonConnect: wallet list modal above all content ───────────────────── */
+#tc-widget-root {
+    z-index: 10000;
+}
+
 /* ─── TonConnect button wrapper (match theme) ────────────────────────────── */
-.aiba-app .ton-connect-button {
-    margin-top: 8px;
+.aiba-app .ton-connect-button,
+.app-header__wallet .ton-connect-button {
+    margin-top: 0;
+}
+.connect-wallet-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.app-header__wallet {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* ─── Status message ────────────────────────────────────────────────────── */

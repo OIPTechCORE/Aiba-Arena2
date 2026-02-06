@@ -21,5 +21,12 @@ export function Providers({ children }) {
         return origin ? `${origin}/${env.replace(/^\/+/, '')}` : env;
     }, []);
 
-    return <TonConnectUIProvider manifestUrl={manifestUrl}>{children}</TonConnectUIProvider>;
+    // Theme for the Connect Wallet modal (list of TON wallets: Tonkeeper, TonHub, etc.)
+    const uiPreferences = useMemo(() => ({ theme: 'DARK' }), []);
+
+    return (
+        <TonConnectUIProvider manifestUrl={manifestUrl} uiPreferences={uiPreferences}>
+            {children}
+        </TonConnectUIProvider>
+    );
 }

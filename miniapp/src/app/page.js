@@ -1576,7 +1576,21 @@ export default function HomePage() {
                 <div className="app-header__brand">
                     <h1 className="aiba-app__title">AIBA Arena</h1>
                 </div>
-                <TonConnectButton />
+                <div className="app-header__wallet">
+                    {wallet ? (
+                        <TonConnectButton />
+                    ) : (
+                        <button
+                            type="button"
+                            className="btn btn--primary connect-wallet-btn"
+                            onClick={() => tonConnectUI?.openModal?.()}
+                            aria-label="Connect TON wallet"
+                        >
+                            <IconWallet />
+                            <span>Connect Wallet</span>
+                        </button>
+                    )}
+                </div>
                 {IS_DEV ? (
                     <p className="aiba-app__sub" style={{ marginTop: 4 }}>
                         Backend: {BACKEND_URL}
