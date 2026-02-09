@@ -5,8 +5,9 @@ const CharityCampaign = require('../models/CharityCampaign');
 const CharityDonation = require('../models/CharityDonation');
 const { getLimit } = require('../util/pagination');
 const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 // GET /api/admin/charity/campaigns — list all campaigns (any status)
 router.get('/campaigns', async (req, res) => {

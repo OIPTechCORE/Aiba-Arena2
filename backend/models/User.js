@@ -46,5 +46,6 @@ const UserSchema = new mongoose.Schema(
 );
 
 UserSchema.index({ telegramId: 1 }, { unique: true, sparse: true });
+UserSchema.index({ wallet: 1 }, { sparse: true });
 
 module.exports = mongoose.model('User', UserSchema);

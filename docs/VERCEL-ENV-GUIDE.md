@@ -105,6 +105,7 @@ Below is the **full list** of backend environment variables. Set every **require
 |-----|-------------|------------------|------|
 | **PORT** | Port the server listens on. | `5000` (Vercel/serverless may ignore) | Often set by host. |
 | **RATE_LIMIT_PER_MINUTE** | Global rate limit (requests per minute per IP). | `600` (default) | Tune as needed. |
+| **REDIS_URL** | Redis connection string for shared rate limiting. | `redis://user:pass@host:6379` | Required for multi-instance rate limits. |
 | **BOOST_TON_WALLET** | TON address that receives **battle** boost payments (cost set in Admin → Economy). | TON address | Needed if boosts with TON are used. |
 | **LEADER_BOARD_WALLET** | TON address that receives payment when users **pay to create** a guild (not in top N). | TON address | Needed for paid guild create. |
 | **BOOST_GROUP_WALLET** | TON address that receives payment when users **boost** a guild. | TON address | Needed for guild boost. |
@@ -117,13 +118,15 @@ Below is the **full list** of backend environment variables. Set every **require
 
 ### 3.3 On-chain reward claims (AIBA withdrawal)
 
-If you want users to **withdraw AIBA** from the app to their TON wallet via the vault, set **all** of these (and keep TON provider mainnet for production):
+If you want users to **withdraw AIBA** from the app to their TON wallet via the vault, set **all** of these (and keep TON provider mainnet for production). For signing, use **either** `ORACLE_PRIVATE_KEY_HEX` **or** `ORACLE_SIGNER_URL`.
 
 | Key | Description | Example / Value | Note |
 |-----|-------------|------------------|------|
 | **ARENA_VAULT_ADDRESS** | ArenaRewardVault contract address (EQ...). | TON address | All three required together. |
 | **AIBA_JETTON_MASTER** | AIBA jetton master contract address. | TON address | |
-| **ORACLE_PRIVATE_KEY_HEX** | 32-byte ed25519 seed in hex (64 hex chars). Used to sign reward claims. | 64 hex characters | Must match vault’s oracle public key. |
+| **ORACLE_PRIVATE_KEY_HEX** | 32-byte ed25519 seed in hex (64 hex chars). Used to sign reward claims. | 64 hex characters | Optional if you use `ORACLE_SIGNER_URL`. Must match vault’s oracle public key. |
+| **ORACLE_SIGNER_URL** | External signing service endpoint. | `https://signer.yourdomain.com/sign` | Use instead of `ORACLE_PRIVATE_KEY_HEX` to keep keys out of env. |
+| **ORACLE_SIGNER_TOKEN** | Bearer token for the signer service. | Long random token | Optional but recommended when using signer URL. |
 | **TON_PROVIDER_URL** | TON API endpoint (for vault reads, seqno, etc.). | e.g. `https://toncenter.com/api/v2/jsonRPC` (mainnet) | When vault is set, required and must be mainnet in prod. |
 | **TON_API_KEY** | API key for TON provider (e.g. TonCenter) to avoid rate limits. | From toncenter.com or your provider | Strongly recommended when using vault. |
 
@@ -253,7 +256,7 @@ These are **TON blockchain addresses** that receive TON when users pay for vario
 
 You can use one address for all, or separate addresses per feature. Copy-paste each address as-is into the corresponding env var.
 
-### 4.9 On-chain claims (ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON_PROVIDER_URL, TON_API_KEY)
+### 4.9 On-chain claims (ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX or ORACLE_SIGNER_URL, TON_PROVIDER_URL, TON_API_KEY)
 
 **When you need these:** Only if you want users to **withdraw AIBA** from the app to their TON wallet via the ArenaRewardVault contract.
 
@@ -268,7 +271,7 @@ You can use one address for all, or separate addresses per feature. Copy-paste e
   - **AibaToken** (jetton master) address → **AIBA_JETTON_MASTER**
   - **ArenaRewardVault** address → **ARENA_VAULT_ADDRESS**
 
-**ORACLE_PRIVATE_KEY_HEX**
+**ORACLE_PRIVATE_KEY_HEX (local signing)**
 
 - This is a **32-byte (64 hex character)** secret key used to sign reward claims. The vault contract stores the **public key**; the backend uses this **private key** to sign.
 
@@ -280,6 +283,12 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 - Copy the 64-character hex string → **ORACLE_PRIVATE_KEY_HEX**.
 - When you deploy the vault, the deploy script will ask for this key (or its public key). Use the **same** key: the backend signs with the private key; the vault must have the matching public key stored (the deploy script usually derives the public key from this private key and configures the contract).
+
+**ORACLE_SIGNER_URL (recommended for production)**
+
+- Use an external signing service so the oracle key is not stored in env.
+- Set `ORACLE_SIGNER_URL` and (optionally) `ORACLE_SIGNER_TOKEN`.
+- The signer should return `{ signatureBase64 }` for the payload provided by the backend.
 
 **TON_PROVIDER_URL**
 

@@ -5,8 +5,9 @@ const StabilityReserve = require('../models/StabilityReserve');
 const BuybackPool = require('../models/BuybackPool');
 const EconomyConfig = require('../models/EconomyConfig');
 const { validateBody } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 async function getTreasury() {
     let t = await Treasury.findOne().lean();

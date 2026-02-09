@@ -14,27 +14,27 @@ function baseClaim() {
     };
 }
 
-test('createSignedClaim is deterministic for same inputs', () => {
+test('createSignedClaim is deterministic for same inputs', async () => {
     const env = { ORACLE_PRIVATE_KEY_HEX: 'aa'.repeat(32) };
-    const a = createSignedClaim(baseClaim(), env);
-    const b = createSignedClaim(baseClaim(), env);
+    const a = await createSignedClaim(baseClaim(), env);
+    const b = await createSignedClaim(baseClaim(), env);
     assert.deepEqual(a, b);
     assert.ok(a.payloadBocBase64.length > 0);
     assert.ok(a.signatureBase64.length > 0);
 });
 
-test('createSignedClaim changes signature when payload changes', () => {
+test('createSignedClaim changes signature when payload changes', async () => {
     const env = { ORACLE_PRIVATE_KEY_HEX: 'aa'.repeat(32) };
-    const a = createSignedClaim(baseClaim(), env);
-    const b = createSignedClaim({ ...baseClaim(), amount: '1001' }, env);
+    const a = await createSignedClaim(baseClaim(), env);
+    const b = await createSignedClaim({ ...baseClaim(), amount: '1001' }, env);
     assert.notEqual(a.payloadBocBase64, b.payloadBocBase64);
     assert.notEqual(a.signatureBase64, b.signatureBase64);
 });
 
-test('createSignedClaim throws if ORACLE_PRIVATE_KEY_HEX missing', () => {
-    assert.throws(() => createSignedClaim(baseClaim(), {}), /ORACLE_PRIVATE_KEY_HEX missing/);
+test('createSignedClaim throws if ORACLE_PRIVATE_KEY_HEX missing', async () => {
+    await assert.rejects(() => createSignedClaim(baseClaim(), {}), /ORACLE_PRIVATE_KEY_HEX missing/);
 });
 
-test('createSignedClaim throws if ORACLE_PRIVATE_KEY_HEX wrong length', () => {
-    assert.throws(() => createSignedClaim(baseClaim(), { ORACLE_PRIVATE_KEY_HEX: 'ab' }), /must be 32 bytes/);
+test('createSignedClaim throws if ORACLE_PRIVATE_KEY_HEX wrong length', async () => {
+    await assert.rejects(() => createSignedClaim(baseClaim(), { ORACLE_PRIVATE_KEY_HEX: 'ab' }), /must be 32 bytes/);
 });

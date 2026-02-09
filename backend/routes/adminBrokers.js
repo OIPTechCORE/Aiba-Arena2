@@ -3,8 +3,9 @@ const { requireAdmin } = require('../middleware/requireAdmin');
 const Broker = require('../models/Broker');
 const BrokerMintJob = require('../models/BrokerMintJob');
 const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 // GET /api/admin/brokers?ownerTelegramId=...&minted=true
 router.get(

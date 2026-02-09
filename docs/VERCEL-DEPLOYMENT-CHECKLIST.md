@@ -87,7 +87,9 @@ Set **all** of these if you want users to withdraw AIBA to TON via the vault:
 |-----|-------------|
 | **ARENA_VAULT_ADDRESS** | ArenaRewardVault contract address (from `npx blueprint run deployAibaArena` / deploy script) |
 | **AIBA_JETTON_MASTER** | AIBA jetton master contract address (from same deploy) |
-| **ORACLE_PRIVATE_KEY_HEX** | 32-byte hex (64 chars); generate with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`; use same key when deploying vault |
+| **ORACLE_PRIVATE_KEY_HEX** | 32-byte hex (64 chars); generate with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`; use same key when deploying vault. Optional if using signer URL. |
+| **ORACLE_SIGNER_URL** | External signer endpoint. Use instead of ORACLE_PRIVATE_KEY_HEX to keep keys out of env. |
+| **ORACLE_SIGNER_TOKEN** | Bearer token for signer endpoint (recommended). |
 | **TON_PROVIDER_URL** | Testnet: `https://testnet.toncenter.com/api/v2/jsonRPC`; Mainnet: `https://toncenter.com/api/v2/jsonRPC` |
 | **TON_API_KEY** | From toncenter.com (or your TON API provider) to avoid rate limits |
 
@@ -112,7 +114,7 @@ Set **all** of these if you want users to withdraw AIBA to TON via the vault:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-**ORACLE_PRIVATE_KEY_HEX (for vault claims):**
+**ORACLE_PRIVATE_KEY_HEX (for vault claims, local signing):**
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
@@ -153,7 +155,7 @@ For copy-paste into your host’s env editor (fill values yourself):
 - MOTORCYCLE_RACING_WALLET  
 - ARENA_VAULT_ADDRESS  
 - AIBA_JETTON_MASTER  
-- ORACLE_PRIVATE_KEY_HEX  
+- ORACLE_PRIVATE_KEY_HEX (or ORACLE_SIGNER_URL + ORACLE_SIGNER_TOKEN)
 - TON_PROVIDER_URL  
 - TON_API_KEY  
 

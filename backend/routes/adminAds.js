@@ -2,8 +2,9 @@ const router = require('express').Router();
 const Ad = require('../models/Ad');
 const { requireAdmin } = require('../middleware/requireAdmin');
 const { validateBody, validateParams } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 // GET /api/admin/ads
 router.get('/', async (_req, res) => {

@@ -105,16 +105,20 @@ function enforceProductionReadiness(env = process.env, { logger = console } = {}
     const vaultAddress = String(env?.ARENA_VAULT_ADDRESS ?? '').trim();
     const jettonMaster = String(env?.AIBA_JETTON_MASTER ?? '').trim();
     const oracleHex = String(env?.ORACLE_PRIVATE_KEY_HEX ?? '').trim();
+    const signerUrl = String(env?.ORACLE_SIGNER_URL ?? '').trim();
     const anyVault = Boolean(vaultAddress || jettonMaster || oracleHex);
 
     if (anyVault) {
-        if (!vaultAddress || !jettonMaster || !oracleHex) {
+        if (!vaultAddress || !jettonMaster || (!oracleHex && !signerUrl)) {
             errors.push(
-                'ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER, and ORACLE_PRIVATE_KEY_HEX must all be set together (or all empty)',
+                'ARENA_VAULT_ADDRESS and AIBA_JETTON_MASTER must be set, and either ORACLE_PRIVATE_KEY_HEX or ORACLE_SIGNER_URL must be provided',
             );
         }
         if (oracleHex && !/^[0-9a-fA-F]{64}$/.test(oracleHex)) {
             errors.push('ORACLE_PRIVATE_KEY_HEX must be 32 bytes (64 hex chars)');
+        }
+        if (signerUrl && !/^https?:\/\//i.test(signerUrl)) {
+            errors.push('ORACLE_SIGNER_URL must be a valid http(s) URL');
         }
 
         const tonProviderUrl = String(env?.TON_PROVIDER_URL ?? '').trim();

@@ -22,7 +22,7 @@ function createApp() {
             credentials: true,
         }),
     );
-    app.use(express.json());
+    app.use(express.json({ limit: process.env.JSON_BODY_LIMIT || '1mb' }));
 
     // Basic global rate limit (IP-based). More specific per-route limits can be layered on top.
     app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.RATE_LIMIT_PER_MINUTE || 600) || 600 }));

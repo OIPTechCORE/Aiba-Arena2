@@ -2,11 +2,14 @@ const router = require('express').Router();
 const Task = require('../models/Task');
 const { requireAdmin } = require('../middleware/requireAdmin');
 const { validateBody, validateParams } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
+
+router.use(requireAdmin(), adminAudit());
 
 // Minimal endpoints for the admin panel
 
 // GET /api/admin/tasks
-router.get('/tasks', requireAdmin(), async (_req, res) => {
+router.get('/tasks', async (_req, res) => {
     try {
         const tasks = await Task.find().sort({ createdAt: -1 }).lean();
         res.json(tasks);
@@ -19,7 +22,6 @@ router.get('/tasks', requireAdmin(), async (_req, res) => {
 // POST /api/admin/tasks
 router.post(
     '/tasks',
-    requireAdmin(),
     validateBody({
         title: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
         description: { type: 'string', trim: true, maxLength: 2000 },
@@ -45,7 +47,6 @@ router.post(
 // PATCH /api/admin/tasks/:id
 router.patch(
     '/tasks/:id',
-    requireAdmin(),
     validateParams({ id: { type: 'objectId', required: true } }),
     validateBody({
         title: { type: 'string', trim: true, maxLength: 200 },
@@ -79,7 +80,6 @@ router.patch(
 // DELETE /api/admin/tasks/:id
 router.delete(
     '/tasks/:id',
-    requireAdmin(),
     validateParams({ id: { type: 'objectId', required: true } }),
     async (req, res) => {
     try {

@@ -6,7 +6,7 @@ This checklist is the minimum bar before deploying Aiba Arena contracts and back
 
 - **Separate keys by purpose**
     - Contract deployer key
-    - Reward-claim signer/oracle key (`ORACLE_PRIVATE_KEY_HEX`)
+    - Reward-claim signer (local `ORACLE_PRIVATE_KEY_HEX` or external `ORACLE_SIGNER_URL`)
     - Admin JWT signing secret (`ADMIN_JWT_SECRET`)
     - Telegram bot token (`TELEGRAM_BOT_TOKEN`)
 - **Never store secrets in the repo**
@@ -16,7 +16,7 @@ This checklist is the minimum bar before deploying Aiba Arena contracts and back
     - Move reward-claim signing behind a dedicated signing service or KMS/HSM
     - Enforce strict allow-lists (vault address, jetton master, max amount per claim, max claims per user/day)
 - **Rotation plan**
-    - Document and rehearse rotation for `ORACLE_PRIVATE_KEY_HEX` (requires updating oracle key on-chain)
+    - Document and rehearse rotation for oracle signing (update on-chain key + signer credentials)
     - Keep old key available for rollback only, time-boxed
 
 ## Validation defaults (backend)
@@ -34,7 +34,7 @@ These defaults apply when env vars are unset; **production should set them expli
 - **Battle seed**
     - Production: **BATTLE_SEED_SECRET** must be ≥ 32 chars, not dev placeholder (fail-fast)
 - **Vault/claims**
-    - When any of `ARENA_VAULT_ADDRESS`, `AIBA_JETTON_MASTER`, `ORACLE_PRIVATE_KEY_HEX` is set: all three required; **TON_PROVIDER_URL** required and must not be testnet (fail-fast)
+    - When `ARENA_VAULT_ADDRESS` and `AIBA_JETTON_MASTER` are set, require **either** `ORACLE_PRIVATE_KEY_HEX` or `ORACLE_SIGNER_URL`; **TON_PROVIDER_URL** required and must not be testnet (fail-fast)
 
 ## Stricter validations (backend)
 
@@ -70,7 +70,7 @@ These defaults apply when env vars are unset; **production should set them expli
 - Vault/claims:
     - `ARENA_VAULT_ADDRESS`
     - `AIBA_JETTON_MASTER`
-    - `ORACLE_PRIVATE_KEY_HEX`
+    - `ORACLE_PRIVATE_KEY_HEX` (or `ORACLE_SIGNER_URL` + `ORACLE_SIGNER_TOKEN`)
     - TON reads: `TON_PROVIDER_URL`, `TON_API_KEY`
 
 ## Checklist enforcement (fail-fast)
@@ -89,9 +89,9 @@ Enforced today:
 - **Deterministic battle secret**
     - Blocks dev/weak `BATTLE_SEED_SECRET` (minimum 32 chars)
 - **Vault/claims config sanity**
-    - Requires vault env to be “all-or-nothing” (`ARENA_VAULT_ADDRESS`, `AIBA_JETTON_MASTER`, `ORACLE_PRIVATE_KEY_HEX`)
+    - Requires vault env to be “all-or-nothing” (`ARENA_VAULT_ADDRESS`, `AIBA_JETTON_MASTER`, and signer: `ORACLE_PRIVATE_KEY_HEX` or `ORACLE_SIGNER_URL`)
     - Requires explicit `TON_PROVIDER_URL` and blocks obvious testnet endpoints when vault/claims are configured
-    - Validates `ORACLE_PRIVATE_KEY_HEX` is 64 hex chars (32 bytes)
+    - Validates `ORACLE_PRIVATE_KEY_HEX` is 64 hex chars (32 bytes) if used
 - **Legacy dispatch**
     - Blocks `ENABLE_LEGACY_PENDING_AIBA_DISPATCH=true` in production (signed claims only)
 

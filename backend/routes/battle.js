@@ -545,7 +545,7 @@ router.post(
                             const validUntil = Math.floor(Date.now() / 1000) + 10 * 60; // 10 minutes
                             const amount = String(rewardAiba); // smallest units (MVP: 1 token == 1 unit)
 
-                            const signed = createSignedClaim({
+                            const signed = await createSignedClaim({
                                 vaultAddress,
                                 jettonMaster,
                                 to: toAddress,

@@ -13,8 +13,9 @@ const {
 } = require('../engine/adminEconomySanitize');
 const { getLimit } = require('../util/pagination');
 const { validateBody, validateQuery } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 async function getAllowedArenaKeys() {
     const modes = await GameMode.find({}).select({ arena: 1, league: 1 }).lean();

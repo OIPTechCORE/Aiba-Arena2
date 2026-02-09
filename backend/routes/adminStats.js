@@ -3,9 +3,10 @@ const { requireAdmin } = require('../middleware/requireAdmin');
 const User = require('../models/User');
 const Battle = require('../models/Battle');
 const EconomyDay = require('../models/EconomyDay');
+const { adminAudit } = require('../middleware/adminAudit');
 
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 function utcDayKey(date = new Date()) {
     const y = date.getUTCFullYear();

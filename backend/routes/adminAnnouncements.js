@@ -5,8 +5,9 @@ const { getLimit } = require('../util/pagination');
 const User = require('../models/User');
 const { notifyAnnouncement } = require('../services/telegramNotify');
 const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 /**
  * GET /api/admin/announcements?limit=50

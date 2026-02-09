@@ -5,8 +5,9 @@ const Broker = require('../models/Broker');
 const Battle = require('../models/Battle');
 const { getLimit } = require('../util/pagination');
 const { validateBody, validateQuery } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 function clampInt(n, min, max) {
     const x = Number(n);

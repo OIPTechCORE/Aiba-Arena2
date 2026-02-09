@@ -3,8 +3,9 @@ const { requireAdmin } = require('../middleware/requireAdmin');
 const GovernanceProposal = require('../models/GovernanceProposal');
 const { applyAction } = require('../util/governanceActions');
 const { validateBody } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 router.get('/proposals', async (_req, res) => {
     const proposals = await GovernanceProposal.find({}).sort({ createdAt: -1 }).lean();

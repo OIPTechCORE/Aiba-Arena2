@@ -12,7 +12,7 @@
 - **Telegram:** `TELEGRAM_BOT_TOKEN` required; `TELEGRAM_INITDATA_MAX_AGE_SECONDS` required, numeric, > 0 (recommended 300–900s).
 - **Admin auth:** `ADMIN_JWT_SECRET` (≥ 32 chars, no dev placeholder), `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` (plaintext `ADMIN_PASSWORD` disallowed in prod).
 - **Battle determinism:** `BATTLE_SEED_SECRET` ≥ 32 chars, no dev placeholder.
-- **Vault/claims:** If any of `ARENA_VAULT_ADDRESS`, `AIBA_JETTON_MASTER`, `ORACLE_PRIVATE_KEY_HEX` is set, **all three** required; `TON_PROVIDER_URL` required and **must not be testnet**; `ORACLE_PRIVATE_KEY_HEX` must be 64 hex chars.
+- **Vault/claims:** If any of `ARENA_VAULT_ADDRESS` or `AIBA_JETTON_MASTER` is set, both are required **and** either `ORACLE_PRIVATE_KEY_HEX` **or** `ORACLE_SIGNER_URL` must be provided; `TON_PROVIDER_URL` required and **must not be testnet**; `ORACLE_PRIVATE_KEY_HEX` must be 64 hex chars if used.
 - **Legacy dispatch:** `ENABLE_LEGACY_PENDING_AIBA_DISPATCH` must not be `true` in production.
 
 ### Docs and ops
@@ -38,13 +38,13 @@
 - Set **all** required env in the **production** backend (see `docs/deployment.md`, `backend/.env.example`, `docs/mainnet-readiness.md`).
 - Use a **secret manager** (Vercel/Render/Railway secrets, Vault, or cloud secrets manager); **no secrets in repo**.
 - Set `APP_ENV=prod` (or `NODE_ENV=production`) so fail-fast checks run; set `CORS_ORIGIN` to your real frontend origins (comma-separated).
-- If using vault/claims: set `ARENA_VAULT_ADDRESS`, `AIBA_JETTON_MASTER`, `ORACLE_PRIVATE_KEY_HEX`, **mainnet** `TON_PROVIDER_URL`, and `TON_API_KEY` (recommended to avoid rate limits).
+- If using vault/claims: set `ARENA_VAULT_ADDRESS`, `AIBA_JETTON_MASTER`, `ORACLE_PRIVATE_KEY_HEX` (or `ORACLE_SIGNER_URL` + `ORACLE_SIGNER_TOKEN`), **mainnet** `TON_PROVIDER_URL`, and `TON_API_KEY` (recommended to avoid rate limits).
 
 ### 2. Key separation and rotation
 
-- **Separate** contract deployer key, oracle key (`ORACLE_PRIVATE_KEY_HEX`), admin JWT secret, Telegram bot token, battle seed.
+- **Separate** contract deployer key, oracle key (`ORACLE_PRIVATE_KEY_HEX` or signer service), admin JWT secret, Telegram bot token, battle seed.
 - **Rotate** any key that ever touched a developer machine before going live.
-- Have a **rotation plan** for `ORACLE_PRIVATE_KEY_HEX` (requires updating oracle on-chain + backend secret); document and rehearse.
+- Have a **rotation plan** for oracle signing (update on-chain oracle public key and rotate signer credentials); document and rehearse.
 
 ### 3. Operational readiness
 

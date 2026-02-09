@@ -2,8 +2,9 @@ const router = require('express').Router();
 const GameMode = require('../models/GameMode');
 const { requireAdmin } = require('../middleware/requireAdmin');
 const { validateBody, validateParams } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 router.get('/', async (_req, res) => {
     const modes = await GameMode.find().sort({ createdAt: -1 }).lean();

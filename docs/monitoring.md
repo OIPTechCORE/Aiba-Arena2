@@ -16,12 +16,26 @@ This repo is instrumented primarily via logs. For production, add:
 - **Mongo connection issues**: backend startup failures, reconnection loops
 - **Treasury ops spikes**: unusually high burn/treasury/reward/staking totals
 
-### Suggested alerts (Prometheus metrics)- **Battle errors**: `rate(aiba_battle_runs_total{result="error"}[5m])` above baseline
+## Suggested alert thresholds
+
+- **API error rate**: >5% of requests over 10 minutes
+- **Battle error rate**: `aiba_battle_runs_total{result="error"}` >2% over 10 minutes
+- **Auto-ban spikes**: >5 bans in 10 minutes (users or brokers)
+- **Vault low TON**: below `MIN_VAULT_TON_NANO` (default 0.03 TON)
+- **Vault low jettons**: below 24h projected claims
+- **Mongo reconnects**: >3 reconnects in 5 minutes
+- **Rate limit spikes**: >10% of requests hitting 429 in 10 minutes
+
+### Suggested alerts (Prometheus metrics)
+
+- **Battle errors**: `rate(aiba_battle_runs_total{result="error"}[5m])` above baseline
 - **Battle anomalies**: `rate(aiba_battle_anomalies_total[5m])` spikes (break down by `arena`/`league`/`mode_key`)
 - **Auto-ban spikes**: `rate(aiba_auto_bans_total{entity=~"user|broker"}[15m])` spikes
 - **Emission denials**: `rate(aiba_economy_emissions_total{result!="ok"}[10m])` spikes (labels: `currency`, `arena`, `league`)
 - **Sink spikes**: `rate(aiba_economy_sinks_total[10m])` spikes (labels: `currency`, `reason`)
-- **Withdrawal failures**: `rate(aiba_economy_withdrawals_total{result!="ok"}[10m])` above baseline## Metrics endpoint
+- **Withdrawal failures**: `rate(aiba_economy_withdrawals_total{result!="ok"}[10m])` above baseline
+
+## Metrics endpoint
 
 - **Backend**: `GET /metrics` (Prometheus format)
 - **Treasury ops** (API): `GET /api/treasury/ops` (latest burn/treasury/rewards/staking ledger)

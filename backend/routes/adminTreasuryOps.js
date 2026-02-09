@@ -1,8 +1,9 @@
 const router = require('express').Router();
 const { requireAdmin } = require('../middleware/requireAdmin');
 const TreasuryOp = require('../models/TreasuryOp');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 router.get('/metrics', async (_req, res) => {
     const ops = await TreasuryOp.find({}).lean();

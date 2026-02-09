@@ -259,7 +259,7 @@ router.post(
         const validUntil = Math.floor(Date.now() / 1000) + 10 * 60; // 10 minutes
         const amount = String(amt);
 
-        const signed = createSignedClaim({
+        const signed = await createSignedClaim({
             vaultAddress,
             jettonMaster,
             to: toAddress,

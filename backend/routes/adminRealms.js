@@ -2,8 +2,9 @@ const router = require('express').Router();
 const { requireAdmin } = require('../middleware/requireAdmin');
 const Realm = require('../models/Realm');
 const { validateBody } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 router.get('/', async (_req, res) => {
     const realms = await Realm.find({}).sort({ level: 1, order: 1 }).lean();

@@ -4,8 +4,9 @@ const NftUniverse = require('../models/NftUniverse');
 const NftStake = require('../models/NftStake');
 const { getLimit } = require('../util/pagination');
 const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 // GET /api/admin/multiverse/universes
 router.get('/universes', async (req, res) => {

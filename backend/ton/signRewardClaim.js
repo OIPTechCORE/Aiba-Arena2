@@ -1,4 +1,5 @@
 const nacl = require('tweetnacl');
+const axios = require('axios');
 const { beginCell, Address, Cell } = require('@ton/core');
 
 function parsePrivateKey(env = process.env) {
@@ -39,12 +40,36 @@ function signClaimHash(cell, env = process.env) {
     return Buffer.from(sig);
 }
 
-function createSignedClaim({ vaultAddress, jettonMaster, to, amount, seqno, validUntil }, env = process.env) {
+async function createSignedClaim({ vaultAddress, jettonMaster, to, amount, seqno, validUntil }, env = process.env) {
     const payloadCell = buildClaimPayload({ vaultAddress, jettonMaster, to, amount, seqno, validUntil });
+    const payloadBocBase64 = payloadCell.toBoc().toString('base64');
+
+    const signerUrl = String(env?.ORACLE_SIGNER_URL || '').trim();
+    if (signerUrl) {
+        const token = String(env?.ORACLE_SIGNER_TOKEN || '').trim();
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const resp = await axios.post(
+            signerUrl,
+            {
+                vaultAddress,
+                jettonMaster,
+                to,
+                amount,
+                seqno,
+                validUntil,
+                payloadBocBase64,
+            },
+            { headers, timeout: 10_000 },
+        );
+        const signatureBase64 = resp?.data?.signatureBase64;
+        if (!signatureBase64) throw new Error('oracle signer did not return signatureBase64');
+        return { payloadBocBase64, signatureBase64 };
+    }
+
     const signature = signClaimHash(payloadCell, env);
 
     return {
-        payloadBocBase64: payloadCell.toBoc().toString('base64'),
+        payloadBocBase64,
         signatureBase64: signature.toString('base64'),
     };
 }

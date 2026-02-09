@@ -39,4 +39,6 @@ const BattleSchema = new mongoose.Schema(
     { timestamps: true },
 );
 
+BattleSchema.index({ ownerTelegramId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Battle', BattleSchema);

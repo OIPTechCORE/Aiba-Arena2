@@ -30,12 +30,13 @@
 - `BATTLE_SEED_SECRET`
 - `ADMIN_JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` (required for production readiness checks; do not use plaintext password)
 - **Production only**: `CORS_ORIGIN` (comma-separated allowed origins; required when `APP_ENV=prod` or `NODE_ENV=production`, or backend fails at startup)
+- **Recommended**: `REDIS_URL` (shared rate limiting for multi-instance deployments)
 - Vault/claim reads (set **all** together when using signed claims; mainnet requires mainnet `TON_PROVIDER_URL`):
     - `TON_PROVIDER_URL`
     - `TON_API_KEY`
     - `ARENA_VAULT_ADDRESS`
     - `AIBA_JETTON_MASTER`
-    - `ORACLE_PRIVATE_KEY_HEX`
+    - `ORACLE_PRIVATE_KEY_HEX` (or `ORACLE_SIGNER_URL` + `ORACLE_SIGNER_TOKEN`)
 
 ### Monitoring hooks
 

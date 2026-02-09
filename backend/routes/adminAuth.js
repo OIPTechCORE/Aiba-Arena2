@@ -3,9 +3,21 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { requireAdmin } = require('../middleware/requireAdmin');
 const { validateBody } = require('../middleware/validate');
+const { rateLimit } = require('../middleware/rateLimit');
 
 router.post(
     '/login',
+    rateLimit({
+        windowMs: 15 * 60_000,
+        max: 5,
+        keyFn: (req) => {
+            const email = String(req.body?.email || '').trim().toLowerCase();
+            const ip = req.headers['x-forwarded-for']
+                ? String(req.headers['x-forwarded-for']).split(',')[0].trim()
+                : req.ip || req.connection?.remoteAddress || 'unknown';
+            return `admin-login:${email || 'unknown'}:${ip}`;
+        },
+    }),
     validateBody({
         email: { type: 'string', trim: true, minLength: 3, maxLength: 200, required: true },
         password: { type: 'string', minLength: 1, maxLength: 200, required: true },

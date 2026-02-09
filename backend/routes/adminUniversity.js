@@ -5,8 +5,9 @@ const UniversityProgress = require('../models/UniversityProgress');
 const { COURSES, getTotalModuleCount } = require('./university');
 const { getLimit } = require('../util/pagination');
 const { validateQuery } = require('../middleware/validate');
+const { adminAudit } = require('../middleware/adminAudit');
 
-router.use(requireAdmin());
+router.use(requireAdmin(), adminAudit());
 
 /** GET /api/admin/university/stats — graduate count, progress count, total modules. */
 router.get('/stats', async (_req, res) => {
