@@ -38,6 +38,7 @@ function createApp() {
     app.use('/api/metadata', require('./routes/metadata'));
 
     app.use('/api/admin/auth', require('./routes/adminAuth'));
+    app.use('/api/admin/audit', require('./routes/adminAudit'));
     app.use('/api/admin', require('./routes/admin'));
     app.use('/api/admin/brokers', require('./routes/adminBrokers'));
     app.use('/api/admin/ads', require('./routes/adminAds'));
