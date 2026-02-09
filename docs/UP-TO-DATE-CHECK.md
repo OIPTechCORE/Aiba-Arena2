@@ -12,7 +12,7 @@ This document records a **cross-check of docs vs code** so the repo is clearly u
 
 **Phases 1–5 implemented (Feb 2025):** Models for realms, missions, mentors, assets, marketplace, governance, treasury ops; new contracts `AiAssetRegistry` and `AiAssetMarketplaceEscrow` + tests and deploy scripts; backend routes for realms/missions/mentors/assets/marketplace/governance/treasury ops + admin endpoints; miniapp tabs for Realms/Assets/Governance; admin tabs for Realms/Marketplace/Treasury Ops. Specs in `UNIVERSAL-SPEC.md` and `API-CONTRACT.md`.
 
-**Exhaustive doc update (same period):** PROJECT-DESCRIPTION-SYSTEMATIC (routes: car-racing, bike-racing, marketplace delist, charity endpoints, admin/mod detail), deployment.md (STARS_STORE_WALLET, CAR_RACING_WALLET, MOTORCYCLE_RACING_WALLET), VISION-VS-CODEBASE-CHECK (12 tabs, car/bike racing routes and models, multiverse/stars-store, miniapp structure), USER-GUIDE (12 tabs list and table with Car Racing, Bike Racing), GAME-EXPLAINED (section 4 Autonomous Racing, TON wallets for Stars/Car/Bike, section renumbering 5–11).
+**Exhaustive doc update (same period):** PROJECT-DESCRIPTION-SYSTEMATIC (routes: car-racing, bike-racing, marketplace delist, charity endpoints, admin/mod detail), deployment.md (STARS_STORE_WALLET, CAR_RACING_WALLET, MOTORCYCLE_RACING_WALLET; Vercel as separate project with root `backend/`; CORS_ORIGIN required in production; vault/claim vars set all together), VISION-VS-CODEBASE-CHECK (12 tabs, car/bike racing routes and models, multiverse/stars-store, miniapp structure), USER-GUIDE (12 tabs list and table with Car Racing, Bike Racing), GAME-EXPLAINED (section 4 Autonomous Racing, TON wallets for Stars/Car/Bike, section renumbering 5–11).
 
 **Later (Connect Wallet on localhost):** RUN-LOCALHOST §7 (TonConnect: many wallets cannot load manifest from localhost; options: browser extension, `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL` to deployed URL, or ngrok), miniapp `providers.js` (SSR-safe manifest URL with `window` guard and fallback), `page.js` (dev-only hint under TonConnect button), `miniapp/.env.local.example` (optional TonConnect manifest URL comment), VERCEL-DEPLOYMENT-CHECKLIST and VERCEL-ENV-GUIDE (TonConnect manifest env).
 
@@ -46,7 +46,7 @@ This document records a **cross-check of docs vs code** so the repo is clearly u
 
 | Doc | Code | Status |
 |-----|------|--------|
-| **deployment.md** | Backend env (MONGO_URI, TELEGRAM_BOT_TOKEN, wallets, vault/claim, etc.) | Aligned |
+| **deployment.md** | Backend env (MONGO_URI, TELEGRAM_BOT_TOKEN, wallets, vault/claim, etc.); Vercel separate project (root `backend/`); CORS_ORIGIN (production); vault/claim set all together | Aligned |
 | **VERCEL-ENV-GUIDE.md** | NEXT_PUBLIC_BACKEND_URL, NEXT_PUBLIC_TONCONNECT_MANIFEST_URL, NEXT_PUBLIC_APP_URL | Aligned |
 | **RUN-LOCALHOST.md** | APP_ENV=dev, x-telegram-id, CORS, backend first; §7 TonConnect (Connect Wallet) localhost limits and options | Aligned |
 

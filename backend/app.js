@@ -4,6 +4,7 @@ const cors = require('cors');
 const { enforceProductionReadiness } = require('./security/productionReadiness');
 const { requestId } = require('./middleware/requestId');
 const { rateLimit } = require('./middleware/rateLimit');
+const { responseEnvelope } = require('./middleware/response');
 const { metricsMiddleware, metricsHandler } = require('./metrics');
 
 function createApp() {
@@ -13,6 +14,7 @@ function createApp() {
     const app = express();
     app.set('trust proxy', 1);
     app.use(requestId);
+    app.use(responseEnvelope);
     app.use(metricsMiddleware);
     app.use(
         cors({
@@ -43,6 +45,7 @@ function createApp() {
     app.use('/api/admin/economy', require('./routes/adminEconomy'));
     app.use('/api/admin/mod', require('./routes/adminModeration'));
     app.use('/api/admin/treasury', require('./routes/adminTreasury'));
+    app.use('/api/admin/governance', require('./routes/adminGovernance'));
     app.use('/api/admin/realms', require('./routes/adminRealms'));
     app.use('/api/admin/marketplace', require('./routes/adminMarketplace'));
     app.use('/api/admin/treasury-ops', require('./routes/adminTreasuryOps'));

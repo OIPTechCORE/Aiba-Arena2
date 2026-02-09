@@ -5,13 +5,25 @@ const Proposal = require('../models/Proposal');
 const Vote = require('../models/Vote');
 const Treasury = require('../models/Treasury');
 const User = require('../models/User');
+const { getLimit } = require('../util/pagination');
 const { creditAibaNoCap, creditNeurNoCap } = require('../engine/economy');
+const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
 
 // GET /api/dao/proposals — list proposals (active first, then closed)
-router.get('/proposals', requireTelegram, async (req, res) => {
+router.get(
+    '/proposals',
+    requireTelegram,
+    validateQuery({
+        limit: { type: 'integer', min: 1, max: 50 },
+        status: { type: 'string', trim: true, maxLength: 20 },
+    }),
+    async (req, res) => {
     try {
-        const limit = Math.min(50, Math.max(1, parseInt(req.query?.limit, 10) || 20));
-        const status = String(req.query?.status ?? '').trim().toLowerCase();
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 20, maxLimit: 50 },
+        );
+        const status = String(req.validatedQuery?.status ?? '').trim().toLowerCase();
         const match = status === 'active' ? { status: 'active' } : status === 'closed' ? { status: 'closed' } : {};
 
         const list = await Proposal.find(match).sort({ status: 1, createdAt: -1 }).limit(limit).lean();
@@ -35,13 +47,18 @@ router.get('/proposals', requireTelegram, async (req, res) => {
         console.error('DAO proposals error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/dao/proposals/:id — single proposal with vote counts and user's vote
-router.get('/proposals/:id', requireTelegram, async (req, res) => {
+router.get(
+    '/proposals/:id',
+    requireTelegram,
+    validateParams({ id: { type: 'objectId', required: true } }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
-        const proposalId = req.params.id;
+        const proposalId = req.validatedParams.id;
 
         const proposal = await Proposal.findById(proposalId).lean();
         if (!proposal) return res.status(404).json({ error: 'proposal not found' });
@@ -62,18 +79,24 @@ router.get('/proposals/:id', requireTelegram, async (req, res) => {
         console.error('DAO proposal detail error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/dao/vote — vote on proposal (one vote per user per proposal)
-router.post('/vote', requireTelegram, async (req, res) => {
+router.post(
+    '/vote',
+    requireTelegram,
+    validateBody({
+        proposalId: { type: 'objectId', required: true },
+        support: { type: 'boolean', required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
 
-        const proposalId = String(req.body?.proposalId ?? '').trim();
-        const support = Boolean(req.body?.support);
-
-        if (!proposalId) return res.status(400).json({ error: 'proposalId required' });
+        const proposalId = req.validatedBody?.proposalId;
+        const support = req.validatedBody?.support;
 
         const proposal = await Proposal.findById(proposalId);
         if (!proposal) return res.status(404).json({ error: 'proposal not found' });
@@ -93,20 +116,32 @@ router.post('/vote', requireTelegram, async (req, res) => {
         console.error('DAO vote error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // Admin: create proposal (reuse admin middleware if available; for MVP allow any authenticated user to create)
-router.post('/proposals', requireTelegram, async (req, res) => {
+router.post(
+    '/proposals',
+    requireTelegram,
+    validateBody({
+        title: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+        description: { type: 'string', trim: true, maxLength: 2000 },
+        type: { type: 'string', trim: true, maxLength: 50 },
+        recipientTelegramId: { type: 'string', trim: true, maxLength: 50 },
+        payoutAiba: { type: 'integer', min: 0 },
+        payoutNeur: { type: 'integer', min: 0 },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
 
-        const title = String(req.body?.title ?? '').trim();
-        const description = String(req.body?.description ?? '').trim();
-        const type = String(req.body?.type ?? 'general').trim();
-        const recipientTelegramId = String(req.body?.recipientTelegramId ?? '').trim();
-        const payoutAiba = Math.max(0, Math.floor(Number(req.body?.payoutAiba ?? 0)));
-        const payoutNeur = Math.max(0, Math.floor(Number(req.body?.payoutNeur ?? 0)));
+        const title = String(req.validatedBody?.title ?? '').trim();
+        const description = String(req.validatedBody?.description ?? '').trim();
+        const type = String(req.validatedBody?.type ?? 'general').trim();
+        const recipientTelegramId = String(req.validatedBody?.recipientTelegramId ?? '').trim();
+        const payoutAiba = Math.max(0, Math.floor(Number(req.validatedBody?.payoutAiba ?? 0)));
+        const payoutNeur = Math.max(0, Math.floor(Number(req.validatedBody?.payoutNeur ?? 0)));
 
         if (!title) return res.status(400).json({ error: 'title required' });
         if (type === 'treasury_payout' && (!recipientTelegramId || (payoutAiba <= 0 && payoutNeur <= 0)))
@@ -126,7 +161,8 @@ router.post('/proposals', requireTelegram, async (req, res) => {
         console.error('DAO create proposal error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // PATCH /api/dao/proposals/:id/close — close proposal (admin)
 router.patch('/proposals/:id/close', requireAdmin(), async (req, res) => {

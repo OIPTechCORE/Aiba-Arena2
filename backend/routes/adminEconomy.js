@@ -11,6 +11,8 @@ const {
     sanitizeCapMap,
     sanitizeEmissionWindowsUtc,
 } = require('../engine/adminEconomySanitize');
+const { getLimit } = require('../util/pagination');
+const { validateBody, validateQuery } = require('../middleware/validate');
 
 router.use(requireAdmin());
 
@@ -26,12 +28,79 @@ router.get('/config', async (_req, res) => {
 });
 
 // PATCH /api/admin/economy/config
-router.patch('/config', async (req, res) => {
+router.patch(
+    '/config',
+    validateBody({
+        dailyCapAiba: { type: 'number', min: 0 },
+        dailyCapNeur: { type: 'number', min: 0 },
+        baseRewardAibaPerScore: { type: 'number', min: 0 },
+        baseRewardNeurPerScore: { type: 'number', min: 0 },
+        emissionStartHourUtc: { type: 'number', min: 0 },
+        emissionEndHourUtc: { type: 'number', min: 0 },
+        upgradeAibaCost: { type: 'number', min: 0 },
+        trainNeurCost: { type: 'number', min: 0 },
+        repairNeurCost: { type: 'number', min: 0 },
+        marketplaceFeeBps: { type: 'number', min: 0 },
+        marketplaceBurnBps: { type: 'number', min: 0 },
+        referralRewardNeurReferrer: { type: 'number', min: 0 },
+        referralRewardNeurReferee: { type: 'number', min: 0 },
+        battleMaxEnergy: { type: 'number', min: 0 },
+        battleEnergyRegenSecondsPerEnergy: { type: 'number', min: 0 },
+        battleAnomalyScoreMax: { type: 'number', min: 0 },
+        battleAutoBanBrokerAnomalyFlags: { type: 'number', min: 0 },
+        battleAutoBanUserAnomalyFlags: { type: 'number', min: 0 },
+        battleAutoBanUserMinutes: { type: 'number', min: 0 },
+        boostCostNeur: { type: 'number', min: 0 },
+        boostDurationHours: { type: 'number', min: 0 },
+        boostMultiplier: { type: 'number', min: 0 },
+        stakingApyPercent: { type: 'number', min: 0 },
+        combineNeurCost: { type: 'number', min: 0 },
+        referralRewardAibaReferrer: { type: 'number', min: 0 },
+        referralRewardAibaReferee: { type: 'number', min: 0 },
+        dailyRewardNeur: { type: 'number', min: 0 },
+        mintAibaCost: { type: 'number', min: 0 },
+        boostCostTonNano: { type: 'number', min: 0 },
+        createGroupCostTonNano: { type: 'number', min: 0 },
+        boostGroupCostTonNano: { type: 'number', min: 0 },
+        leaderboardTopFreeCreate: { type: 'number', min: 0 },
+        createBrokerCostTonNano: { type: 'number', min: 0 },
+        boostProfileCostTonNano: { type: 'number', min: 0 },
+        giftCostTonNano: { type: 'number', min: 0 },
+        marketplaceDefaultNewBrokerPriceAIBA: { type: 'number', min: 0 },
+        boostProfileDurationDays: { type: 'number', min: 0 },
+        oracleAibaPerTon: { type: 'number', min: 0 },
+        oracleNeurPerAiba: { type: 'number', min: 0 },
+        starRewardPerBattle: { type: 'number', min: 0 },
+        diamondRewardFirstWin: { type: 'number', min: 0 },
+        topLeaderBadgeTopN: { type: 'number', min: 0 },
+        courseCompletionBadgeMintCostTonNano: { type: 'number', min: 0 },
+        fullCourseCompletionCertificateMintCostTonNano: { type: 'number', min: 0 },
+        nftStakingApyPercent: { type: 'number', min: 0 },
+        nftStakingRewardPerDayAiba: { type: 'number', min: 0 },
+        arenaLegendMintCostAiba: { type: 'number', min: 0 },
+        arenaLegendUnlockWins: { type: 'number', min: 0 },
+        starsStorePackStars: { type: 'number', min: 0 },
+        starsStorePackPriceAiba: { type: 'number', min: 0 },
+        starsStorePackPriceTonNano: { type: 'number', min: 0 },
+        createCarCostTonNano: { type: 'number', min: 0 },
+        createCarCostAiba: { type: 'number', min: 0 },
+        carEntryFeeAiba: { type: 'number', min: 0 },
+        carRacingFeeBps: { type: 'number', min: 0 },
+        createBikeCostTonNano: { type: 'number', min: 0 },
+        createBikeCostAiba: { type: 'number', min: 0 },
+        bikeEntryFeeAiba: { type: 'number', min: 0 },
+        bikeRacingFeeBps: { type: 'number', min: 0 },
+        dailyCapAibaByArena: { type: 'object' },
+        dailyCapNeurByArena: { type: 'object' },
+        emissionWindowsUtc: { type: 'object' },
+    }),
+    async (req, res) => {
     const update = {};
+    const body = req.validatedBody || {};
 
     const maybeNum = (k) => {
-        if (req.body?.[k] === undefined) return;
-        const v = Number(req.body[k]);
+        if (body[k] === undefined) return;
+        const v = Number(body[k]);
         if (!Number.isFinite(v) || v < 0) return;
         update[k] = v;
     };
@@ -207,14 +276,36 @@ router.patch('/config', async (req, res) => {
 
     const allowed = await getAllowedArenaKeys();
 
-    if (req.body?.dailyCapAibaByArena && typeof req.body.dailyCapAibaByArena === 'object') {
-        update.dailyCapAibaByArena = sanitizeCapMap(req.body.dailyCapAibaByArena, allowed.arenas);
+    if (body.dailyCapAibaByArena && typeof body.dailyCapAibaByArena === 'object') {
+        for (const [k, v] of Object.entries(body.dailyCapAibaByArena)) {
+            const num = Number(v);
+            if (!Number.isFinite(num) || num < 0) {
+                return res.status(400).json({ error: 'invalid dailyCapAibaByArena', field: String(k) });
+            }
+        }
+        update.dailyCapAibaByArena = sanitizeCapMap(body.dailyCapAibaByArena, allowed.arenas);
     }
-    if (req.body?.dailyCapNeurByArena && typeof req.body.dailyCapNeurByArena === 'object') {
-        update.dailyCapNeurByArena = sanitizeCapMap(req.body.dailyCapNeurByArena, allowed.arenas);
+    if (body.dailyCapNeurByArena && typeof body.dailyCapNeurByArena === 'object') {
+        for (const [k, v] of Object.entries(body.dailyCapNeurByArena)) {
+            const num = Number(v);
+            if (!Number.isFinite(num) || num < 0) {
+                return res.status(400).json({ error: 'invalid dailyCapNeurByArena', field: String(k) });
+            }
+        }
+        update.dailyCapNeurByArena = sanitizeCapMap(body.dailyCapNeurByArena, allowed.arenas);
     }
-    if (req.body?.emissionWindowsUtc && typeof req.body.emissionWindowsUtc === 'object') {
-        update.emissionWindowsUtc = sanitizeEmissionWindowsUtc(req.body.emissionWindowsUtc, allowed);
+    if (body.emissionWindowsUtc && typeof body.emissionWindowsUtc === 'object') {
+        for (const [k, v] of Object.entries(body.emissionWindowsUtc)) {
+            if (!v || typeof v !== 'object') {
+                return res.status(400).json({ error: 'invalid emissionWindowsUtc', field: String(k) });
+            }
+            const startHourUtc = Number(v.startHourUtc);
+            const endHourUtc = Number(v.endHourUtc);
+            if (!Number.isFinite(startHourUtc) || !Number.isFinite(endHourUtc)) {
+                return res.status(400).json({ error: 'invalid emissionWindowsUtc', field: String(k) });
+            }
+        }
+        update.emissionWindowsUtc = sanitizeEmissionWindowsUtc(body.emissionWindowsUtc, allowed);
     }
 
     const cfg = await EconomyConfig.findOneAndUpdate(
@@ -223,26 +314,42 @@ router.patch('/config', async (req, res) => {
         { upsert: true, new: true, setDefaultsOnInsert: true },
     ).lean();
     res.json(cfg);
-});
+    },
+);
 
 // GET /api/admin/economy/day?day=YYYY-MM-DD
-router.get('/day', async (req, res) => {
-    const day = String(req.query?.day || '').trim();
+router.get(
+    '/day',
+    validateQuery({
+        day: { type: 'string', trim: true, minLength: 1, maxLength: 20, required: true },
+    }),
+    async (req, res) => {
+    const day = String(req.validatedQuery?.day || '').trim();
     if (!day) return res.status(400).json({ error: 'day required (YYYY-MM-DD)' });
 
     const doc = await EconomyDay.findOne({ day }).lean();
     res.json(doc || { day, emittedAiba: 0, emittedNeur: 0, burnedAiba: 0, spentNeur: 0 });
-});
+    },
+);
 
 // POST /api/admin/economy/credit-user
 // Body: { requestId, telegramId, aibaDelta?, neurDelta?, reason? }
-router.post('/credit-user', async (req, res) => {
-    const requestId = req.body?.requestId ? String(req.body.requestId).trim() : '';
+router.post(
+    '/credit-user',
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+        telegramId: { type: 'string', trim: true, minLength: 1, maxLength: 50, required: true },
+        aibaDelta: { type: 'number' },
+        neurDelta: { type: 'number' },
+        reason: { type: 'string', trim: true, maxLength: 200 },
+    }),
+    async (req, res) => {
+    const requestId = req.validatedBody?.requestId ? String(req.validatedBody.requestId).trim() : '';
     const headerRequestId = req.headers['x-request-id'] ? String(req.headers['x-request-id']).trim() : '';
     const idempotencyKey = requestId || headerRequestId;
     if (!idempotencyKey) return res.status(400).json({ error: 'requestId required' });
 
-    const telegramId = String(req.body?.telegramId || '').trim();
+    const telegramId = String(req.validatedBody?.telegramId || '').trim();
     if (!telegramId) return res.status(400).json({ error: 'telegramId required' });
 
     // Idempotency: if we already applied this requestId, return current user.
@@ -258,9 +365,9 @@ router.post('/credit-user', async (req, res) => {
         return res.json({ ok: true, user, requestId: idempotencyKey, duplicate: true });
     }
 
-    const aibaDelta = req.body?.aibaDelta === undefined ? 0 : Number(req.body.aibaDelta);
-    const neurDelta = req.body?.neurDelta === undefined ? 0 : Number(req.body.neurDelta);
-    const reason = String(req.body?.reason || 'admin_adjustment').trim();
+    const aibaDelta = req.validatedBody?.aibaDelta === undefined ? 0 : Number(req.validatedBody.aibaDelta);
+    const neurDelta = req.validatedBody?.neurDelta === undefined ? 0 : Number(req.validatedBody.neurDelta);
+    const reason = String(req.validatedBody?.reason || 'admin_adjustment').trim();
 
     if (!Number.isFinite(aibaDelta) || !Number.isFinite(neurDelta)) {
         return res.status(400).json({ error: 'aibaDelta/neurDelta must be numbers' });
@@ -307,13 +414,23 @@ router.post('/credit-user', async (req, res) => {
     }
 
     res.json({ ok: true, user, requestId: idempotencyKey });
-});
+    },
+);
 
 // GET /api/admin/economy/ledger?telegramId=...&limit=100
-router.get('/ledger', async (req, res) => {
+router.get(
+    '/ledger',
+    validateQuery({
+        telegramId: { type: 'string', trim: true, maxLength: 50 },
+        limit: { type: 'integer', min: 1, max: 500 },
+    }),
+    async (req, res) => {
     try {
-        const telegramId = req.query?.telegramId ? String(req.query.telegramId).trim() : '';
-        const limit = Math.max(1, Math.min(500, Number(req.query?.limit ?? 100) || 100));
+        const telegramId = req.validatedQuery?.telegramId ? String(req.validatedQuery.telegramId).trim() : '';
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 100, maxLimit: 500 },
+        );
 
         const q = {};
         if (telegramId) q.telegramId = telegramId;
@@ -324,12 +441,19 @@ router.get('/ledger', async (req, res) => {
         console.error('Error in /api/admin/economy/ledger:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/admin/economy/simulate?days=30 — token economy simulator
-router.get('/simulate', async (req, res) => {
+router.get(
+    '/simulate',
+    validateQuery({ days: { type: 'integer', min: 1, max: 365 } }),
+    async (req, res) => {
     try {
-        const days = Math.max(1, Math.min(365, parseInt(req.query?.days, 10) || 30));
+        const days = getLimit(
+            { query: { limit: req.validatedQuery?.days } },
+            { defaultLimit: 30, maxLimit: 365 },
+        );
         const cfg = await getConfig();
         const baseAiba = Number(cfg.baseRewardAibaPerScore ?? 0);
         const baseNeur = Number(cfg.baseRewardNeurPerScore ?? 0);
@@ -363,6 +487,7 @@ router.get('/simulate', async (req, res) => {
         console.error('Economy simulate error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

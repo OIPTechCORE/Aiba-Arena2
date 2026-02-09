@@ -68,6 +68,7 @@ if (enableLegacyPendingAibaDispatch) {
         const { syncTopLeaderBadges } = require('./jobs/syncTopLeaderBadges');
         const { seedRacingTracks } = require('./jobs/seedRacingTracks');
         const { expireRentals } = require('./jobs/expireRentals');
+        const { accrueMentorRewards } = require('./jobs/accrueMentorRewards');
         seedRacingTracks().catch((err) => console.error('Seed racing tracks failed:', err));
         syncTopLeaderBadges().catch((err) => console.error('Initial top-leader badge sync failed:', err));
         cron.schedule('0 */6 * * *', () => {
@@ -75,6 +76,9 @@ if (enableLegacyPendingAibaDispatch) {
         });
         cron.schedule('0 * * * *', () => {
             expireRentals().catch((err) => console.error('Cron expire rentals failed:', err));
+        });
+        cron.schedule('0 * * * *', () => {
+            accrueMentorRewards().catch((err) => console.error('Cron mentor rewards failed:', err));
         });
 
         app.listen(process.env.PORT || 5000, () => console.log('Server listening'));

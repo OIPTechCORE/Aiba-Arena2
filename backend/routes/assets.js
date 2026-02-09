@@ -4,6 +4,7 @@ const User = require('../models/User');
 const EconomyConfig = require('../models/EconomyConfig');
 const TreasuryOp = require('../models/TreasuryOp');
 const { requireTelegram } = require('../middleware/requireTelegram');
+const { validateBody } = require('../middleware/validate');
 const { computeTokenSplits } = require('../util/tokenSplits');
 
 const router = express.Router();
@@ -16,8 +17,17 @@ router.get('/mine', requireTelegram, async (req, res) => {
     res.json({ assets });
 });
 
-router.post('/mint', requireTelegram, async (req, res) => {
-    const { category, name, realmKey, metadataUri } = req.body || {};
+router.post(
+    '/mint',
+    requireTelegram,
+    validateBody({
+        category: { type: 'string', trim: true, maxLength: 100 },
+        name: { type: 'string', trim: true, maxLength: 120 },
+        realmKey: { type: 'string', trim: true, maxLength: 50 },
+        metadataUri: { type: 'string', trim: true, maxLength: 500 },
+    }),
+    async (req, res) => {
+    const { category, name, realmKey, metadataUri } = req.validatedBody || {};
     const user = await User.findOne({ telegramId: req.telegramId });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
@@ -44,10 +54,17 @@ router.post('/mint', requireTelegram, async (req, res) => {
     }
 
     res.json({ asset });
-});
+    },
+);
 
-router.post('/upgrade', requireTelegram, async (req, res) => {
-    const assetId = String(req.body?.assetId || '').trim();
+router.post(
+    '/upgrade',
+    requireTelegram,
+    validateBody({
+        assetId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
+    const assetId = req.validatedBody?.assetId;
     const asset = await Asset.findById(assetId);
     if (!asset) return res.status(404).json({ error: 'Asset not found' });
 
@@ -72,6 +89,7 @@ router.post('/upgrade', requireTelegram, async (req, res) => {
     }
 
     res.json({ asset });
-});
+    },
+);
 
 module.exports = router;

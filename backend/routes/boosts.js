@@ -6,6 +6,7 @@ const UsedTonTxHash = require('../models/UsedTonTxHash');
 const { getConfig, debitNeurFromUser } = require('../engine/economy');
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
 const { verifyTonPayment } = require('../util/tonVerify');
+const { validateBody } = require('../middleware/validate');
 
 // GET /api/boosts/mine — active boosts for current user
 router.get('/mine', requireTelegram, async (req, res) => {
@@ -23,7 +24,14 @@ router.get('/mine', requireTelegram, async (req, res) => {
 });
 
 // POST /api/boosts/buy — buy boost with NEUR (MVP: in-app currency)
-router.post('/buy', requireTelegram, async (req, res) => {
+router.post(
+    '/buy',
+    requireTelegram,
+    validateBody({
+        boostKey: { type: 'string', trim: true, minLength: 1, maxLength: 100, required: true },
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -62,10 +70,18 @@ router.post('/buy', requireTelegram, async (req, res) => {
         console.error('Boosts buy error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/boosts/buy-with-ton — buy boost with TON (verify tx and grant boost)
-router.post('/buy-with-ton', requireTelegram, async (req, res) => {
+router.post(
+    '/buy-with-ton',
+    requireTelegram,
+    validateBody({
+        boostKey: { type: 'string', trim: true, minLength: 1, maxLength: 100, required: true },
+        txHash: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -126,10 +142,17 @@ router.post('/buy-with-ton', requireTelegram, async (req, res) => {
         console.error('Boosts buy-with-ton error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/boosts/buy-profile-with-ton — Boost your profile (visibility). Pay TON 1–10 → BOOST_PROFILE_WALLET.
-router.post('/buy-profile-with-ton', requireTelegram, async (req, res) => {
+router.post(
+    '/buy-profile-with-ton',
+    requireTelegram,
+    validateBody({
+        txHash: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -173,6 +196,7 @@ router.post('/buy-profile-with-ton', requireTelegram, async (req, res) => {
         console.error('Boosts buy-profile-with-ton error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

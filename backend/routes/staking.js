@@ -3,6 +3,7 @@ const { requireTelegram } = require('../middleware/requireTelegram');
 const Staking = require('../models/Staking');
 const { getConfig, debitAibaFromUser, creditAibaNoCap } = require('../engine/economy');
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
+const { validateBody } = require('../middleware/validate');
 
 async function getStakingSummary(telegramId) {
     const cfg = await getConfig();
@@ -37,13 +38,19 @@ router.get('/summary', requireTelegram, async (req, res) => {
     }
 });
 
-router.post('/stake', requireTelegram, async (req, res) => {
+router.post(
+    '/stake',
+    requireTelegram,
+    validateBody({
+        amount: { type: 'integer', min: 1, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
         const requestId = getIdempotencyKey(req);
         if (!requestId) return res.status(400).json({ error: 'requestId required' });
-        const amount = Math.floor(Number(req.body?.amount ?? 0));
+        const amount = Math.floor(Number(req.validatedBody?.amount ?? 0));
         if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: 'amount must be positive' });
         const debit = await debitAibaFromUser(amount, {
             telegramId,
@@ -67,15 +74,23 @@ router.post('/stake', requireTelegram, async (req, res) => {
         console.error('Staking stake error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
-router.post('/unstake', requireTelegram, async (req, res) => {
+router.post(
+    '/unstake',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128, required: true },
+        amount: { type: 'integer', min: 1, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
         const requestId = getIdempotencyKey(req);
         if (!requestId) return res.status(400).json({ error: 'requestId required' });
-        const amount = Math.floor(Number(req.body?.amount ?? 0));
+        const amount = Math.floor(Number(req.validatedBody?.amount ?? 0));
         if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: 'amount must be positive' });
         const staking = await Staking.findOne({ telegramId });
         if (!staking || Number(staking.amount ?? 0) < amount)
@@ -98,9 +113,16 @@ router.post('/unstake', requireTelegram, async (req, res) => {
         console.error('Staking unstake error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
-router.post('/claim', requireTelegram, async (req, res) => {
+router.post(
+    '/claim',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -129,6 +151,7 @@ router.post('/claim', requireTelegram, async (req, res) => {
         console.error('Staking claim error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

@@ -41,7 +41,7 @@ This document is a **complete, systematic description** of the Aiba-Arena2 proje
 | `admin-panel/` | Next.js admin UI: tasks, ads, game modes, economy config, moderation, stats, treasury, charity, university, announcements. |
 | `docs/` | All project documentation (game, user guide, vision check, deployment, runbook, monitoring, plans). |
 | `.github/workflows/ci.yml` | CI: lint, Blueprint build, contract tests, backend tests, miniapp + admin build. |
-| `tact.config.json` | Tact compiler config: nine projects (AibaJetton, AibaJettonSupply, ArenaVault, AibaToken, ArenaRewardVault, BrokerNFT, BrokerMarketplaceEscrow, AiAssetRegistry, AiAssetMarketplaceEscrow). |
+| `tact.config.json` | Tact compiler config: eleven projects (AibaJetton, AibaJettonSupply, ArenaVault, AibaToken, ArenaRewardVault, BrokerNFT, BrokerMarketplaceEscrow, AiAssetRegistry, AiAssetMarketplaceEscrow, AiAssetMarketplaceEscrowJetton, MentorStakingVault). |
 | `jest.config.ts`, `jest.setup.ts` | Jest config for contract tests. |
 | `cronWorker.js` | Optional root-level cron entry (if used; main cron lives in `backend/server.js`). |
 
@@ -189,6 +189,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - `/api/vault` — inventory, claim-status, last-seqno.
 - `/api/leaderboard` — global list (by score/aiba/neur/battles), my-rank.
 - `/api/marketplace` — listings, list, delist, buy.
+- `/api/asset-marketplace` — listings, onchain-info, list, buy, rent (NFT assets).
 - `/api/car-racing` — tracks, races, cars (mine), create (AIBA), create-with-ton (txHash), enter (raceId, carId), race/:id, leaderboard, config, listings, list, buy-car.
 - `/api/bike-racing` — tracks, races, bikes (mine), create (AIBA), create-with-ton (txHash), enter (raceId, bikeId), race/:id, leaderboard, config, listings, list, buy-bike.
 - `/api/stars-store` — **config** (pack Stars, price AIBA, price TON, wallet), **buy-with-aiba** (one pack), **buy-with-ton** (txHash → TON to STARS_STORE_WALLET).
@@ -203,6 +204,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - `/api/gifts` — **send** (pay TON → gift to user by telegramId/username), **received**, **sent**.
 - `/api/multiverse` — **universes** (list NFT universes), **me** (my NFTs), **stake** (stake broker NFT), **unstake**, **staking/rewards**, **staking/claim** (claim AIBA from NFT staking).
 - `/api/university` — courses, progress (GET/POST), mint-course-badge-info, mint-course-badge, mint-full-certificate-info, mint-full-certificate.
+- `/api/comms/status` — comms health check (operational status).
 
 **Admin (JWT required):**
 
@@ -411,7 +413,7 @@ Supporting: `jetton_messages.tact`, `jetton_default_wallet.tact`, `broker_nft_me
 - **GAME-EXPLAINED.md** — What the game is (brokers, arenas, battles, NEUR/AIBA, claims, guilds, referrals, marketplace, TON payments, boost profile, gifts).
 - **USER-GUIDE.md** — How to play (connect wallet, broker, battle, balances, guilds, claim, marketplace create broker/list/buy, boost profile, gifts, referrals, troubleshooting).
 - **VISION-VS-CODEBASE-CHECK.md** — Vision vs implementation (implemented/partial/not implemented).
-- **deployment.md** — Components, backend env, miniapp/admin env.
+- **deployment.md** — Components; backend env (incl. CORS_ORIGIN for production, vault/claim set all together); Vercel backend as separate project (root `backend/`); miniapp/admin env.
 - **mainnet-readiness.md** — Key management, validation defaults, checklist enforcement, required env.
 - **runbook.md** — Key summary, incident response, production checks, key rotation, security playbooks.
 - **monitoring.md** — Logs, uptime, Prometheus /metrics, suggested alerts and metrics.

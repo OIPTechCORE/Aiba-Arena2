@@ -4,11 +4,20 @@ const Listing = require('../models/Listing');
 const Broker = require('../models/Broker');
 const { getConfig, debitAibaFromUser, creditAibaNoCap } = require('../engine/economy');
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
+const { getLimit } = require('../util/pagination');
+const { validateBody, validateQuery } = require('../middleware/validate');
 
 // GET /api/marketplace/listings — active listings (with broker snapshot)
-router.get('/listings', requireTelegram, async (req, res) => {
+router.get(
+    '/listings',
+    requireTelegram,
+    validateQuery({ limit: { type: 'integer', min: 1, max: 50 } }),
+    async (req, res) => {
     try {
-        const limit = Math.min(50, Math.max(1, parseInt(req.query?.limit, 10) || 20));
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 20, maxLimit: 50 },
+        );
         const list = await Listing.find({ status: 'active' })
             .sort({ createdAt: -1 })
             .limit(limit)
@@ -35,17 +44,26 @@ router.get('/listings', requireTelegram, async (req, res) => {
         console.error('Marketplace listings error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/marketplace/list — list a broker for sale
-router.post('/list', requireTelegram, async (req, res) => {
+router.post(
+    '/list',
+    requireTelegram,
+    validateBody({
+        brokerId: { type: 'objectId', required: true },
+        priceAIBA: { type: 'integer', min: 0, required: true },
+        priceNEUR: { type: 'integer', min: 0 },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
 
-        const brokerId = String(req.body?.brokerId ?? '').trim();
-        const priceAIBA = Math.floor(Number(req.body?.priceAIBA ?? 0));
-        const priceNEUR = Math.floor(Number(req.body?.priceNEUR ?? 0));
+        const brokerId = req.validatedBody?.brokerId;
+        const priceAIBA = req.validatedBody?.priceAIBA;
+        const priceNEUR = req.validatedBody?.priceNEUR ?? 0;
 
         if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
         if (!Number.isFinite(priceAIBA) || priceAIBA < 0) return res.status(400).json({ error: 'priceAIBA must be non-negative' });
@@ -70,16 +88,22 @@ router.post('/list', requireTelegram, async (req, res) => {
         console.error('Marketplace list error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/marketplace/delist — cancel listing (seller only)
-router.post('/delist', requireTelegram, async (req, res) => {
+router.post(
+    '/delist',
+    requireTelegram,
+    validateBody({
+        listingId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
 
-        const listingId = String(req.body?.listingId ?? '').trim();
-        if (!listingId) return res.status(400).json({ error: 'listingId required' });
+        const listingId = req.validatedBody?.listingId;
 
         const listing = await Listing.findOne({ _id: listingId, status: 'active' });
         if (!listing) return res.status(404).json({ error: 'listing not found' });
@@ -92,10 +116,17 @@ router.post('/delist', requireTelegram, async (req, res) => {
         console.error('Marketplace delist error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/marketplace/buy — purchase a listed broker (off-chain: transfer ownership, debit buyer, credit seller minus fee)
-router.post('/buy', requireTelegram, async (req, res) => {
+router.post(
+    '/buy',
+    requireTelegram,
+    validateBody({
+        listingId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -103,8 +134,7 @@ router.post('/buy', requireTelegram, async (req, res) => {
         const requestId = getIdempotencyKey(req);
         if (!requestId) return res.status(400).json({ error: 'requestId required' });
 
-        const listingId = String(req.body?.listingId ?? '').trim();
-        if (!listingId) return res.status(400).json({ error: 'listingId required' });
+        const listingId = req.validatedBody?.listingId;
 
         const listing = await Listing.findOne({ _id: listingId, status: 'active' }).populate('brokerId');
         if (!listing) return res.status(404).json({ error: 'listing not found' });
@@ -157,6 +187,7 @@ router.post('/buy', requireTelegram, async (req, res) => {
         console.error('Marketplace buy error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

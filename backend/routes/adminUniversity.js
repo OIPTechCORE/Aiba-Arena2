@@ -3,6 +3,8 @@ const { requireAdmin } = require('../middleware/requireAdmin');
 const User = require('../models/User');
 const UniversityProgress = require('../models/UniversityProgress');
 const { COURSES, getTotalModuleCount } = require('./university');
+const { getLimit } = require('../util/pagination');
+const { validateQuery } = require('../middleware/validate');
 
 router.use(requireAdmin());
 
@@ -45,9 +47,15 @@ router.get('/courses', async (_req, res) => {
 });
 
 /** GET /api/admin/university/graduates?limit=100 — list users with university_graduate badge. */
-router.get('/graduates', async (req, res) => {
+router.get(
+    '/graduates',
+    validateQuery({ limit: { type: 'integer', min: 1, max: 200 } }),
+    async (req, res) => {
     try {
-        const limit = Math.min(200, Math.max(1, parseInt(req.query?.limit, 10) || 100));
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 100, maxLimit: 200 },
+        );
         const users = await User.find({ badges: 'university_graduate' })
             .select('telegramId username telegram badges graduatedAt')
             .limit(limit)
@@ -67,6 +75,7 @@ router.get('/graduates', async (req, res) => {
         console.error('Admin university graduates error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

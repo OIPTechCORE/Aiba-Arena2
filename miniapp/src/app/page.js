@@ -2,9 +2,10 @@
 
 import { TonConnectButton, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useEffect, useMemo, useState } from 'react';
-import { createApi } from '../lib/api';
+import { createApi, getErrorMessage } from '../lib/api';
 import { getTelegramUserUnsafe } from '../lib/telegram';
 import { buildRewardClaimPayload } from '../lib/tonRewardClaim';
+import { buildJettonTransferPayload, buildListingForwardPayload } from '../lib/tonJetton';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 const IS_DEV = BACKEND_URL.includes('localhost');
@@ -215,6 +216,9 @@ export default function HomePage() {
     const [selectedRealmKey, setSelectedRealmKey] = useState('');
     const [missions, setMissions] = useState([]);
     const [mentors, setMentors] = useState([]);
+    const [mentorStakes, setMentorStakes] = useState([]);
+    const [mentorStakeAmount, setMentorStakeAmount] = useState('');
+    const [mentorStakeMentorId, setMentorStakeMentorId] = useState('');
     const [assets, setAssets] = useState([]);
     const [marketListings, setMarketListings] = useState([]);
     const [assetCategory, setAssetCategory] = useState('agent');
@@ -282,7 +286,7 @@ export default function HomePage() {
             await refreshBrokers();
             await refreshEconomy();
         } catch (e) {
-            setMarketMsg(e?.response?.data?.error || 'Buy failed.');
+            setMarketMsg(getErrorMessage(e, 'Buy failed.'));
         } finally {
             setBusy(false);
         }
@@ -309,7 +313,7 @@ export default function HomePage() {
             await refreshEconomy();
             await refreshStarsStoreConfig();
         } catch (e) {
-            setStarsStoreMsg(e?.response?.data?.error || 'Purchase failed.');
+            setStarsStoreMsg(getErrorMessage(e, 'Purchase failed.'));
         } finally {
             setBusy(false);
         }
@@ -325,7 +329,7 @@ export default function HomePage() {
             await refreshEconomy();
             await refreshStarsStoreConfig();
         } catch (e) {
-            setStarsStoreMsg(e?.response?.data?.error || 'Purchase failed.');
+            setStarsStoreMsg(getErrorMessage(e, 'Purchase failed.'));
         } finally {
             setBusy(false);
         }
@@ -346,7 +350,7 @@ export default function HomePage() {
             await refreshListings();
             await refreshEconomy();
         } catch (e) {
-            setCreateBrokerMsg(e?.response?.data?.error || 'Create failed.');
+            setCreateBrokerMsg(getErrorMessage(e, 'Create failed.'));
         } finally {
             setBusy(false);
         }
@@ -365,7 +369,7 @@ export default function HomePage() {
             setProfileBoostTxHash('');
             await refreshEconomy();
         } catch (e) {
-            setProfileBoostMsg(e?.response?.data?.error || 'Boost failed.');
+            setProfileBoostMsg(getErrorMessage(e, 'Boost failed.'));
         } finally {
             setBusy(false);
         }
@@ -406,7 +410,7 @@ export default function HomePage() {
             setGiftMessage('');
             await refreshGifts();
         } catch (e) {
-            setGiftMsg(e?.response?.data?.error || 'Send failed.');
+            setGiftMsg(getErrorMessage(e, 'Send failed.'));
         } finally {
             setBusy(false);
         }
@@ -443,7 +447,7 @@ export default function HomePage() {
             setMultiverseMsg('NFT staked. Earn AIBA daily.');
             await refreshMultiverse();
         } catch (e) {
-            setMultiverseMsg(e?.response?.data?.error || 'Stake failed.');
+            setMultiverseMsg(getErrorMessage(e, 'Stake failed.'));
         } finally {
             setBusy(false);
         }
@@ -456,7 +460,7 @@ export default function HomePage() {
             setMultiverseMsg('Unstaked.');
             await refreshMultiverse();
         } catch (e) {
-            setMultiverseMsg(e?.response?.data?.error || 'Unstake failed.');
+            setMultiverseMsg(getErrorMessage(e, 'Unstake failed.'));
         } finally {
             setBusy(false);
         }
@@ -470,7 +474,7 @@ export default function HomePage() {
             await refreshMultiverse();
             await refreshEconomy();
         } catch (e) {
-            setMultiverseMsg(e?.response?.data?.error || 'Claim failed.');
+            setMultiverseMsg(getErrorMessage(e, 'Claim failed.'));
         } finally {
             setBusy(false);
         }
@@ -517,7 +521,7 @@ export default function HomePage() {
             await refreshCarRacing();
             await refreshEconomy();
         } catch (e) {
-            setCarMsg(e?.response?.data?.error || 'Create failed.');
+            setCarMsg(getErrorMessage(e, 'Create failed.'));
         } finally {
             setBusy(false);
         }
@@ -532,7 +536,7 @@ export default function HomePage() {
             setCarCreateTxHash('');
             await refreshCarRacing();
         } catch (e) {
-            setCarMsg(e?.response?.data?.error || 'Create failed.');
+            setCarMsg(getErrorMessage(e, 'Create failed.'));
         } finally {
             setBusy(false);
         }
@@ -549,7 +553,7 @@ export default function HomePage() {
             await refreshCarRacing();
             await refreshEconomy();
         } catch (e) {
-            setCarMsg(e?.response?.data?.error || 'Enter failed.');
+            setCarMsg(getErrorMessage(e, 'Enter failed.'));
         } finally {
             setBusy(false);
         }
@@ -596,7 +600,7 @@ export default function HomePage() {
             await refreshBikeRacing();
             await refreshEconomy();
         } catch (e) {
-            setBikeMsg(e?.response?.data?.error || 'Create failed.');
+            setBikeMsg(getErrorMessage(e, 'Create failed.'));
         } finally {
             setBusy(false);
         }
@@ -611,7 +615,7 @@ export default function HomePage() {
             setBikeCreateTxHash('');
             await refreshBikeRacing();
         } catch (e) {
-            setBikeMsg(e?.response?.data?.error || 'Create failed.');
+            setBikeMsg(getErrorMessage(e, 'Create failed.'));
         } finally {
             setBusy(false);
         }
@@ -628,7 +632,7 @@ export default function HomePage() {
             await refreshBikeRacing();
             await refreshEconomy();
         } catch (e) {
-            setBikeMsg(e?.response?.data?.error || 'Enter failed.');
+            setBikeMsg(getErrorMessage(e, 'Enter failed.'));
         } finally {
             setBusy(false);
         }
@@ -839,7 +843,7 @@ export default function HomePage() {
             setMintNftMsg('Mint job queued. NFT will be linked when ready.');
             await refreshEconomy();
         } catch (e) {
-            setMintNftMsg(e?.response?.data?.error || 'Mint failed.');
+            setMintNftMsg(getErrorMessage(e, 'Mint failed.'));
         } finally {
             setBusy(false);
         }
@@ -906,7 +910,7 @@ export default function HomePage() {
             if (isNetworkError) {
                 setStatus(`Backend unreachable at ${BACKEND_URL}. Start it: cd backend && npm start`);
             } else {
-                setStatus(e?.response?.data?.error || e?.message || 'Failed to create broker.');
+                setStatus(getErrorMessage(e, 'Failed to create broker.'));
             }
         } finally {
             setBusy(false);
@@ -929,7 +933,7 @@ export default function HomePage() {
             await refreshBrokers();
             await refreshEconomy();
         } catch (e) {
-            setCombineMsg(e?.response?.data?.error || 'Combine failed (insufficient NEUR?).');
+            setCombineMsg(getErrorMessage(e, 'Combine failed (insufficient NEUR?).'));
         } finally {
             setBusy(false);
         }
@@ -1027,7 +1031,7 @@ export default function HomePage() {
             await refreshGuilds();
             await refreshAllGroups();
         } catch (e) {
-            setGuildMsg(e?.response?.data?.error || 'Create failed (name taken? pay TON if not top leader?).');
+            setGuildMsg(getErrorMessage(e, 'Create failed (name taken? pay TON if not top leader?).'));
         } finally {
             setBusy(false);
         }
@@ -1044,7 +1048,7 @@ export default function HomePage() {
             await refreshAllGroups();
             await refreshGuilds();
         } catch (e) {
-            setBoostGroupMsg(e?.response?.data?.error || 'Boost failed.');
+            setBoostGroupMsg(getErrorMessage(e, 'Boost failed.'));
         }
     }
 
@@ -1216,7 +1220,7 @@ export default function HomePage() {
             await refreshUniversity();
             await refreshEconomy();
         } catch (e) {
-            setUniversityMintMsg(e?.response?.data?.error || 'Mint failed.');
+            setUniversityMintMsg(getErrorMessage(e, 'Mint failed.'));
         } finally {
             setBusy(false);
         }
@@ -1233,7 +1237,7 @@ export default function HomePage() {
             await refreshUniversity();
             await refreshEconomy();
         } catch (e) {
-            setUniversityMintMsg(e?.response?.data?.error || 'Mint failed.');
+            setUniversityMintMsg(getErrorMessage(e, 'Mint failed.'));
         } finally {
             setBusy(false);
         }
@@ -1286,6 +1290,14 @@ export default function HomePage() {
             setMentors([]);
         }
     }
+    async function refreshMentorStakes() {
+        try {
+            const res = await api.get('/api/mentors/stakes');
+            setMentorStakes(Array.isArray(res.data?.stakes) ? res.data.stakes : []);
+        } catch {
+            setMentorStakes([]);
+        }
+    }
     async function refreshAssets() {
         try {
             const res = await api.get('/api/assets/mine');
@@ -1316,7 +1328,63 @@ export default function HomePage() {
             await api.post('/api/mentors/assign', { mentorId });
             setStatus('Mentor assigned.');
         } catch (e) {
-            setStatus(e?.response?.data?.error || 'Mentor assignment failed.');
+            setStatus(getErrorMessage(e, 'Mentor assignment failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function stakeMentorOffchain() {
+        if (!mentorStakeMentorId || !mentorStakeAmount) return;
+        setBusy(true);
+        try {
+            await api.post('/api/mentors/stake', { mentorId: mentorStakeMentorId, amountAiba: mentorStakeAmount });
+            setMentorStakeAmount('');
+            setStatus('Mentor staked.');
+            await refreshMentorStakes();
+            await refreshEconomy();
+        } catch (e) {
+            setStatus(getErrorMessage(e, 'Stake failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function unstakeMentor(stakeId) {
+        setBusy(true);
+        try {
+            await api.post('/api/mentors/unstake', { stakeId });
+            setStatus('Unstaked.');
+            await refreshMentorStakes();
+            await refreshEconomy();
+        } catch (e) {
+            setStatus(getErrorMessage(e, 'Unstake failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function stakeMentorOffchain() {
+        if (!mentorStakeMentorId || !mentorStakeAmount) return;
+        setBusy(true);
+        try {
+            await api.post('/api/mentors/stake', { mentorId: mentorStakeMentorId, amountAiba: mentorStakeAmount });
+            setMentorStakeAmount('');
+            setStatus('Mentor staked.');
+            await refreshMentorStakes();
+            await refreshEconomy();
+        } catch (e) {
+            setStatus(getErrorMessage(e, 'Stake failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function unstakeMentor(stakeId) {
+        setBusy(true);
+        try {
+            await api.post('/api/mentors/unstake', { stakeId });
+            setStatus('Unstaked.');
+            await refreshMentorStakes();
+            await refreshEconomy();
+        } catch (e) {
+            setStatus(getErrorMessage(e, 'Unstake failed.'));
         } finally {
             setBusy(false);
         }
@@ -1330,7 +1398,7 @@ export default function HomePage() {
             }
             await refreshEconomy();
         } catch (e) {
-            setStatus(e?.response?.data?.error || 'Mission completion failed.');
+            setStatus(getErrorMessage(e, 'Mission completion failed.'));
         } finally {
             setBusy(false);
         }
@@ -1348,7 +1416,7 @@ export default function HomePage() {
             await refreshEconomy();
             if (res.data?.asset) setStatus('Asset minted.');
         } catch (e) {
-            setStatus(e?.response?.data?.error || 'Asset mint failed.');
+            setStatus(getErrorMessage(e, 'Asset mint failed.'));
         } finally {
             setBusy(false);
         }
@@ -1360,7 +1428,7 @@ export default function HomePage() {
             await refreshAssets();
             await refreshEconomy();
         } catch (e) {
-            setStatus(e?.response?.data?.error || 'Asset upgrade failed.');
+            setStatus(getErrorMessage(e, 'Asset upgrade failed.'));
         } finally {
             setBusy(false);
         }
@@ -1374,7 +1442,7 @@ export default function HomePage() {
             setListingPrice('');
             await refreshMarketListings();
         } catch (e) {
-            setStatus(e?.response?.data?.error || 'Listing failed.');
+            setStatus(getErrorMessage(e, 'Listing failed.'));
         } finally {
             setBusy(false);
         }
@@ -1387,7 +1455,7 @@ export default function HomePage() {
             await refreshAssets();
             await refreshEconomy();
         } catch (e) {
-            setStatus(e?.response?.data?.error || 'Buy failed.');
+            setStatus(getErrorMessage(e, 'Buy failed.'));
         } finally {
             setBusy(false);
         }
@@ -1399,7 +1467,7 @@ export default function HomePage() {
             await refreshMarketListings();
             await refreshEconomy();
         } catch (e) {
-            setStatus(e?.response?.data?.error || 'Rent failed.');
+            setStatus(getErrorMessage(e, 'Rent failed.'));
         } finally {
             setBusy(false);
         }
@@ -1416,7 +1484,7 @@ export default function HomePage() {
             setProposalDescription('');
             await refreshProposals();
         } catch (e) {
-            setStatus(e?.response?.data?.error || 'Proposal failed.');
+            setStatus(getErrorMessage(e, 'Proposal failed.'));
         } finally {
             setBusy(false);
         }
@@ -1427,7 +1495,84 @@ export default function HomePage() {
             await api.post('/api/governance/vote', { proposalId, vote });
             await refreshProposals();
         } catch (e) {
-            setStatus(e?.response?.data?.error || 'Vote failed.');
+            setStatus(getErrorMessage(e, 'Vote failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function onchainBuyListing(listingId) {
+        if (!wallet?.account?.address) {
+            setStatus('Connect wallet first.');
+            return;
+        }
+        setBusy(true);
+        try {
+            const res = await api.get('/api/asset-marketplace/onchain-info', { params: { listingId } });
+            const info = res.data || {};
+            if (!info.escrowJettonWallet || !info.escrowAddress) {
+                setStatus('On-chain escrow not configured.');
+                return;
+            }
+
+            const forwardCell = buildListingForwardPayload(info.listingId);
+            const payload = buildJettonTransferPayload({
+                destination: info.escrowAddress,
+                responseAddress: wallet.account.address,
+                amount: String(info.priceAiba || 0),
+                forwardPayloadCell: forwardCell,
+            });
+
+            await tonConnectUI.sendTransaction({
+                validUntil: Math.floor(Date.now() / 1000) + 300,
+                messages: [
+                    {
+                        address: info.escrowJettonWallet,
+                        amount: '50000000', // 0.05 TON for jetton transfer gas
+                        payload,
+                    },
+                ],
+            });
+            setStatus('On-chain buy sent. Finalize in escrow if required.');
+        } catch (e) {
+            setStatus(e?.message || 'On-chain buy failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function onchainStakeMentor(amountAiba) {
+        if (!wallet?.account?.address) {
+            setStatus('Connect wallet first.');
+            return;
+        }
+        setBusy(true);
+        try {
+            const res = await api.get('/api/mentors/stake-info');
+            const info = res.data || {};
+            if (!info.vaultAddress || !info.vaultJettonWallet) {
+                setStatus('Mentor staking vault not configured.');
+                return;
+            }
+
+            const payload = buildJettonTransferPayload({
+                destination: info.vaultAddress,
+                responseAddress: wallet.account.address,
+                amount: String(amountAiba || 0),
+            });
+
+            await tonConnectUI.sendTransaction({
+                validUntil: Math.floor(Date.now() / 1000) + 300,
+                messages: [
+                    {
+                        address: info.vaultJettonWallet,
+                        amount: '50000000', // 0.05 TON for jetton transfer gas
+                        payload,
+                    },
+                ],
+            });
+            setStatus('On-chain mentor stake sent.');
+        } catch (e) {
+            setStatus(e?.message || 'On-chain stake failed.');
         } finally {
             setBusy(false);
         }
@@ -1459,7 +1604,7 @@ export default function HomePage() {
             await refreshCharityAll();
             await refreshEconomy();
         } catch (e) {
-            setCharityMsg(e?.response?.data?.detail || e?.response?.data?.error || 'Donation failed.');
+            setCharityMsg(getErrorMessage(e, 'Donation failed.'));
         } finally {
             setBusy(false);
         }
@@ -2222,7 +2367,7 @@ export default function HomePage() {
                     {carListings.length > 0 ? (
                         <div className="card">
                             <div className="card__title">Car marketplace</div>
-                            {carListings.map((l) => <div key={l._id} className="list-item"><span>Car #{String(l.carId).slice(-6)} — {l.priceAIBA} AIBA</span><button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post('/api/car-racing/buy-car', { requestId: uuid(), listingId: l._id }); setCarMsg('Purchased.'); await refreshCarRacing(); await refreshEconomy(); } catch (e) { setCarMsg(e?.response?.data?.error || 'Buy failed.'); } finally { setBusy(false); } }} disabled={busy}>Buy</button></div>)}
+                            {carListings.map((l) => <div key={l._id} className="list-item"><span>Car #{String(l.carId).slice(-6)} — {l.priceAIBA} AIBA</span><button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post('/api/car-racing/buy-car', { requestId: uuid(), listingId: l._id }); setCarMsg('Purchased.'); await refreshCarRacing(); await refreshEconomy(); } catch (e) { setCarMsg(getErrorMessage(e, 'Buy failed.')); } finally { setBusy(false); } }} disabled={busy}>Buy</button></div>)}
                         </div>
                     ) : null}
                 </section>
@@ -2278,7 +2423,7 @@ export default function HomePage() {
                     {bikeListings.length > 0 ? (
                         <div className="card">
                             <div className="card__title">Bike marketplace</div>
-                            {bikeListings.map((l) => <div key={l._id} className="list-item"><span>Bike #{String(l.bikeId).slice(-6)} — {l.priceAIBA} AIBA</span><button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post('/api/bike-racing/buy-bike', { requestId: uuid(), listingId: l._id }); setBikeMsg('Purchased.'); await refreshBikeRacing(); await refreshEconomy(); } catch (e) { setBikeMsg(e?.response?.data?.error || 'Buy failed.'); } finally { setBusy(false); } }} disabled={busy}>Buy</button></div>)}
+                            {bikeListings.map((l) => <div key={l._id} className="list-item"><span>Bike #{String(l.bikeId).slice(-6)} — {l.priceAIBA} AIBA</span><button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post('/api/bike-racing/buy-bike', { requestId: uuid(), listingId: l._id }); setBikeMsg('Purchased.'); await refreshBikeRacing(); await refreshEconomy(); } catch (e) { setBikeMsg(getErrorMessage(e, 'Buy failed.')); } finally { setBusy(false); } }} disabled={busy}>Buy</button></div>)}
                         </div>
                     ) : null}
                 </section>
@@ -2657,8 +2802,9 @@ export default function HomePage() {
                                             <div className="list-item__title">Listing #{String(l._id).slice(-6)}</div>
                                             <div className="list-item__desc">{l.listingType} · {l.priceAiba} AIBA</div>
                                         </div>
-                                        <div style={{ display: 'flex', gap: 8 }}>
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                             <button type="button" className="btn btn--primary" onClick={() => buyListing(l._id)} disabled={busy}>Buy</button>
+                                            <button type="button" className="btn btn--ghost" onClick={() => onchainBuyListing(l._id)} disabled={busy}>On-chain Buy</button>
                                             <button type="button" className="btn btn--ghost" onClick={() => rentListing(l._id)} disabled={busy}>Rent</button>
                                         </div>
                                     </div>

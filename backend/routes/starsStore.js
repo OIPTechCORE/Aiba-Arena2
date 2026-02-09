@@ -5,6 +5,7 @@ const { getIdempotencyKey } = require('../engine/idempotencyKey');
 const { verifyTonPayment } = require('../util/tonVerify');
 const UsedTonTxHash = require('../models/UsedTonTxHash');
 const User = require('../models/User');
+const { validateBody } = require('../middleware/validate');
 
 // GET /api/stars-store/config — pack size, price in AIBA, price in TON (nano), wallet for TON (if set)
 router.get('/config', async (req, res) => {
@@ -29,7 +30,13 @@ router.get('/config', async (req, res) => {
 });
 
 // POST /api/stars-store/buy-with-aiba — buy one pack of Stars with AIBA
-router.post('/buy-with-aiba', requireTelegram, async (req, res) => {
+router.post(
+    '/buy-with-aiba',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -81,10 +88,17 @@ router.post('/buy-with-aiba', requireTelegram, async (req, res) => {
         console.error('Stars store buy-with-aiba error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/stars-store/buy-with-ton — buy one pack of Stars with TON (txHash). TON goes to STARS_STORE_WALLET.
-router.post('/buy-with-ton', requireTelegram, async (req, res) => {
+router.post(
+    '/buy-with-ton',
+    requireTelegram,
+    validateBody({
+        txHash: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -133,6 +147,7 @@ router.post('/buy-with-ton', requireTelegram, async (req, res) => {
         console.error('Stars store buy-with-ton error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

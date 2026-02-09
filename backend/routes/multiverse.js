@@ -5,6 +5,7 @@ const NftStake = require('../models/NftStake');
 const Broker = require('../models/Broker');
 const { getConfig, creditAibaNoCap } = require('../engine/economy');
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
+const { validateBody } = require('../middleware/validate');
 
 // Ensure default "broker" universe exists
 async function ensureBrokerUniverse() {
@@ -91,7 +92,14 @@ router.get('/me', requireTelegram, async (req, res) => {
 });
 
 // POST /api/multiverse/stake — stake a broker NFT (broker must have nftItemAddress)
-router.post('/stake', requireTelegram, async (req, res) => {
+router.post(
+    '/stake',
+    requireTelegram,
+    validateBody({
+        universeId: { type: 'objectId', required: true },
+        tokenId: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -124,10 +132,17 @@ router.post('/stake', requireTelegram, async (req, res) => {
         console.error('Multiverse stake error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/multiverse/unstake — unstake a broker NFT
-router.post('/unstake', requireTelegram, async (req, res) => {
+router.post(
+    '/unstake',
+    requireTelegram,
+    validateBody({
+        stakeId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -144,7 +159,8 @@ router.post('/unstake', requireTelegram, async (req, res) => {
         console.error('Multiverse unstake error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // Compute pending NFT staking reward for a single stake (fixed per-day reward)
 function pendingRewardForStake(stake, rewardPerDayAiba) {
@@ -182,7 +198,13 @@ router.get('/staking/rewards', requireTelegram, async (req, res) => {
 });
 
 // POST /api/multiverse/staking/claim — claim all pending NFT staking rewards
-router.post('/staking/claim', requireTelegram, async (req, res) => {
+router.post(
+    '/staking/claim',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -217,6 +239,7 @@ router.post('/staking/claim', requireTelegram, async (req, res) => {
         console.error('Multiverse staking claim error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

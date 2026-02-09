@@ -15,17 +15,20 @@
 <h1>Deployment (Testnet baseline)</h1>
 <h2>Components</h2>
 <ul>
-<li><strong>Backend</strong>: Express — local/Render/Railway use <code>backend/server.js</code>; Vercel uses <code>backend/api/index.js</code> (serverless).</li>
+<li><strong>Contracts</strong>: compiled/deployed via Blueprint (<code>npm run build</code>, <code>npm run bp run ...</code>)</li>
+<li><strong>Backend</strong>: Express — local/Render/Railway use <code>backend/server.js</code>; on Vercel deploy as a <strong>separate project</strong> with root directory <code>backend/</code> (entry: <code>api/index.js</code>, serverless).</li>
 <li><strong>Miniapp</strong>: Next.js (<code>miniapp/</code>) for Telegram Mini App</li>
 <li><strong>Admin OS</strong>: Next.js (<code>admin-panel/</code>) for operators</li>
 </ul>
 <h2>Backend (Render/Railway)</h2>
 <ul>
+<li><strong>Start command</strong>: <code>npm install &amp;&amp; npm run start</code></li>
 <li><strong>Root directory</strong>: <code>backend/</code></li>
-<li><strong>Required env</strong>: copy from <code>backend/.env.example</code></li>
+<li><strong>Required env</strong>: copy from <code>backend/.env.example</code>. Optional: <code>PORT</code> (default 5000); set <code>APP_ENV=prod</code> (or <code>NODE_ENV=production</code>) to run production readiness checks.</li>
 </ul>
 <h3>Minimum env for testnet end-to-end</h3>
 <ul>
+<li><code>MONGO_URI</code> (local: <code>mongodb://localhost:27017/aiba_arena</code>; Atlas: <code>mongodb+srv://user:pass@cluster.mongodb.net/aiba_arena?retryWrites=true&amp;w=majority</code>)</li>
 <li><code>TELEGRAM_BOT_TOKEN</code> (production Telegram auth and push notifications, e.g. battle win)</li>
 <li><code>BOOST_TON_WALLET</code> (TON wallet address that receives boost payments; boost cost: Admin → Economy <code>boostCostTonNano</code>)</li>
 <li><code>LEADER_BOARD_WALLET</code> (Super Admin: receives TON when users pay to create a group; cost: Admin → Economy <code>createGroupCostTonNano</code>, 1–10 TON)</li>
@@ -39,23 +42,22 @@
 <li><code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code> (recommended 300–900; set explicitly for mainnet)</li>
 <li><code>BATTLE_SEED_SECRET</code></li>
 <li><code>ADMIN_JWT_SECRET</code>, <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD_HASH</code> (required for production readiness checks; do not use plaintext password)</li>
-<li>Vault/claim reads:</li>
-<li>- <code>TON_PROVIDER_URL</code></li>
-<li>- <code>TON_API_KEY</code></li>
-<li>- <code>ARENA_VAULT_ADDRESS</code></li>
-<li>- <code>AIBA_JETTON_MASTER</code></li>
-<li>- <code>ORACLE_PRIVATE_KEY_HEX</code></li>
+<li><strong>Production only</strong>: <code>CORS_ORIGIN</code> (comma-separated allowed origins; required when <code>APP_ENV=prod</code> or <code>NODE_ENV=production</code>, or backend fails at startup)</li>
+<li>Vault/claim reads (set <strong>all</strong> together when using signed claims; mainnet requires mainnet <code>TON_PROVIDER_URL</code>): <code>TON_PROVIDER_URL</code>, <code>TON_API_KEY</code>, <code>ARENA_VAULT_ADDRESS</code>, <code>AIBA_JETTON_MASTER</code>, <code>ORACLE_PRIVATE_KEY_HEX</code></li>
 </ul>
 <h3>Monitoring hooks</h3>
 <ul>
+<li>Uptime: <code>GET /health</code></li>
 <li>Metrics (Prometheus): <code>GET /metrics</code></li>
 </ul>
 <h2>Miniapp + Admin panel (Vercel)</h2>
 <ul>
+<li><strong>Build</strong>: <code>npm install &amp;&amp; npm run build</code></li>
 <li><strong>Output</strong>: Next.js (Vercel handles)</li>
 </ul>
 <h3>Env</h3>
 <ul>
+<li><code>NEXT_PUBLIC_BACKEND_URL</code> (both miniapp + admin-panel)</li>
 <li>Optional: <code>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</code> (miniapp; defaults to <code>/api/tonconnect-manifest</code>)</li>
 </ul>
   </div>

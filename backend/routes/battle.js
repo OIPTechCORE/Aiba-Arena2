@@ -25,6 +25,7 @@ const {
 const { createSignedClaim } = require('../ton/signRewardClaim');
 const { getVaultLastSeqno } = require('../ton/vaultRead');
 const { rateLimit } = require('../middleware/rateLimit');
+const { validateBody } = require('../middleware/validate');
 const { metrics } = require('../metrics');
 const { clampInt, applyEnergyRegen } = require('../engine/battleEnergy');
 const { buildBattleSeedMessage } = require('../engine/battleSeed');
@@ -99,6 +100,14 @@ router.post(
     '/run',
     requireTelegram,
     rateLimit({ windowMs: 60_000, max: 25, keyFn: (req) => `battle:${req.telegramId || 'unknown'}` }),
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128, required: true },
+        brokerId: { type: 'objectId', required: true },
+        arena: { type: 'string', trim: true, maxLength: 50 },
+        league: { type: 'string', trim: true, maxLength: 50 },
+        modeKey: { type: 'string', trim: true, maxLength: 100 },
+        autoClaim: { type: 'boolean' },
+    }),
     async (req, res) => {
         try {
             const telegramId = req.telegramId ? String(req.telegramId) : '';

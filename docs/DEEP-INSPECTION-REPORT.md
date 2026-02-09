@@ -97,7 +97,7 @@ Home, Brokers, Market, Car Racing, Bike Racing, Multiverse, Arenas, Guilds, Char
 |-----|-----------|
 | README | Ports 5000/3000/3001, MongoDB Atlas note, backend env, Connect Wallet sentence, frontends env, deploy backend on Vercel. ✅ |
 | RUN-LOCALHOST | Steps, MONGO_URI (local + Atlas), §7 TonConnect + responsive modal. ✅ |
-| deployment.md | MONGO_URI, wallets, vault, TELEGRAM_INITDATA_MAX_AGE_SECONDS. ✅ |
+| deployment.md | MONGO_URI, wallets, vault, TELEGRAM_INITDATA_MAX_AGE_SECONDS; Vercel as separate project (root `backend/`); CORS_ORIGIN (production); vault/claim set all together. ✅ |
 | VERCEL-DEPLOYMENT-CHECKLIST | Backend = aiba-arena2-miniapp (or -api), Miniapp = aiba-arena2, Admin = aiba-arena2-admin-panel; env table. ✅ |
 | VERCEL-ENV-GUIDE | Miniapp/admin env, NEXT_PUBLIC_BACKEND_URL, TonConnect manifest. ✅ |
 | PROJECT-DESCRIPTION-SYSTEMATIC | Layout, stack, contracts, backend routes, miniapp tabs, cronWorker note. ✅ |

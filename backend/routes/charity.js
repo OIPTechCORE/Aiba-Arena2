@@ -6,15 +6,28 @@ const CharityDonation = require('../models/CharityDonation');
 const { getConfig } = require('../engine/economy');
 const { donateToCampaign } = require('../engine/charity');
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
+const { getLimit } = require('../util/pagination');
+const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
 
 // GET /api/charity/campaigns — list active/ended campaigns (public or authenticated)
 // Query: featured=1, cause=education, status=active
-router.get('/campaigns', async (req, res) => {
+router.get(
+    '/campaigns',
+    validateQuery({
+        featured: { type: 'boolean' },
+        cause: { type: 'string', trim: true, maxLength: 50 },
+        status: { type: 'string', trim: true, maxLength: 20 },
+        limit: { type: 'integer', min: 1, max: 100 },
+    }),
+    async (req, res) => {
     try {
-        const featured = req.query?.featured === '1' || req.query?.featured === 'true';
-        const cause = (req.query?.cause || '').trim().toLowerCase();
-        const statusFilter = (req.query?.status || '').trim().toLowerCase();
-        const limit = Math.min(100, Math.max(1, parseInt(req.query?.limit, 10) || 50));
+        const featured = Boolean(req.validatedQuery?.featured);
+        const cause = (req.validatedQuery?.cause || '').trim().toLowerCase();
+        const statusFilter = (req.validatedQuery?.status || '').trim().toLowerCase();
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 50, maxLimit: 100 },
+        );
 
         const query = { status: { $in: ['active', 'ended'] } };
         if (featured) query.featured = true;
@@ -33,17 +46,27 @@ router.get('/campaigns', async (req, res) => {
         console.error('Charity campaigns list error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/charity/campaigns/:id — one campaign + recent donations (anonymized if anonymous)
-router.get('/campaigns/:id', async (req, res) => {
+router.get(
+    '/campaigns/:id',
+    validateParams({ id: { type: 'objectId', required: true } }),
+    validateQuery({
+        recentDonations: { type: 'integer', min: 1, max: 50 },
+    }),
+    async (req, res) => {
     try {
-        const campaign = await CharityCampaign.findById(req.params.id).lean();
+        const campaign = await CharityCampaign.findById(req.validatedParams.id).lean();
         if (!campaign || !['active', 'ended', 'funded', 'disbursed'].includes(campaign.status)) {
             return res.status(404).json({ error: 'not found' });
         }
 
-        const recentLimit = Math.min(50, parseInt(req.query?.recentDonations, 10) || 20);
+        const recentLimit = getLimit(
+            { query: { limit: req.validatedQuery?.recentDonations } },
+            { defaultLimit: 20, maxLimit: 50 },
+        );
         const recent = await CharityDonation.find({ campaignId: campaign._id })
             .sort({ donatedAt: -1 })
             .limit(recentLimit)
@@ -63,17 +86,29 @@ router.get('/campaigns/:id', async (req, res) => {
         console.error('Charity campaign get error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/charity/donate — donate NEUR/AIBA from balance (authenticated)
-router.post('/donate', requireTelegram, async (req, res) => {
+router.post(
+    '/donate',
+    requireTelegram,
+    validateBody({
+        campaignId: { type: 'objectId', required: true },
+        amountNeur: { type: 'integer', min: 0 },
+        amountAiba: { type: 'integer', min: 0 },
+        message: { type: 'string', trim: true, maxLength: 500 },
+        anonymous: { type: 'boolean' },
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+    }),
+    async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
-        const campaignId = req.body?.campaignId;
-        const amountNeur = Math.floor(Number(req.body?.amountNeur ?? 0)) || 0;
-        const amountAiba = Math.floor(Number(req.body?.amountAiba ?? 0)) || 0;
-        const message = (req.body?.message || '').trim().slice(0, 500);
-        const anonymous = Boolean(req.body?.anonymous);
+        const campaignId = req.validatedBody?.campaignId;
+        const amountNeur = Math.floor(Number(req.validatedBody?.amountNeur ?? 0)) || 0;
+        const amountAiba = Math.floor(Number(req.validatedBody?.amountAiba ?? 0)) || 0;
+        const message = (req.validatedBody?.message || '').trim().slice(0, 500);
+        const anonymous = Boolean(req.validatedBody?.anonymous);
         const requestId = getIdempotencyKey(req);
 
         if (!campaignId) return res.status(400).json({ error: 'campaignId required' });
@@ -119,14 +154,25 @@ router.post('/donate', requireTelegram, async (req, res) => {
         console.error('Charity donate error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/charity/leaderboard — top donors (by=neur|aiba|impact|count, campaignId=, limit=)
-router.get('/leaderboard', async (req, res) => {
+router.get(
+    '/leaderboard',
+    validateQuery({
+        by: { type: 'string', trim: true, maxLength: 20 },
+        campaignId: { type: 'objectId' },
+        limit: { type: 'integer', min: 1, max: 100 },
+    }),
+    async (req, res) => {
     try {
-        const by = (req.query?.by || 'impact').trim().toLowerCase();
-        const campaignId = (req.query?.campaignId || '').trim();
-        const limit = Math.min(100, Math.max(1, parseInt(req.query?.limit, 10) || 50));
+        const by = (req.validatedQuery?.by || 'impact').trim().toLowerCase();
+        const campaignId = (req.validatedQuery?.campaignId || '').trim();
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 50, maxLimit: 100 },
+        );
 
         const allowed = ['neur', 'aiba', 'impact', 'count'];
         if (!allowed.includes(by)) {
@@ -138,9 +184,6 @@ router.get('/leaderboard', async (req, res) => {
 
         let match = {};
         if (campaignId) {
-            if (!mongoose.Types.ObjectId.isValid(campaignId)) {
-                return res.status(400).json({ error: 'invalid campaignId' });
-            }
             match = { campaignId: new mongoose.Types.ObjectId(campaignId) };
         }
         match.anonymous = { $ne: true };
@@ -200,7 +243,8 @@ router.get('/leaderboard', async (req, res) => {
         console.error('Charity leaderboard error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/charity/my-impact — current user's total donated (NEUR, AIBA, impact) and per-campaign breakdown
 router.get('/my-impact', requireTelegram, async (req, res) => {

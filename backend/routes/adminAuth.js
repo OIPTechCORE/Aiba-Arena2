@@ -2,13 +2,20 @@ const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { requireAdmin } = require('../middleware/requireAdmin');
+const { validateBody } = require('../middleware/validate');
 
-router.post('/login', async (req, res) => {
+router.post(
+    '/login',
+    validateBody({
+        email: { type: 'string', trim: true, minLength: 3, maxLength: 200, required: true },
+        password: { type: 'string', minLength: 1, maxLength: 200, required: true },
+    }),
+    async (req, res) => {
     try {
-        const email = String(req.body?.email || '')
+        const email = String(req.validatedBody?.email || '')
             .trim()
             .toLowerCase();
-        const password = String(req.body?.password || '');
+        const password = String(req.validatedBody?.password || '');
 
         const adminEmail = String(process.env.ADMIN_EMAIL || '')
             .trim()
@@ -34,7 +41,8 @@ router.post('/login', async (req, res) => {
         console.error('Error in admin login:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 router.get('/me', requireAdmin(), async (req, res) => {
     res.json({ email: req.admin.email, role: req.admin.role });

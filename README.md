@@ -101,9 +101,9 @@ Metrics: `GET /metrics` on `http://localhost:5000/metrics` (Prometheus)
 
 This backend can run on Vercel as a serverless Express API.
 
-- Create a **new Vercel project** for the backend
-- Set **Root Directory** to `backend`
-- Vercel will deploy the API using `backend/vercel.json`
+- Create a **new Vercel project** for the backend (deploy backend as a **separate project** from miniapp/admin).
+- Set **Root Directory** to `backend` (entry: `api/index.js`, serverless).
+- Vercel will deploy the API using `backend/vercel.json`.
 
 After deploy, your backend domain will look like:
 
@@ -118,7 +118,7 @@ Example endpoints:
 Required Vercel env vars (set in the backend project):
 
 - `MONGO_URI`
-- `CORS_ORIGIN=https://aiba-arena2-miniapp.vercel.app,https://aiba-arena2-admin-panel.vercel.app`
+- `CORS_ORIGIN` (required in production; comma-separated origins, e.g. `https://aiba-arena2-miniapp.vercel.app,https://aiba-arena2-admin-panel.vercel.app` — backend fails at startup without it when `APP_ENV=prod` or `NODE_ENV=production`)
 - `ADMIN_JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` (or `ADMIN_PASSWORD` for dev only)
 
 ### Battle + on-chain claim (optional)

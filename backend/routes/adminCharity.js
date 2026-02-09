@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const { requireAdmin } = require('../middleware/requireAdmin');
 const CharityCampaign = require('../models/CharityCampaign');
 const CharityDonation = require('../models/CharityDonation');
+const { getLimit } = require('../util/pagination');
+const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
 
 router.use(requireAdmin());
 
@@ -20,9 +22,26 @@ router.get('/campaigns', async (req, res) => {
 });
 
 // POST /api/admin/charity/campaigns — create campaign
-router.post('/campaigns', async (req, res) => {
+router.post(
+    '/campaigns',
+    validateBody({
+        name: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+        description: { type: 'string', trim: true, maxLength: 2000 },
+        cause: { type: 'string', trim: true, maxLength: 20 },
+        goalNeur: { type: 'integer', min: 0 },
+        goalAiba: { type: 'integer', min: 0 },
+        goalTonNano: { type: 'integer', min: 0 },
+        status: { type: 'string', trim: true, maxLength: 20 },
+        beneficiaryTonAddress: { type: 'string', trim: true, maxLength: 128 },
+        beneficiaryType: { type: 'string', trim: true, maxLength: 20 },
+        startAt: { type: 'string', trim: true, maxLength: 50 },
+        endAt: { type: 'string', trim: true, maxLength: 50 },
+        featured: { type: 'boolean' },
+        order: { type: 'integer', min: 0 },
+    }),
+    async (req, res) => {
     try {
-        const body = req.body || {};
+        const body = req.validatedBody || {};
         const name = (body.name || '').trim();
         if (!name) return res.status(400).json({ error: 'name required' });
 
@@ -53,15 +72,34 @@ router.post('/campaigns', async (req, res) => {
         console.error('Admin charity create campaign error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // PATCH /api/admin/charity/campaigns/:id — update campaign
-router.patch('/campaigns/:id', async (req, res) => {
+router.patch(
+    '/campaigns/:id',
+    validateParams({ id: { type: 'objectId', required: true } }),
+    validateBody({
+        name: { type: 'string', trim: true, maxLength: 200 },
+        description: { type: 'string', trim: true, maxLength: 2000 },
+        cause: { type: 'string', trim: true, maxLength: 20 },
+        goalNeur: { type: 'integer', min: 0 },
+        goalAiba: { type: 'integer', min: 0 },
+        goalTonNano: { type: 'integer', min: 0 },
+        status: { type: 'string', trim: true, maxLength: 20 },
+        beneficiaryTonAddress: { type: 'string', trim: true, maxLength: 128 },
+        beneficiaryType: { type: 'string', trim: true, maxLength: 20 },
+        startAt: { type: 'string', trim: true, maxLength: 50 },
+        endAt: { type: 'string', trim: true, maxLength: 50 },
+        featured: { type: 'boolean' },
+        order: { type: 'integer', min: 0 },
+    }),
+    async (req, res) => {
     try {
-        const campaign = await CharityCampaign.findById(req.params.id);
+        const campaign = await CharityCampaign.findById(req.validatedParams.id);
         if (!campaign) return res.status(404).json({ error: 'not found' });
 
-        const body = req.body || {};
+        const body = req.validatedBody || {};
         if (body.name !== undefined) campaign.name = String(body.name).trim().slice(0, 200);
         if (body.description !== undefined) campaign.description = String(body.description).trim().slice(0, 2000);
         if (body.cause !== undefined && ['education', 'environment', 'health', 'emergency', 'community', 'other'].includes(String(body.cause).toLowerCase())) {
@@ -88,12 +126,16 @@ router.patch('/campaigns/:id', async (req, res) => {
         console.error('Admin charity update campaign error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/admin/charity/campaigns/:id/close — set status to ended (or funded if goals met)
-router.post('/campaigns/:id/close', async (req, res) => {
+router.post(
+    '/campaigns/:id/close',
+    validateParams({ id: { type: 'objectId', required: true } }),
+    async (req, res) => {
     try {
-        const campaign = await CharityCampaign.findById(req.params.id);
+        const campaign = await CharityCampaign.findById(req.validatedParams.id);
         if (!campaign) return res.status(404).json({ error: 'not found' });
 
         const goalNeur = campaign.goalNeur || 0;
@@ -109,12 +151,16 @@ router.post('/campaigns/:id/close', async (req, res) => {
         console.error('Admin charity close campaign error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/admin/charity/campaigns/:id/disburse — mark as disbursed (record disbursedAt)
-router.post('/campaigns/:id/disburse', async (req, res) => {
+router.post(
+    '/campaigns/:id/disburse',
+    validateParams({ id: { type: 'objectId', required: true } }),
+    async (req, res) => {
     try {
-        const campaign = await CharityCampaign.findById(req.params.id);
+        const campaign = await CharityCampaign.findById(req.validatedParams.id);
         if (!campaign) return res.status(404).json({ error: 'not found' });
 
         campaign.status = 'disbursed';
@@ -125,19 +171,32 @@ router.post('/campaigns/:id/disburse', async (req, res) => {
         console.error('Admin charity disburse campaign error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/admin/charity/donations — list donations (filter by campaignId, telegramId, date range)
-router.get('/donations', async (req, res) => {
+router.get(
+    '/donations',
+    validateQuery({
+        campaignId: { type: 'objectId' },
+        telegramId: { type: 'string', trim: true, maxLength: 50 },
+        from: { type: 'string', trim: true, maxLength: 50 },
+        to: { type: 'string', trim: true, maxLength: 50 },
+        limit: { type: 'integer', min: 1, max: 500 },
+    }),
+    async (req, res) => {
     try {
-        const campaignId = (req.query?.campaignId || '').trim();
-        const telegramId = (req.query?.telegramId || '').trim();
-        const from = req.query?.from ? new Date(req.query.from) : null;
-        const to = req.query?.to ? new Date(req.query.to) : null;
-        const limit = Math.min(500, Math.max(1, parseInt(req.query?.limit, 10) || 100));
+        const campaignId = (req.validatedQuery?.campaignId || '').trim();
+        const telegramId = (req.validatedQuery?.telegramId || '').trim();
+        const from = req.validatedQuery?.from ? new Date(req.validatedQuery.from) : null;
+        const to = req.validatedQuery?.to ? new Date(req.validatedQuery.to) : null;
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 100, maxLimit: 500 },
+        );
 
         const query = {};
-        if (campaignId && mongoose.Types.ObjectId.isValid(campaignId)) query.campaignId = new mongoose.Types.ObjectId(campaignId);
+        if (campaignId) query.campaignId = new mongoose.Types.ObjectId(campaignId);
         if (telegramId) query.telegramId = telegramId;
         if (from || to) {
             query.donatedAt = {};
@@ -155,7 +214,8 @@ router.get('/donations', async (req, res) => {
         console.error('Admin charity donations list error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/admin/charity/stats — global + per-campaign stats
 router.get('/stats', async (_req, res) => {

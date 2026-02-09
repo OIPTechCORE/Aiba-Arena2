@@ -1,14 +1,25 @@
 const router = require('express').Router();
 const Announcement = require('../models/Announcement');
 const { requireTelegram } = require('../middleware/requireTelegram');
+const { getLimit } = require('../util/pagination');
+const { validateQuery } = require('../middleware/validate');
 
 /**
  * GET /api/announcements?limit=20
- * Public feed: active, published announcements, newest first.
+ * Feed: active, published announcements, newest first (Telegram auth required).
  */
-router.get('/', requireTelegram, async (req, res) => {
+router.get(
+    '/',
+    requireTelegram,
+    validateQuery({
+        limit: { type: 'integer', min: 1, max: 100 },
+    }),
+    async (req, res) => {
     try {
-        const limit = Math.min(100, Math.max(1, parseInt(req.query?.limit, 10) || 20));
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 20, maxLimit: 100 },
+        );
         const now = new Date();
 
         const items = await Announcement.find({
@@ -25,6 +36,7 @@ router.get('/', requireTelegram, async (req, res) => {
         console.error('Announcements list error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

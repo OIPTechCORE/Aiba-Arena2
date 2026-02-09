@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { getVaultInventory, getVaultLastSeqno } = require('../ton/vaultRead');
+const { validateQuery } = require('../middleware/validate');
 
 // Public read endpoints (on-chain data is public anyway)
 
@@ -12,12 +13,17 @@ function safeBigInt(s, fallback = 0n) {
 }
 
 // GET /api/vault/last-seqno?to=EQ...
-router.get('/last-seqno', async (req, res) => {
+router.get(
+    '/last-seqno',
+    validateQuery({
+        to: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+    }),
+    async (req, res) => {
     try {
         const vaultAddress = String(process.env.ARENA_VAULT_ADDRESS || '').trim();
         if (!vaultAddress) return res.status(400).json({ error: 'ARENA_VAULT_ADDRESS not configured' });
 
-        const to = String(req.query?.to || '').trim();
+        const to = String(req.validatedQuery?.to || '').trim();
         if (!to) return res.status(400).json({ error: 'to required' });
 
         const last = await getVaultLastSeqno(vaultAddress, to);
@@ -26,19 +32,28 @@ router.get('/last-seqno', async (req, res) => {
         console.error('Error in /api/vault/last-seqno:', err);
         res.status(500).json({ error: 'failed to read vault', detail: String(err?.message || err) });
     }
-});
+    },
+);
 
 // GET /api/vault/claim-status?to=EQ...&seqno=123&validUntil=1700000000&amount=1000
 // Returns: pending | confirmed | expired | insufficient_inventory | insufficient_ton
-router.get('/claim-status', async (req, res) => {
+router.get(
+    '/claim-status',
+    validateQuery({
+        to: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+        seqno: { type: 'integer', min: 0, required: true },
+        validUntil: { type: 'integer', min: 0, required: true },
+        amount: { type: 'integer', min: 0 },
+    }),
+    async (req, res) => {
     try {
         const vaultAddress = String(process.env.ARENA_VAULT_ADDRESS || '').trim();
         if (!vaultAddress) return res.status(400).json({ error: 'ARENA_VAULT_ADDRESS not configured' });
 
-        const to = String(req.query?.to || '').trim();
-        const seqno = safeBigInt(req.query?.seqno, 0n);
-        const validUntil = Number(req.query?.validUntil ?? 0);
-        const amount = safeBigInt(req.query?.amount, 0n);
+        const to = String(req.validatedQuery?.to || '').trim();
+        const seqno = safeBigInt(req.validatedQuery?.seqno, 0n);
+        const validUntil = Number(req.validatedQuery?.validUntil ?? 0);
+        const amount = safeBigInt(req.validatedQuery?.amount, 0n);
 
         if (!to) return res.status(400).json({ error: 'to required' });
         if (seqno <= 0n) return res.status(400).json({ error: 'seqno required' });
@@ -114,7 +129,8 @@ router.get('/claim-status', async (req, res) => {
         console.error('Error in /api/vault/claim-status:', err);
         res.status(500).json({ error: 'failed to read claim status', detail: String(err?.message || err) });
     }
-});
+    },
+);
 
 // GET /api/vault/inventory
 router.get('/inventory', async (_req, res) => {

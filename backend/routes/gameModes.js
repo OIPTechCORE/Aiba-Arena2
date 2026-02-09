@@ -1,13 +1,21 @@
 const router = require('express').Router();
 const GameMode = require('../models/GameMode');
 const { requireTelegram } = require('../middleware/requireTelegram');
+const { validateQuery } = require('../middleware/validate');
 
 // Public listing for miniapp
 // GET /api/game-modes?arena=prediction&league=rookie
-router.get('/', requireTelegram, async (req, res) => {
+router.get(
+    '/',
+    requireTelegram,
+    validateQuery({
+        arena: { type: 'string', trim: true, maxLength: 50 },
+        league: { type: 'string', trim: true, maxLength: 50 },
+    }),
+    async (req, res) => {
     try {
-        const arena = req.query?.arena ? String(req.query.arena).trim() : null;
-        const league = req.query?.league ? String(req.query.league).trim() : null;
+        const arena = req.validatedQuery?.arena || null;
+        const league = req.validatedQuery?.league || null;
 
         const q = { enabled: true };
         if (arena) q.arena = arena;
@@ -19,6 +27,7 @@ router.get('/', requireTelegram, async (req, res) => {
         console.error('Error fetching game modes:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

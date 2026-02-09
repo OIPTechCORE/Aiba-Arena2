@@ -1,12 +1,20 @@
 const router = require('express').Router();
 const Ad = require('../models/Ad');
 const { requireTelegram } = require('../middleware/requireTelegram');
+const { validateQuery } = require('../middleware/validate');
+const { getLimit } = require('../util/pagination');
 
-// Public ads endpoint for miniapp
+// Ads endpoint for miniapp (Telegram auth required)
 // GET /api/ads?placement=between_battles
-router.get('/', requireTelegram, async (req, res) => {
+router.get(
+    '/',
+    requireTelegram,
+    validateQuery({
+        placement: { type: 'string', trim: true, maxLength: 50 },
+    }),
+    async (req, res) => {
     try {
-        const placement = String(req.query?.placement || 'between_battles').trim();
+        const placement = req.validatedQuery?.placement || 'between_battles';
         const now = new Date();
 
         const ads = await Ad.find({
@@ -26,6 +34,7 @@ router.get('/', requireTelegram, async (req, res) => {
         console.error('Error fetching ads:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

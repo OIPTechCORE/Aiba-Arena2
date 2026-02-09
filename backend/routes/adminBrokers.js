@@ -2,15 +2,24 @@ const router = require('express').Router();
 const { requireAdmin } = require('../middleware/requireAdmin');
 const Broker = require('../models/Broker');
 const BrokerMintJob = require('../models/BrokerMintJob');
+const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
 
 router.use(requireAdmin());
 
 // GET /api/admin/brokers?ownerTelegramId=...&minted=true
-router.get('/', async (req, res) => {
+router.get(
+    '/',
+    validateQuery({
+        ownerTelegramId: { type: 'string', trim: true, maxLength: 50 },
+        minted: { type: 'string', trim: true, maxLength: 10 },
+    }),
+    async (req, res) => {
     try {
         const q = {};
-        const ownerTelegramId = req.query?.ownerTelegramId ? String(req.query.ownerTelegramId).trim() : '';
-        const minted = req.query?.minted !== undefined ? String(req.query.minted).trim() : '';
+        const ownerTelegramId = req.validatedQuery?.ownerTelegramId
+            ? String(req.validatedQuery.ownerTelegramId).trim()
+            : '';
+        const minted = req.validatedQuery?.minted !== undefined ? String(req.validatedQuery.minted).trim() : '';
 
         if (ownerTelegramId) q.ownerTelegramId = ownerTelegramId;
         if (minted === 'true') q.nftItemAddress = { $ne: '' };
@@ -22,18 +31,29 @@ router.get('/', async (req, res) => {
         console.error('Error listing brokers (admin):', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/admin/brokers/:id/link-nft
 // Body: { nftCollectionAddress, nftItemIndex, nftItemAddress, metadataUri? }
-router.post('/:id/link-nft', async (req, res) => {
+router.post(
+    '/:id/link-nft',
+    validateParams({ id: { type: 'objectId', required: true } }),
+    validateBody({
+        nftCollectionAddress: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+        nftItemAddress: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+        nftItemIndex: { type: 'integer', min: 0 },
+        metadataUri: { type: 'string', trim: true, maxLength: 500 },
+    }),
+    async (req, res) => {
     try {
-        const { id } = req.params;
-        const nftCollectionAddress = String(req.body?.nftCollectionAddress || '').trim();
-        const nftItemAddress = String(req.body?.nftItemAddress || '').trim();
-        const nftItemIndexRaw = req.body?.nftItemIndex;
+        const { id } = req.validatedParams;
+        const nftCollectionAddress = String(req.validatedBody?.nftCollectionAddress || '').trim();
+        const nftItemAddress = String(req.validatedBody?.nftItemAddress || '').trim();
+        const nftItemIndexRaw = req.validatedBody?.nftItemIndex;
         const nftItemIndex = nftItemIndexRaw === undefined || nftItemIndexRaw === null ? null : Number(nftItemIndexRaw);
-        const metadataUri = req.body?.metadataUri !== undefined ? String(req.body.metadataUri || '').trim() : undefined;
+        const metadataUri =
+            req.validatedBody?.metadataUri !== undefined ? String(req.validatedBody.metadataUri || '').trim() : undefined;
 
         if (!nftCollectionAddress) return res.status(400).json({ error: 'nftCollectionAddress required' });
         if (!nftItemAddress) return res.status(400).json({ error: 'nftItemAddress required' });
@@ -55,12 +75,16 @@ router.post('/:id/link-nft', async (req, res) => {
         console.error('Error linking broker NFT:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/admin/brokers/mint-jobs?status=pending
-router.get('/mint-jobs', async (req, res) => {
+router.get(
+    '/mint-jobs',
+    validateQuery({ status: { type: 'string', trim: true, maxLength: 20 } }),
+    async (req, res) => {
     try {
-        const status = String(req.query?.status || '').trim();
+        const status = String(req.validatedQuery?.status || '').trim();
         const q = status ? { status } : {};
         const jobs = await BrokerMintJob.find(q).sort({ createdAt: -1 }).limit(100).lean();
         res.json(jobs);
@@ -68,18 +92,27 @@ router.get('/mint-jobs', async (req, res) => {
         console.error('Error listing mint jobs:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/admin/brokers/mint-jobs/:id/complete — mark job completed and link NFT to broker
-router.post('/mint-jobs/:id/complete', async (req, res) => {
+router.post(
+    '/mint-jobs/:id/complete',
+    validateParams({ id: { type: 'objectId', required: true } }),
+    validateBody({
+        nftCollectionAddress: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+        nftItemAddress: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+        nftItemIndex: { type: 'integer', min: 0 },
+    }),
+    async (req, res) => {
     try {
-        const job = await BrokerMintJob.findById(req.params.id);
+        const job = await BrokerMintJob.findById(req.validatedParams.id);
         if (!job) return res.status(404).json({ error: 'mint job not found' });
         if (job.status === 'completed') return res.status(400).json({ error: 'already completed' });
 
-        const nftCollectionAddress = String(req.body?.nftCollectionAddress || '').trim();
-        const nftItemAddress = String(req.body?.nftItemAddress || '').trim();
-        const nftItemIndex = req.body?.nftItemIndex != null ? Number(req.body.nftItemIndex) : null;
+        const nftCollectionAddress = String(req.validatedBody?.nftCollectionAddress || '').trim();
+        const nftItemAddress = String(req.validatedBody?.nftItemAddress || '').trim();
+        const nftItemIndex = req.validatedBody?.nftItemIndex != null ? Number(req.validatedBody.nftItemIndex) : null;
         if (!nftCollectionAddress || !nftItemAddress) return res.status(400).json({ error: 'nftCollectionAddress and nftItemAddress required' });
 
         await Broker.findByIdAndUpdate(job.brokerId, {
@@ -99,6 +132,7 @@ router.post('/mint-jobs/:id/complete', async (req, res) => {
         console.error('Error completing mint job:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

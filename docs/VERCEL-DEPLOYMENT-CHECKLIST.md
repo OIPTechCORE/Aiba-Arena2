@@ -47,7 +47,7 @@ Use this as a quick reference for **which variables** go **where**. Set values i
 
 ## 3. Backend (root = `backend`)
 
-Set these **where the backend runs** (Vercel backend project, or Render/Railway env).
+Deploy the backend as a **separate** Vercel project (or on Render/Railway) with **Root Directory** = `backend` (serverless entry: `api/index.js`). Set these **where the backend runs**.
 
 ### 3.1 Required (production)
 
@@ -55,7 +55,7 @@ Set these **where the backend runs** (Vercel backend project, or Render/Railway 
 |-----|-------------|
 | **MONGO_URI** | MongoDB connection string (e.g. `mongodb+srv://user:pass@cluster.../aiba_arena?retryWrites=true&w=majority`). Use database name `aiba_arena` (or your choice). |
 | **APP_ENV** | `prod` |
-| **CORS_ORIGIN** | Comma-separated, no spaces: `https://aiba-arena2.vercel.app,https://aiba-arena2-admin-panel.vercel.app` |
+| **CORS_ORIGIN** | Comma-separated, no spaces (required in production — backend fails at startup without it): `https://aiba-arena2.vercel.app,https://aiba-arena2-admin-panel.vercel.app` |
 | **TELEGRAM_BOT_TOKEN** | From BotFather |
 | **TELEGRAM_INITDATA_MAX_AGE_SECONDS** | `300`–`900` (e.g. `900`) |
 | **ADMIN_JWT_SECRET** | 32+ char random (e.g. `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`) |

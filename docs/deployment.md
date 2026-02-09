@@ -3,7 +3,7 @@
 ## Components
 
 - **Contracts**: compiled/deployed via Blueprint (`npm run build`, `npm run bp run ...`)
-- **Backend**: Express — local/Render/Railway use `backend/server.js`; Vercel uses `backend/api/index.js` (serverless).
+- **Backend**: Express — local/Render/Railway use `backend/server.js`; on Vercel deploy as a **separate project** with root directory `backend/` (entry: `api/index.js`, serverless).
 - **Miniapp**: Next.js (`miniapp/`) for Telegram Mini App
 - **Admin OS**: Next.js (`admin-panel/`) for operators
 
@@ -11,7 +11,7 @@
 
 - **Start command**: `npm install && npm run start`
 - **Root directory**: `backend/`
-- **Required env**: copy from `backend/.env.example`
+- **Required env**: copy from `backend/.env.example`. Optional: `PORT` (default 5000); set `APP_ENV=prod` (or `NODE_ENV=production`) to run production readiness checks.
 
 ### Minimum env for testnet end-to-end
 
@@ -29,7 +29,8 @@
 - `TELEGRAM_INITDATA_MAX_AGE_SECONDS` (recommended 300–900; set explicitly for mainnet)
 - `BATTLE_SEED_SECRET`
 - `ADMIN_JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` (required for production readiness checks; do not use plaintext password)
-- Vault/claim reads:
+- **Production only**: `CORS_ORIGIN` (comma-separated allowed origins; required when `APP_ENV=prod` or `NODE_ENV=production`, or backend fails at startup)
+- Vault/claim reads (set **all** together when using signed claims; mainnet requires mainnet `TON_PROVIDER_URL`):
     - `TON_PROVIDER_URL`
     - `TON_API_KEY`
     - `ARENA_VAULT_ADDRESS`

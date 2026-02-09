@@ -90,6 +90,26 @@
                 "external": false
             },
             "mode": "full"
+        },
+        {
+            "name": "AiAssetMarketplaceEscrowJetton",
+            "path": "contracts/ai_asset_marketplace_escrow_jetton.tact",
+            "output": "build\\AiAssetMarketplaceEscrowJetton",
+            "options": {
+                "debug": false,
+                "external": false
+            },
+            "mode": "full"
+        },
+        {
+            "name": "MentorStakingVault",
+            "path": "contracts/mentor_staking_vault.tact",
+            "output": "build\\MentorStakingVault",
+            "options": {
+                "debug": false,
+                "external": false
+            },
+            "mode": "full"
         }
     ]
 }

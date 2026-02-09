@@ -2,6 +2,8 @@ const router = require('express').Router();
 const { requireAdmin } = require('../middleware/requireAdmin');
 const NftUniverse = require('../models/NftUniverse');
 const NftStake = require('../models/NftStake');
+const { getLimit } = require('../util/pagination');
+const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
 
 router.use(requireAdmin());
 
@@ -17,11 +19,25 @@ router.get('/universes', async (req, res) => {
 });
 
 // PATCH /api/admin/multiverse/universes/:slug
-router.patch('/universes/:slug', async (req, res) => {
+router.patch(
+    '/universes/:slug',
+    validateParams({ slug: { type: 'string', trim: true, minLength: 1, maxLength: 50, required: true } }),
+    validateBody({
+        name: { type: 'string', trim: true, maxLength: 200 },
+        description: { type: 'string', trim: true, maxLength: 2000 },
+        mintCostAiba: { type: 'number', min: 0 },
+        mintCostTonNano: { type: 'number', min: 0 },
+        feeBps: { type: 'number', min: 0, max: 10000 },
+        burnBps: { type: 'number', min: 0, max: 10000 },
+        stakingEnabled: { type: 'boolean' },
+        active: { type: 'boolean' },
+        order: { type: 'number' },
+    }),
+    async (req, res) => {
     try {
-        const slug = String(req.params.slug || '').trim();
+        const slug = String(req.validatedParams.slug || '').trim();
         if (!slug) return res.status(400).json({ error: 'slug required' });
-        const body = req.body && typeof req.body === 'object' ? req.body : {};
+        const body = req.validatedBody && typeof req.validatedBody === 'object' ? req.validatedBody : {};
         const update = {};
         if (body.name !== undefined) update.name = String(body.name).trim();
         if (body.description !== undefined) update.description = String(body.description).trim();
@@ -54,14 +70,25 @@ router.patch('/universes/:slug', async (req, res) => {
         console.error('Admin multiverse patch error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/admin/multiverse/stakes — list all NFT stakes (optional: telegramId, universeSlug)
-router.get('/stakes', async (req, res) => {
+router.get(
+    '/stakes',
+    validateQuery({
+        telegramId: { type: 'string', trim: true, maxLength: 50 },
+        universeSlug: { type: 'string', trim: true, maxLength: 50 },
+        limit: { type: 'integer', min: 1, max: 100 },
+    }),
+    async (req, res) => {
     try {
-        const telegramId = req.query?.telegramId ? String(req.query.telegramId).trim() : null;
-        const universeSlug = req.query?.universeSlug ? String(req.query.universeSlug).trim() : null;
-        const limit = Math.min(100, Math.max(1, parseInt(req.query?.limit, 10) || 50));
+        const telegramId = req.validatedQuery?.telegramId ? String(req.validatedQuery.telegramId).trim() : null;
+        const universeSlug = req.validatedQuery?.universeSlug ? String(req.validatedQuery.universeSlug).trim() : null;
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 50, maxLimit: 100 },
+        );
         const q = {};
         if (telegramId) q.telegramId = telegramId;
         if (universeSlug) q.universeSlug = universeSlug;
@@ -71,6 +98,7 @@ router.get('/stakes', async (req, res) => {
         console.error('Admin multiverse stakes error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

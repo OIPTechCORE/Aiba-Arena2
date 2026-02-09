@@ -5,6 +5,7 @@ const Referral = require('../models/Referral');
 const ReferralUse = require('../models/ReferralUse');
 const User = require('../models/User');
 const { getConfig, tryEmitNeur, creditNeurNoCap, tryEmitAiba, creditAibaNoCap } = require('../engine/economy');
+const { validateBody } = require('../middleware/validate');
 
 router.use(requireTelegram);
 
@@ -34,9 +35,14 @@ router.post('/create', async (req, res) => {
 });
 
 // POST /api/referrals/use
-router.post('/use', async (req, res) => {
+router.post(
+    '/use',
+    validateBody({
+        code: { type: 'string', trim: true, minLength: 1, maxLength: 32, required: true },
+    }),
+    async (req, res) => {
     const telegramId = String(req.telegramId || ''); // referee
-    const code = String(req.body?.code || '')
+    const code = String(req.validatedBody?.code || '')
         .trim()
         .toLowerCase();
     if (!code) return res.status(400).json({ error: 'code required' });
@@ -161,6 +167,7 @@ router.post('/use', async (req, res) => {
         neurReward: { referrer: creditedReferrer, referee: creditedReferee },
         aibaReward: { referrer: creditedAibaReferrer, referee: creditedAibaReferee },
     });
-});
+    },
+);
 
 module.exports = router;

@@ -34,7 +34,7 @@ Body: `{ mentorId }`
 Returns `{ ok: true }`
 
 **POST** `/api/mentors/upgrade`  
-Body: `{ mentorId, tier }`  
+Body: `{ mentorId }`  
 Returns `{ ok: true, costAiba }`
 
 ---
@@ -52,19 +52,43 @@ Returns `{ asset }`
 **GET** `/api/assets/mine`  
 Returns `{ assets: Asset[] }`
 
-**POST** `/api/marketplace/list`  
-Body: `{ assetId, priceAiba, listingType }`  
-Returns `{ listing }`
+### 3a) Broker Marketplace (Brokers)
 
 **GET** `/api/marketplace/listings`  
-Query: `listingType`, `realmKey`, `category`  
-Returns `{ listings: AssetListing[] }`
+Query: `limit`  
+Returns `Listing[]`
+
+**POST** `/api/marketplace/list`  
+Body: `{ brokerId, priceAIBA, priceNEUR }`  
+Returns `Listing`
+
+**POST** `/api/marketplace/delist`  
+Body: `{ listingId }`  
+Returns `{ ok: true, listing }`
 
 **POST** `/api/marketplace/buy`  
 Body: `{ listingId }`  
+Returns `{ ok: true, broker, listingId }`
+
+### 3b) Asset Marketplace (NFT Assets)
+
+**GET** `/api/asset-marketplace/listings`  
+Query: `listingType`  
+Returns `{ listings: AssetListing[] }`
+
+**GET** `/api/asset-marketplace/onchain-info`  
+Query: `listingId`  
+Returns `{ listingId, priceAiba, escrowAddress, escrowJettonWallet, jettonMaster }`
+
+**POST** `/api/asset-marketplace/list`  
+Body: `{ assetId, priceAiba, listingType }`  
+Returns `{ listing }`
+
+**POST** `/api/asset-marketplace/buy`  
+Body: `{ listingId }`  
 Returns `{ ok: true, asset }`
 
-**POST** `/api/marketplace/rent`  
+**POST** `/api/asset-marketplace/rent`  
 Body: `{ listingId, durationHours }`  
 Returns `{ rental }`
 
@@ -88,10 +112,13 @@ Returns `{ ok: true }`
 ## 5) Treasury & Telemetry
 
 **GET** `/api/treasury/summary`  
-Returns `{ burnTotal, treasuryTotal, rewardsTotal, stakingTotal }`
+Returns `{ balanceAiba, balanceNeur, totalPaidOutAiba, totalPaidOutNeur }`
 
 **GET** `/api/treasury/ops`  
 Returns `{ ops: TreasuryOp[] }`
+
+**GET** `/api/comms/status`  
+Returns `{ status: "operational", updatedAt }`
 
 ---
 
@@ -100,11 +127,22 @@ Returns `{ ops: TreasuryOp[] }`
 **GET** `/api/admin/realms`  
 **POST** `/api/admin/realms` (create/update)
 
-**GET** `/api/admin/economy`  
-**POST** `/api/admin/economy` (update splits/fees)
+**GET** `/api/admin/economy/config`  
+**PATCH** `/api/admin/economy/config`  
+**GET** `/api/admin/economy/day`  
+**GET** `/api/admin/economy/ledger`  
+**GET** `/api/admin/economy/simulate`  
+**POST** `/api/admin/economy/credit-user`
 
 **GET** `/api/admin/marketplace/metrics`  
-**GET** `/api/admin/treasury/metrics`
+**GET** `/api/admin/treasury`  
+**POST** `/api/admin/treasury/fund`  
+**GET** `/api/admin/treasury/reserve`  
+**POST** `/api/admin/treasury/reserve/fund`  
+**GET** `/api/admin/treasury/buyback`  
+**POST** `/api/admin/treasury/buyback/fund`  
+**PATCH** `/api/admin/treasury/oracle`  
+**GET** `/api/admin/treasury-ops/metrics`
 
 ---
 

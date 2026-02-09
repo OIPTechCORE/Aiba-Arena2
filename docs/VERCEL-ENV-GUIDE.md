@@ -111,6 +111,9 @@ Below is the **full list** of backend environment variables. Set every **require
 | **CREATED_BROKERS_WALLET** | TON address that receives payment when users **create a broker with TON** (broker is auto-listed on marketplace). Cost: Admin → Economy `createBrokerCostTonNano` (1–10 TON). | TON address | Needed for “Create broker (pay TON)” in Market tab. |
 | **BOOST_PROFILE_WALLET** | TON address that receives payment when users **boost their profile**. Cost: Admin → Economy `boostProfileCostTonNano` (1–10 TON). | TON address | Needed for “Boost your profile” in Wallet tab. |
 | **GIFTS_WALLET** | TON address that receives payment when users **send a gift** to another user. Cost: Admin → Economy `giftCostTonNano` (1–10 TON). | TON address | Needed for Gifts in Wallet tab. |
+| **STARS_STORE_WALLET** | TON address that receives payment when users buy Stars with TON. Cost: Admin → Economy `starsStorePackPriceTonNano` (1–10 TON). | TON address | Needed for Stars Store TON purchases. |
+| **CAR_RACING_WALLET** | TON address that receives payment when users create a car with TON. Cost: Admin → Economy `createCarCostTonNano` (1–10 TON). | TON address | Needed for car creation with TON. |
+| **MOTORCYCLE_RACING_WALLET** | TON address that receives payment when users create a bike with TON. Cost: Admin → Economy `createBikeCostTonNano` (1–10 TON). | TON address | Needed for bike creation with TON. |
 
 ### 3.3 On-chain reward claims (AIBA withdrawal)
 
@@ -244,6 +247,9 @@ These are **TON blockchain addresses** that receive TON when users pay for vario
 6. **CREATED_BROKERS_WALLET** — receives TON when users **create a broker** (pay TON → broker auto-listed on marketplace); cost `createBrokerCostTonNano` (1–10 TON).
 7. **BOOST_PROFILE_WALLET** — receives TON when users **boost their profile**; cost `boostProfileCostTonNano` (1–10 TON).
 8. **GIFTS_WALLET** — receives TON when users **send a gift** to another user; cost `giftCostTonNano` (1–10 TON).
+9. **STARS_STORE_WALLET** — receives TON when users **buy Stars with TON**; cost `starsStorePackPriceTonNano` (1–10 TON).
+10. **CAR_RACING_WALLET** — receives TON when users **create a car with TON**; cost `createCarCostTonNano` (1–10 TON).
+11. **MOTORCYCLE_RACING_WALLET** — receives TON when users **create a bike with TON**; cost `createBikeCostTonNano` (1–10 TON).
 
 You can use one address for all, or separate addresses per feature. Copy-paste each address as-is into the corresponding env var.
 
@@ -333,7 +339,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 | NEXT_PUBLIC_BACKEND_URL | Miniapp + Admin panel (both) |
 | NEXT_PUBLIC_TONCONNECT_MANIFEST_URL | Miniapp only |
 | NEXT_PUBLIC_APP_URL / APP_URL | Miniapp only (optional) |
-| MONGO_URI, APP_ENV, CORS_ORIGIN, TELEGRAM_*, ADMIN_*, BATTLE_SEED_SECRET, BOOST_*_WALLET, LEADER_BOARD_WALLET, CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET, ARENA_VAULT_*, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON_* | Backend only (Vercel backend project or Render/Railway/etc.) |
+| MONGO_URI, APP_ENV, CORS_ORIGIN, TELEGRAM_*, ADMIN_*, BATTLE_SEED_SECRET, BOOST_*_WALLET, LEADER_BOARD_WALLET, CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET, STARS_STORE_WALLET, CAR_RACING_WALLET, MOTORCYCLE_RACING_WALLET, ARENA_VAULT_*, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON_* | Backend only (Vercel backend project or Render/Railway/etc.) |
 
 ---
 

@@ -3,6 +3,8 @@ const { requireAdmin } = require('../middleware/requireAdmin');
 const User = require('../models/User');
 const Broker = require('../models/Broker');
 const Battle = require('../models/Battle');
+const { getLimit } = require('../util/pagination');
+const { validateBody, validateQuery } = require('../middleware/validate');
 
 router.use(requireAdmin());
 
@@ -13,10 +15,19 @@ function clampInt(n, min, max) {
 }
 
 // GET /api/admin/mod/flagged-brokers?minFlags=1&limit=100
-router.get('/flagged-brokers', async (req, res) => {
+router.get(
+    '/flagged-brokers',
+    validateQuery({
+        minFlags: { type: 'integer', min: 0, max: 1000000 },
+        limit: { type: 'integer', min: 1, max: 500 },
+    }),
+    async (req, res) => {
     try {
-        const minFlags = clampInt(req.query?.minFlags ?? 1, 0, 1_000_000);
-        const limit = clampInt(req.query?.limit ?? 100, 1, 500);
+        const minFlags = clampInt(req.validatedQuery?.minFlags ?? 1, 0, 1_000_000);
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 100, maxLimit: 500 },
+        );
 
         const brokers = await Broker.find({ anomalyFlags: { $gte: minFlags } })
             .sort({ anomalyFlags: -1, updatedAt: -1 })
@@ -28,25 +39,42 @@ router.get('/flagged-brokers', async (req, res) => {
         console.error('Error fetching flagged brokers:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/admin/mod/recent-anomalies?limit=100
-router.get('/recent-anomalies', async (req, res) => {
+router.get(
+    '/recent-anomalies',
+    validateQuery({ limit: { type: 'integer', min: 1, max: 500 } }),
+    async (req, res) => {
     try {
-        const limit = clampInt(req.query?.limit ?? 100, 1, 500);
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 100, maxLimit: 500 },
+        );
         const battles = await Battle.find({ anomaly: true }).sort({ createdAt: -1 }).limit(limit).lean();
         res.json(battles);
     } catch (err) {
         console.error('Error fetching anomalies:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/admin/mod/flagged-users?minFlags=1&limit=100
-router.get('/flagged-users', async (req, res) => {
+router.get(
+    '/flagged-users',
+    validateQuery({
+        minFlags: { type: 'integer', min: 0, max: 1000000 },
+        limit: { type: 'integer', min: 1, max: 500 },
+    }),
+    async (req, res) => {
     try {
-        const minFlags = clampInt(req.query?.minFlags ?? 1, 0, 1_000_000);
-        const limit = clampInt(req.query?.limit ?? 100, 1, 500);
+        const minFlags = clampInt(req.validatedQuery?.minFlags ?? 1, 0, 1_000_000);
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 100, maxLimit: 500 },
+        );
 
         const users = await User.find({ anomalyFlags: { $gte: minFlags } })
             .sort({ anomalyFlags: -1, updatedAt: -1 })
@@ -58,13 +86,21 @@ router.get('/flagged-users', async (req, res) => {
         console.error('Error fetching flagged users:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/admin/mod/ban-user
-router.post('/ban-user', async (req, res) => {
-    const telegramId = String(req.body?.telegramId || '').trim();
-    const minutes = Number(req.body?.minutes ?? 60 * 24);
-    const reason = String(req.body?.reason || 'banned').trim();
+router.post(
+    '/ban-user',
+    validateBody({
+        telegramId: { type: 'string', trim: true, minLength: 1, maxLength: 50, required: true },
+        minutes: { type: 'number', min: 1 },
+        reason: { type: 'string', trim: true, maxLength: 200 },
+    }),
+    async (req, res) => {
+    const telegramId = String(req.validatedBody?.telegramId || '').trim();
+    const minutes = Number(req.validatedBody?.minutes ?? 60 * 24);
+    const reason = String(req.validatedBody?.reason || 'banned').trim();
 
     if (!telegramId) return res.status(400).json({ error: 'telegramId required' });
     if (!Number.isFinite(minutes) || minutes <= 0) return res.status(400).json({ error: 'minutes must be > 0' });
@@ -78,11 +114,17 @@ router.post('/ban-user', async (req, res) => {
     ).lean();
 
     res.json(user);
-});
+    },
+);
 
 // POST /api/admin/mod/unban-user
-router.post('/unban-user', async (req, res) => {
-    const telegramId = String(req.body?.telegramId || '').trim();
+router.post(
+    '/unban-user',
+    validateBody({
+        telegramId: { type: 'string', trim: true, minLength: 1, maxLength: 50, required: true },
+    }),
+    async (req, res) => {
+    const telegramId = String(req.validatedBody?.telegramId || '').trim();
     if (!telegramId) return res.status(400).json({ error: 'telegramId required' });
 
     const user = await User.findOneAndUpdate(
@@ -91,12 +133,19 @@ router.post('/unban-user', async (req, res) => {
         { new: true },
     ).lean();
     res.json(user || { ok: true });
-});
+    },
+);
 
 // POST /api/admin/mod/ban-broker
-router.post('/ban-broker', async (req, res) => {
-    const brokerId = String(req.body?.brokerId || '').trim();
-    const reason = String(req.body?.reason || 'broker banned').trim();
+router.post(
+    '/ban-broker',
+    validateBody({
+        brokerId: { type: 'objectId', required: true },
+        reason: { type: 'string', trim: true, maxLength: 200 },
+    }),
+    async (req, res) => {
+    const brokerId = String(req.validatedBody?.brokerId || '').trim();
+    const reason = String(req.validatedBody?.reason || 'broker banned').trim();
     if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
     const broker = await Broker.findByIdAndUpdate(
@@ -106,11 +155,15 @@ router.post('/ban-broker', async (req, res) => {
     ).lean();
     if (!broker) return res.status(404).json({ error: 'not found' });
     res.json(broker);
-});
+    },
+);
 
 // GET /api/admin/mod/user?telegramId= — fetch single user profile (stars, diamonds, badges)
-router.get('/user', async (req, res) => {
-    const telegramId = String(req.query?.telegramId || '').trim();
+router.get(
+    '/user',
+    validateQuery({ telegramId: { type: 'string', trim: true, minLength: 1, maxLength: 50, required: true } }),
+    async (req, res) => {
+    const telegramId = String(req.validatedQuery?.telegramId || '').trim();
     if (!telegramId) return res.status(400).json({ error: 'telegramId required' });
     try {
         const user = await User.findOne({ telegramId })
@@ -134,7 +187,8 @@ router.get('/user', async (req, res) => {
         console.error('Error fetching user:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/admin/mod/sync-top-leader-badges — run top_leader badge sync job once
 router.post('/sync-top-leader-badges', async (req, res) => {
@@ -150,9 +204,15 @@ router.post('/sync-top-leader-badges', async (req, res) => {
 
 // POST /api/admin/mod/user-badges
 // Body: { telegramId: string, badges: string[] } — set user profile badges (X-style)
-router.post('/user-badges', async (req, res) => {
-    const telegramId = String(req.body?.telegramId || '').trim();
-    let badges = req.body?.badges;
+router.post(
+    '/user-badges',
+    validateBody({
+        telegramId: { type: 'string', trim: true, minLength: 1, maxLength: 50, required: true },
+        badges: { type: 'array', itemType: 'string' },
+    }),
+    async (req, res) => {
+    const telegramId = String(req.validatedBody?.telegramId || '').trim();
+    let badges = req.validatedBody?.badges;
     if (!telegramId) return res.status(400).json({ error: 'telegramId required' });
     if (!Array.isArray(badges)) badges = [];
     badges = badges.filter((b) => typeof b === 'string' && b.trim().length > 0).map((b) => String(b).trim());
@@ -163,11 +223,17 @@ router.post('/user-badges', async (req, res) => {
         { new: true, upsert: true, setDefaultsOnInsert: true },
     ).lean();
     res.json(user);
-});
+    },
+);
 
 // POST /api/admin/mod/unban-broker
-router.post('/unban-broker', async (req, res) => {
-    const brokerId = String(req.body?.brokerId || '').trim();
+router.post(
+    '/unban-broker',
+    validateBody({
+        brokerId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
+    const brokerId = String(req.validatedBody?.brokerId || '').trim();
     if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
     const broker = await Broker.findByIdAndUpdate(
@@ -177,6 +243,7 @@ router.post('/unban-broker', async (req, res) => {
     ).lean();
     if (!broker) return res.status(404).json({ error: 'not found' });
     res.json(broker);
-});
+    },
+);
 
 module.exports = router;

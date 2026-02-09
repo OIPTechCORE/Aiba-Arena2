@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const Broker = require('../models/Broker');
+const { validateParams } = require('../middleware/validate');
 
 function getBaseUrl(req) {
     const proto = String(req.headers['x-forwarded-proto'] || 'http');
@@ -21,9 +22,12 @@ function svgEscape(s) {
 }
 
 // GET /api/metadata/brokers/:id
-router.get('/brokers/:id', async (req, res) => {
+router.get(
+    '/brokers/:id',
+    validateParams({ id: { type: 'objectId', required: true } }),
+    async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id } = req.validatedParams;
         const broker = await Broker.findById(id).lean();
         if (!broker) return res.status(404).json({ error: 'not found' });
 
@@ -52,12 +56,16 @@ router.get('/brokers/:id', async (req, res) => {
         console.error('Error in /api/metadata/brokers/:id:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/metadata/brokers/:id/image.svg
-router.get('/brokers/:id/image.svg', async (req, res) => {
+router.get(
+    '/brokers/:id/image.svg',
+    validateParams({ id: { type: 'objectId', required: true } }),
+    async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id } = req.validatedParams;
         const broker = await Broker.findById(id).lean();
         if (!broker) return res.status(404).send('not found');
 
@@ -101,6 +109,7 @@ router.get('/brokers/:id/image.svg', async (req, res) => {
         console.error('Error in /api/metadata/brokers/:id/image.svg:', err);
         res.status(500).send('error');
     }
-});
+    },
+);
 
 module.exports = router;

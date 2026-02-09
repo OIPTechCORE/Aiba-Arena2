@@ -7,19 +7,56 @@ const EconomyConfig = require('../models/EconomyConfig');
 const TreasuryOp = require('../models/TreasuryOp');
 const { requireTelegram } = require('../middleware/requireTelegram');
 const { computeTokenSplits } = require('../util/tokenSplits');
+const { validateBody, validateQuery } = require('../middleware/validate');
 
 const router = express.Router();
 
-router.get('/listings', async (req, res) => {
+router.get(
+    '/listings',
+    validateQuery({
+        listingType: { type: 'string', trim: true, maxLength: 50 },
+    }),
+    async (req, res) => {
     const listingType = String(req.query.listingType || '').trim();
     const query = { status: 'active' };
     if (listingType) query.listingType = listingType;
     const listings = await AssetListing.find(query).sort({ createdAt: -1 }).lean();
     res.json({ listings });
-});
+    },
+);
 
-router.post('/list', requireTelegram, async (req, res) => {
-    const { assetId, priceAiba, listingType } = req.body || {};
+// On-chain settlement info (jetton escrow)
+router.get(
+    '/onchain-info',
+    validateQuery({
+        listingId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
+    const listingId = String(req.query.listingId || '').trim();
+    if (!listingId) return res.status(400).json({ error: 'listingId required' });
+    const listing = await AssetListing.findById(listingId).lean();
+    if (!listing || listing.status !== 'active') return res.status(404).json({ error: 'Listing not found' });
+
+    res.json({
+        listingId,
+        priceAiba: listing.priceAiba,
+        escrowAddress: process.env.AI_ASSET_ESCROW_ADDRESS || '',
+        escrowJettonWallet: process.env.AI_ASSET_ESCROW_JETTON_WALLET || '',
+        jettonMaster: process.env.AIBA_JETTON_MASTER || '',
+    });
+    },
+);
+
+router.post(
+    '/list',
+    requireTelegram,
+    validateBody({
+        assetId: { type: 'objectId', required: true },
+        priceAiba: { type: 'integer', min: 0, required: true },
+        listingType: { type: 'string', trim: true, maxLength: 50 },
+    }),
+    async (req, res) => {
+    const { assetId, priceAiba, listingType } = req.validatedBody || {};
     const asset = await Asset.findById(assetId);
     if (!asset) return res.status(404).json({ error: 'Asset not found' });
 
@@ -37,10 +74,17 @@ router.post('/list', requireTelegram, async (req, res) => {
     await asset.save();
 
     res.json({ listing });
-});
+    },
+);
 
-router.post('/buy', requireTelegram, async (req, res) => {
-    const listingId = String(req.body?.listingId || '').trim();
+router.post(
+    '/buy',
+    requireTelegram,
+    validateBody({
+        listingId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
+    const listingId = req.validatedBody?.listingId;
     const listing = await AssetListing.findById(listingId);
     if (!listing || listing.status !== 'active') return res.status(404).json({ error: 'Listing not found' });
 
@@ -76,10 +120,18 @@ router.post('/buy', requireTelegram, async (req, res) => {
     }
 
     res.json({ ok: true, asset });
-});
+    },
+);
 
-router.post('/rent', requireTelegram, async (req, res) => {
-    const { listingId, durationHours } = req.body || {};
+router.post(
+    '/rent',
+    requireTelegram,
+    validateBody({
+        listingId: { type: 'objectId', required: true },
+        durationHours: { type: 'integer', min: 1, max: 720 },
+    }),
+    async (req, res) => {
+    const { listingId, durationHours } = req.validatedBody || {};
     const listing = await AssetListing.findById(listingId);
     if (!listing || listing.status !== 'active') return res.status(404).json({ error: 'Listing not found' });
 
@@ -117,6 +169,7 @@ router.post('/rent', requireTelegram, async (req, res) => {
     }
 
     res.json({ rental });
-});
+    },
+);
 
 module.exports = router;

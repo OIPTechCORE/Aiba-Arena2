@@ -35,7 +35,7 @@ The codebase is **feature-complete for a testnet/MVP**: contracts build and have
 **Gaps / notes:**
 
 - Root `package.json` **build:contracts** lists `AibaJettonSupply` (from `AibaJetton.tact`); `tact.config.json` correctly maps both `AibaJetton` and `AibaJettonSupply` to their `.tact` files. Build succeeds.
-- **docs/deployment.md** still says “Backend: Express (`backend/server.js`)”. Correct: **local/Render** use `server.js`; **Vercel** uses `backend/api/index.js` (serverless). Consider adding one line that Vercel uses `api/index.js`.
+- _(Resolved)_ **docs/deployment.md** — “Backend: Express (`backend/server.js`)”. Now states: local/Render/Railway use `server.js`; Vercel as **separate project** with root `backend/` and entry `api/index.js` (serverless); **CORS_ORIGIN** required in production; vault/claim vars set **all together**; PORT and APP_ENV noted.
 
 ---
 
@@ -155,7 +155,7 @@ Previous fixes (from conversation history) addressed passing a proper `Deploy` m
 ## 7. Documentation & Ops
 
 - **README.md** — Structure, build/test/deploy, backend env, Vercel backend, battle+claim flow, frontends, deployment/ops links, autocommit scripts; **marketplace & payments** link (MARKETPLACE-AND-PAYMENTS-MASTER-PLAN). **Accurate.**
-- **docs/deployment.md** — Testnet baseline; components; backend (Render/Railway/Vercel) env; **CREATED_BROKERS_WALLET**, **BOOST_PROFILE_WALLET**, **GIFTS_WALLET**; miniapp + admin on Vercel. **Up to date.**
+- **docs/deployment.md** — Testnet baseline; components; backend (Render/Railway + Vercel as separate project, root `backend/`); env includes **CORS_ORIGIN** (production), **PORT**/ **APP_ENV**, vault/claim (all together); miniapp + admin on Vercel. **Up to date.**
 - **docs/mainnet-readiness.md** — Key separation, validations, idempotency, rate limiting, required env (incl. optional TON wallets for create broker, boost profile, gifts), checklist enforcement, security review steps. **Strong.**
 - **docs/runbook.md** — Incident response, production safety checks, key rotation (including oracle), **Super Admin TON wallets** (create broker, boost profile, gifts, leaderboard, boost group, boost TON); security playbooks, data migrations. **Useful.**
 - **docs/monitoring.md** — Logs, uptime, Prometheus, suggested alerts and metric names. **Good baseline.**
@@ -205,10 +205,9 @@ Previous fixes (from conversation history) addressed passing a proper `Deploy` m
 ### Recommended next steps (concise)
 
 1. **Mainnet:** Set `APP_ENV=prod` and all required env; complete mainnet-readiness checklist (keys, CORS, Telegram, vault, TON provider).
-2. **Deployment doc:** One-line clarification that Vercel uses `backend/api/index.js`.
-3. **Rate limiting:** Plan Redis (or shared store) for production multi-instance.
-4. **Contract tests:** Run full `npm test` in CI; if flaky/slow, consider splitting “build only” vs “build + test” or caching build artifacts.
-5. **Operational:** Configure monitoring/alerting per docs/monitoring.md; test backups and runbook procedures.
+2. **Rate limiting:** Plan Redis (or shared store) for production multi-instance.
+3. **Contract tests:** Run full `npm test` in CI; if flaky/slow, consider splitting “build only” vs “build + test” or caching build artifacts.
+4. **Operational:** Configure monitoring/alerting per docs/monitoring.md; test backups and runbook procedures.
 
 ---
 
@@ -218,4 +217,4 @@ Previous fixes (from conversation history) addressed passing a proper `Deploy` m
 - **Production hardening:** **Documented** — mainnet-readiness and runbook give a clear path; implementation already has fail-fast checks and security hooks.
 - **Deployment flexibility:** **Good** — Backend runs as long-lived (server.js) or serverless (Vercel); frontends build for Vercel.
 
-**One-line summary:** Aiba-Arena2 is a **testnet-ready TON game/reward stack** with contracts, Express backend (local + Vercel), Telegram miniapp, and admin panel; mainnet readiness is documented and largely enforced by existing production checks, with a short list of follow-ups (env, docs tweak, rate-limit store, ops).
+**One-line summary:** Aiba-Arena2 is a **testnet-ready TON game/reward stack** with contracts, Express backend (local + Vercel), Telegram miniapp, and admin panel; mainnet readiness is documented and largely enforced by existing production checks; deployment doc updated (Vercel, CORS_ORIGIN, vault). Follow-ups: env, rate-limit store, ops.

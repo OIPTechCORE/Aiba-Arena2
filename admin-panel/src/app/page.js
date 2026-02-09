@@ -5,9 +5,18 @@ import { useEffect, useMemo, useState } from 'react';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
+function getAdminErrorMessage(error, fallback = 'Request failed.') {
+    const data = error?.response?.data || {};
+    if (data?.error && typeof data.error === 'object') {
+        return data.error.message || data.error.code || fallback;
+    }
+    if (data?.error) return data.error;
+    return error?.message || fallback;
+}
+
 export default function AdminHome() {
     const [token, setToken] = useState('');
-    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod | stats | treasury | realms | marketplace | treasuryOps | charity | comms | university
+    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod | stats | treasury | realms | marketplace | treasuryOps | governance | charity | comms | university
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -18,6 +27,7 @@ export default function AdminHome() {
     const [realmLevel, setRealmLevel] = useState(1);
     const [marketMetrics, setMarketMetrics] = useState(null);
     const [treasuryOpsSummary, setTreasuryOpsSummary] = useState(null);
+    const [govProposals, setGovProposals] = useState([]);
 
     const api = useMemo(() => {
         const a = axios.create({ baseURL: BACKEND_URL });
@@ -25,6 +35,23 @@ export default function AdminHome() {
             if (token) cfg.headers.Authorization = `Bearer ${token}`;
             return cfg;
         });
+        a.interceptors.response.use(
+            (response) => {
+                const data = response?.data;
+                if (data && data.ok === false && data.error) {
+                    const err = new Error(data.error.message || data.error.code || 'Request failed');
+                    err.code = data.error.code;
+                    err.details = data.error.details;
+                    err.requestId = data.requestId || response?.headers?.['x-request-id'] || '';
+                    return Promise.reject(err);
+                }
+                if (data && data.ok === true && Object.prototype.hasOwnProperty.call(data, 'data')) {
+                    return { ...response, data: data.data };
+                }
+                return response;
+            },
+            (error) => Promise.reject(error),
+        );
         return a;
     }, [token]);
 
@@ -45,8 +72,8 @@ export default function AdminHome() {
             if (!t) throw new Error('no token');
             setToken(t);
             localStorage.setItem('aiba_admin_token', t);
-        } catch {
-            setAuthError('Login failed (check ADMIN_EMAIL / password).');
+        } catch (e) {
+            setAuthError(getAdminErrorMessage(e, 'Login failed (check ADMIN_EMAIL / password).'));
         }
     };
 
@@ -99,6 +126,20 @@ export default function AdminHome() {
         } catch {
             setTreasuryOpsSummary(null);
         }
+    };
+
+    // ----- Governance -----
+    const fetchGovProposals = async () => {
+        try {
+            const res = await api.get('/api/admin/governance/proposals');
+            setGovProposals(Array.isArray(res.data?.proposals) ? res.data.proposals : []);
+        } catch {
+            setGovProposals([]);
+        }
+    };
+    const executeProposal = async (proposalId) => {
+        await api.post('/api/admin/governance/execute', { proposalId });
+        await fetchGovProposals();
     };
 
     // ----- Tasks -----
@@ -372,7 +413,8 @@ export default function AdminHome() {
             const res = await api.get('/api/admin/mod/user', { params: { telegramId } });
             setUserDetail(res.data);
         } catch (e) {
-            setUserDetailError(e?.response?.data?.error === 'user not found' ? 'User not found.' : 'Failed to load user.');
+            const msg = getAdminErrorMessage(e, 'Failed to load user.');
+            setUserDetailError(msg === 'user not found' ? 'User not found.' : msg);
         }
     };
 
@@ -401,7 +443,7 @@ export default function AdminHome() {
         try {
             const res = await api.get('/api/admin/announcements', { params: { limit: 50 } });
             setAnnouncements(Array.isArray(res.data) ? res.data : []);
-        } catch {
+        } catch (e) {
             setAnnouncements([]);
         }
     };
@@ -422,7 +464,7 @@ export default function AdminHome() {
             setAnnouncementLink('');
             await fetchAnnouncements();
         } catch (e) {
-            setCommsMsg(e?.response?.data?.error || 'Create failed.');
+            setCommsMsg(getAdminErrorMessage(e, 'Create failed.'));
         }
     };
     const broadcastAnnouncement = async (id) => {
@@ -433,7 +475,7 @@ export default function AdminHome() {
             setCommsMsg(`Broadcast sent to ${res.data?.sent ?? 0} users.`);
             setBroadcastingId('');
         } catch (e) {
-            setCommsMsg(e?.response?.data?.error || 'Broadcast failed.');
+            setCommsMsg(getAdminErrorMessage(e, 'Broadcast failed.'));
             setBroadcastingId('');
         }
     };
@@ -529,7 +571,7 @@ export default function AdminHome() {
             await fetchCharityCampaigns();
             await fetchCharityStats();
         } catch (e) {
-            setCharityMsg(e?.response?.data?.error || 'Create failed.');
+            setCharityMsg(getAdminErrorMessage(e, 'Create failed.'));
         }
     };
     const updateCharityCampaign = async (id, patch) => {
@@ -539,7 +581,7 @@ export default function AdminHome() {
             setCharityMsg('Updated.');
             await fetchCharityCampaigns();
         } catch (e) {
-            setCharityMsg(e?.response?.data?.error || 'Update failed.');
+            setCharityMsg(getAdminErrorMessage(e, 'Update failed.'));
         }
     };
     const closeCharityCampaign = async (id) => {
@@ -550,7 +592,7 @@ export default function AdminHome() {
             await fetchCharityCampaigns();
             await fetchCharityStats();
         } catch (e) {
-            setCharityMsg(e?.response?.data?.error || 'Close failed.');
+            setCharityMsg(getAdminErrorMessage(e, 'Close failed.'));
         }
     };
     const disburseCharityCampaign = async (id) => {
@@ -561,7 +603,7 @@ export default function AdminHome() {
             await fetchCharityCampaigns();
             await fetchCharityStats();
         } catch (e) {
-            setCharityMsg(e?.response?.data?.error || 'Disburse failed.');
+            setCharityMsg(getAdminErrorMessage(e, 'Disburse failed.'));
         }
     };
 
@@ -583,6 +625,7 @@ export default function AdminHome() {
         if (tab === 'realms') fetchRealms();
         if (tab === 'marketplace') fetchMarketMetrics();
         if (tab === 'treasuryOps') fetchTreasuryOpsMetrics();
+        if (tab === 'governance') fetchGovProposals();
         if (tab === 'charity') {
             fetchCharityCampaigns();
             fetchCharityStats();
@@ -651,6 +694,9 @@ export default function AdminHome() {
                         </button>
                         <button onClick={() => setTab('treasuryOps')} style={{ padding: '8px 12px' }}>
                             Treasury Ops
+                        </button>
+                        <button onClick={() => setTab('governance')} style={{ padding: '8px 12px' }}>
+                            Governance
                         </button>
                         <button onClick={() => setTab('charity')} style={{ padding: '8px 12px' }}>
                             Charity
@@ -1259,6 +1305,30 @@ export default function AdminHome() {
                                     <div>Treasury: {treasuryOpsSummary?.treasury ?? 0}</div>
                                     <div>Rewards: {treasuryOpsSummary?.rewards ?? 0}</div>
                                     <div>Staking: {treasuryOpsSummary?.staking ?? 0}</div>
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === 'governance' ? (
+                            <>
+                                <button onClick={fetchGovProposals} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
+                                    {govProposals.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No proposals.</div>
+                                    ) : (
+                                        govProposals.map((p) => (
+                                            <div key={p._id} style={{ padding: 10, border: '1px solid #f2f2f2', borderRadius: 8 }}>
+                                                <div style={{ fontWeight: 600 }}>{p.title}</div>
+                                                <div style={{ color: '#666', fontSize: 12 }}>{p.description}</div>
+                                                <div style={{ color: '#999', fontSize: 12, marginTop: 4 }}>status: {p.status}</div>
+                                                {p.status === 'voting' ? (
+                                                    <button onClick={() => executeProposal(p._id)} style={{ padding: '6px 10px', marginTop: 8 }}>
+                                                        Execute
+                                                    </button>
+                                                ) : null}
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </>
                         ) : null}

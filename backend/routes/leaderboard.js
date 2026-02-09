@@ -2,13 +2,25 @@ const router = require('express').Router();
 const { requireTelegram } = require('../middleware/requireTelegram');
 const Battle = require('../models/Battle');
 const User = require('../models/User');
+const { getLimit } = require('../util/pagination');
+const { validateQuery } = require('../middleware/validate');
 
 // GET /api/leaderboard?by=score|aiba|neur|battles&limit=50
 // Global leaderboard: all users worldwide, no country filter. Any authenticated user can see it.
-router.get('/', requireTelegram, async (req, res) => {
+router.get(
+    '/',
+    requireTelegram,
+    validateQuery({
+        by: { type: 'string', trim: true, maxLength: 20 },
+        limit: { type: 'integer', min: 1, max: 500 },
+    }),
+    async (req, res) => {
     try {
-        const by = String(req.query?.by || 'score').trim().toLowerCase();
-        const limit = Math.min(500, Math.max(1, parseInt(req.query?.limit, 10) || 50));
+        const by = String(req.validatedQuery?.by || 'score').trim().toLowerCase();
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 50, maxLimit: 500 },
+        );
 
         const allowed = ['score', 'aiba', 'neur', 'battles'];
         if (!allowed.includes(by)) {
@@ -53,7 +65,8 @@ router.get('/', requireTelegram, async (req, res) => {
         console.error('Leaderboard error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/leaderboard/my-rank — current user's rank (by score) for "top leaders create group free" logic
 router.get('/my-rank', requireTelegram, async (req, res) => {

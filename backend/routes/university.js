@@ -1,4 +1,11 @@
 const router = require('express').Router();
+const { requireTelegram } = require('../middleware/requireTelegram');
+const UniversityProgress = require('../models/UniversityProgress');
+const CourseBadgeMint = require('../models/CourseBadgeMint');
+const FullCertificateMint = require('../models/FullCertificateMint');
+const User = require('../models/User');
+const { validateBody } = require('../middleware/validate');
+const { getConfig } = require('../engine/economy');
 
 /**
  * Static course data for AIBA ARENA UNIVERSITY.
@@ -121,12 +128,19 @@ router.get('/progress', requireTelegram, async (req, res) => {
 });
 
 /** POST /api/university/progress — mark a module complete (courseId, moduleId). Awards university_graduate badge when all modules done. */
-router.post('/progress', requireTelegram, async (req, res) => {
+router.post(
+    '/progress',
+    requireTelegram,
+    validateBody({
+        courseId: { type: 'string', trim: true, minLength: 1, maxLength: 100, required: true },
+        moduleId: { type: 'string', trim: true, minLength: 1, maxLength: 100, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const courseId = String(req.body?.courseId || '').trim();
-        const moduleId = String(req.body?.moduleId || '').trim();
+        const courseId = String(req.validatedBody?.courseId || '').trim();
+        const moduleId = String(req.validatedBody?.moduleId || '').trim();
         if (!courseId || !moduleId) return res.status(400).json({ error: 'courseId and moduleId required' });
         const key = `${courseId}-${moduleId}`;
         const allKeys = getAllModuleKeys();
@@ -163,7 +177,8 @@ router.post('/progress', requireTelegram, async (req, res) => {
         console.error('University progress POST error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 /** GET /api/university/mint-course-badge-info — cost (TON), wallet, canMint, alreadyMinted (requires Telegram). */
 router.get('/mint-course-badge-info', requireTelegram, async (req, res) => {
@@ -194,11 +209,17 @@ router.get('/mint-course-badge-info', requireTelegram, async (req, res) => {
 });
 
 /** POST /api/university/mint-course-badge — verify TON payment and award course_completion badge (at least one course completed). */
-router.post('/mint-course-badge', requireTelegram, async (req, res) => {
+router.post(
+    '/mint-course-badge',
+    requireTelegram,
+    validateBody({
+        txHash: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const txHash = String(req.body?.txHash || '').trim();
+        const txHash = String(req.validatedBody?.txHash || '').trim();
         if (!txHash) return res.status(400).json({ error: 'txHash required' });
 
         const cfg = await getConfig();
@@ -251,7 +272,8 @@ router.post('/mint-course-badge', requireTelegram, async (req, res) => {
         console.error('University mint-course-badge error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 /** GET /api/university/mint-full-certificate-info — cost (TON), wallet, canMint, alreadyMinted for whole course completion certificate (graduate only). */
 router.get('/mint-full-certificate-info', requireTelegram, async (req, res) => {
@@ -281,11 +303,17 @@ router.get('/mint-full-certificate-info', requireTelegram, async (req, res) => {
 });
 
 /** POST /api/university/mint-full-certificate — verify TON payment and award full_course_completion_certificate badge (all courses completed). */
-router.post('/mint-full-certificate', requireTelegram, async (req, res) => {
+router.post(
+    '/mint-full-certificate',
+    requireTelegram,
+    validateBody({
+        txHash: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const txHash = String(req.body?.txHash || '').trim();
+        const txHash = String(req.validatedBody?.txHash || '').trim();
         if (!txHash) return res.status(400).json({ error: 'txHash required' });
 
         const cfg = await getConfig();
@@ -339,7 +367,8 @@ router.post('/mint-full-certificate', requireTelegram, async (req, res) => {
         console.error('University mint-full-certificate error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;
 module.exports.COURSES = COURSES;

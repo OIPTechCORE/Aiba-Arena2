@@ -7,6 +7,7 @@ const ActionRunKey = require('../models/ActionRunKey');
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
 const { getConfig, debitNeurFromUser, debitAibaFromUser } = require('../engine/economy');
 const { verifyTonPayment } = require('../util/tonVerify');
+const { validateBody } = require('../middleware/validate');
 
 async function acquireActionLock({ scope, requestId, telegramId }) {
     const lockTtlMs = 15 * 60 * 1000;
@@ -87,12 +88,18 @@ router.post('/starter', requireTelegram, async (req, res) => {
 
 // POST /api/brokers/create-with-ton — Pay TON to create a new broker; auto-listed on marketplace (global recognition).
 // Body: { txHash }. Cost 1–10 TON (createBrokerCostTonNano); payment → CREATED_BROKERS_WALLET.
-router.post('/create-with-ton', requireTelegram, async (req, res) => {
+router.post(
+    '/create-with-ton',
+    requireTelegram,
+    validateBody({
+        txHash: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
 
-        const txHash = String(req.body?.txHash || '').trim();
+        const txHash = String(req.validatedBody?.txHash || '').trim();
         if (!txHash) return res.status(400).json({ error: 'txHash required' });
 
         const cfg = await getConfig();
@@ -141,7 +148,8 @@ router.post('/create-with-ton', requireTelegram, async (req, res) => {
         console.error('Error create-with-ton broker:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // List my brokers
 router.get('/mine', requireTelegram, async (req, res) => {
@@ -159,7 +167,15 @@ router.get('/mine', requireTelegram, async (req, res) => {
 
 // Train a broker (NEUR sink)
 // POST /api/brokers/train { requestId?, brokerId, stat: "intelligence"|"speed"|"risk" }
-router.post('/train', requireTelegram, async (req, res) => {
+router.post(
+    '/train',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+        brokerId: { type: 'objectId', required: true },
+        stat: { type: 'string', trim: true, enum: ['intelligence', 'speed', 'risk'] },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -171,8 +187,8 @@ router.post('/train', requireTelegram, async (req, res) => {
         if (!lock.ok && lock.inProgress) return res.status(409).json({ error: 'in_progress', retryAfterMs: 1500 });
         if (lock.ok && lock.completed) return res.json(lock.response);
 
-        const brokerId = String(req.body?.brokerId || '').trim();
-        const stat = String(req.body?.stat || '').trim();
+        const brokerId = String(req.validatedBody?.brokerId || '').trim();
+        const stat = String(req.validatedBody?.stat || '').trim();
         if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
         if (!['intelligence', 'speed', 'risk'].includes(stat)) return res.status(400).json({ error: 'invalid stat' });
 
@@ -236,11 +252,19 @@ router.post('/train', requireTelegram, async (req, res) => {
         console.error('Error training broker:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // Repair a broker (NEUR sink) - restores energy and clears cooldowns
 // POST /api/brokers/repair { requestId?, brokerId }
-router.post('/repair', requireTelegram, async (req, res) => {
+router.post(
+    '/repair',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+        brokerId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -252,7 +276,7 @@ router.post('/repair', requireTelegram, async (req, res) => {
         if (!lock.ok && lock.inProgress) return res.status(409).json({ error: 'in_progress', retryAfterMs: 1500 });
         if (lock.ok && lock.completed) return res.json(lock.response);
 
-        const brokerId = String(req.body?.brokerId || '').trim();
+        const brokerId = String(req.validatedBody?.brokerId || '').trim();
         if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
         const broker = await Broker.findById(brokerId);
@@ -315,11 +339,20 @@ router.post('/repair', requireTelegram, async (req, res) => {
         console.error('Error repairing broker:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // Upgrade a broker (AIBA sink) - permanent improvement
 // POST /api/brokers/upgrade { requestId?, brokerId, stat }
-router.post('/upgrade', requireTelegram, async (req, res) => {
+router.post(
+    '/upgrade',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+        brokerId: { type: 'objectId', required: true },
+        stat: { type: 'string', trim: true, enum: ['intelligence', 'speed', 'risk'] },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -331,8 +364,8 @@ router.post('/upgrade', requireTelegram, async (req, res) => {
         if (!lock.ok && lock.inProgress) return res.status(409).json({ error: 'in_progress', retryAfterMs: 1500 });
         if (lock.ok && lock.completed) return res.json(lock.response);
 
-        const brokerId = String(req.body?.brokerId || '').trim();
-        const stat = String(req.body?.stat || '').trim();
+        const brokerId = String(req.validatedBody?.brokerId || '').trim();
+        const stat = String(req.validatedBody?.stat || '').trim();
         if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
         if (!['intelligence', 'speed', 'risk'].includes(stat)) return res.status(400).json({ error: 'invalid stat' });
 
@@ -396,11 +429,20 @@ router.post('/upgrade', requireTelegram, async (req, res) => {
         console.error('Error upgrading broker:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // Combine two brokers: base absorbs sacrifice (blended stats + XP), sacrifice is deleted. Costs NEUR.
 // POST /api/brokers/combine { requestId?, baseBrokerId, sacrificeBrokerId }
-router.post('/combine', requireTelegram, async (req, res) => {
+router.post(
+    '/combine',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+        baseBrokerId: { type: 'objectId', required: true },
+        sacrificeBrokerId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -412,8 +454,8 @@ router.post('/combine', requireTelegram, async (req, res) => {
         if (!lock.ok && lock.inProgress) return res.status(409).json({ error: 'in_progress', retryAfterMs: 1500 });
         if (lock.ok && lock.completed) return res.json(lock.response);
 
-        const baseId = String(req.body?.baseBrokerId || '').trim();
-        const sacrificeId = String(req.body?.sacrificeBrokerId || '').trim();
+        const baseId = String(req.validatedBody?.baseBrokerId || '').trim();
+        const sacrificeId = String(req.validatedBody?.sacrificeBrokerId || '').trim();
         if (!baseId || !sacrificeId) return res.status(400).json({ error: 'baseBrokerId and sacrificeBrokerId required' });
         if (baseId === sacrificeId) return res.status(400).json({ error: 'base and sacrifice must be different brokers' });
 
@@ -491,11 +533,19 @@ router.post('/combine', requireTelegram, async (req, res) => {
         console.error('Error combining brokers:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // In-app NFT mint: pay AIBA, create pending mint job (admin or worker completes actual mint and links broker).
 // POST /api/brokers/mint-nft { requestId?, brokerId }
-router.post('/mint-nft', requireTelegram, async (req, res) => {
+router.post(
+    '/mint-nft',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+        brokerId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -503,7 +553,7 @@ router.post('/mint-nft', requireTelegram, async (req, res) => {
         const requestId = getIdempotencyKey(req);
         if (!requestId) return res.status(400).json({ error: 'requestId required' });
 
-        const brokerId = String(req.body?.brokerId || '').trim();
+        const brokerId = String(req.validatedBody?.brokerId || '').trim();
         if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
         const broker = await Broker.findById(brokerId);
@@ -548,6 +598,7 @@ router.post('/mint-nft', requireTelegram, async (req, res) => {
         console.error('Broker mint-nft error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

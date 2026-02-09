@@ -5,18 +5,28 @@ const User = require('../models/User');
 const { getConfig } = require('../engine/economy');
 const { verifyTonPayment } = require('../util/tonVerify');
 const UsedTonTxHash = require('../models/UsedTonTxHash');
+const { getLimit } = require('../util/pagination');
+const { validateBody, validateQuery } = require('../middleware/validate');
 
 router.use(requireTelegram);
 
 // POST /api/gifts/send — Send a gift to another user. Pay TON 1–10 → GIFTS_WALLET.
 // Body: { txHash, toTelegramId or toUsername, message? }
-router.post('/send', async (req, res) => {
+router.post(
+    '/send',
+    validateBody({
+        txHash: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+        toTelegramId: { type: 'string', trim: true, maxLength: 50 },
+        toUsername: { type: 'string', trim: true, maxLength: 50 },
+        message: { type: 'string', trim: true, maxLength: 200 },
+    }),
+    async (req, res) => {
     try {
         const fromTelegramId = String(req.telegramId || '');
-        const txHash = String(req.body?.txHash || '').trim();
-        const toTelegramId = String(req.body?.toTelegramId || '').trim();
-        let toUsername = String(req.body?.toUsername || '').trim();
-        const message = String(req.body?.message || '').trim();
+        const txHash = String(req.validatedBody?.txHash || '').trim();
+        const toTelegramId = String(req.validatedBody?.toTelegramId || '').trim();
+        let toUsername = String(req.validatedBody?.toUsername || '').trim();
+        const message = String(req.validatedBody?.message || '').trim();
 
         if (!txHash) return res.status(400).json({ error: 'txHash required' });
 
@@ -65,32 +75,47 @@ router.post('/send', async (req, res) => {
         console.error('Gifts send error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/gifts/received — Gifts received by current user
-router.get('/received', async (req, res) => {
+router.get(
+    '/received',
+    validateQuery({ limit: { type: 'integer', min: 1, max: 50 } }),
+    async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
-        const limit = Math.min(50, Math.max(1, parseInt(req.query?.limit, 10) || 20));
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 20, maxLimit: 50 },
+        );
         const list = await Gift.find({ toTelegramId: telegramId }).sort({ createdAt: -1 }).limit(limit).lean();
         res.json(list);
     } catch (err) {
         console.error('Gifts received error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/gifts/sent — Gifts sent by current user
-router.get('/sent', async (req, res) => {
+router.get(
+    '/sent',
+    validateQuery({ limit: { type: 'integer', min: 1, max: 50 } }),
+    async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
-        const limit = Math.min(50, Math.max(1, parseInt(req.query?.limit, 10) || 20));
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 20, maxLimit: 50 },
+        );
         const list = await Gift.find({ fromTelegramId: telegramId }).sort({ createdAt: -1 }).limit(limit).lean();
         res.json(list);
     } catch (err) {
         console.error('Gifts sent error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

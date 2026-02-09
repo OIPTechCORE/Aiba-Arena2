@@ -8,6 +8,7 @@ const { getConfig, debitAibaFromUserNoBurn } = require('../engine/economy');
 const { createSignedClaim } = require('../ton/signRewardClaim');
 const { getVaultLastSeqno } = require('../ton/vaultRead');
 const { metrics } = require('../metrics');
+const { validateBody } = require('../middleware/validate');
 
 router.use(requireTelegram);
 
@@ -159,7 +160,13 @@ router.get('/me', async (req, res) => {
 // POST /api/economy/claim-aiba
 // Body: { requestId?: string, amount?: number|string }
 // Withdraw AIBA credits to an on-chain claim (signature-based vault).
-router.post('/claim-aiba', async (req, res) => {
+router.post(
+    '/claim-aiba',
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+        amount: { type: 'integer', min: 1 },
+    }),
+    async (req, res) => {
     let claimMutexId = '';
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
@@ -217,7 +224,7 @@ router.post('/claim-aiba', async (req, res) => {
         if (!mutex.ok && mutex.inProgress) return res.status(409).json({ error: 'in_progress', retryAfterMs: 1500 });
         claimMutexId = mutex.lockId || '';
 
-        const rawAmount = req.body?.amount;
+        const rawAmount = req.validatedBody?.amount ?? req.body?.amount;
         const amt =
             rawAmount === undefined || rawAmount === null
                 ? Math.floor(Number(user?.aibaBalance ?? 0))

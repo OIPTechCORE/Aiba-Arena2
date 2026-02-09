@@ -11,6 +11,8 @@ const { getConfig, debitAibaFromUser, creditAibaNoCap } = require('../engine/eco
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
 const { verifyTonPayment } = require('../util/tonVerify');
 const { simulateRace } = require('../engine/raceEngine');
+const { getLimit } = require('../util/pagination');
+const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
 
 const LEAGUES = ['rookie', 'pro', 'elite'];
 
@@ -23,9 +25,14 @@ function getCarRacingConfig(cfg) {
     };
 }
 
-router.get('/tracks', async (req, res) => {
+router.get(
+    '/tracks',
+    validateQuery({
+        league: { type: 'string', trim: true, enum: LEAGUES },
+    }),
+    async (req, res) => {
     try {
-        const league = req.query.league && LEAGUES.includes(req.query.league) ? req.query.league : null;
+        const league = req.validatedQuery?.league ? req.validatedQuery.league : null;
         const q = { active: true };
         if (league) q.league = league;
         const tracks = await CarTrack.find(q).lean();
@@ -34,12 +41,22 @@ router.get('/tracks', async (req, res) => {
         console.error('Car racing tracks error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
-router.get('/races', async (req, res) => {
+router.get(
+    '/races',
+    validateQuery({
+        status: { type: 'string', trim: true, maxLength: 20 },
+        limit: { type: 'integer', min: 1, max: 50 },
+    }),
+    async (req, res) => {
     try {
-        const status = req.query.status === 'open' ? 'open' : 'open';
-        const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
+        const status = req.validatedQuery?.status === 'open' ? 'open' : 'open';
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 20, maxLimit: 50 },
+        );
         const races = await CarRace.find({ status }).sort({ createdAt: -1 }).limit(limit).lean();
         const withCount = await Promise.all(
             races.map(async (r) => {
@@ -52,7 +69,8 @@ router.get('/races', async (req, res) => {
         console.error('Car racing races error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 router.get('/cars', requireTelegram, async (req, res) => {
     try {
@@ -66,7 +84,13 @@ router.get('/cars', requireTelegram, async (req, res) => {
     }
 });
 
-router.post('/create', requireTelegram, async (req, res) => {
+router.post(
+    '/create',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
@@ -98,13 +122,20 @@ router.post('/create', requireTelegram, async (req, res) => {
         console.error('Car racing create error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
-router.post('/create-with-ton', requireTelegram, async (req, res) => {
+router.post(
+    '/create-with-ton',
+    requireTelegram,
+    validateBody({
+        txHash: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const txHash = String(req.body?.txHash ?? '').trim();
+        const txHash = String(req.validatedBody?.txHash ?? '').trim();
         if (!txHash) return res.status(400).json({ error: 'txHash required' });
         const wallet = (process.env.CAR_RACING_WALLET || '').trim();
         if (!wallet) return res.status(503).json({ error: 'CAR_RACING_WALLET not configured' });
@@ -129,7 +160,8 @@ router.post('/create-with-ton', requireTelegram, async (req, res) => {
         console.error('Car racing create-with-ton error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 async function runCarRaceIfFull(raceId) {
     const race = await CarRace.findById(raceId);
@@ -196,14 +228,22 @@ async function runCarRaceIfFull(raceId) {
     await race.save();
 }
 
-router.post('/enter', requireTelegram, async (req, res) => {
+router.post(
+    '/enter',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+        raceId: { type: 'objectId', required: true },
+        carId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
         const requestId = getIdempotencyKey(req);
         if (!requestId) return res.status(400).json({ error: 'requestId required' });
-        const raceId = String(req.body?.raceId ?? '').trim();
-        const carId = String(req.body?.carId ?? '').trim();
+        const raceId = String(req.validatedBody?.raceId ?? '').trim();
+        const carId = String(req.validatedBody?.carId ?? '').trim();
         if (!raceId || !carId) return res.status(400).json({ error: 'raceId and carId required' });
         const race = await CarRace.findById(raceId);
         if (!race) return res.status(404).json({ error: 'race not found' });
@@ -243,11 +283,15 @@ router.post('/enter', requireTelegram, async (req, res) => {
         console.error('Car racing enter error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
-router.get('/race/:id', async (req, res) => {
+router.get(
+    '/race/:id',
+    validateParams({ id: { type: 'objectId', required: true } }),
+    async (req, res) => {
     try {
-        const race = await CarRace.findById(req.params.id).lean();
+        const race = await CarRace.findById(req.validatedParams.id).lean();
         if (!race) return res.status(404).json({ error: 'race not found' });
         const entries = await CarRaceEntry.find({ raceId: race._id }).populate('carId').sort({ position: 1 }).lean();
         res.json({ race, entries });
@@ -255,11 +299,18 @@ router.get('/race/:id', async (req, res) => {
         console.error('Car racing race get error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
-router.get('/leaderboard', async (req, res) => {
+router.get(
+    '/leaderboard',
+    validateQuery({ limit: { type: 'integer', min: 1, max: 100 } }),
+    async (req, res) => {
     try {
-        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 20, maxLimit: 100 },
+        );
         const agg = await CarRaceEntry.aggregate([
             { $match: { position: { $gte: 1 } } },
             { $group: { _id: '$telegramId', totalPoints: { $sum: '$points' }, wins: { $sum: { $cond: [{ $eq: ['$position', 1] }, 1, 0] } }, aibaEarned: { $sum: '$aibaReward' } } },
@@ -271,7 +322,8 @@ router.get('/leaderboard', async (req, res) => {
         console.error('Car racing leaderboard error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 router.get('/config', async (req, res) => {
     try {
@@ -287,23 +339,38 @@ router.get('/config', async (req, res) => {
     }
 });
 
-router.get('/listings', requireTelegram, async (req, res) => {
+router.get(
+    '/listings',
+    requireTelegram,
+    validateQuery({ limit: { type: 'integer', min: 1, max: 50 } }),
+    async (req, res) => {
     try {
-        const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
+        const limit = getLimit(
+            { query: { limit: req.validatedQuery?.limit } },
+            { defaultLimit: 20, maxLimit: 50 },
+        );
         const list = await CarListing.find({ status: 'active' }).sort({ createdAt: -1 }).limit(limit).populate('carId').lean();
         res.json(list.filter((l) => l.carId).map((l) => ({ _id: l._id, carId: l.carId._id, car: l.carId, sellerTelegramId: l.sellerTelegramId, priceAIBA: l.priceAIBA })));
     } catch (err) {
         console.error('Car listings error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
-router.post('/list', requireTelegram, async (req, res) => {
+router.post(
+    '/list',
+    requireTelegram,
+    validateBody({
+        carId: { type: 'objectId', required: true },
+        priceAIBA: { type: 'integer', min: 0, required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const carId = String(req.body?.carId ?? '').trim();
-        const priceAIBA = Math.floor(Number(req.body?.priceAIBA ?? 0));
+        const carId = String(req.validatedBody?.carId ?? '').trim();
+        const priceAIBA = Math.floor(Number(req.validatedBody?.priceAIBA ?? 0));
         if (!carId || !Number.isFinite(priceAIBA) || priceAIBA < 0) return res.status(400).json({ error: 'carId and priceAIBA required' });
         const car = await RacingCar.findById(carId);
         if (!car) return res.status(404).json({ error: 'car not found' });
@@ -316,15 +383,23 @@ router.post('/list', requireTelegram, async (req, res) => {
         console.error('Car list error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
-router.post('/buy-car', requireTelegram, async (req, res) => {
+router.post(
+    '/buy-car',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128 },
+        listingId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
         const requestId = getIdempotencyKey(req);
         if (!requestId) return res.status(400).json({ error: 'requestId required' });
-        const listingId = String(req.body?.listingId ?? '').trim();
+        const listingId = String(req.validatedBody?.listingId ?? '').trim();
         if (!listingId) return res.status(400).json({ error: 'listingId required' });
         const listing = await CarListing.findOne({ _id: listingId, status: 'active' }).populate('carId');
         if (!listing || !listing.carId) return res.status(404).json({ error: 'listing not found' });
@@ -365,6 +440,7 @@ router.post('/buy-car', requireTelegram, async (req, res) => {
         console.error('Car buy error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

@@ -4,6 +4,8 @@ const Guild = require('../models/Guild');
 const Broker = require('../models/Broker');
 const Battle = require('../models/Battle');
 const { getConfig } = require('../engine/economy');
+const { getLimit } = require('../util/pagination');
+const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
 
 router.use(requireTelegram);
 
@@ -35,11 +37,18 @@ async function verifyTonPayment(txHash, toWallet, minNano) {
 }
 
 // POST /api/guilds/create — Top leaders (by score) create free; others pay TON (1–10, configurable in Super Admin). Paid TON → LEADER_BOARD_WALLET.
-router.post('/create', async (req, res) => {
+router.post(
+    '/create',
+    validateBody({
+        name: { type: 'string', trim: true, minLength: 3, maxLength: 24, required: true },
+        bio: { type: 'string', trim: true, maxLength: 500 },
+        txHash: { type: 'string', trim: true, maxLength: 200 },
+    }),
+    async (req, res) => {
     const telegramId = String(req.telegramId || '');
-    const name = String(req.body?.name || '').trim();
-    const bio = String(req.body?.bio || '').trim();
-    const txHash = String(req.body?.txHash || '').trim();
+    const name = String(req.validatedBody?.name || '').trim();
+    const bio = String(req.validatedBody?.bio || '').trim();
+    const txHash = String(req.validatedBody?.txHash || '').trim();
 
     if (!name) return res.status(400).json({ error: 'name required' });
     if (name.length < 3 || name.length > 24) return res.status(400).json({ error: 'name must be 3-24 chars' });
@@ -85,12 +94,18 @@ router.post('/create', async (req, res) => {
         console.error('Error creating guild:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/guilds/join
-router.post('/join', async (req, res) => {
+router.post(
+    '/join',
+    validateBody({
+        guildId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     const telegramId = String(req.telegramId || '');
-    const guildId = String(req.body?.guildId || '').trim();
+    const guildId = String(req.validatedBody?.guildId || '').trim();
     if (!guildId) return res.status(400).json({ error: 'guildId required' });
 
     const guild = await Guild.findById(guildId);
@@ -102,12 +117,18 @@ router.post('/join', async (req, res) => {
     guild.members.push({ telegramId, role: 'member', joinedAt: new Date() });
     await guild.save();
     res.json(guild.toObject());
-});
+    },
+);
 
 // POST /api/guilds/leave
-router.post('/leave', async (req, res) => {
+router.post(
+    '/leave',
+    validateBody({
+        guildId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     const telegramId = String(req.telegramId || '');
-    const guildId = String(req.body?.guildId || '').trim();
+    const guildId = String(req.validatedBody?.guildId || '').trim();
     if (!guildId) return res.status(400).json({ error: 'guildId required' });
 
     const guild = await Guild.findById(guildId);
@@ -116,15 +137,22 @@ router.post('/leave', async (req, res) => {
     guild.members = guild.members.filter((m) => String(m.telegramId) !== telegramId);
     await guild.save();
     res.json({ ok: true });
-});
+    },
+);
 
 // POST /api/guilds/deposit-broker
 // Body: { guildId, brokerId }
-router.post('/deposit-broker', async (req, res) => {
+router.post(
+    '/deposit-broker',
+    validateBody({
+        guildId: { type: 'objectId', required: true },
+        brokerId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
-        const guildId = String(req.body?.guildId || '').trim();
-        const brokerId = String(req.body?.brokerId || '').trim();
+        const guildId = String(req.validatedBody?.guildId || '').trim();
+        const brokerId = String(req.validatedBody?.brokerId || '').trim();
         if (!guildId) return res.status(400).json({ error: 'guildId required' });
         if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
@@ -152,15 +180,22 @@ router.post('/deposit-broker', async (req, res) => {
         console.error('Error depositing broker:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // POST /api/guilds/withdraw-broker
 // Body: { guildId, brokerId }
-router.post('/withdraw-broker', async (req, res) => {
+router.post(
+    '/withdraw-broker',
+    validateBody({
+        guildId: { type: 'objectId', required: true },
+        brokerId: { type: 'objectId', required: true },
+    }),
+    async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
-        const guildId = String(req.body?.guildId || '').trim();
-        const brokerId = String(req.body?.brokerId || '').trim();
+        const guildId = String(req.validatedBody?.guildId || '').trim();
+        const brokerId = String(req.validatedBody?.brokerId || '').trim();
         if (!guildId) return res.status(400).json({ error: 'guildId required' });
         if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
@@ -192,13 +227,17 @@ router.post('/withdraw-broker', async (req, res) => {
         console.error('Error withdrawing broker:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/guilds/:guildId/pool
-router.get('/:guildId/pool', async (req, res) => {
+router.get(
+    '/:guildId/pool',
+    validateParams({ guildId: { type: 'objectId', required: true } }),
+    async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
-        const guildId = String(req.params.guildId || '').trim();
+        const guildId = String(req.validatedParams.guildId || '').trim();
         const guild = await Guild.findById(guildId).lean();
         if (!guild) return res.status(404).json({ error: 'not found' });
         if (!isMember(guild, telegramId)) return res.status(403).json({ error: 'not a member' });
@@ -210,17 +249,25 @@ router.get('/:guildId/pool', async (req, res) => {
         console.error('Error loading guild pool:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/guilds/list — All groups globally (all users can see). Sorted by boost count then created.
-router.get('/list', async (req, res) => {
-    const limit = Math.min(300, Math.max(1, parseInt(req.query?.limit, 10) || 200));
+router.get(
+    '/list',
+    validateQuery({ limit: { type: 'integer', min: 1, max: 300 } }),
+    async (req, res) => {
+    const limit = getLimit(
+        { query: { limit: req.validatedQuery?.limit } },
+        { defaultLimit: 200, maxLimit: 300 },
+    );
     const guilds = await Guild.find({ active: true })
         .sort({ boostCount: -1, createdAt: -1 })
         .limit(limit)
         .lean();
     res.json(guilds);
-});
+    },
+);
 
 // GET /api/guilds/mine
 router.get('/mine', async (req, res) => {
@@ -236,9 +283,13 @@ router.get('/top', async (_req, res) => {
 });
 
 // POST /api/guilds/:guildId/boost — Any user can pay TON to boost a group. Paid TON → BOOST_GROUP_WALLET. Cost 1–10 TON (Super Admin config).
-router.post('/:guildId/boost', async (req, res) => {
-    const guildId = String(req.params.guildId || '').trim();
-    const txHash = String(req.body?.txHash || '').trim();
+router.post(
+    '/:guildId/boost',
+    validateParams({ guildId: { type: 'objectId', required: true } }),
+    validateBody({ txHash: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true } }),
+    async (req, res) => {
+    const guildId = String(req.validatedParams.guildId || '').trim();
+    const txHash = String(req.validatedBody?.txHash || '').trim();
     if (!guildId) return res.status(400).json({ error: 'guildId required' });
     if (!txHash) return res.status(400).json({ error: 'txHash required' });
 
@@ -271,6 +322,7 @@ router.post('/:guildId/boost', async (req, res) => {
         console.error('Guild boost error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;

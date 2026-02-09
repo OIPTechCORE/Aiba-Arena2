@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const User = require('../models/User');
 const { requireTelegram } = require('../middleware/requireTelegram');
+const { validateBody } = require('../middleware/validate');
 const ActionRunKey = require('../models/ActionRunKey');
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
 const { tryEmitAiba, creditAibaNoCap } = require('../engine/economy');
@@ -109,7 +110,15 @@ async function postScoreHandler(req, res) {
     }
 }
 
-router.post('/score', requireTelegram, postScoreHandler);
+router.post(
+    '/score',
+    requireTelegram,
+    validateBody({
+        requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128, required: true },
+        score: { type: 'integer', min: 0, required: true },
+    }),
+    postScoreHandler,
+);
 
 module.exports = router;
 module.exports.postScoreHandler = postScoreHandler;

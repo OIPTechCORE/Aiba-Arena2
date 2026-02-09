@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const Ad = require('../models/Ad');
 const { requireAdmin } = require('../middleware/requireAdmin');
+const { validateBody, validateParams } = require('../middleware/validate');
 
 router.use(requireAdmin());
 
@@ -11,48 +12,80 @@ router.get('/', async (_req, res) => {
 });
 
 // POST /api/admin/ads
-router.post('/', async (req, res) => {
-    const imageUrl = String(req.body?.imageUrl || '').trim();
-    const linkUrl = String(req.body?.linkUrl || '').trim();
-    const placement = String(req.body?.placement || 'between_battles').trim();
-    const weight = Number(req.body?.weight ?? 1);
-    const active = req.body?.active === undefined ? true : Boolean(req.body.active);
-    const startsAt = req.body?.startsAt ? new Date(req.body.startsAt) : null;
-    const endsAt = req.body?.endsAt ? new Date(req.body.endsAt) : null;
+router.post(
+    '/',
+    validateBody({
+        imageUrl: { type: 'string', trim: true, minLength: 1, maxLength: 500, required: true },
+        linkUrl: { type: 'string', trim: true, maxLength: 500 },
+        placement: { type: 'string', trim: true, maxLength: 50 },
+        weight: { type: 'number', min: 0.0001 },
+        active: { type: 'boolean' },
+        startsAt: { type: 'string', trim: true, maxLength: 50 },
+        endsAt: { type: 'string', trim: true, maxLength: 50 },
+    }),
+    async (req, res) => {
+    const imageUrl = String(req.validatedBody?.imageUrl || '').trim();
+    const linkUrl = String(req.validatedBody?.linkUrl || '').trim();
+    const placement = String(req.validatedBody?.placement || 'between_battles').trim();
+    const weight = Number(req.validatedBody?.weight ?? 1);
+    const active = req.validatedBody?.active === undefined ? true : Boolean(req.validatedBody.active);
+    const startsAt = req.validatedBody?.startsAt ? new Date(req.validatedBody.startsAt) : null;
+    const endsAt = req.validatedBody?.endsAt ? new Date(req.validatedBody.endsAt) : null;
 
     if (!imageUrl) return res.status(400).json({ error: 'imageUrl required' });
     if (Number.isNaN(weight) || weight <= 0) return res.status(400).json({ error: 'weight must be > 0' });
 
     const ad = await Ad.create({ imageUrl, linkUrl, placement, weight, active, startsAt, endsAt });
     res.status(201).json(ad);
-});
+    },
+);
 
 // PATCH /api/admin/ads/:id
-router.patch('/:id', async (req, res) => {
+router.patch(
+    '/:id',
+    validateParams({ id: { type: 'objectId', required: true } }),
+    validateBody({
+        imageUrl: { type: 'string', trim: true, maxLength: 500 },
+        linkUrl: { type: 'string', trim: true, maxLength: 500 },
+        placement: { type: 'string', trim: true, maxLength: 50 },
+        weight: { type: 'number', min: 0.0001 },
+        active: { type: 'boolean' },
+        startsAt: { type: 'string', trim: true, maxLength: 50 },
+        endsAt: { type: 'string', trim: true, maxLength: 50 },
+    }),
+    async (req, res) => {
     const update = {};
-    if (req.body?.imageUrl !== undefined) update.imageUrl = String(req.body.imageUrl || '').trim();
-    if (req.body?.linkUrl !== undefined) update.linkUrl = String(req.body.linkUrl || '').trim();
-    if (req.body?.placement !== undefined) update.placement = String(req.body.placement || '').trim();
-    if (req.body?.weight !== undefined) update.weight = Number(req.body.weight);
-    if (req.body?.active !== undefined) update.active = Boolean(req.body.active);
-    if (req.body?.startsAt !== undefined) update.startsAt = req.body.startsAt ? new Date(req.body.startsAt) : null;
-    if (req.body?.endsAt !== undefined) update.endsAt = req.body.endsAt ? new Date(req.body.endsAt) : null;
+    if (req.validatedBody?.imageUrl !== undefined) update.imageUrl = String(req.validatedBody.imageUrl || '').trim();
+    if (req.validatedBody?.linkUrl !== undefined) update.linkUrl = String(req.validatedBody.linkUrl || '').trim();
+    if (req.validatedBody?.placement !== undefined)
+        update.placement = String(req.validatedBody.placement || '').trim();
+    if (req.validatedBody?.weight !== undefined) update.weight = Number(req.validatedBody.weight);
+    if (req.validatedBody?.active !== undefined) update.active = Boolean(req.validatedBody.active);
+    if (req.validatedBody?.startsAt !== undefined)
+        update.startsAt = req.validatedBody.startsAt ? new Date(req.validatedBody.startsAt) : null;
+    if (req.validatedBody?.endsAt !== undefined)
+        update.endsAt = req.validatedBody.endsAt ? new Date(req.validatedBody.endsAt) : null;
 
     if (update.imageUrl !== undefined && !update.imageUrl)
         return res.status(400).json({ error: 'imageUrl cannot be empty' });
     if (update.weight !== undefined && (Number.isNaN(update.weight) || update.weight <= 0))
         return res.status(400).json({ error: 'weight must be > 0' });
 
-    const ad = await Ad.findByIdAndUpdate(req.params.id, update, { new: true }).lean();
+    const ad = await Ad.findByIdAndUpdate(req.validatedParams.id, update, { new: true }).lean();
     if (!ad) return res.status(404).json({ error: 'not found' });
     res.json(ad);
-});
+    },
+);
 
 // DELETE /api/admin/ads/:id
-router.delete('/:id', async (req, res) => {
-    const deleted = await Ad.findByIdAndDelete(req.params.id).lean();
+router.delete(
+    '/:id',
+    validateParams({ id: { type: 'objectId', required: true } }),
+    async (req, res) => {
+    const deleted = await Ad.findByIdAndDelete(req.validatedParams.id).lean();
     if (!deleted) return res.status(404).json({ error: 'not found' });
     res.json({ deleted: true });
-});
+    },
+);
 
 module.exports = router;

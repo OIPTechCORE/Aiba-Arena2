@@ -4,6 +4,7 @@ const Treasury = require('../models/Treasury');
 const StabilityReserve = require('../models/StabilityReserve');
 const BuybackPool = require('../models/BuybackPool');
 const EconomyConfig = require('../models/EconomyConfig');
+const { validateBody } = require('../middleware/validate');
 
 router.use(requireAdmin());
 
@@ -28,10 +29,16 @@ router.get('/', async (_req, res) => {
 });
 
 // POST /api/admin/treasury/fund — Body: { aibaDelta?, neurDelta? }
-router.post('/fund', async (req, res) => {
+router.post(
+    '/fund',
+    validateBody({
+        aibaDelta: { type: 'integer' },
+        neurDelta: { type: 'integer' },
+    }),
+    async (req, res) => {
     try {
-        const aiba = Math.floor(Number(req.body?.aibaDelta ?? 0));
-        const neur = Math.floor(Number(req.body?.neurDelta ?? 0));
+        const aiba = Math.floor(Number(req.validatedBody?.aibaDelta ?? 0));
+        const neur = Math.floor(Number(req.validatedBody?.neurDelta ?? 0));
         if (aiba === 0 && neur === 0) return res.status(400).json({ error: 'aibaDelta or neurDelta required' });
         await Treasury.findOneAndUpdate(
             {},
@@ -44,7 +51,8 @@ router.post('/fund', async (req, res) => {
         console.error('Admin treasury fund error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/admin/treasury/reserve — stability reserve
 router.get('/reserve', async (_req, res) => {
@@ -62,10 +70,16 @@ router.get('/reserve', async (_req, res) => {
 });
 
 // POST /api/admin/treasury/reserve/fund — Body: { aibaDelta?, neurDelta? }
-router.post('/reserve/fund', async (req, res) => {
+router.post(
+    '/reserve/fund',
+    validateBody({
+        aibaDelta: { type: 'integer' },
+        neurDelta: { type: 'integer' },
+    }),
+    async (req, res) => {
     try {
-        const aiba = Math.floor(Number(req.body?.aibaDelta ?? 0));
-        const neur = Math.floor(Number(req.body?.neurDelta ?? 0));
+        const aiba = Math.floor(Number(req.validatedBody?.aibaDelta ?? 0));
+        const neur = Math.floor(Number(req.validatedBody?.neurDelta ?? 0));
         await StabilityReserve.findOneAndUpdate(
             {},
             { $inc: { aibaBalance: aiba, neurBalance: neur } },
@@ -77,7 +91,8 @@ router.post('/reserve/fund', async (req, res) => {
         console.error('Admin reserve fund error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/admin/treasury/buyback
 router.get('/buyback', async (_req, res) => {
@@ -95,10 +110,16 @@ router.get('/buyback', async (_req, res) => {
 });
 
 // POST /api/admin/treasury/buyback/fund — Body: { aibaDelta?, neurDelta? }
-router.post('/buyback/fund', async (req, res) => {
+router.post(
+    '/buyback/fund',
+    validateBody({
+        aibaDelta: { type: 'integer' },
+        neurDelta: { type: 'integer' },
+    }),
+    async (req, res) => {
     try {
-        const aiba = Math.floor(Number(req.body?.aibaDelta ?? 0));
-        const neur = Math.floor(Number(req.body?.neurDelta ?? 0));
+        const aiba = Math.floor(Number(req.validatedBody?.aibaDelta ?? 0));
+        const neur = Math.floor(Number(req.validatedBody?.neurDelta ?? 0));
         await BuybackPool.findOneAndUpdate(
             {},
             { $inc: { aibaBalance: aiba, neurBalance: neur } },
@@ -110,13 +131,22 @@ router.post('/buyback/fund', async (req, res) => {
         console.error('Admin buyback fund error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // PATCH /api/admin/treasury/oracle — set price oracle (config)
-router.patch('/oracle', async (req, res) => {
+router.patch(
+    '/oracle',
+    validateBody({
+        oracleAibaPerTon: { type: 'number', min: 0 },
+        oracleNeurPerAiba: { type: 'number', min: 0 },
+    }),
+    async (req, res) => {
     try {
-        const aibaPerTon = req.body?.oracleAibaPerTon !== undefined ? Number(req.body.oracleAibaPerTon) : undefined;
-        const neurPerAiba = req.body?.oracleNeurPerAiba !== undefined ? Number(req.body.oracleNeurPerAiba) : undefined;
+        const aibaPerTon =
+            req.validatedBody?.oracleAibaPerTon !== undefined ? Number(req.validatedBody.oracleAibaPerTon) : undefined;
+        const neurPerAiba =
+            req.validatedBody?.oracleNeurPerAiba !== undefined ? Number(req.validatedBody.oracleNeurPerAiba) : undefined;
         const update = {};
         if (Number.isFinite(aibaPerTon)) update.oracleAibaPerTon = aibaPerTon;
         if (Number.isFinite(neurPerAiba)) update.oracleNeurPerAiba = neurPerAiba;
@@ -127,6 +157,7 @@ router.patch('/oracle', async (req, res) => {
         console.error('Admin oracle update error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 module.exports = router;
