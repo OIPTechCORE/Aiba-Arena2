@@ -882,6 +882,9 @@ export default function HomePage() {
         if (tab === 'assets') { refreshAssets().catch(() => {}); refreshMarketListings().catch(() => {}); }
         if (tab === 'governance') { refreshProposals().catch(() => {}); }
         if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); }
+        // Seamless UX: scroll active panel into view when tab changes
+        const el = document.querySelector('.tab-content');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab]);
 
@@ -1983,6 +1986,7 @@ export default function HomePage() {
             <div className="hero-center hero-center--compact" aria-hidden="false">
                 <h2 className="hero-center__title">AI BROKER ARENA</h2>
                 <p className="hero-center__sub">Own AI brokers. Compete in 3D arenas. Earn NEUR &amp; AIBA.</p>
+                <p className="hero-center__hint">Swipe the tab bar to explore Home, Brokers, Market, Racing, and more.</p>
                 <button
                     type="button"
                     className="hero-center__enter hero-center__enter--btn"
@@ -2000,7 +2004,7 @@ export default function HomePage() {
                             key={id}
                             type="button"
                             className={`nav-hub__btn ${tab === id ? 'nav-hub__btn--active' : ''}`}
-                            onClick={() => setTab(id)}
+                            onClick={() => { setTab(id); }}
                             aria-pressed={tab === id}
                             aria-label={label}
                         >

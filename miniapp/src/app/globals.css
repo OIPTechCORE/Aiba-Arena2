@@ -63,8 +63,11 @@ body,
 /* ─── App shell ─────────────────────────────────────────────────────────── */
 .aiba-app {
     min-height: 100vh;
-    padding: 14px 16px;
-    padding-bottom: 32px;
+    min-height: 100dvh;
+    padding-top: max(14px, env(safe-area-inset-top));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(32px, env(safe-area-inset-bottom));
+    padding-left: max(16px, env(safe-area-inset-left));
     max-width: 560px;
     margin: 0 auto;
     transform-style: preserve-3d;
@@ -114,6 +117,7 @@ body,
 /* Tab content: only active panel visible — modular multi-tabbed UI */
 .tab-content {
     margin-top: 8px;
+    scroll-margin-top: 12px;
 }
 
 .tab-panel {
@@ -419,6 +423,7 @@ body,
     font-size: clamp(1.6rem, 5vw, 2.2rem);
     letter-spacing: 0.12em;
     text-align: center;
+    white-space: nowrap;
     margin: 0 0 8px 0;
     background: linear-gradient(135deg, #fff 0%, var(--accent-cyan) 50%, var(--accent-magenta) 100%);
     -webkit-background-clip: text;
@@ -433,6 +438,7 @@ body,
     text-align: center;
     margin-bottom: 12px;
     max-width: 280px;
+    white-space: nowrap;
 }
 
 .cinematic__hint {
@@ -441,6 +447,7 @@ body,
     text-align: center;
     margin-bottom: 28px;
     max-width: 260px;
+    white-space: nowrap;
 }
 
 .cinematic__enter {
@@ -449,6 +456,7 @@ body,
     font-weight: 700;
     font-size: 1rem;
     letter-spacing: 0.15em;
+    white-space: nowrap;
     text-transform: uppercase;
     color: #001a1f;
     background: linear-gradient(180deg, #00f0ff 0%, #00a8b8 100%);
@@ -540,7 +548,30 @@ body,
     min-height: 18vh;
     padding: 20px 24px;
 }
-.hero-center--compact .hero-center__hint { display: none; }
+
+/* Each hero line on one line (no wrap) */
+.hero-center__title,
+.hero-center__sub,
+.hero-center__hint {
+    white-space: nowrap;
+}
+.hero-center__enter--btn {
+    white-space: nowrap;
+}
+.hero-center {
+    overflow-x: auto;
+    overflow-y: hidden;
+    min-width: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+.hero-center::-webkit-scrollbar {
+    height: 4px;
+}
+.hero-center::-webkit-scrollbar-thumb {
+    background: var(--border-glass);
+    border-radius: 2px;
+}
 
 /* ─── Nav Hub: futuristic grid of 15 section buttons ─────────────────────── */
 .nav-hub {
@@ -1134,7 +1165,7 @@ body,
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     background: rgba(0, 0, 0, 0.2);
-    overflow: hidden;
+    overflow-x: hidden;
 }
 .university-module__header {
     display: flex;
@@ -1169,6 +1200,9 @@ body,
     color: var(--text-secondary);
     border-top: 1px solid var(--border-subtle);
     background: rgba(0, 0, 0, 0.15);
+    max-height: 50vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .university-module__done {
     margin-left: 6px;
