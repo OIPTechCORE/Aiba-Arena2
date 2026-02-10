@@ -2,6 +2,7 @@ const router = require('express').Router();
 const crypto = require('crypto');
 const { requireTelegram } = require('../middleware/requireTelegram');
 const RacingCar = require('../models/RacingCar');
+const { CAR_CLASSES } = require('../models/RacingCar');
 const CarTrack = require('../models/CarTrack');
 const CarRace = require('../models/CarRace');
 const CarRaceEntry = require('../models/CarRaceEntry');
@@ -15,6 +16,27 @@ const { getLimit } = require('../util/pagination');
 const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
 
 const LEAGUES = ['rookie', 'pro', 'elite'];
+
+const CAR_CLASS_LABELS = {
+    formula1: 'Formula 1 (Turbo/Hybrid/Modern)',
+    lemans: 'Le Mans Prototypes / Hypercars',
+    canam: 'Can-Am (Unrestricted Power)',
+    indycar: 'IndyCar / CART',
+    groupB: 'Group B Rally Monsters',
+    gt1: 'GT1 / GT Racing',
+    electric: 'Electric Racing',
+    drag: 'Drag Racing (Top Fuel / Funny Car)',
+    touring: 'Touring / DTM / Supercars',
+    hillclimb: 'Hillclimb / Time Attack / Unlimited',
+    nascar: 'NASCAR / Stock Car',
+    historic: 'Historic Monsters',
+    hypercar: 'Modern Hypercar Race Variants',
+    extreme: 'Extreme Track/Prototype Specials',
+};
+
+function pickRandomCarClass() {
+    return CAR_CLASSES[Math.floor(Math.random() * CAR_CLASSES.length)];
+}
 
 function getCarRacingConfig(cfg) {
     return {
@@ -112,6 +134,7 @@ router.post(
         if (!debit.ok) return res.status(403).json({ error: debit.reason === 'insufficient' ? 'insufficient AIBA' : 'debit failed' });
         const car = await RacingCar.create({
             ownerTelegramId: telegramId,
+            carClass: pickRandomCarClass(),
             topSpeed: 50,
             acceleration: 50,
             handling: 50,
@@ -149,6 +172,7 @@ router.post(
         await UsedTonTxHash.create({ txHash, purpose: 'create_car', ownerTelegramId: telegramId });
         const car = await RacingCar.create({
             ownerTelegramId: telegramId,
+            carClass: pickRandomCarClass(),
             topSpeed: 50,
             acceleration: 50,
             handling: 50,
@@ -332,9 +356,19 @@ router.get('/config', async (req, res) => {
         res.json({
             ...c,
             walletForTon: (process.env.CAR_RACING_WALLET || '').trim() || null,
+            carClasses: CAR_CLASSES.map((id) => ({ id, label: CAR_CLASS_LABELS[id] || id })),
         });
     } catch (err) {
         console.error('Car racing config error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+router.get('/classes', async (_req, res) => {
+    try {
+        res.json(CAR_CLASSES.map((id) => ({ id, label: CAR_CLASS_LABELS[id] || id })));
+    } catch (err) {
+        console.error('Car racing classes error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
 });

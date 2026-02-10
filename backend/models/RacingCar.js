@@ -1,8 +1,14 @@
 const mongoose = require('mongoose');
 
+const CAR_CLASSES = [
+    'formula1', 'lemans', 'canam', 'indycar', 'groupB', 'gt1', 'electric',
+    'drag', 'touring', 'hillclimb', 'nascar', 'historic', 'hypercar', 'extreme',
+];
+
 const RacingCarSchema = new mongoose.Schema(
     {
         ownerTelegramId: { type: String, index: true, required: true },
+        carClass: { type: String, enum: CAR_CLASSES, default: 'formula1', trim: true, index: true },
         topSpeed: { type: Number, default: 50 },
         acceleration: { type: Number, default: 50 },
         handling: { type: Number, default: 50 },
@@ -21,4 +27,7 @@ const RacingCarSchema = new mongoose.Schema(
 
 RacingCarSchema.index({ ownerTelegramId: 1, createdAt: -1 });
 
+RacingCarSchema.statics.CAR_CLASSES = CAR_CLASSES;
+
 module.exports = mongoose.model('RacingCar', RacingCarSchema);
+module.exports.CAR_CLASSES = CAR_CLASSES;

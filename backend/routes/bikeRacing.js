@@ -2,6 +2,7 @@ const router = require('express').Router();
 const crypto = require('crypto');
 const { requireTelegram } = require('../middleware/requireTelegram');
 const RacingMotorcycle = require('../models/RacingMotorcycle');
+const { BIKE_CLASSES } = require('../models/RacingMotorcycle');
 const BikeTrack = require('../models/BikeTrack');
 const BikeRace = require('../models/BikeRace');
 const BikeRaceEntry = require('../models/BikeRaceEntry');
@@ -15,6 +16,27 @@ const { getLimit } = require('../util/pagination');
 const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
 
 const LEAGUES = ['rookie', 'pro', 'elite'];
+
+const BIKE_CLASS_LABELS = {
+    hyperTrack: 'Hyper-High-Power (Track-Only / Extreme)',
+    superbike: 'Modern Superbike (M 1000 RR, RSV4, Fireblade, R1M, ZX-10R)',
+    sportbike: 'High-Performance Sportbikes (Panigale V4, Ninja H2, Hayabusa, ZX-14R)',
+    trackRacing: 'Racing & Track-Focused (NSF250R, RC 390, Panigale V2, RS660)',
+    historic: 'Historic & Legendary (NSR500, YZR-M1, RC211V, Desmosedici, Norton Manx)',
+    electric: 'Electric Performance (Damon, Zero, Energica, Lightning, LiveWire)',
+    exotic: 'Exotic & Limited (Bimota, NCR Millona, MV F4CC, Langen, Paton)',
+    bigTorque: 'High Torque / Big Displacement (Rocket 3, XDiavel, Indian, CVO, VMAX)',
+    modernPerf: 'Modern High-Performance (Super Duke R, Panigale SP2, HP4 Race)',
+    concept: 'Emerging / Concept / Future (V4 concepts, Electrified, Superveloce)',
+    motogp: 'MotoGP / GP-Derived Racers',
+    supersport: 'Supersport 600 (CBR600RR, ZX-6R, Daytona)',
+    hypersport: 'Hypersport (Ninja H2, Hayabusa, ZX-14R)',
+    classicTT: 'Classic TT / Legendary Racers',
+};
+
+function pickRandomBikeClass() {
+    return BIKE_CLASSES[Math.floor(Math.random() * BIKE_CLASSES.length)];
+}
 
 function getBikeRacingConfig(cfg) {
     return {
@@ -112,6 +134,7 @@ router.post(
         if (!debit.ok) return res.status(403).json({ error: debit.reason === 'insufficient' ? 'insufficient AIBA' : 'debit failed' });
         const bike = await RacingMotorcycle.create({
             ownerTelegramId: telegramId,
+            bikeClass: pickRandomBikeClass(),
             topSpeed: 50,
             acceleration: 50,
             handling: 50,
@@ -149,6 +172,7 @@ router.post(
         await UsedTonTxHash.create({ txHash, purpose: 'create_bike', ownerTelegramId: telegramId });
         const bike = await RacingMotorcycle.create({
             ownerTelegramId: telegramId,
+            bikeClass: pickRandomBikeClass(),
             topSpeed: 50,
             acceleration: 50,
             handling: 50,
@@ -332,9 +356,19 @@ router.get('/config', async (req, res) => {
         res.json({
             ...c,
             walletForTon: (process.env.MOTORCYCLE_RACING_WALLET || '').trim() || null,
+            bikeClasses: BIKE_CLASSES.map((id) => ({ id, label: BIKE_CLASS_LABELS[id] || id })),
         });
     } catch (err) {
         console.error('Bike racing config error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+router.get('/classes', async (_req, res) => {
+    try {
+        res.json(BIKE_CLASSES.map((id) => ({ id, label: BIKE_CLASS_LABELS[id] || id })));
+    } catch (err) {
+        console.error('Bike racing classes error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
 });

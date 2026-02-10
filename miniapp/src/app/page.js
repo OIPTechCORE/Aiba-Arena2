@@ -2318,13 +2318,14 @@ export default function HomePage() {
                 <section className={`tab-panel ${tab === 'carRacing' ? 'is-active' : ''}`} aria-hidden={tab !== 'carRacing'}>
                     <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
                         <div className="card__title">Car Racing</div>
-                        <p className="card__hint">Autonomous car racing. Create a car (AIBA or TON), enter open races, earn AIBA by finish position.</p>
+                        <p className="card__hint">Autonomous car racing. Create or buy a car, enter open races, earn AIBA by finish position.</p>
+                        <p className="card__hint" style={{ marginTop: 6, fontSize: 11, opacity: 0.9 }}>Inspired by the most powerful racing cars: Formula 1, Le Mans, Can-Am, IndyCar, Group B, GT1, Electric, Drag, Touring/DTM, Hillclimb, NASCAR, Historic, Hypercar, Extreme prototypes.</p>
                         <button type="button" className="btn btn--secondary" onClick={refreshCarRacing} disabled={busy}><IconRefresh /> Refresh</button>
                         {carMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{carMsg}</p> : null}
                     </div>
                     {carRacingConfig ? (
                         <div className="card">
-                            <div className="card__title">Create car</div>
+                            <div className="card__title">1. Create a racing car</div>
                             <p className="card__hint">Cost: {carRacingConfig.createCarCostAiba > 0 ? `${carRacingConfig.createCarCostAiba} AIBA` : ''}{carRacingConfig.createCarCostAiba > 0 && carRacingConfig.createCarCostTonNano > 0 ? ' or ' : ''}{carRacingConfig.createCarCostTonNano > 0 ? `${(carRacingConfig.createCarCostTonNano / 1e9).toFixed(1)} TON` : ''}</p>
                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
                                 {carRacingConfig.createCarCostAiba > 0 ? <button type="button" className="btn btn--primary" onClick={createCarAiba} disabled={busy}><IconCar /> Create with AIBA</button> : null}
@@ -2338,9 +2339,32 @@ export default function HomePage() {
                         </div>
                     ) : null}
                     <div className="card">
+                        <div className="card__title">2. Buy a racing car</div>
+                        <p className="card__hint">Purchase a car from other players with AIBA.</p>
+                        {carListings.length === 0 ? (
+                            <p className="guide-tip">No cars for sale. Check back later or create your own above.</p>
+                        ) : (
+                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                {carListings.map((l) => {
+                                    const car = l.car || l.carId;
+                                    const classLabel = car?.carClass && carRacingConfig?.carClasses?.find((x) => x.id === car.carClass)?.label ? carRacingConfig.carClasses.find((x) => x.id === car.carClass).label : (car?.carClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing car';
+                                    return (
+                                        <li key={l._id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                            <span>Car #{String(l.carId?._id ?? l.carId).slice(-6)} — {classLabel} — {l.priceAIBA} AIBA</span>
+                                            <button type="button" className="btn btn--primary" onClick={async () => { setBusy(true); setCarMsg(''); try { await api.post('/api/car-racing/buy-car', { requestId: uuid(), listingId: l._id }); setCarMsg('Purchased.'); await refreshCarRacing(); await refreshEconomy(); } catch (e) { setCarMsg(getErrorMessage(e, 'Buy failed.')); } finally { setBusy(false); } }} disabled={busy}>Buy</button>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        )}
+                    </div>
+                    <div className="card">
                         <div className="card__title">My cars</div>
-                        {myCars.length === 0 ? <p className="guide-tip">No cars. Create one above.</p> : (
-                            <ul style={{ listStyle: 'none', padding: 0 }}>{myCars.map((c) => <li key={c._id}>#{String(c._id).slice(-6)} — SPD{c.topSpeed} ACC{c.acceleration} HND{c.handling} DUR{c.durability}</li>)}</ul>
+                        {myCars.length === 0 ? <p className="guide-tip">No cars. Create or buy one above.</p> : (
+                            <ul style={{ listStyle: 'none', padding: 0 }}>{myCars.map((c) => {
+                                const classLabel = c.carClass && carRacingConfig?.carClasses?.find((x) => x.id === c.carClass)?.label ? carRacingConfig.carClasses.find((x) => x.id === c.carClass).label : (c.carClass || 'Racing car');
+                                return <li key={c._id}>#{String(c._id).slice(-6)} — {classLabel} — SPD{c.topSpeed} ACC{c.acceleration} HND{c.handling} DUR{c.durability}</li>;
+                            })}</ul>
                         )}
                     </div>
                     <div className="card">
@@ -2352,7 +2376,10 @@ export default function HomePage() {
                         </select>
                         <select className="select" value={carEnterCarId} onChange={(e) => setCarEnterCarId(e.target.value)} style={{ marginTop: 8, minWidth: '100%' }}>
                             <option value="">Select car</option>
-                            {myCars.map((c) => <option key={c._id} value={c._id}>#{String(c._id).slice(-6)}</option>)}
+                            {myCars.map((c) => {
+                                const classLabel = c.carClass && carRacingConfig?.carClasses?.find((x) => x.id === c.carClass)?.label ? carRacingConfig.carClasses.find((x) => x.id === c.carClass).label : (c.carClass || 'Car');
+                                return <option key={c._id} value={c._id}>#{String(c._id).slice(-6)} — {classLabel}</option>;
+                            })}
                         </select>
                         <button type="button" className="btn btn--primary" onClick={enterCarRace} disabled={busy || !carEnterRaceId || !carEnterCarId} style={{ marginTop: 8 }}>Enter race</button>
                     </div>
@@ -2363,25 +2390,20 @@ export default function HomePage() {
                             <ol style={{ margin: 0, paddingLeft: 20 }}>{carLeaderboard.slice(0, 10).map((r) => <li key={r.telegramId}>#{r.rank} — {r.totalPoints} pts, {r.wins} wins, {r.aibaEarned} AIBA</li>)}</ol>
                         </div>
                     ) : null}
-                    {carListings.length > 0 ? (
-                        <div className="card">
-                            <div className="card__title">Car marketplace</div>
-                            {carListings.map((l) => <div key={l._id} className="list-item"><span>Car #{String(l.carId).slice(-6)} — {l.priceAIBA} AIBA</span><button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post('/api/car-racing/buy-car', { requestId: uuid(), listingId: l._id }); setCarMsg('Purchased.'); await refreshCarRacing(); await refreshEconomy(); } catch (e) { setCarMsg(getErrorMessage(e, 'Buy failed.')); } finally { setBusy(false); } }} disabled={busy}>Buy</button></div>)}
-                        </div>
-                    ) : null}
                 </section>
 
                 {/* ─── Bike Racing (Autonomous) ───────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'bikeRacing' ? 'is-active' : ''}`} aria-hidden={tab !== 'bikeRacing'}>
                     <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-magenta)' }}>
                         <div className="card__title">Bike Racing</div>
-                        <p className="card__hint">Autonomous motorcycle racing. Create a bike (AIBA or TON), enter open races, earn AIBA.</p>
+                        <p className="card__hint">Autonomous motorcycle racing. Create or buy a bike, enter open races, earn AIBA.</p>
+                        <p className="card__hint" style={{ marginTop: 6, fontSize: 11, opacity: 0.9 }}>Inspired by the most powerful racing &amp; high-performance motorcycles: Hyper-Track (H2R, MTT 420RR), Superbikes (M 1000 RR, Fireblade, R1M), Sportbikes (Ninja H2, Hayabusa), Track Racing, Historic GP (NSR500, Desmosedici), Electric (Energica, LiveWire), Exotic (Bimota, NCR), Big Torque (Rocket 3, VMAX), MotoGP, Supersport, Hypersport, Classic TT, Concepts.</p>
                         <button type="button" className="btn btn--secondary" onClick={refreshBikeRacing} disabled={busy}><IconRefresh /> Refresh</button>
                         {bikeMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{bikeMsg}</p> : null}
                     </div>
                     {bikeRacingConfig ? (
                         <div className="card">
-                            <div className="card__title">Create bike</div>
+                            <div className="card__title">1. Create a racing bike</div>
                             <p className="card__hint">Cost: {bikeRacingConfig.createBikeCostAiba > 0 ? `${bikeRacingConfig.createBikeCostAiba} AIBA` : ''}{bikeRacingConfig.createBikeCostAiba > 0 && bikeRacingConfig.createBikeCostTonNano > 0 ? ' or ' : ''}{bikeRacingConfig.createBikeCostTonNano > 0 ? `${(bikeRacingConfig.createBikeCostTonNano / 1e9).toFixed(1)} TON` : ''}</p>
                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
                                 {bikeRacingConfig.createBikeCostAiba > 0 ? <button type="button" className="btn btn--primary" onClick={createBikeAiba} disabled={busy}><IconBike /> Create with AIBA</button> : null}
@@ -2395,9 +2417,32 @@ export default function HomePage() {
                         </div>
                     ) : null}
                     <div className="card">
+                        <div className="card__title">2. Buy a racing bike</div>
+                        <p className="card__hint">Purchase a bike from other players with AIBA.</p>
+                        {bikeListings.length === 0 ? (
+                            <p className="guide-tip">No bikes for sale. Check back later or create your own above.</p>
+                        ) : (
+                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                {bikeListings.map((l) => {
+                                    const bike = l.bike || l.bikeId;
+                                    const classLabel = bike?.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === bike.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === bike.bikeClass).label : (bike?.bikeClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing bike';
+                                    return (
+                                        <li key={l._id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                            <span>Bike #{String(l.bikeId?._id ?? l.bikeId).slice(-6)} — {classLabel} — {l.priceAIBA} AIBA</span>
+                                            <button type="button" className="btn btn--primary" onClick={async () => { setBusy(true); setBikeMsg(''); try { await api.post('/api/bike-racing/buy-bike', { requestId: uuid(), listingId: l._id }); setBikeMsg('Purchased.'); await refreshBikeRacing(); await refreshEconomy(); } catch (e) { setBikeMsg(getErrorMessage(e, 'Buy failed.')); } finally { setBusy(false); } }} disabled={busy}>Buy</button>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        )}
+                    </div>
+                    <div className="card">
                         <div className="card__title">My bikes</div>
-                        {myBikes.length === 0 ? <p className="guide-tip">No bikes. Create one above.</p> : (
-                            <ul style={{ listStyle: 'none', padding: 0 }}>{myBikes.map((b) => <li key={b._id}>#{String(b._id).slice(-6)} — SPD{b.topSpeed} ACC{b.acceleration} HND{b.handling} DUR{b.durability}</li>)}</ul>
+                        {myBikes.length === 0 ? <p className="guide-tip">No bikes. Create or buy one above.</p> : (
+                            <ul style={{ listStyle: 'none', padding: 0 }}>{myBikes.map((b) => {
+                                const classLabel = b.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === b.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === b.bikeClass).label : (b.bikeClass || 'Racing bike');
+                                return <li key={b._id}>#{String(b._id).slice(-6)} — {classLabel} — SPD{b.topSpeed} ACC{b.acceleration} HND{b.handling} DUR{b.durability}</li>;
+                            })}</ul>
                         )}
                     </div>
                     <div className="card">
@@ -2409,7 +2454,10 @@ export default function HomePage() {
                         </select>
                         <select className="select" value={bikeEnterBikeId} onChange={(e) => setBikeEnterBikeId(e.target.value)} style={{ marginTop: 8, minWidth: '100%' }}>
                             <option value="">Select bike</option>
-                            {myBikes.map((b) => <option key={b._id} value={b._id}>#{String(b._id).slice(-6)}</option>)}
+                            {myBikes.map((b) => {
+                                const classLabel = b.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === b.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === b.bikeClass).label : (b.bikeClass || 'Bike');
+                                return <option key={b._id} value={b._id}>#{String(b._id).slice(-6)} — {classLabel}</option>;
+                            })}
                         </select>
                         <button type="button" className="btn btn--primary" onClick={enterBikeRace} disabled={busy || !bikeEnterRaceId || !bikeEnterBikeId} style={{ marginTop: 8 }}>Enter race</button>
                     </div>
@@ -2417,12 +2465,6 @@ export default function HomePage() {
                         <div className="card">
                             <div className="card__title">Leaderboard</div>
                             <ol style={{ margin: 0, paddingLeft: 20 }}>{bikeLeaderboard.slice(0, 10).map((r) => <li key={r.telegramId}>#{r.rank} — {r.totalPoints} pts, {r.wins} wins, {r.aibaEarned} AIBA</li>)}</ol>
-                        </div>
-                    ) : null}
-                    {bikeListings.length > 0 ? (
-                        <div className="card">
-                            <div className="card__title">Bike marketplace</div>
-                            {bikeListings.map((l) => <div key={l._id} className="list-item"><span>Bike #{String(l.bikeId).slice(-6)} — {l.priceAIBA} AIBA</span><button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post('/api/bike-racing/buy-bike', { requestId: uuid(), listingId: l._id }); setBikeMsg('Purchased.'); await refreshBikeRacing(); await refreshEconomy(); } catch (e) { setBikeMsg(getErrorMessage(e, 'Buy failed.')); } finally { setBusy(false); } }} disabled={busy}>Buy</button></div>)}
                         </div>
                     ) : null}
                 </section>

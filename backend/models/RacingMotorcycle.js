@@ -1,7 +1,13 @@
 const mongoose = require('mongoose');
 
+const BIKE_CLASSES = [
+    'hyperTrack', 'superbike', 'sportbike', 'trackRacing', 'historic', 'electric',
+    'exotic', 'bigTorque', 'modernPerf', 'concept', 'motogp', 'supersport', 'hypersport', 'classicTT',
+];
+
 const RacingMotorcycleSchema = new mongoose.Schema({
     ownerTelegramId: { type: String, index: true, required: true },
+    bikeClass: { type: String, enum: BIKE_CLASSES, default: 'superbike', trim: true, index: true },
     topSpeed: { type: Number, default: 50 },
     acceleration: { type: Number, default: 50 },
     handling: { type: Number, default: 50 },
@@ -19,3 +25,4 @@ const RacingMotorcycleSchema = new mongoose.Schema({
 RacingMotorcycleSchema.index({ ownerTelegramId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('RacingMotorcycle', RacingMotorcycleSchema);
+module.exports.BIKE_CLASSES = BIKE_CLASSES;
