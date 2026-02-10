@@ -160,6 +160,11 @@ const BADGE_LABELS = {
     full_course_completion_certificate: { label: 'Full Course Certificate', color: 'var(--accent-gold)', title: 'Minted after completing all courses' },
 };
 
+/* Short explanations for tabs (what brokers, arenas, guilds are) */
+const BROKERS_EXPLANATION = 'Brokers are your AI agents that compete in 3D arenas. Each has stats (INT, SPD, RISK) and energy. They earn AIBA and NEUR from battles, can be combined to merge stats, minted as NFTs, or traded on the Market.';
+const ARENAS_EXPLANATION = 'Arenas are battle modes where your broker competes. Choose prediction, simulation, strategyWars, arbitrage, or guildWars (requires a guild). Run a battle to earn AIBA, Stars, and sometimes Diamonds.';
+const GUILDS_EXPLANATION = 'Guilds (groups) let you team up with others: create or join a group, deposit brokers into the shared pool, and compete in Guild Wars. Top leaders create free; others can pay TON to create. Boost a guild with TON to give it benefits.';
+
 const TAB_LIST = [
     { id: 'home', label: 'Home', Icon: IconHome },
     { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
@@ -1857,24 +1862,26 @@ export default function HomePage() {
         <div className="aiba-app">
             {showCinematicIntro ? (
                 <div className="cinematic">
-                    <h1 className="cinematic__title">AI BROKER ARENA</h1>
-                    <p className="cinematic__sub">Own AI brokers. Compete in 3D arenas. Earn NEUR & AIBA.</p>
-                    <p className="cinematic__hint">Swipe the tab bar to explore Home, Brokers, Market, Racing, and more.</p>
-                    <button
-                        type="button"
-                        className="cinematic__enter"
-                        onClick={() => {
-                            try {
-                                localStorage.setItem('aiba_cinematic_seen', '1');
-                            } catch {}
-                            setShowCinematicIntro(false);
-                            if (typeof localStorage !== 'undefined' && !localStorage.getItem('aiba_tutorial_done')) {
-                                setTutorialStep(1);
-                            }
-                        }}
-                    >
-                        Enter
-                    </button>
+                    <div className="cinematic__inner">
+                        <h1 className="cinematic__title">AI BROKER ARENA</h1>
+                        <p className="cinematic__sub">Own AI brokers. Compete in 3D arenas. Earn NEUR &amp; AIBA.</p>
+                        <p className="cinematic__hint">Swipe the tab bar to explore Home, Brokers, Market, Racing, and more.</p>
+                        <button
+                            type="button"
+                            className="cinematic__enter"
+                            onClick={() => {
+                                try {
+                                    localStorage.setItem('aiba_cinematic_seen', '1');
+                                } catch {}
+                                setShowCinematicIntro(false);
+                                if (typeof localStorage !== 'undefined' && !localStorage.getItem('aiba_tutorial_done')) {
+                                    setTutorialStep(1);
+                                }
+                            }}
+                        >
+                            Enter
+                        </button>
+                    </div>
                 </div>
             ) : null}
             {tutorialStep >= 1 && tutorialStep <= 4 ? (
@@ -1989,6 +1996,13 @@ export default function HomePage() {
                 ))}
             </div>
 
+            <div className="hero-center" aria-hidden="false">
+                <h2 className="hero-center__title">AI BROKER ARENA</h2>
+                <p className="hero-center__sub">Own AI brokers. Compete in 3D arenas. Earn NEUR &amp; AIBA.</p>
+                <p className="hero-center__hint">Swipe the tab bar to explore Home, Brokers, Market, Racing, and more.</p>
+                <span className="hero-center__enter">Enter</span>
+            </div>
+
             <p className="guide-tip" style={{ marginTop: 0 }}>
                 {tab === 'home' ? 'Pick a broker and arena, then hit Run battle to earn.' :
                  tab === 'brokers' ? 'Merge two brokers or mint one as NFT.' :
@@ -2010,6 +2024,10 @@ export default function HomePage() {
             <div className="tab-content">
                 {/* ─── Home ───────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'home' ? 'is-active' : ''}`} aria-hidden={tab !== 'home'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">What are brokers?</div>
+                        <p className="card__hint">{BROKERS_EXPLANATION}</p>
+                    </div>
                     <div className="action-row">
                         <button type="button" className="btn btn--secondary" onClick={createStarterBroker} disabled={busy}><IconBrokers /> New broker</button>
                         <button type="button" className="btn btn--secondary" onClick={refreshBrokers} disabled={busy}><IconRefresh /> Refresh</button>
@@ -2113,6 +2131,10 @@ export default function HomePage() {
 
                 {/* ─── Brokers ────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'brokers' ? 'is-active' : ''}`} aria-hidden={tab !== 'brokers'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">What are brokers?</div>
+                        <p className="card__hint">{BROKERS_EXPLANATION}</p>
+                    </div>
                     <div className="card card--elevated">
                         <div className="card__title">My brokers</div>
                         <p className="card__hint">Fight, combine two to merge stats, or mint as NFT.</p>
@@ -2150,6 +2172,10 @@ export default function HomePage() {
 
                 {/* ─── Arenas ─────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'arenas' ? 'is-active' : ''}`} aria-hidden={tab !== 'arenas'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">What are arenas?</div>
+                        <p className="card__hint">{ARENAS_EXPLANATION}</p>
+                    </div>
                     <div className="card card--elevated">
                         <div className="card__title">Arena</div>
                         <p className="card__hint">Choose battle mode. Guild Wars requires a guild.</p>
@@ -2185,6 +2211,10 @@ export default function HomePage() {
 
                 {/* ─── Guilds (Groups) — global leaderboard, pay-to-create, boost ────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'guilds' ? 'is-active' : ''}`} aria-hidden={tab !== 'guilds'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">What are guilds?</div>
+                        <p className="card__hint">{GUILDS_EXPLANATION}</p>
+                    </div>
                     <div className="card card--elevated">
                         <div className="card__title">Groups</div>
                         <p className="card__hint">Top leaders create free; others pay TON. All groups visible globally. Anyone can join or boost.</p>
@@ -2245,6 +2275,10 @@ export default function HomePage() {
 
                 {/* ─── Market ─────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'market' ? 'is-active' : ''}`} aria-hidden={tab !== 'market'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">What are brokers?</div>
+                        <p className="card__hint">{BROKERS_EXPLANATION}</p>
+                    </div>
                     {Number(economyMe?.economy?.createBrokerCostTonNano) > 0 ? (
                         <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
                             <div className="card__title">Create your broker (pay TON)</div>
@@ -2323,21 +2357,28 @@ export default function HomePage() {
                         <button type="button" className="btn btn--secondary" onClick={refreshCarRacing} disabled={busy}><IconRefresh /> Refresh</button>
                         {carMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{carMsg}</p> : null}
                     </div>
-                    {carRacingConfig ? (
-                        <div className="card">
-                            <div className="card__title">1. Create a racing car</div>
-                            <p className="card__hint">Cost: {carRacingConfig.createCarCostAiba > 0 ? `${carRacingConfig.createCarCostAiba} AIBA` : ''}{carRacingConfig.createCarCostAiba > 0 && carRacingConfig.createCarCostTonNano > 0 ? ' or ' : ''}{carRacingConfig.createCarCostTonNano > 0 ? `${(carRacingConfig.createCarCostTonNano / 1e9).toFixed(1)} TON` : ''}</p>
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-                                {carRacingConfig.createCarCostAiba > 0 ? <button type="button" className="btn btn--primary" onClick={createCarAiba} disabled={busy}><IconCar /> Create with AIBA</button> : null}
-                                {carRacingConfig.createCarCostTonNano > 0 && carRacingConfig.walletForTon ? (
-                                    <>
-                                        <input className="input" value={carCreateTxHash} onChange={(e) => setCarCreateTxHash(e.target.value)} placeholder="TON tx hash" style={{ flex: '1 1 180px', minWidth: 0 }} />
-                                        <button type="button" className="btn btn--primary" onClick={createCarTon} disabled={busy || !carCreateTxHash.trim()}>Create with TON</button>
-                                    </>
-                                ) : null}
-                            </div>
-                        </div>
-                    ) : null}
+                    <div className="card">
+                        <div className="card__title">1. Create a racing car</div>
+                        {carRacingConfig ? (
+                            <>
+                                <p className="card__hint">Cost: {carRacingConfig.createCarCostAiba > 0 ? `${carRacingConfig.createCarCostAiba} AIBA` : ''}{carRacingConfig.createCarCostAiba > 0 && carRacingConfig.createCarCostTonNano > 0 ? ' or ' : ''}{carRacingConfig.createCarCostTonNano > 0 ? `${(carRacingConfig.createCarCostTonNano / 1e9).toFixed(1)} TON` : ''}</p>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                                    {carRacingConfig.createCarCostAiba > 0 ? <button type="button" className="btn btn--primary" onClick={createCarAiba} disabled={busy}><IconCar /> Create with AIBA</button> : null}
+                                    {carRacingConfig.createCarCostTonNano > 0 && carRacingConfig.walletForTon ? (
+                                        <>
+                                            <input className="input" value={carCreateTxHash} onChange={(e) => setCarCreateTxHash(e.target.value)} placeholder="TON tx hash" style={{ flex: '1 1 180px', minWidth: 0 }} />
+                                            <button type="button" className="btn btn--primary" onClick={createCarTon} disabled={busy || !carCreateTxHash.trim()}>Create with TON</button>
+                                        </>
+                                    ) : null}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <p className="card__hint">Loading racing config…</p>
+                                <button type="button" className="btn btn--secondary" onClick={refreshCarRacing} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
+                            </>
+                        )}
+                    </div>
                     <div className="card">
                         <div className="card__title">2. Buy a racing car</div>
                         <p className="card__hint">Purchase a car from other players with AIBA.</p>
@@ -2401,21 +2442,28 @@ export default function HomePage() {
                         <button type="button" className="btn btn--secondary" onClick={refreshBikeRacing} disabled={busy}><IconRefresh /> Refresh</button>
                         {bikeMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{bikeMsg}</p> : null}
                     </div>
-                    {bikeRacingConfig ? (
-                        <div className="card">
-                            <div className="card__title">1. Create a racing bike</div>
-                            <p className="card__hint">Cost: {bikeRacingConfig.createBikeCostAiba > 0 ? `${bikeRacingConfig.createBikeCostAiba} AIBA` : ''}{bikeRacingConfig.createBikeCostAiba > 0 && bikeRacingConfig.createBikeCostTonNano > 0 ? ' or ' : ''}{bikeRacingConfig.createBikeCostTonNano > 0 ? `${(bikeRacingConfig.createBikeCostTonNano / 1e9).toFixed(1)} TON` : ''}</p>
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-                                {bikeRacingConfig.createBikeCostAiba > 0 ? <button type="button" className="btn btn--primary" onClick={createBikeAiba} disabled={busy}><IconBike /> Create with AIBA</button> : null}
-                                {bikeRacingConfig.createBikeCostTonNano > 0 && bikeRacingConfig.walletForTon ? (
-                                    <>
-                                        <input className="input" value={bikeCreateTxHash} onChange={(e) => setBikeCreateTxHash(e.target.value)} placeholder="TON tx hash" style={{ flex: '1 1 180px', minWidth: 0 }} />
-                                        <button type="button" className="btn btn--primary" onClick={createBikeTon} disabled={busy || !bikeCreateTxHash.trim()}>Create with TON</button>
-                                    </>
-                                ) : null}
-                            </div>
-                        </div>
-                    ) : null}
+                    <div className="card">
+                        <div className="card__title">1. Create a racing bike</div>
+                        {bikeRacingConfig ? (
+                            <>
+                                <p className="card__hint">Cost: {bikeRacingConfig.createBikeCostAiba > 0 ? `${bikeRacingConfig.createBikeCostAiba} AIBA` : ''}{bikeRacingConfig.createBikeCostAiba > 0 && bikeRacingConfig.createBikeCostTonNano > 0 ? ' or ' : ''}{bikeRacingConfig.createBikeCostTonNano > 0 ? `${(bikeRacingConfig.createBikeCostTonNano / 1e9).toFixed(1)} TON` : ''}</p>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                                    {bikeRacingConfig.createBikeCostAiba > 0 ? <button type="button" className="btn btn--primary" onClick={createBikeAiba} disabled={busy}><IconBike /> Create with AIBA</button> : null}
+                                    {bikeRacingConfig.createBikeCostTonNano > 0 && bikeRacingConfig.walletForTon ? (
+                                        <>
+                                            <input className="input" value={bikeCreateTxHash} onChange={(e) => setBikeCreateTxHash(e.target.value)} placeholder="TON tx hash" style={{ flex: '1 1 180px', minWidth: 0 }} />
+                                            <button type="button" className="btn btn--primary" onClick={createBikeTon} disabled={busy || !bikeCreateTxHash.trim()}>Create with TON</button>
+                                        </>
+                                    ) : null}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <p className="card__hint">Loading racing config…</p>
+                                <button type="button" className="btn btn--secondary" onClick={refreshBikeRacing} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
+                            </>
+                        )}
+                    </div>
                     <div className="card">
                         <div className="card__title">2. Buy a racing bike</div>
                         <p className="card__hint">Purchase a bike from other players with AIBA.</p>
