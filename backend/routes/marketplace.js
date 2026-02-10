@@ -6,6 +6,56 @@ const { getConfig, debitAibaFromUser, creditAibaNoCap } = require('../engine/eco
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
 const { getLimit } = require('../util/pagination');
 const { validateBody, validateQuery } = require('../middleware/validate');
+const { SYSTEM_BROKERS, getSystemBroker } = require('../config/systemShop');
+
+// GET /api/marketplace/system-brokers — catalog of brokers sold by the system (for AIBA)
+router.get('/system-brokers', (_req, res) => {
+    try {
+        res.json(SYSTEM_BROKERS);
+    } catch (err) {
+        console.error('System brokers catalog error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// POST /api/marketplace/buy-system-broker — purchase a broker from the system with AIBA
+router.post(
+    '/buy-system-broker',
+    requireTelegram,
+    validateBody({ catalogId: { type: 'string', trim: true, minLength: 1, maxLength: 64, required: true } }),
+    async (req, res) => {
+    try {
+        const telegramId = req.telegramId ? String(req.telegramId) : '';
+        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+        const catalogId = String(req.validatedBody?.catalogId ?? '').trim();
+        const entry = getSystemBroker(catalogId);
+        if (!entry) return res.status(404).json({ error: 'catalog entry not found' });
+        const requestId = getIdempotencyKey(req) || `sys-broker-${catalogId}-${Date.now()}`;
+        const debit = await debitAibaFromUser(entry.priceAiba, {
+            telegramId,
+            reason: 'system_broker_buy',
+            arena: 'marketplace',
+            league: 'global',
+            sourceType: 'system_shop',
+            sourceId: catalogId,
+            requestId,
+            meta: { catalogId },
+        });
+        if (!debit.ok) return res.status(403).json({ error: debit.reason === 'insufficient' ? 'insufficient AIBA' : 'debit failed' });
+        const broker = await Broker.create({
+            ownerTelegramId: telegramId,
+            intelligence: entry.intelligence,
+            speed: entry.speed,
+            risk: entry.risk,
+            energy: 100,
+        });
+        res.status(201).json({ ok: true, broker: broker.toObject(), aibaBalance: debit.user?.aibaBalance ?? 0 });
+    } catch (err) {
+        console.error('Buy system broker error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+    },
+);
 
 // GET /api/marketplace/listings — active listings (with broker snapshot)
 router.get(

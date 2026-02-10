@@ -14,6 +14,7 @@ const { verifyTonPayment } = require('../util/tonVerify');
 const { simulateRace } = require('../engine/raceEngine');
 const { getLimit } = require('../util/pagination');
 const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
+const { SYSTEM_CARS, getSystemCar } = require('../config/systemShop');
 
 const LEAGUES = ['rookie', 'pro', 'elite'];
 
@@ -372,6 +373,55 @@ router.get('/classes', async (_req, res) => {
         res.status(500).json({ error: 'internal server error' });
     }
 });
+
+router.get('/system-cars', (_req, res) => {
+    try {
+        const withLabel = SYSTEM_CARS.map((c) => ({ ...c, classLabel: CAR_CLASS_LABELS[c.carClass] || c.carClass }));
+        res.json(withLabel);
+    } catch (err) {
+        console.error('System cars catalog error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+router.post(
+    '/buy-system-car',
+    requireTelegram,
+    validateBody({ catalogId: { type: 'string', trim: true, minLength: 1, maxLength: 64, required: true } }),
+    async (req, res) => {
+    try {
+        const telegramId = req.telegramId ? String(req.telegramId) : '';
+        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+        const catalogId = String(req.validatedBody?.catalogId ?? '').trim();
+        const entry = getSystemCar(catalogId);
+        if (!entry) return res.status(404).json({ error: 'catalog entry not found' });
+        const requestId = getIdempotencyKey(req) || `sys-car-${catalogId}-${Date.now()}`;
+        const debit = await debitAibaFromUser(entry.priceAiba, {
+            telegramId,
+            reason: 'system_car_buy',
+            arena: 'car_racing',
+            league: 'global',
+            sourceType: 'system_shop',
+            sourceId: catalogId,
+            requestId,
+            meta: { catalogId },
+        });
+        if (!debit.ok) return res.status(403).json({ error: debit.reason === 'insufficient' ? 'insufficient AIBA' : 'debit failed' });
+        const car = await RacingCar.create({
+            ownerTelegramId: telegramId,
+            carClass: entry.carClass,
+            topSpeed: entry.topSpeed,
+            acceleration: entry.acceleration,
+            handling: entry.handling,
+            durability: entry.durability,
+        });
+        res.status(201).json({ ok: true, car: car.toObject(), aibaBalance: debit.user?.aibaBalance ?? 0 });
+    } catch (err) {
+        console.error('Buy system car error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+    },
+);
 
 router.get(
     '/listings',

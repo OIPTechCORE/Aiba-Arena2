@@ -14,6 +14,7 @@ const { verifyTonPayment } = require('../util/tonVerify');
 const { simulateRace } = require('../engine/raceEngine');
 const { getLimit } = require('../util/pagination');
 const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
+const { SYSTEM_BIKES, getSystemBike } = require('../config/systemShop');
 
 const LEAGUES = ['rookie', 'pro', 'elite'];
 
@@ -372,6 +373,55 @@ router.get('/classes', async (_req, res) => {
         res.status(500).json({ error: 'internal server error' });
     }
 });
+
+router.get('/system-bikes', (_req, res) => {
+    try {
+        const withLabel = SYSTEM_BIKES.map((b) => ({ ...b, classLabel: BIKE_CLASS_LABELS[b.bikeClass] || b.bikeClass }));
+        res.json(withLabel);
+    } catch (err) {
+        console.error('System bikes catalog error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+router.post(
+    '/buy-system-bike',
+    requireTelegram,
+    validateBody({ catalogId: { type: 'string', trim: true, minLength: 1, maxLength: 64, required: true } }),
+    async (req, res) => {
+    try {
+        const telegramId = req.telegramId ? String(req.telegramId) : '';
+        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+        const catalogId = String(req.validatedBody?.catalogId ?? '').trim();
+        const entry = getSystemBike(catalogId);
+        if (!entry) return res.status(404).json({ error: 'catalog entry not found' });
+        const requestId = getIdempotencyKey(req) || `sys-bike-${catalogId}-${Date.now()}`;
+        const debit = await debitAibaFromUser(entry.priceAiba, {
+            telegramId,
+            reason: 'system_bike_buy',
+            arena: 'bike_racing',
+            league: 'global',
+            sourceType: 'system_shop',
+            sourceId: catalogId,
+            requestId,
+            meta: { catalogId },
+        });
+        if (!debit.ok) return res.status(403).json({ error: debit.reason === 'insufficient' ? 'insufficient AIBA' : 'debit failed' });
+        const bike = await RacingMotorcycle.create({
+            ownerTelegramId: telegramId,
+            bikeClass: entry.bikeClass,
+            topSpeed: entry.topSpeed,
+            acceleration: entry.acceleration,
+            handling: entry.handling,
+            durability: entry.durability,
+        });
+        res.status(201).json({ ok: true, bike: bike.toObject(), aibaBalance: debit.user?.aibaBalance ?? 0 });
+    } catch (err) {
+        console.error('Buy system bike error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+    },
+);
 
 router.get(
     '/listings',

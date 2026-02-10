@@ -133,6 +133,11 @@ const IconBike = () => (
         <circle cx="5.5" cy="17.5" r="3.5" /><circle cx="18.5" cy="17.5" r="3.5" /><path d="M9 17l4-7 3 4" /><path d="M13 10l2-3" /><path d="M5.5 17.5h4l5-7" />
     </svg>
 );
+const IconLeaderboard = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M6 9H4.5a2.5 2.5 0 010-5H6" /><path d="M18 9h1.5a2.5 2.5 0 000-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2h-3v10.5a2.5 2.5 0 01-5 0V2H6v10.5a2.5 2.5 0 01-5 0" />
+    </svg>
+);
 /* Futuristic Stars (Telegram Stars–style) */
 const IconStar = () => (
     <svg className="icon-svg icon-svg--star" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -167,6 +172,7 @@ const GUILDS_EXPLANATION = 'Guilds (groups) let you team up with others: create 
 
 const TAB_LIST = [
     { id: 'home', label: 'Home', Icon: IconHome },
+    { id: 'leaderboard', label: 'Leaderboard', Icon: IconLeaderboard },
     { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
     { id: 'market', label: 'Market', Icon: IconMarket },
     { id: 'carRacing', label: 'Car Racing', Icon: IconCar },
@@ -249,16 +255,37 @@ export default function HomePage() {
 
     // Marketplace
     const [listings, setListings] = useState([]);
+    const [systemBrokers, setSystemBrokers] = useState([]);
     const [listPriceAIBA, setListPriceAIBA] = useState('');
     const [listBrokerId, setListBrokerId] = useState('');
     const [marketMsg, setMarketMsg] = useState('');
     async function refreshListings() {
         setBusy(true);
         try {
-            const res = await api.get('/api/marketplace/listings');
-            setListings(Array.isArray(res.data) ? res.data : []);
+            const [listRes, sysRes] = await Promise.all([
+                api.get('/api/marketplace/listings').catch(() => ({ data: [] })),
+                api.get('/api/marketplace/system-brokers').catch(() => ({ data: [] })),
+            ]);
+            setListings(Array.isArray(listRes.data) ? listRes.data : []);
+            setSystemBrokers(Array.isArray(sysRes.data) ? sysRes.data : []);
         } catch {
             setListings([]);
+            setSystemBrokers([]);
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function buySystemBroker(catalogId) {
+        setBusy(true);
+        setMarketMsg('');
+        try {
+            await api.post('/api/marketplace/buy-system-broker', { catalogId });
+            setMarketMsg('Broker purchased from system.');
+            await refreshBrokers();
+            await refreshListings();
+            await refreshEconomy();
+        } catch (e) {
+            setMarketMsg(getErrorMessage(e, 'Purchase failed.'));
         } finally {
             setBusy(false);
         }
@@ -491,19 +518,21 @@ export default function HomePage() {
     const [myCars, setMyCars] = useState([]);
     const [carListings, setCarListings] = useState([]);
     const [carLeaderboard, setCarLeaderboard] = useState([]);
+    const [systemCars, setSystemCars] = useState([]);
     const [carMsg, setCarMsg] = useState('');
     const [carCreateTxHash, setCarCreateTxHash] = useState('');
     const [carEnterRaceId, setCarEnterRaceId] = useState('');
     const [carEnterCarId, setCarEnterCarId] = useState('');
     async function refreshCarRacing() {
         try {
-            const [config, tracks, races, cars, listings, leaderboard] = await Promise.all([
+            const [config, tracks, races, cars, listings, leaderboard, systemCars] = await Promise.all([
                 api.get('/api/car-racing/config').then((r) => r.data).catch(() => null),
                 api.get('/api/car-racing/tracks').then((r) => r.data).catch(() => []),
                 api.get('/api/car-racing/races').then((r) => r.data).catch(() => []),
                 api.get('/api/car-racing/cars').then((r) => r.data).catch(() => []),
                 api.get('/api/car-racing/listings').then((r) => r.data).catch(() => []),
                 api.get('/api/car-racing/leaderboard').then((r) => r.data).catch(() => []),
+                api.get('/api/car-racing/system-cars').then((r) => r.data).catch(() => []),
             ]);
             setCarRacingConfig(config);
             setCarTracks(Array.isArray(tracks) ? tracks : []);
@@ -511,9 +540,24 @@ export default function HomePage() {
             setMyCars(Array.isArray(cars) ? cars : []);
             setCarListings(Array.isArray(listings) ? listings : []);
             setCarLeaderboard(Array.isArray(leaderboard) ? leaderboard : []);
+            setSystemCars(Array.isArray(systemCars) ? systemCars : []);
         } catch {
             setCarRaces([]);
             setMyCars([]);
+        }
+    }
+    async function buySystemCar(catalogId) {
+        setBusy(true);
+        setCarMsg('');
+        try {
+            await api.post('/api/car-racing/buy-system-car', { catalogId });
+            setCarMsg('Car purchased from system.');
+            await refreshCarRacing();
+            await refreshEconomy();
+        } catch (e) {
+            setCarMsg(getErrorMessage(e, 'Purchase failed.'));
+        } finally {
+            setBusy(false);
         }
     }
     async function createCarAiba() {
@@ -570,19 +614,21 @@ export default function HomePage() {
     const [myBikes, setMyBikes] = useState([]);
     const [bikeListings, setBikeListings] = useState([]);
     const [bikeLeaderboard, setBikeLeaderboard] = useState([]);
+    const [systemBikes, setSystemBikes] = useState([]);
     const [bikeMsg, setBikeMsg] = useState('');
     const [bikeCreateTxHash, setBikeCreateTxHash] = useState('');
     const [bikeEnterRaceId, setBikeEnterRaceId] = useState('');
     const [bikeEnterBikeId, setBikeEnterBikeId] = useState('');
     async function refreshBikeRacing() {
         try {
-            const [config, tracks, races, bikes, listings, leaderboard] = await Promise.all([
+            const [config, tracks, races, bikes, listings, leaderboard, systemBikes] = await Promise.all([
                 api.get('/api/bike-racing/config').then((r) => r.data).catch(() => null),
                 api.get('/api/bike-racing/tracks').then((r) => r.data).catch(() => []),
                 api.get('/api/bike-racing/races').then((r) => r.data).catch(() => []),
                 api.get('/api/bike-racing/bikes').then((r) => r.data).catch(() => []),
                 api.get('/api/bike-racing/listings').then((r) => r.data).catch(() => []),
                 api.get('/api/bike-racing/leaderboard').then((r) => r.data).catch(() => []),
+                api.get('/api/bike-racing/system-bikes').then((r) => r.data).catch(() => []),
             ]);
             setBikeRacingConfig(config);
             setBikeTracks(Array.isArray(tracks) ? tracks : []);
@@ -590,6 +636,7 @@ export default function HomePage() {
             setMyBikes(Array.isArray(bikes) ? bikes : []);
             setBikeListings(Array.isArray(listings) ? listings : []);
             setBikeLeaderboard(Array.isArray(leaderboard) ? leaderboard : []);
+            setSystemBikes(Array.isArray(systemBikes) ? systemBikes : []);
         } catch {
             setBikeRaces([]);
             setMyBikes([]);
@@ -637,6 +684,20 @@ export default function HomePage() {
             await refreshEconomy();
         } catch (e) {
             setBikeMsg(getErrorMessage(e, 'Enter failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function buySystemBike(catalogId) {
+        setBusy(true);
+        setBikeMsg('');
+        try {
+            await api.post('/api/bike-racing/buy-system-bike', { catalogId });
+            setBikeMsg('Bike purchased from system.');
+            await refreshBikeRacing();
+            await refreshEconomy();
+        } catch (e) {
+            setBikeMsg(getErrorMessage(e, 'Purchase failed.'));
         } finally {
             setBusy(false);
         }
@@ -870,6 +931,7 @@ export default function HomePage() {
     }, []);
 
     useEffect(() => {
+        if (tab === 'leaderboard') refreshLeaderboard().catch(() => {});
         if (tab === 'guilds') refreshMyRank().catch(() => {});
         if (tab === 'charity') refreshCharityAll();
         if (tab === 'university') refreshUniversity();
@@ -2017,6 +2079,7 @@ export default function HomePage() {
 
             <p className="guide-tip" style={{ marginTop: 0 }}>
                 {tab === 'home' ? 'Pick a broker and arena, then hit Run battle to earn.' :
+                 tab === 'leaderboard' ? 'Global ranks by score, AIBA, NEUR, or battles. Run battles to climb.' :
                  tab === 'brokers' ? 'Merge two brokers or mint one as NFT.' :
                  tab === 'arenas' ? 'Choose arena and run battle. Guild Wars needs a guild.' :
                  tab === 'guilds' ? 'Create or join a group; deposit brokers to the pool.' :
@@ -2138,6 +2201,39 @@ export default function HomePage() {
                                 </div>
                             ))
                         ) : <p className="guide-tip">Run battles to appear on the board.</p>}
+                    </div>
+                </section>
+
+                {/* ─── Global Leaderboard ──────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'leaderboard' ? 'is-active' : ''}`} aria-hidden={tab !== 'leaderboard'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title">Global Leaderboard</div>
+                        <p className="card__hint">Top players by score, AIBA, NEUR, or battles. Run battles to climb the ranks.</p>
+                        <div className="action-row">
+                            <select className="select" value={leaderboardBy} onChange={(e) => setLeaderboardBy(e.target.value)}><option value="score">By score</option><option value="aiba">By AIBA</option><option value="neur">By NEUR</option><option value="battles">By battles</option></select>
+                            <button type="button" className="btn btn--primary" onClick={refreshLeaderboard} disabled={busy}><IconRefresh /> Refresh</button>
+                        </div>
+                        {leaderboard.length > 0 ? (
+                            leaderboard.slice(0, 20).map((row, i) => (
+                                <div key={row.telegramId || i} className="list-item">
+                                    <span className="list-item__rank">#{row.rank}</span>
+                                    <span className="list-item__name">
+                                        {row.username || row.telegramId}
+                                        {Array.isArray(row.badges) && row.badges.length > 0 ? (
+                                            <span className="list-item__badges">
+                                                {row.badges.slice(0, 3).map((badgeId) => {
+                                                    const meta = BADGE_LABELS[badgeId] || { label: badgeId, color: 'var(--text-muted)' };
+                                                    return (
+                                                        <span key={badgeId} className="badge-pill badge-pill--inline" style={{ borderColor: meta.color, color: meta.color }} title={meta.title || meta.label}>{meta.label}</span>
+                                                    );
+                                                })}
+                                            </span>
+                                        ) : null}
+                                    </span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>score {row.totalScore} · AIBA {row.totalAiba}</span>
+                                </div>
+                            ))
+                        ) : <p className="guide-tip">Run battles to appear on the board. Tap Refresh to load.</p>}
                     </div>
                 </section>
 
@@ -2349,6 +2445,23 @@ export default function HomePage() {
                         ) : <p className="guide-tip">No listings.</p>}
                     </div>
                     <div className="card">
+                        <div className="card__title">Buy from system</div>
+                        <p className="card__hint">Purchase a broker from the system for AIBA.</p>
+                        {systemBrokers.length === 0 ? (
+                            <p className="guide-tip">No system brokers. Refresh to load.</p>
+                        ) : (
+                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                {systemBrokers.map((entry) => (
+                                    <li key={entry.id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                        <span>{entry.name} — INT{entry.intelligence} SPD{entry.speed} RISK{entry.risk} — {entry.priceAiba} AIBA</span>
+                                        <button type="button" className="btn btn--primary" onClick={() => buySystemBroker(entry.id)} disabled={busy}><IconBuy /> Buy</button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        {marketMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{marketMsg}</p> : null}
+                    </div>
+                    <div className="card">
                         <div className="card__title">Boosts</div>
                         <p className="card__hint">Multiply battle rewards for a period.</p>
                         <div className="action-row">
@@ -2387,9 +2500,30 @@ export default function HomePage() {
                         ) : (
                             <>
                                 <p className="card__hint">Loading racing config…</p>
+                                <p className="card__hint" style={{ marginTop: 6 }}>Purchase a car from THE SYSTEM with AIBA.</p>
                                 <button type="button" className="btn btn--secondary" onClick={refreshCarRacing} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
                             </>
                         )}
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Buy a car from the system</div>
+                        <p className="card__hint">Purchase a racing car from the system for AIBA.</p>
+                        {systemCars.length === 0 ? (
+                            <p className="guide-tip">No system cars. Refresh to load.</p>
+                        ) : (
+                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                {systemCars.map((entry) => {
+                                    const classLabel = entry.carClass && carRacingConfig?.carClasses?.find((x) => x.id === entry.carClass)?.label ? carRacingConfig.carClasses.find((x) => x.id === entry.carClass).label : (entry.carClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing car';
+                                    return (
+                                        <li key={entry.id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                            <span>{entry.name} — {classLabel} — SPD{entry.topSpeed} ACC{entry.acceleration} HND{entry.handling} DUR{entry.durability} — {entry.priceAiba} AIBA</span>
+                                            <button type="button" className="btn btn--primary" onClick={() => buySystemCar(entry.id)} disabled={busy}>Buy</button>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        )}
+                        {carMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{carMsg}</p> : null}
                     </div>
                     <div className="card">
                         <div className="card__title">2. Buy a racing car</div>
@@ -2472,9 +2606,30 @@ export default function HomePage() {
                         ) : (
                             <>
                                 <p className="card__hint">Loading racing config…</p>
+                                <p className="card__hint" style={{ marginTop: 6 }}>Purchase a BIKE from THE SYSTEM with AIBA.</p>
                                 <button type="button" className="btn btn--secondary" onClick={refreshBikeRacing} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
                             </>
                         )}
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Buy a bike from the system</div>
+                        <p className="card__hint">Purchase a racing bike from the system for AIBA.</p>
+                        {systemBikes.length === 0 ? (
+                            <p className="guide-tip">No system bikes. Refresh to load.</p>
+                        ) : (
+                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                {systemBikes.map((entry) => {
+                                    const classLabel = entry.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === entry.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === entry.bikeClass).label : (entry.bikeClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing bike';
+                                    return (
+                                        <li key={entry.id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                            <span>{entry.name} — {classLabel} — SPD{entry.topSpeed} ACC{entry.acceleration} HND{entry.handling} DUR{entry.durability} — {entry.priceAiba} AIBA</span>
+                                            <button type="button" className="btn btn--primary" onClick={() => buySystemBike(entry.id)} disabled={busy}>Buy</button>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        )}
+                        {bikeMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{bikeMsg}</p> : null}
                     </div>
                     <div className="card">
                         <div className="card__title">2. Buy a racing bike</div>
@@ -2699,7 +2854,11 @@ export default function HomePage() {
                         <button type="button" className="btn btn--ghost" style={{ marginTop: 10 }} onClick={refreshUniversity} disabled={busy}><IconRefresh /> Refresh</button>
                     </div>
                     {universityCourses.length === 0 ? (
-                        <p className="guide-tip">Unable to load courses. Check backend or try again.</p>
+                        <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                            <div className="card__title">No courses loaded</div>
+                            <p className="card__hint">Courses are loaded from the server. Tap Refresh below to load them. If you run locally, ensure the backend is running (e.g. <code style={{ fontSize: '0.75rem' }}>cd backend &amp;&amp; npm start</code>).</p>
+                            <button type="button" className="btn btn--primary" onClick={refreshUniversity} disabled={busy} style={{ marginTop: 12 }}><IconRefresh /> Refresh courses</button>
+                        </div>
                     ) : (
                         <div className="university-courses">
                             {universityCourses.map((course) => (
