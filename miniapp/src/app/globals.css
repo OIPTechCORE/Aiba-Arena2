@@ -517,6 +517,25 @@ body,
     color: var(--accent-cyan);
 }
 
+/* Enter as button: clear CTA, scrolls to content */
+.hero-center__enter--btn {
+    margin-top: 8px;
+    padding: 10px 24px;
+    background: transparent;
+    border: 2px solid var(--accent-cyan);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.hero-center__enter--btn:hover {
+    background: rgba(0, 240, 255, 0.15);
+    color: #fff;
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+}
+.hero-center__enter--btn:active {
+    transform: scale(0.98);
+}
+
 /* ─── Tutorial overlay (glass modal, 3D futuristic) ───────────────────────── */
 .tutorial-overlay {
     position: fixed;
