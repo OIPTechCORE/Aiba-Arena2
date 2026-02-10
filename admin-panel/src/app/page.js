@@ -6,6 +6,9 @@ import { useEffect, useMemo, useState } from 'react';
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
 function getAdminErrorMessage(error, fallback = 'Request failed.') {
+    if (!error?.response && (error?.code === 'ERR_NETWORK' || error?.message?.includes('Network Error'))) {
+        return `Backend unreachable. Is the API running at ${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}? Start it with: npm run dev (from project root) or npm start (from backend/).`;
+    }
     const data = error?.response?.data || {};
     if (data?.error && typeof data.error === 'object') {
         return data.error.message || data.error.code || fallback;
@@ -642,6 +645,9 @@ export default function AdminHome() {
             {!token ? (
                 <div style={{ maxWidth: 420, border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Admin login</div>
+                    <p style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+                        Backend must be running at {BACKEND_URL}. Use ADMIN_EMAIL and ADMIN_PASSWORD (or ADMIN_PASSWORD_HASH) from backend/.env.
+                    </p>
                     <div style={{ display: 'grid', gap: 8 }}>
                         <input
                             value={email}
@@ -659,7 +665,7 @@ export default function AdminHome() {
                         <button onClick={login} style={{ padding: '10px 12px' }}>
                             Login
                         </button>
-                        {authError ? <div style={{ color: 'crimson' }}>{authError}</div> : null}
+                        {authError ? <div style={{ color: 'crimson', whiteSpace: 'pre-wrap' }}>{authError}</div> : null}
                     </div>
                 </div>
             ) : (

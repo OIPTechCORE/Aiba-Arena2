@@ -11,5 +11,6 @@ alwaysApply: true
 - Use a clear, descriptive commit message that summarizes what was changed (e.g. "Add University plan section", "Fix lint in page.js").
 - Request `git_write` permission when running `git add` and `git commit`.
 - Request `network` permission when running `git push` so every commit is pushed to the remote.
+- Prefer pushing to the **main** branch (production). If the repo uses `main` as default, push to `origin main` so Vercel and other integrations auto-deploy.
 
 This keeps the repo up to date locally and on the remote with every update you make.

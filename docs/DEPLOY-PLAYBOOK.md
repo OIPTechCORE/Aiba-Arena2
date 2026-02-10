@@ -31,9 +31,15 @@ If `git filter-repo` is not available, use `git filter-branch` or BFG.
 3. Configure the WebApp domain to match the miniapp domain.
 4. Set `TELEGRAM_INITDATA_MAX_AGE_SECONDS` (recommended 300–900).
 
-## 4) Vercel Deployment
+## 4) GitHub and Vercel (Auto-Deploy)
 
-### 4.1 Backend (Vercel Serverless)
+- **Production branch:** Use **`main`** (not `master`). Push all releases to `main`.
+- **Vercel auto-deploy:** Connect your Vercel project to this GitHub repo and set **Production Branch** to **`main`**. Every push to `main` triggers an automatic deployment for backend, miniapp, and admin (each as its own Vercel project if configured separately).
+- **Default branch on GitHub:** In repo **Settings → General → Default branch**, set to **main** so new clones and PRs use `main`.
+
+## 5) Vercel Deployment
+
+### 5.1 Backend (Vercel Serverless)
 
 Project root: `backend/`  
 Entry point: `backend/api/index.js`  
@@ -62,7 +68,7 @@ Run predeploy checks:
 npm run predeploy:check
 ```
 
-### 4.2 Miniapp (Next.js)
+### 5.2 Miniapp (Next.js)
 
 Project root: `miniapp/`
 
@@ -72,14 +78,14 @@ Required env vars:
 Optional:
 - `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL`
 
-### 4.3 Admin Panel (Next.js)
+### 5.3 Admin Panel (Next.js)
 
 Project root: `admin-panel/`
 
 Required env vars:
 - `NEXT_PUBLIC_BACKEND_URL`
 
-## 5) Localhost Development
+## 6) Localhost Development
 
 1. Copy env templates:
    - `backend/.env.example` -> `backend/.env`
@@ -96,7 +102,7 @@ npm run dev
 npm run tunnel
 ```
 
-## 6) Hardening Checklist
+## 7) Hardening Checklist
 
 - Use `APP_ENV=prod` in production.
 - Keep `ADMIN_PASSWORD_HASH` only; remove `ADMIN_PASSWORD`.
@@ -104,7 +110,7 @@ npm run tunnel
 - Configure monitoring and uptime checks.
 - Enable MongoDB backups.
 
-## 7) Incident Checklist (Quick)
+## 8) Incident Checklist (Quick)
 
 - Rotate any compromised tokens immediately.
 - Re-deploy with new secrets.

@@ -224,7 +224,6 @@ export default function HomePage() {
     const [assetCategory, setAssetCategory] = useState('agent');
     const [assetName, setAssetName] = useState('');
     const [listingPrice, setListingPrice] = useState('');
-    const [proposals, setProposals] = useState([]);
     const [proposalTitle, setProposalTitle] = useState('');
     const [proposalDescription, setProposalDescription] = useState('');
 

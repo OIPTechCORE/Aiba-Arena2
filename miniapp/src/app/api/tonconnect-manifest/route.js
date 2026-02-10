@@ -15,11 +15,13 @@ function getBaseUrl() {
 
 export function GET() {
     const baseUrl = getBaseUrl();
+    // TON Connect spec: iconUrl should be PNG or ICO (180x180 px). SVG is not supported by some wallets.
+    // If you add public/icon.png (180x180), switch to: iconUrl: `${baseUrl}/icon.png`
+    const iconUrl = `${baseUrl}/icon.svg`;
 
     return Response.json({
-        // "url" is the dApp origin (not Telegram).
         url: baseUrl,
         name: 'AIBA Arena',
-        iconUrl: `${baseUrl}/icon.svg`,
+        iconUrl,
     });
 }

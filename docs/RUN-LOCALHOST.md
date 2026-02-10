@@ -44,6 +44,15 @@ npm run dev
 
 This starts backend (5000), miniapp (3000), and admin (3001) via `concurrently`. You must have `backend/.env` created first.
 
+**Fix dependency vulnerabilities (safe, no breaking changes):**  
+Run `npm audit fix` (without `--force`) in the repo root, then in `backend`, `miniapp`, and `admin-panel`. Do not use `npm audit fix --force` unless you accept possible breaking changes.
+
+**Error -102 (connection refused) when opening the app:**  
+The URL (e.g. `http://localhost:3000`) could not be reached. Fix: (1) Start the dev server (`npm run dev` from project root), then open the URL in a **desktop browser** on the same machine. (2) If you open the app from Telegram or another in-app browser, it often cannot reach `localhost`; use a deployed HTTPS URL or an ngrok tunnel. See [CONNECT-WALLET-TON-SCAN.md](CONNECT-WALLET-TON-SCAN.md) for Connect Wallet and localhost details.
+
+**Admin panel: "Network error" on login:**  
+The admin panel (localhost:3001) calls the backend at **http://localhost:5000**. Fix: (1) **Start the backend** — run `npm run dev` from the project root (starts backend + miniapp + admin) or run `npm start` from `backend/` in a separate terminal. (2) In `backend/.env` set **ADMIN_EMAIL** and **ADMIN_PASSWORD** (or **ADMIN_PASSWORD_HASH**), and **ADMIN_JWT_SECRET** (e.g. a long random string). (3) Ensure **admin-panel/.env.local** has `NEXT_PUBLIC_BACKEND_URL=http://localhost:5000` (or leave it unset to use that default). (4) If the backend runs but login still fails, open http://localhost:5000/api/comms/status in the browser; if that fails, the backend is not reachable (firewall, wrong port, or process not running).
+
 ---
 
 ## Prerequisites
