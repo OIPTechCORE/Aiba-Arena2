@@ -404,6 +404,15 @@ body,
     color: var(--text-primary);
 }
 
+.cinematic__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    max-width: 360px;
+}
+
 .cinematic__title {
     font-family: var(--font-display);
     font-weight: 900;
@@ -458,6 +467,54 @@ body,
 .cinematic__enter:active {
     transform: translateY(2px);
     box-shadow: 0 4px 0 #006670, 0 6px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(0, 240, 255, 0.5);
+}
+
+/* ─── Hero block: AI BROKER ARENA in the middle of the page ─────────────── */
+.hero-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 32vh;
+    padding: 32px 24px;
+    margin: 0 auto;
+    max-width: 420px;
+}
+
+.hero-center__title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(1.5rem, 4.5vw, 2rem);
+    letter-spacing: 0.1em;
+    margin: 0 0 10px 0;
+    background: linear-gradient(135deg, #fff 0%, var(--accent-cyan) 50%, var(--accent-magenta) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-center__sub {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+}
+
+.hero-center__hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0 0 16px 0;
+    line-height: 1.35;
+}
+
+.hero-center__enter {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-cyan);
 }
 
 /* ─── Tutorial overlay (glass modal, 3D futuristic) ───────────────────────── */
@@ -1026,41 +1083,79 @@ body,
     cursor: pointer;
 }
 
-/* ─── TonConnect: wallet list modal — seamlessly responsive ─────────────── */
+/* ─── TonConnect: wallet list modal — seamlessly responsive, nothing hidden ─ */
+/* Ensure body never clips the modal */
+body.ton-connect-modal-open,
+html:has(#tc-widget-root [data-tc-modal="true"]) {
+    overflow: visible;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
 #tc-widget-root {
     position: fixed;
     inset: 0;
     z-index: 10000;
     width: 100%;
-    /* Allow clicks to pass through when modal is closed */
     pointer-events: none;
-    /* Dynamic viewport height for mobile (address bar show/hide) */
     height: 100%;
     height: 100dvh;
     min-height: -webkit-fill-available;
     min-height: 100vh;
     box-sizing: border-box;
-    /* Safe area for notches and home indicator */
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    /* Smooth scroll when modal content overflows */
-    overflow: auto;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* When modal is open: capture pointer events and show full viewport */
+#tc-widget-root:has([data-tc-modal="true"]) {
+    pointer-events: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
 }
 
-/* Modal backdrop: full width and scrollable on small screens */
+/* Modal backdrop: full viewport, nothing clipped */
 #tc-widget-root [data-tc-modal="true"] {
     min-height: 100%;
     min-height: 100dvh;
+    min-width: 100%;
+    width: 100%;
+    max-width: 100vw;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     box-sizing: border-box;
     pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+/* Inner modal content: scrollable so wallet list is never hidden */
+#tc-widget-root [data-tc-modal="true"] > div,
+#tc-widget-root [data-tc-modal="true"] [class*="modal"],
+#tc-widget-root [data-tc-modal="true"] [class*="Modal"] {
+    max-height: 100%;
+    max-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    width: 100%;
+    display: block;
 }
 
 @media (max-width: 440px) {
     #tc-widget-root [data-tc-modal="true"] {
         width: 100%;
         max-width: 100vw;
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
     }
 }
 
