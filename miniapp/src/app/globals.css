@@ -536,6 +536,109 @@ body,
     transform: scale(0.98);
 }
 
+.hero-center--compact {
+    min-height: 18vh;
+    padding: 20px 24px;
+}
+.hero-center--compact .hero-center__hint { display: none; }
+
+/* ─── Nav Hub: futuristic grid of 15 section buttons ─────────────────────── */
+.nav-hub {
+    margin: 20px 0 16px 0;
+    padding: 0 4px;
+}
+
+.nav-hub__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+@media (min-width: 420px) {
+    .nav-hub__grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+    }
+}
+
+@media (min-width: 520px) {
+    .nav-hub__grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+    }
+}
+
+.nav-hub__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 10px;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--text-secondary);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.nav-hub__btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-glass);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 240, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.nav-hub__btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.nav-hub__btn--active {
+    color: var(--accent-cyan);
+    border-color: var(--border-glass);
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.18) 0%, rgba(224, 64, 251, 0.1) 100%);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2), 0 0 24px rgba(0, 240, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.nav-hub__btn--active:hover {
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18), 0 0 28px rgba(0, 240, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.nav-hub__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+}
+
+.nav-hub__icon .icon-svg {
+    width: 24px;
+    height: 24px;
+    opacity: 0.9;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.nav-hub__btn--active .nav-hub__icon .icon-svg {
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.nav-hub__label {
+    text-align: center;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
 /* ─── Tutorial overlay (glass modal, 3D futuristic) ───────────────────────── */
 .tutorial-overlay {
     position: fixed;

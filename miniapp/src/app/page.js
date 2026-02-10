@@ -1980,28 +1980,36 @@ export default function HomePage() {
                 </label>
             </div>
 
-            <div className="tab-bar">
-                {TAB_LIST.map(({ id, label, Icon }) => (
-                    <button
-                        key={id}
-                        type="button"
-                        className={`btn btn--ghost ${tab === id ? 'btn--active' : ''}`}
-                        onClick={() => setTab(id)}
-                        aria-pressed={tab === id}
-                        aria-label={label}
-                    >
-                        <Icon />
-                        <span>{label}</span>
-                    </button>
-                ))}
-            </div>
-
-            <div className="hero-center" aria-hidden="false">
+            <div className="hero-center hero-center--compact" aria-hidden="false">
                 <h2 className="hero-center__title">AI BROKER ARENA</h2>
                 <p className="hero-center__sub">Own AI brokers. Compete in 3D arenas. Earn NEUR &amp; AIBA.</p>
-                <p className="hero-center__hint">Swipe the tab bar to explore Home, Brokers, Market, Racing, and more.</p>
-                <span className="hero-center__enter">Enter</span>
+                <button
+                    type="button"
+                    className="hero-center__enter hero-center__enter--btn"
+                    onClick={() => document.querySelector('.tab-content')?.scrollIntoView({ behavior: 'smooth' })}
+                    aria-label="Scroll to content"
+                >
+                    Enter
+                </button>
             </div>
+
+            <nav className="nav-hub" aria-label="Main navigation">
+                <div className="nav-hub__grid">
+                    {TAB_LIST.map(({ id, label, Icon }) => (
+                        <button
+                            key={id}
+                            type="button"
+                            className={`nav-hub__btn ${tab === id ? 'nav-hub__btn--active' : ''}`}
+                            onClick={() => setTab(id)}
+                            aria-pressed={tab === id}
+                            aria-label={label}
+                        >
+                            <span className="nav-hub__icon"><Icon /></span>
+                            <span className="nav-hub__label">{label}</span>
+                        </button>
+                    ))}
+                </div>
+            </nav>
 
             <p className="guide-tip" style={{ marginTop: 0 }}>
                 {tab === 'home' ? 'Pick a broker and arena, then hit Run battle to earn.' :
