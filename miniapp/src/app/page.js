@@ -971,7 +971,12 @@ export default function HomePage() {
         setBusy(true);
         setStatus('');
         try {
-            await api.post('/api/brokers/starter', {});
+            const res = await api.post('/api/brokers/starter', {});
+            const created = res?.data;
+            if (created && created._id) {
+                setBrokers((prev) => [created, ...prev]);
+                setSelectedBrokerId(created._id);
+            }
             await refreshBrokers();
             setStatus('Starter broker created.');
         } catch (e) {
@@ -2109,6 +2114,7 @@ export default function HomePage() {
                         <button type="button" className="btn btn--primary" onClick={runBattle} disabled={busy || !selectedBrokerId}><IconRun /> Run battle</button>
                         <button type="button" className="btn btn--secondary" onClick={refreshVaultInventory} disabled={busy}><IconVault /> Vault</button>
                     </div>
+                    {status ? <p className={`status-msg ${status.toLowerCase().includes('fail') || status.includes('unreachable') ? 'status-msg--error' : ''}`} style={{ marginTop: 8, marginBottom: 0 }}>{status}</p> : null}
                     {vaultInfo ? (
                         <div className="card card--elevated">
                             <div className="card__title">Vault</div>
@@ -2166,7 +2172,13 @@ export default function HomePage() {
                         <div className="action-row">
                             <button type="button" className="btn btn--secondary" onClick={createReferral} disabled={busy}><IconShare /> My code</button>
                         </div>
-                        {myReferral?.code ? <p className="card__hint" style={{ marginTop: 8 }}>Your code: <strong style={{ color: 'var(--accent-cyan)' }}>{String(myReferral.code).toUpperCase()}</strong></p> : null}
+                        {myReferral?.code ? (
+                            <>
+                                <p className="card__hint" style={{ marginTop: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent-cyan)' }}>Share your link on socials</p>
+                                <p className="card__hint" style={{ marginTop: 4 }}>Your code: <strong style={{ color: 'var(--accent-cyan)' }}>{String(myReferral.code).toUpperCase()}</strong></p>
+                                <button type="button" className="btn btn--secondary" style={{ marginTop: 8 }} onClick={() => { const code = String(myReferral.code).toUpperCase(); const msg = `Join me on AIBA Arena! Use my referral code: ${code}`; if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(msg).then(() => setRefMsg('Copied to clipboard.')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(msg); } }}>Copy share message</button>
+                            </>
+                        ) : null}
                         <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                             <input className="input" value={refCodeInput} onChange={(e) => setRefCodeInput(e.target.value)} placeholder="Friend's code" style={{ flex: '1 1 180px' }} />
                             <button type="button" className="btn btn--primary" onClick={useReferral} disabled={busy || !refCodeInput.trim()}>Apply</button>
