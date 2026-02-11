@@ -2056,7 +2056,7 @@ export default function HomePage() {
                     </div>
                 </div>
             ) : null}
-            <header className="app-header">
+            <header className="app-header app-header--android">
                 <div className="app-header__brand">
                     <h1 className="aiba-app__title">AIBA Arena</h1>
                 </div>
@@ -2122,24 +2122,6 @@ export default function HomePage() {
                     Enter
                 </button>
             </div>
-
-            <nav className="nav-hub" aria-label="Main navigation">
-                <div className="nav-hub__grid">
-                    {TAB_LIST.map(({ id, label, Icon }) => (
-                        <button
-                            key={id}
-                            type="button"
-                            className={`nav-hub__btn ${tab === id ? 'nav-hub__btn--active' : ''}`}
-                            onClick={() => { setTab(id); }}
-                            aria-pressed={tab === id}
-                            aria-label={label}
-                        >
-                            <span className="nav-hub__icon"><Icon /></span>
-                            <span className="nav-hub__label">{label}</span>
-                        </button>
-                    ))}
-                </div>
-            </nav>
 
             <p className="guide-tip" style={{ marginTop: 0 }}>
                 {tab === 'home' ? 'Pick a broker and arena, then hit Run battle to earn.' :
@@ -3478,6 +3460,23 @@ export default function HomePage() {
                     ) : null}
                 </section>
             </div>
+            <nav className="android-bottom-nav" aria-label="Primary navigation">
+                <div className="android-bottom-nav__track">
+                    {TAB_LIST.map(({ id, label, Icon }) => (
+                        <button
+                            key={id}
+                            type="button"
+                            className={`android-bottom-nav__btn ${tab === id ? 'android-bottom-nav__btn--active' : ''}`}
+                            onClick={() => setTab(id)}
+                            aria-pressed={tab === id}
+                            aria-label={label}
+                        >
+                            <span className="android-bottom-nav__icon"><Icon /></span>
+                            <span className="android-bottom-nav__label">{label}</span>
+                        </button>
+                    ))}
+                </div>
+            </nav>
         </div>
     );
 }
