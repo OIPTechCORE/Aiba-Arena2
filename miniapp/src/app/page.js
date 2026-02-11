@@ -2146,11 +2146,17 @@ export default function HomePage() {
             <div className="tab-content">
                 {/* ─── Home ───────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'home' ? 'is-active' : ''}`} aria-hidden={tab !== 'home'}>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
-                        <div className="card__title">What are brokers?</div>
-                        <p className="card__hint">{BROKERS_EXPLANATION}</p>
+                    <div className="card card--elevated home-overview" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">Home Command Center</div>
+                        <p className="card__hint">Battle-ready Android-style dashboard. Manage brokers, run fights, and jump into tasks fast.</p>
+                        <div className="home-overview__stats">
+                            <span className="home-stat-pill">AIBA {Number(economyMe?.aibaBalance ?? 0)}</span>
+                            <span className="home-stat-pill">NEUR {Number(economyMe?.neurBalance ?? 0)}</span>
+                            <span className="home-stat-pill">Stars {Number(economyMe?.starsBalance ?? 0)}</span>
+                            <span className="home-stat-pill">Brokers {brokers.length}</span>
+                        </div>
                     </div>
-                    <div className="action-row">
+                    <div className="action-row action-row--android">
                         <button type="button" className="btn btn--secondary" onClick={createStarterBroker} disabled={busy}><IconBrokers /> New broker</button>
                         <button type="button" className="btn btn--secondary" onClick={() => setTab('tasks')} disabled={busy}><IconTasks /> Tasks</button>
                         <button type="button" className="btn btn--secondary" onClick={refreshBrokers} disabled={busy}><IconRefresh /> Refresh</button>
@@ -2261,37 +2267,42 @@ export default function HomePage() {
 
                 {/* ─── Tasks (Personalized for all user kinds) ─────────────────── */}
                 <section className={`tab-panel ${tab === 'tasks' ? 'is-active' : ''}`} aria-hidden={tab !== 'tasks'}>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
-                        <div className="card__title">Tasks for Every User Type</div>
-                        <p className="card__hint">A deep, personalized task plan that adapts to your progress. Includes onboarding, economy, racing, social, learning, and advanced tasks.</p>
-                        <button type="button" className="btn btn--secondary" onClick={refreshTasks} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh tasks</button>
-                        {tasksMsg ? <p className="status-msg status-msg--error" style={{ marginTop: 8 }}>{tasksMsg}</p> : null}
+                    <div className="card card--elevated tasks-hero" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">Task Center</div>
+                        <p className="card__hint">Personalized mission queue for every player profile: newcomer, fighter, trader, racer, social, scholar, and investor.</p>
+                        <div className="action-row action-row--android">
+                            <button type="button" className="btn btn--secondary" onClick={refreshTasks} disabled={busy}><IconRefresh /> Refresh tasks</button>
+                            <button type="button" className="btn btn--ghost" onClick={() => setTab('home')} disabled={busy}><IconHome /> Back to Home</button>
+                        </div>
                         {Array.isArray(taskProfile?.userKinds) && taskProfile.userKinds.length > 0 ? (
-                            <p className="card__hint" style={{ marginTop: 8 }}>
-                                Your user kinds: <strong>{taskProfile.userKinds.join(', ')}</strong>
-                            </p>
+                            <div className="tasks-kinds">
+                                {taskProfile.userKinds.map((k) => (
+                                    <span key={k} className="task-chip">{k}</span>
+                                ))}
+                            </div>
                         ) : null}
+                        {tasksMsg ? <p className="status-msg status-msg--error" style={{ marginTop: 8 }}>{tasksMsg}</p> : null}
                     </div>
-                    <div className="card">
+                    <div className="card tasks-list-card">
                         <div className="card__title">Your task queue</div>
                         {taskFeed.length === 0 ? (
                             <p className="guide-tip">No tasks available yet. Tap Refresh tasks.</p>
                         ) : (
-                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                            <ul className="tasks-list">
                                 {taskFeed.map((t, i) => (
-                                    <li key={t.id || i} className="list-item" style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 6, marginBottom: 8 }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                                    <li key={t.id || i} className="task-item">
+                                        <div className="task-item__head">
                                             <strong>{t.title || 'Task'}</strong>
-                                            <span className={`badge-pill ${t.completed ? '' : 'badge-pill--inline'}`} style={{ borderColor: t.completed ? 'var(--accent-green)' : 'var(--border)', color: t.completed ? 'var(--accent-green)' : 'var(--text-muted)' }}>
+                                            <span className={`badge-pill ${t.completed ? '' : 'badge-pill--inline'}`} style={{ borderColor: t.completed ? 'var(--accent-green)' : 'var(--border-subtle)', color: t.completed ? 'var(--accent-green)' : 'var(--text-muted)' }}>
                                                 {t.completed ? 'Completed' : 'Open'}
                                             </span>
                                         </div>
-                                        {t.description ? <p className="card__hint" style={{ margin: 0 }}>{t.description}</p> : null}
-                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                            {t.category ? <span className="card__hint" style={{ margin: 0 }}>Category: {t.category}</span> : null}
-                                            {Array.isArray(t.userKinds) && t.userKinds.length > 0 ? <span className="card__hint" style={{ margin: 0 }}>For: {t.userKinds.join(', ')}</span> : null}
+                                        {t.description ? <p className="card__hint task-item__desc">{t.description}</p> : null}
+                                        <div className="task-item__meta">
+                                            {t.category ? <span className="task-chip">Category: {t.category}</span> : null}
+                                            {Array.isArray(t.userKinds) && t.userKinds.length > 0 ? <span className="task-chip">For: {t.userKinds.join(', ')}</span> : null}
                                             {(Number(t.rewardAiba || 0) > 0 || Number(t.rewardNeur || 0) > 0) ? (
-                                                <span className="card__hint" style={{ margin: 0 }}>Reward hint: {Number(t.rewardAiba || 0)} AIBA / {Number(t.rewardNeur || 0)} NEUR</span>
+                                                <span className="task-chip">Reward hint: {Number(t.rewardAiba || 0)} AIBA / {Number(t.rewardNeur || 0)} NEUR</span>
                                             ) : null}
                                         </div>
                                         {t.ctaTab ? (

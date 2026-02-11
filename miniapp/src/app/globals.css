@@ -37,6 +37,15 @@
     --radius-pill: 999px;
     --font-display: 'Orbitron', sans-serif;
     --font-body: 'Exo 2', system-ui, sans-serif;
+    /* Android rhythm */
+    --android-space-1: 8px;
+    --android-space-2: 12px;
+    --android-space-3: 16px;
+    --android-space-4: 20px;
+    --android-title-size: 0.98rem;
+    --android-body-size: 0.9rem;
+    --android-hint-size: 0.8rem;
+    --android-btn-height: 44px;
 }
 
 * {
@@ -243,10 +252,12 @@ body,
 .btn {
     font-family: var(--font-body);
     font-weight: 600;
-    font-size: 0.9rem;
-    padding: 10px 18px;
+    font-size: 0.86rem;
+    line-height: 1.2;
+    min-height: var(--android-btn-height);
+    padding: 10px 14px;
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: 12px;
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
     display: inline-flex;
@@ -406,8 +417,8 @@ body,
     background: var(--bg-glass);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: 18px;
-    margin-top: 16px;
+    padding: var(--android-space-3);
+    margin-top: var(--android-space-2);
     backdrop-filter: blur(12px);
     box-shadow: var(--shadow-3d-card), inset 0 1px 0 rgba(255, 255, 255, 0.06);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -420,9 +431,9 @@ body,
 .card__title {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1rem;
+    font-size: var(--android-title-size);
     letter-spacing: 0.04em;
-    margin: 0 0 12px 0;
+    margin: 0 0 10px 0;
     color: var(--text-primary);
     display: flex;
     align-items: center;
@@ -438,19 +449,20 @@ body,
 }
 
 .card__hint {
-    font-size: 0.75rem;
+    font-size: var(--android-hint-size);
     color: var(--text-muted);
-    margin: 6px 0 12px 0;
-    line-height: 1.45;
+    margin: 6px 0 10px 0;
+    line-height: 1.5;
 }
 
 /* ─── Inputs (futuristic outline + glow focus) ───────────────────────────── */
 .input {
     width: 100%;
     max-width: 320px;
-    padding: 12px 14px;
+    min-height: var(--android-btn-height);
+    padding: 10px 14px;
     font-family: var(--font-body);
-    font-size: 0.9rem;
+    font-size: var(--android-body-size);
     color: var(--text-primary);
     background: rgba(0, 0, 0, 0.35);
     border: 1px solid var(--border-subtle);
@@ -469,9 +481,10 @@ body,
 }
 
 .select {
+    min-height: var(--android-btn-height);
     padding: 10px 14px;
     font-family: var(--font-body);
-    font-size: 0.9rem;
+    font-size: var(--android-body-size);
     color: var(--text-primary);
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid var(--border-subtle);
@@ -965,10 +978,86 @@ body,
 /* ─── Action row (quick actions) ────────────────────────────────────────── */
 .action-row {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
-    margin-top: 14px;
-    margin-bottom: 6px;
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.action-row--android .btn {
+    min-width: 124px;
+}
+
+/* ─── Home + Tasks Phase 2 cards ─────────────────────────────────────────── */
+.home-overview {
+    border-radius: 16px;
+}
+
+.home-overview__stats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.home-stat-pill,
+.task-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    border: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+}
+
+.tasks-hero {
+    border-radius: 16px;
+}
+
+.tasks-kinds {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.tasks-list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.task-item {
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.task-item__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.task-item__desc {
+    margin: 0;
+}
+
+.task-item__meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 /* ─── Victory / battle result card (eye-catching) ────────────────────────── */
