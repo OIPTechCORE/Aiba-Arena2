@@ -26,16 +26,46 @@ router.post(
         title: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
         description: { type: 'string', trim: true, maxLength: 2000 },
         enabled: { type: 'boolean' },
+        category: { type: 'string', trim: true, enum: ['onboarding', 'core', 'economy', 'racing', 'social', 'learning', 'advanced'] },
+        userKinds: { type: 'array' },
+        ctaLabel: { type: 'string', trim: true, maxLength: 100 },
+        ctaTab: { type: 'string', trim: true, maxLength: 60 },
+        rewardAiba: { type: 'number', min: 0 },
+        rewardNeur: { type: 'number', min: 0 },
+        sortOrder: { type: 'number' },
     }),
     async (req, res) => {
     try {
         const title = String(req.validatedBody?.title ?? '').trim();
         const description = String(req.validatedBody?.description ?? '').trim();
         const enabled = req.validatedBody?.enabled === undefined ? true : Boolean(req.validatedBody.enabled);
+        const category = String(req.validatedBody?.category || 'core').trim();
+        const rawKinds = Array.isArray(req.validatedBody?.userKinds) ? req.validatedBody.userKinds : ['all'];
+        const userKinds = rawKinds
+            .map((k) => String(k || '').trim())
+            .filter(Boolean);
+        const ctaLabel = String(req.validatedBody?.ctaLabel || 'Open').trim();
+        const ctaTab = String(req.validatedBody?.ctaTab || '').trim();
+        const rewardAiba = Math.max(0, Number(req.validatedBody?.rewardAiba || 0));
+        const rewardNeur = Math.max(0, Number(req.validatedBody?.rewardNeur || 0));
+        const sortOrder = Number.isFinite(Number(req.validatedBody?.sortOrder))
+            ? Number(req.validatedBody.sortOrder)
+            : 100;
 
         if (!title) return res.status(400).json({ error: 'title required' });
 
-        const task = await Task.create({ title, description, enabled });
+        const task = await Task.create({
+            title,
+            description,
+            enabled,
+            category,
+            userKinds: userKinds.length ? userKinds : ['all'],
+            ctaLabel,
+            ctaTab,
+            rewardAiba,
+            rewardNeur,
+            sortOrder,
+        });
         res.status(201).json(task);
     } catch (err) {
         console.error('Error creating task:', err);
@@ -52,6 +82,13 @@ router.patch(
         title: { type: 'string', trim: true, maxLength: 200 },
         description: { type: 'string', trim: true, maxLength: 2000 },
         enabled: { type: 'boolean' },
+        category: { type: 'string', trim: true, enum: ['onboarding', 'core', 'economy', 'racing', 'social', 'learning', 'advanced'] },
+        userKinds: { type: 'array' },
+        ctaLabel: { type: 'string', trim: true, maxLength: 100 },
+        ctaTab: { type: 'string', trim: true, maxLength: 60 },
+        rewardAiba: { type: 'number', min: 0 },
+        rewardNeur: { type: 'number', min: 0 },
+        sortOrder: { type: 'number' },
     }),
     async (req, res) => {
     try {
@@ -62,6 +99,18 @@ router.patch(
         if (req.validatedBody?.description !== undefined)
             update.description = String(req.validatedBody.description).trim();
         if (req.validatedBody?.enabled !== undefined) update.enabled = Boolean(req.validatedBody.enabled);
+        if (req.validatedBody?.category !== undefined) update.category = String(req.validatedBody.category).trim();
+        if (req.validatedBody?.userKinds !== undefined) {
+            const kinds = Array.isArray(req.validatedBody.userKinds)
+                ? req.validatedBody.userKinds.map((k) => String(k || '').trim()).filter(Boolean)
+                : [];
+            update.userKinds = kinds.length ? kinds : ['all'];
+        }
+        if (req.validatedBody?.ctaLabel !== undefined) update.ctaLabel = String(req.validatedBody.ctaLabel).trim();
+        if (req.validatedBody?.ctaTab !== undefined) update.ctaTab = String(req.validatedBody.ctaTab).trim();
+        if (req.validatedBody?.rewardAiba !== undefined) update.rewardAiba = Math.max(0, Number(req.validatedBody.rewardAiba || 0));
+        if (req.validatedBody?.rewardNeur !== undefined) update.rewardNeur = Math.max(0, Number(req.validatedBody.rewardNeur || 0));
+        if (req.validatedBody?.sortOrder !== undefined) update.sortOrder = Number(req.validatedBody.sortOrder || 100);
 
         if (update.title !== undefined && !update.title) {
             return res.status(400).json({ error: 'title cannot be empty' });

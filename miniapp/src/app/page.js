@@ -138,6 +138,12 @@ const IconLeaderboard = () => (
         <path d="M6 9H4.5a2.5 2.5 0 010-5H6" /><path d="M18 9h1.5a2.5 2.5 0 000-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2h-3v10.5a2.5 2.5 0 01-5 0V2H6v10.5a2.5 2.5 0 01-5 0" />
     </svg>
 );
+const IconTasks = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M9 6h11" /><path d="M9 12h11" /><path d="M9 18h11" />
+        <path d="M4 6h.01" /><path d="M4 12h.01" /><path d="M4 18h.01" />
+    </svg>
+);
 /* Futuristic Stars (Telegram Stars–style) */
 const IconStar = () => (
     <svg className="icon-svg icon-svg--star" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -172,6 +178,7 @@ const GUILDS_EXPLANATION = 'Guilds (groups) let you team up with others: create 
 
 const TAB_LIST = [
     { id: 'home', label: 'Home', Icon: IconHome },
+    { id: 'tasks', label: 'Tasks', Icon: IconTasks },
     { id: 'leaderboard', label: 'Leaderboard', Icon: IconLeaderboard },
     { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
     { id: 'market', label: 'Market', Icon: IconMarket },
@@ -238,6 +245,9 @@ export default function HomePage() {
     const [listingPrice, setListingPrice] = useState('');
     const [proposalTitle, setProposalTitle] = useState('');
     const [proposalDescription, setProposalDescription] = useState('');
+    const [taskFeed, setTaskFeed] = useState([]);
+    const [taskProfile, setTaskProfile] = useState(null);
+    const [tasksMsg, setTasksMsg] = useState('');
 
     // Leaderboard
     const [leaderboard, setLeaderboard] = useState([]);
@@ -249,6 +259,27 @@ export default function HomePage() {
             setLeaderboard(Array.isArray(res.data) ? res.data : []);
         } catch {
             setLeaderboard([]);
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function refreshTasks() {
+        setBusy(true);
+        setTasksMsg('');
+        try {
+            const res = await api.get('/api/tasks');
+            if (Array.isArray(res.data)) {
+                setTaskFeed(res.data);
+                setTaskProfile(null);
+            } else {
+                setTaskFeed(Array.isArray(res.data?.tasks) ? res.data.tasks : []);
+                setTaskProfile(res.data?.profile || null);
+            }
+        } catch (e) {
+            setTaskFeed([]);
+            setTaskProfile(null);
+            setTasksMsg(getErrorMessage(e, 'Could not load tasks.'));
         } finally {
             setBusy(false);
         }
@@ -941,6 +972,7 @@ export default function HomePage() {
 
     useEffect(() => {
         if (tab === 'leaderboard') refreshLeaderboard().catch(() => {});
+        if (tab === 'tasks') refreshTasks().catch(() => {});
         if (tab === 'guilds') refreshMyRank().catch(() => {});
         if (tab === 'charity') refreshCharityAll();
         if (tab === 'university') refreshUniversity();
@@ -2111,6 +2143,7 @@ export default function HomePage() {
 
             <p className="guide-tip" style={{ marginTop: 0 }}>
                 {tab === 'home' ? 'Pick a broker and arena, then hit Run battle to earn.' :
+                 tab === 'tasks' ? 'Personalized tasks for every user type: newcomer, trader, racer, social, scholar, and investor.' :
                  tab === 'leaderboard' ? 'Global ranks by score, AIBA, NEUR, or battles. Run battles to climb.' :
                  tab === 'brokers' ? 'Merge two brokers or mint one as NFT.' :
                  tab === 'arenas' ? 'Choose arena and run battle. Guild Wars needs a guild.' :
@@ -2137,6 +2170,7 @@ export default function HomePage() {
                     </div>
                     <div className="action-row">
                         <button type="button" className="btn btn--secondary" onClick={createStarterBroker} disabled={busy}><IconBrokers /> New broker</button>
+                        <button type="button" className="btn btn--secondary" onClick={() => setTab('tasks')} disabled={busy}><IconTasks /> Tasks</button>
                         <button type="button" className="btn btn--secondary" onClick={refreshBrokers} disabled={busy}><IconRefresh /> Refresh</button>
                         <button type="button" className="btn btn--primary" onClick={runBattle} disabled={busy || !selectedBrokerId}><IconRun /> Run battle</button>
                         <button type="button" className="btn btn--secondary" onClick={refreshVaultInventory} disabled={busy}><IconVault /> Vault</button>
@@ -2240,6 +2274,53 @@ export default function HomePage() {
                                 </div>
                             ))
                         ) : <p className="guide-tip">Run battles to appear on the board.</p>}
+                    </div>
+                </section>
+
+                {/* ─── Tasks (Personalized for all user kinds) ─────────────────── */}
+                <section className={`tab-panel ${tab === 'tasks' ? 'is-active' : ''}`} aria-hidden={tab !== 'tasks'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">Tasks for Every User Type</div>
+                        <p className="card__hint">A deep, personalized task plan that adapts to your progress. Includes onboarding, economy, racing, social, learning, and advanced tasks.</p>
+                        <button type="button" className="btn btn--secondary" onClick={refreshTasks} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh tasks</button>
+                        {tasksMsg ? <p className="status-msg status-msg--error" style={{ marginTop: 8 }}>{tasksMsg}</p> : null}
+                        {Array.isArray(taskProfile?.userKinds) && taskProfile.userKinds.length > 0 ? (
+                            <p className="card__hint" style={{ marginTop: 8 }}>
+                                Your user kinds: <strong>{taskProfile.userKinds.join(', ')}</strong>
+                            </p>
+                        ) : null}
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Your task queue</div>
+                        {taskFeed.length === 0 ? (
+                            <p className="guide-tip">No tasks available yet. Tap Refresh tasks.</p>
+                        ) : (
+                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                {taskFeed.map((t, i) => (
+                                    <li key={t.id || i} className="list-item" style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 6, marginBottom: 8 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                                            <strong>{t.title || 'Task'}</strong>
+                                            <span className={`badge-pill ${t.completed ? '' : 'badge-pill--inline'}`} style={{ borderColor: t.completed ? 'var(--accent-green)' : 'var(--border)', color: t.completed ? 'var(--accent-green)' : 'var(--text-muted)' }}>
+                                                {t.completed ? 'Completed' : 'Open'}
+                                            </span>
+                                        </div>
+                                        {t.description ? <p className="card__hint" style={{ margin: 0 }}>{t.description}</p> : null}
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                            {t.category ? <span className="card__hint" style={{ margin: 0 }}>Category: {t.category}</span> : null}
+                                            {Array.isArray(t.userKinds) && t.userKinds.length > 0 ? <span className="card__hint" style={{ margin: 0 }}>For: {t.userKinds.join(', ')}</span> : null}
+                                            {(Number(t.rewardAiba || 0) > 0 || Number(t.rewardNeur || 0) > 0) ? (
+                                                <span className="card__hint" style={{ margin: 0 }}>Reward hint: {Number(t.rewardAiba || 0)} AIBA / {Number(t.rewardNeur || 0)} NEUR</span>
+                                            ) : null}
+                                        </div>
+                                        {t.ctaTab ? (
+                                            <button type="button" className="btn btn--primary" onClick={() => setTab(String(t.ctaTab))} disabled={busy || Boolean(t.completed)}>
+                                                {t.ctaLabel || 'Open'}
+                                            </button>
+                                        ) : null}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 </section>
 
