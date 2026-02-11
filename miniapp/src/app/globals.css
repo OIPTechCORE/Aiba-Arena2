@@ -1547,6 +1547,94 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
     color: #69f0ae;
 }
 
+/* ─── Flow segmented controls (Phase 3/4 sheet-style flows) ────────────────── */
+.flow-switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: var(--android-space-2) 0;
+    padding: 6px 8px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(12px);
+}
+
+.flow-switch__btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 8px 12px;
+    font-size: var(--android-body-size);
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.flow-switch__btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.flow-switch__btn.is-active {
+    color: var(--accent-cyan);
+    border-color: var(--border-glass);
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.18) 0%, rgba(224, 64, 251, 0.08) 100%);
+}
+
+/* Sheet-style cards with enter animation */
+.sheet-card {
+    margin-top: var(--android-space-2);
+    animation: sheetCardIn 0.28s ease;
+}
+
+@keyframes sheetCardIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Status banner variants (for flow sections) */
+.status-banner {
+    margin-top: var(--android-space-2);
+    padding: 10px 14px;
+    font-size: var(--android-body-size);
+    border-radius: var(--radius-sm);
+    border-left: 4px solid var(--accent-blue);
+    background: rgba(0, 0, 0, 0.25);
+    color: var(--text-secondary);
+}
+
+.status-banner--success {
+    border-left-color: var(--accent-green);
+    color: #69f0ae;
+}
+
+.status-banner--error {
+    border-left-color: #ff5252;
+    color: #ff8a80;
+}
+
+.status-banner--info {
+    border-left-color: var(--accent-cyan);
+    color: var(--text-primary);
+}
+
+/* Compact list row for sheets */
+.sheet-list-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    margin-top: 6px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
 /* ─── Checkbox (futuristic) ─────────────────────────────────────────────── */
 .check-wrap {
     display: inline-flex;

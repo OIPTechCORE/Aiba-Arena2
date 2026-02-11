@@ -248,6 +248,9 @@ export default function HomePage() {
     const [taskFeed, setTaskFeed] = useState([]);
     const [taskProfile, setTaskProfile] = useState(null);
     const [tasksMsg, setTasksMsg] = useState('');
+    const [marketFlow, setMarketFlow] = useState('overview'); // overview | trade | system | boosts
+    const [carFlow, setCarFlow] = useState('garage'); // garage | system | market | race | leaderboard
+    const [bikeFlow, setBikeFlow] = useState('garage'); // garage | system | market | race | leaderboard
 
     // Leaderboard
     const [leaderboard, setLeaderboard] = useState([]);
@@ -2500,90 +2503,105 @@ export default function HomePage() {
                         <div className="card__title">What are brokers?</div>
                         <p className="card__hint">{BROKERS_EXPLANATION}</p>
                     </div>
-                    {Number(economyMe?.economy?.createBrokerCostTonNano) > 0 ? (
-                        <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
-                            <div className="card__title">Create your broker (pay TON)</div>
-                            <p className="card__hint">Pay TON to create a new broker. It is automatically listed on the marketplace so everyone can see it — you get global recognition.</p>
-                            <p className="card__hint" style={{ marginTop: 6 }}>Cost: <strong>{(economyMe.economy.createBrokerCostTonNano / 1e9).toFixed(1)} TON</strong>. Send exact amount to the wallet shown in the app, then paste the transaction hash below.</p>
-                            <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                <input className="input" value={createBrokerTxHash} onChange={(e) => setCreateBrokerTxHash(e.target.value)} placeholder="Transaction hash (tx hash)" style={{ flex: '1 1 200px', minWidth: 0 }} />
-                                <button type="button" className="btn btn--primary" onClick={createBrokerWithTon} disabled={busy || !createBrokerTxHash.trim()}><IconMint /> Create broker</button>
-                            </div>
-                            {createBrokerMsg ? <p className={`status-msg ${createBrokerMsg.includes('created') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{createBrokerMsg}</p> : null}
-                        </div>
-                    ) : null}
-                    {starsStoreConfig?.enabled ? (
-                        <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
-                            <div className="card__title">Stars Store</div>
-                            <p className="card__hint">Buy Stars with AIBA or TON. Stars are in-app recognition currency (also earned from battles).</p>
-                            <p className="card__hint" style={{ marginTop: 6 }}><strong>{starsStoreConfig.packStars} Stars</strong> per pack — {starsStoreConfig.packPriceAiba > 0 ? `${starsStoreConfig.packPriceAiba} AIBA` : ''}{starsStoreConfig.packPriceAiba > 0 && starsStoreConfig.packPriceTonNano > 0 ? ' or ' : ''}{starsStoreConfig.packPriceTonNano > 0 ? `${starsStoreConfig.packPriceTonFormatted} TON` : ''}</p>
-                            <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-                                {starsStoreConfig.packPriceAiba > 0 ? (
-                                    <button type="button" className="btn btn--primary" onClick={buyStarsWithAiba} disabled={busy}><IconStar /> Buy with AIBA</button>
-                                ) : null}
-                                {starsStoreConfig.packPriceTonNano > 0 && starsStoreConfig.walletForTon ? (
-                                    <>
-                                        <span className="card__hint" style={{ margin: 0 }}>Or send {starsStoreConfig.packPriceTonFormatted} TON to the Stars Store wallet, then paste tx hash:</span>
-                                        <input className="input" value={starsStoreTxHash} onChange={(e) => setStarsStoreTxHash(e.target.value)} placeholder="Transaction hash" style={{ flex: '1 1 200px', minWidth: 0 }} />
-                                        <button type="button" className="btn btn--primary" onClick={buyStarsWithTon} disabled={busy || !starsStoreTxHash.trim()}>Buy with TON</button>
-                                    </>
-                                ) : null}
-                            </div>
-                            {starsStoreMsg ? <p className={`status-msg ${starsStoreMsg.includes('Purchased') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{starsStoreMsg}</p> : null}
-                        </div>
-                    ) : null}
-                    <div className="card card--elevated">
-                        <div className="card__title">Marketplace</div>
-                        <p className="card__hint">Sell brokers for AIBA or buy from others.</p>
-                        <div className="action-row">
-                            <button type="button" className="btn btn--secondary" onClick={refreshListings} disabled={busy}><IconRefresh /> Refresh</button>
-                        </div>
-                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                            <span className="card__hint" style={{ margin: 0 }}>Sell:</span>
-                            <select className="select" value={listBrokerId} onChange={(e) => setListBrokerId(e.target.value)}>
-                                <option value="">Select broker</option>
-                                {brokers.map((b) => <option key={b._id} value={b._id}>#{b._id.slice(-6)} INT{b.intelligence} SPD{b.speed} RISK{b.risk}</option>)}
-                            </select>
-                            <input className="input" value={listPriceAIBA} onChange={(e) => setListPriceAIBA(e.target.value)} placeholder="Price (AIBA)" style={{ width: 100 }} />
-                            <button type="button" className="btn btn--primary" onClick={listBroker} disabled={busy || !listBrokerId || !listPriceAIBA.trim()}><IconList /> List</button>
-                        </div>
-                        {marketMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{marketMsg}</p> : null}
-                        {listings.length > 0 ? (
-                            listings.map((l) => (
-                                <div key={l._id} className="list-item">
-                                    <span>INT{l.broker?.intelligence} SPD{l.broker?.speed} RISK{l.broker?.risk} — {l.priceAIBA} AIBA</span>
-                                    <button type="button" className="btn btn--primary" onClick={() => buyListing(l._id)} disabled={busy}><IconBuy /> Buy</button>
+                    <div className="flow-switch" role="group" aria-label="Market flow">
+                        {['overview', 'trade', 'system', 'boosts'].map((f) => (
+                            <button key={f} type="button" className={`flow-switch__btn ${marketFlow === f ? 'is-active' : ''}`} onClick={() => setMarketFlow(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}</button>
+                        ))}
+                    </div>
+                    {marketFlow === 'overview' && (
+                        <>
+                            {Number(economyMe?.economy?.createBrokerCostTonNano) > 0 ? (
+                                <div className="card card--elevated sheet-card" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                                    <div className="card__title">Create your broker (pay TON)</div>
+                                    <p className="card__hint">Pay TON to create a new broker. It is automatically listed on the marketplace so everyone can see it — you get global recognition.</p>
+                                    <p className="card__hint" style={{ marginTop: 6 }}>Cost: <strong>{(economyMe.economy.createBrokerCostTonNano / 1e9).toFixed(1)} TON</strong>. Send exact amount to the wallet shown in the app, then paste the transaction hash below.</p>
+                                    <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                        <input className="input" value={createBrokerTxHash} onChange={(e) => setCreateBrokerTxHash(e.target.value)} placeholder="Transaction hash (tx hash)" style={{ flex: '1 1 200px', minWidth: 0 }} />
+                                        <button type="button" className="btn btn--primary" onClick={createBrokerWithTon} disabled={busy || !createBrokerTxHash.trim()}><IconMint /> Create broker</button>
+                                    </div>
+                                    {createBrokerMsg ? <p className={`status-banner ${createBrokerMsg.includes('created') ? 'status-banner--success' : 'status-banner--error'}`}>{createBrokerMsg}</p> : null}
                                 </div>
-                            ))
-                        ) : <p className="guide-tip">No listings.</p>}
-                    </div>
-                    <div className="card">
-                        <div className="card__title">Buy from system</div>
-                        <p className="card__hint">Purchase a broker from the system for AIBA.</p>
-                        {systemBrokers.length === 0 ? (
-                            <p className="guide-tip">No system brokers. Refresh to load.</p>
-                        ) : (
-                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
-                                {systemBrokers.map((entry) => (
-                                    <li key={entry.id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                        <span>{entry.name} — INT{entry.intelligence} SPD{entry.speed} RISK{entry.risk} — {entry.priceAiba} AIBA</span>
-                                        <button type="button" className="btn btn--primary" onClick={() => buySystemBroker(entry.id)} disabled={busy}><IconBuy /> Buy</button>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                        {marketMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{marketMsg}</p> : null}
-                    </div>
-                    <div className="card">
-                        <div className="card__title">Boosts</div>
-                        <p className="card__hint">Multiply battle rewards for a period.</p>
-                        <div className="action-row">
-                            <button type="button" className="btn btn--secondary" onClick={refreshBoosts} disabled={busy}><IconRefresh /> Refresh</button>
-                            <button type="button" className="btn btn--primary" onClick={buyBoost} disabled={busy}>Buy boost (NEUR)</button>
+                            ) : null}
+                            {starsStoreConfig?.enabled ? (
+                                <div className="card card--elevated sheet-card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                                    <div className="card__title">Stars Store</div>
+                                    <p className="card__hint">Buy Stars with AIBA or TON. Stars are in-app recognition currency (also earned from battles).</p>
+                                    <p className="card__hint" style={{ marginTop: 6 }}><strong>{starsStoreConfig.packStars} Stars</strong> per pack — {starsStoreConfig.packPriceAiba > 0 ? `${starsStoreConfig.packPriceAiba} AIBA` : ''}{starsStoreConfig.packPriceAiba > 0 && starsStoreConfig.packPriceTonNano > 0 ? ' or ' : ''}{starsStoreConfig.packPriceTonNano > 0 ? `${starsStoreConfig.packPriceTonFormatted} TON` : ''}</p>
+                                    <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                                        {starsStoreConfig.packPriceAiba > 0 ? (
+                                            <button type="button" className="btn btn--primary" onClick={buyStarsWithAiba} disabled={busy}><IconStar /> Buy with AIBA</button>
+                                        ) : null}
+                                        {starsStoreConfig.packPriceTonNano > 0 && starsStoreConfig.walletForTon ? (
+                                            <>
+                                                <span className="card__hint" style={{ margin: 0 }}>Or send {starsStoreConfig.packPriceTonFormatted} TON to the Stars Store wallet, then paste tx hash:</span>
+                                                <input className="input" value={starsStoreTxHash} onChange={(e) => setStarsStoreTxHash(e.target.value)} placeholder="Transaction hash" style={{ flex: '1 1 200px', minWidth: 0 }} />
+                                                <button type="button" className="btn btn--primary" onClick={buyStarsWithTon} disabled={busy || !starsStoreTxHash.trim()}>Buy with TON</button>
+                                            </>
+                                        ) : null}
+                                    </div>
+                                    {starsStoreMsg ? <p className={`status-banner ${starsStoreMsg.includes('Purchased') ? 'status-banner--success' : 'status-banner--error'}`}>{starsStoreMsg}</p> : null}
+                                </div>
+                            ) : null}
+                        </>
+                    )}
+                    {marketFlow === 'trade' && (
+                        <div className="card card--elevated sheet-card">
+                            <div className="card__title">Marketplace</div>
+                            <p className="card__hint">Sell brokers for AIBA or buy from others.</p>
+                            <div className="action-row">
+                                <button type="button" className="btn btn--secondary" onClick={refreshListings} disabled={busy}><IconRefresh /> Refresh</button>
+                            </div>
+                            <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                <span className="card__hint" style={{ margin: 0 }}>Sell:</span>
+                                <select className="select" value={listBrokerId} onChange={(e) => setListBrokerId(e.target.value)}>
+                                    <option value="">Select broker</option>
+                                    {brokers.map((b) => <option key={b._id} value={b._id}>#{b._id.slice(-6)} INT{b.intelligence} SPD{b.speed} RISK{b.risk}</option>)}
+                                </select>
+                                <input className="input" value={listPriceAIBA} onChange={(e) => setListPriceAIBA(e.target.value)} placeholder="Price (AIBA)" style={{ width: 100 }} />
+                                <button type="button" className="btn btn--primary" onClick={listBroker} disabled={busy || !listBrokerId || !listPriceAIBA.trim()}><IconList /> List</button>
+                            </div>
+                            {marketMsg ? <p className={`status-banner ${marketMsg.includes('Listed') || marketMsg.includes('Purchased') ? 'status-banner--success' : 'status-banner--error'}`}>{marketMsg}</p> : null}
+                            {listings.length > 0 ? (
+                                listings.map((l) => (
+                                    <div key={l._id} className="list-item">
+                                        <span>INT{l.broker?.intelligence} SPD{l.broker?.speed} RISK{l.broker?.risk} — {l.priceAIBA} AIBA</span>
+                                        <button type="button" className="btn btn--primary" onClick={() => buyListing(l._id)} disabled={busy}><IconBuy /> Buy</button>
+                                    </div>
+                                ))
+                            ) : <p className="guide-tip">No listings.</p>}
                         </div>
-                        {boostMsg ? <p className="status-msg status-msg--success" style={{ marginTop: 8 }}>{boostMsg}</p> : null}
-                        {boosts.length > 0 ? <p className="card__hint" style={{ marginTop: 8 }}>Active: {boosts.map((b) => `${b.multiplier}x until ${new Date(b.expiresAt).toLocaleString()}`).join('; ')}</p> : <p className="guide-tip">Buy a boost to multiply battle rewards.</p>}
-                    </div>
+                    )}
+                    {marketFlow === 'system' && (
+                        <div className="card sheet-card">
+                            <div className="card__title">Buy from system</div>
+                            <p className="card__hint">Purchase a broker from the system for AIBA.</p>
+                            {systemBrokers.length === 0 ? (
+                                <p className="guide-tip">No system brokers. Refresh to load.</p>
+                            ) : (
+                                <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                    {systemBrokers.map((entry) => (
+                                        <li key={entry.id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                            <span>{entry.name} — INT{entry.intelligence} SPD{entry.speed} RISK{entry.risk} — {entry.priceAiba} AIBA</span>
+                                            <button type="button" className="btn btn--primary" onClick={() => buySystemBroker(entry.id)} disabled={busy}><IconBuy /> Buy</button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                            {marketMsg ? <p className={`status-banner ${marketMsg.includes('purchased') || marketMsg.includes('Purchased') ? 'status-banner--success' : 'status-banner--error'}`}>{marketMsg}</p> : null}
+                        </div>
+                    )}
+                    {marketFlow === 'boosts' && (
+                        <div className="card sheet-card">
+                            <div className="card__title">Boosts</div>
+                            <p className="card__hint">Multiply battle rewards for a period.</p>
+                            <div className="action-row">
+                                <button type="button" className="btn btn--secondary" onClick={refreshBoosts} disabled={busy}><IconRefresh /> Refresh</button>
+                                <button type="button" className="btn btn--primary" onClick={buyBoost} disabled={busy}>Buy boost (NEUR)</button>
+                            </div>
+                            {boostMsg ? <p className="status-banner status-banner--success">{boostMsg}</p> : null}
+                            {boosts.length > 0 ? <p className="card__hint" style={{ marginTop: 8 }}>Active: {boosts.map((b) => `${b.multiplier}x until ${new Date(b.expiresAt).toLocaleString()}`).join('; ')}</p> : <p className="guide-tip">Buy a boost to multiply battle rewards.</p>}
+                        </div>
+                    )}
                 </section>
 
                 {/* ─── Car Racing (Autonomous) ───────────────────────────────────── */}
@@ -2593,9 +2611,16 @@ export default function HomePage() {
                         <p className="card__hint">Autonomous car racing. Create or buy a car, enter open races, earn AIBA by finish position.</p>
                         <p className="card__hint" style={{ marginTop: 6, fontSize: 11, opacity: 0.9 }}>Inspired by the most powerful racing cars: Formula 1, Le Mans, Can-Am, IndyCar, Group B, GT1, Electric, Drag, Touring/DTM, Hillclimb, NASCAR, Historic, Hypercar, Extreme prototypes.</p>
                         <button type="button" className="btn btn--secondary" onClick={refreshCarRacing} disabled={busy}><IconRefresh /> Refresh</button>
-                        {carMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{carMsg}</p> : null}
+                        {carMsg ? <p className={`status-banner ${carMsg.includes('Purchased') || carMsg.includes('Entered') || carMsg.includes('Created') ? 'status-banner--success' : carMsg.includes('failed') || carMsg.includes('Failed') ? 'status-banner--error' : 'status-banner--info'}`} style={{ marginTop: 8 }}>{carMsg}</p> : null}
                     </div>
-                    <div className="card">
+                    <div className="flow-switch" role="group" aria-label="Car flow">
+                        {['garage', 'system', 'market', 'race', 'leaderboard'].map((f) => (
+                            <button key={f} type="button" className={`flow-switch__btn ${carFlow === f ? 'is-active' : ''}`} onClick={() => setCarFlow(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}</button>
+                        ))}
+                    </div>
+                    {carFlow === 'garage' && (
+                        <>
+                    <div className="card sheet-card">
                         <div className="card__title">1. Create a racing car</div>
                         {carRacingConfig ? (
                             <>
@@ -2618,7 +2643,19 @@ export default function HomePage() {
                             </>
                         )}
                     </div>
-                    <div className="card">
+                    <div className="card sheet-card">
+                        <div className="card__title">My cars</div>
+                        {myCars.length === 0 ? <p className="guide-tip">No cars. Create or buy one above.</p> : (
+                            <ul style={{ listStyle: 'none', padding: 0 }}>{myCars.map((c) => {
+                                const classLabel = c.carClass && carRacingConfig?.carClasses?.find((x) => x.id === c.carClass)?.label ? carRacingConfig.carClasses.find((x) => x.id === c.carClass).label : (c.carClass || 'Racing car');
+                                return <li key={c._id} className="sheet-list-row">#{String(c._id).slice(-6)} — {classLabel} — SPD{c.topSpeed} ACC{c.acceleration} HND{c.handling} DUR{c.durability}</li>;
+                            })}</ul>
+                        )}
+                    </div>
+                        </>
+                    )}
+                    {carFlow === 'system' && (
+                    <div className="card sheet-card">
                         <div className="card__title">Buy a car from the system</div>
                         <p className="card__hint">Purchase a racing car from the system for AIBA.</p>
                         {systemCars.length === 0 ? (
@@ -2636,9 +2673,11 @@ export default function HomePage() {
                                 })}
                             </ul>
                         )}
-                        {carMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{carMsg}</p> : null}
+                        {carMsg ? <p className={`status-banner ${carMsg.includes('Purchased') ? 'status-banner--success' : 'status-banner--error'}`} style={{ marginTop: 8 }}>{carMsg}</p> : null}
                     </div>
-                    <div className="card">
+                    )}
+                    {carFlow === 'market' && (
+                    <div className="card sheet-card">
                         <div className="card__title">2. Buy a racing car</div>
                         <p className="card__hint">Purchase a car from other players with AIBA.</p>
                         {carListings.length === 0 ? (
@@ -2658,38 +2697,35 @@ export default function HomePage() {
                             </ul>
                         )}
                     </div>
-                    <div className="card">
-                        <div className="card__title">My cars</div>
-                        {myCars.length === 0 ? <p className="guide-tip">No cars. Create or buy one above.</p> : (
-                            <ul style={{ listStyle: 'none', padding: 0 }}>{myCars.map((c) => {
-                                const classLabel = c.carClass && carRacingConfig?.carClasses?.find((x) => x.id === c.carClass)?.label ? carRacingConfig.carClasses.find((x) => x.id === c.carClass).label : (c.carClass || 'Racing car');
-                                return <li key={c._id}>#{String(c._id).slice(-6)} — {classLabel} — SPD{c.topSpeed} ACC{c.acceleration} HND{c.handling} DUR{c.durability}</li>;
-                            })}</ul>
-                        )}
-                    </div>
-                    <div className="card">
-                        <div className="card__title">Enter race</div>
-                        <p className="card__hint">Entry fee: {carRacingConfig?.entryFeeAiba ?? 10} AIBA. When race is full, it runs and rewards are paid.</p>
-                        <select className="select" value={carEnterRaceId} onChange={(e) => setCarEnterRaceId(e.target.value)} style={{ marginTop: 6, minWidth: '100%' }}>
-                            <option value="">Select race</option>
-                            {carRaces.map((r) => <option key={r._id} value={r._id}>{r.trackId} {r.league} — {r.entryCount ?? 0}/{r.maxEntries} — {r.entryFeeAiba} AIBA</option>)}
-                        </select>
-                        <select className="select" value={carEnterCarId} onChange={(e) => setCarEnterCarId(e.target.value)} style={{ marginTop: 8, minWidth: '100%' }}>
-                            <option value="">Select car</option>
-                            {myCars.map((c) => {
-                                const classLabel = c.carClass && carRacingConfig?.carClasses?.find((x) => x.id === c.carClass)?.label ? carRacingConfig.carClasses.find((x) => x.id === c.carClass).label : (c.carClass || 'Car');
-                                return <option key={c._id} value={c._id}>#{String(c._id).slice(-6)} — {classLabel}</option>;
-                            })}
-                        </select>
-                        <button type="button" className="btn btn--primary" onClick={enterCarRace} disabled={busy || !carEnterRaceId || !carEnterCarId} style={{ marginTop: 8 }}>Enter race</button>
-                    </div>
-                    {carLeaderboard.length > 0 ? (
-                        <div className="card">
+                    )}
+                    {carFlow === 'race' && (
+                        <div className="card sheet-card">
+                            <div className="card__title">Enter race</div>
+                            <p className="card__hint">Entry fee: {carRacingConfig?.entryFeeAiba ?? 10} AIBA. When race is full, it runs and rewards are paid.</p>
+                            <select className="select" value={carEnterRaceId} onChange={(e) => setCarEnterRaceId(e.target.value)} style={{ marginTop: 6, minWidth: '100%' }}>
+                                <option value="">Select race</option>
+                                {carRaces.map((r) => <option key={r._id} value={r._id}>{r.trackId} {r.league} — {r.entryCount ?? 0}/{r.maxEntries} — {r.entryFeeAiba} AIBA</option>)}
+                            </select>
+                            <select className="select" value={carEnterCarId} onChange={(e) => setCarEnterCarId(e.target.value)} style={{ marginTop: 8, minWidth: '100%' }}>
+                                <option value="">Select car</option>
+                                {myCars.map((c) => {
+                                    const classLabel = c.carClass && carRacingConfig?.carClasses?.find((x) => x.id === c.carClass)?.label ? carRacingConfig.carClasses.find((x) => x.id === c.carClass).label : (c.carClass || 'Car');
+                                    return <option key={c._id} value={c._id}>#{String(c._id).slice(-6)} — {classLabel}</option>;
+                                })}
+                            </select>
+                            <button type="button" className="btn btn--primary" onClick={enterCarRace} disabled={busy || !carEnterRaceId || !carEnterCarId} style={{ marginTop: 8 }}>Enter race</button>
+                            {carMsg ? <p className={`status-banner ${carMsg.includes('Purchased') || carMsg.includes('Entered') ? 'status-banner--success' : carMsg.includes('failed') || carMsg.includes('Failed') ? 'status-banner--error' : 'status-banner--info'}`} style={{ marginTop: 8 }}>{carMsg}</p> : null}
+                        </div>
+                    )}
+                    {carFlow === 'leaderboard' && (
+                        <div className="card sheet-card">
                             <div className="card__title">Leaderboard</div>
                             <p className="card__hint">Top by total points.</p>
-                            <ol style={{ margin: 0, paddingLeft: 20 }}>{carLeaderboard.slice(0, 10).map((r) => <li key={r.telegramId}>#{r.rank} — {r.totalPoints} pts, {r.wins} wins, {r.aibaEarned} AIBA</li>)}</ol>
+                            {carLeaderboard.length > 0 ? (
+                                <ol style={{ margin: 0, paddingLeft: 20 }}>{carLeaderboard.slice(0, 10).map((r) => <li key={r.telegramId} className="sheet-list-row">#{r.rank} — {r.totalPoints} pts, {r.wins} wins, {r.aibaEarned} AIBA</li>)}</ol>
+                            ) : <p className="guide-tip">No leaderboard data. Enter races to climb the ranks.</p>}
                         </div>
-                    ) : null}
+                    )}
                 </section>
 
                 {/* ─── Bike Racing (Autonomous) ───────────────────────────────────── */}
@@ -2699,102 +2735,121 @@ export default function HomePage() {
                         <p className="card__hint">Autonomous motorcycle racing. Create or buy a bike, enter open races, earn AIBA.</p>
                         <p className="card__hint" style={{ marginTop: 6, fontSize: 11, opacity: 0.9 }}>Inspired by the most powerful racing &amp; high-performance motorcycles: Hyper-Track (H2R, MTT 420RR), Superbikes (M 1000 RR, Fireblade, R1M), Sportbikes (Ninja H2, Hayabusa), Track Racing, Historic GP (NSR500, Desmosedici), Electric (Energica, LiveWire), Exotic (Bimota, NCR), Big Torque (Rocket 3, VMAX), MotoGP, Supersport, Hypersport, Classic TT, Concepts.</p>
                         <button type="button" className="btn btn--secondary" onClick={refreshBikeRacing} disabled={busy}><IconRefresh /> Refresh</button>
-                        {bikeMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{bikeMsg}</p> : null}
+                        {bikeMsg ? <p className={`status-banner ${bikeMsg.includes('Purchased') || bikeMsg.includes('Entered') ? 'status-banner--success' : bikeMsg.includes('failed') || bikeMsg.includes('Failed') ? 'status-banner--error' : 'status-banner--info'}`} style={{ marginTop: 8 }}>{bikeMsg}</p> : null}
                     </div>
-                    <div className="card">
-                        <div className="card__title">1. Create a racing bike</div>
-                        {bikeRacingConfig ? (
-                            <>
-                                <p className="card__hint">Cost: {bikeRacingConfig.createBikeCostAiba > 0 ? `${bikeRacingConfig.createBikeCostAiba} AIBA` : ''}{bikeRacingConfig.createBikeCostAiba > 0 && bikeRacingConfig.createBikeCostTonNano > 0 ? ' or ' : ''}{bikeRacingConfig.createBikeCostTonNano > 0 ? `${(bikeRacingConfig.createBikeCostTonNano / 1e9).toFixed(1)} TON` : ''}</p>
-                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-                                    {bikeRacingConfig.createBikeCostAiba > 0 ? <button type="button" className="btn btn--primary" onClick={createBikeAiba} disabled={busy}><IconBike /> Create with AIBA</button> : null}
-                                    {bikeRacingConfig.createBikeCostTonNano > 0 && bikeRacingConfig.walletForTon ? (
-                                        <>
-                                            <input className="input" value={bikeCreateTxHash} onChange={(e) => setBikeCreateTxHash(e.target.value)} placeholder="TON tx hash" style={{ flex: '1 1 180px', minWidth: 0 }} />
-                                            <button type="button" className="btn btn--primary" onClick={createBikeTon} disabled={busy || !bikeCreateTxHash.trim()}>Create with TON</button>
-                                        </>
-                                    ) : null}
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <p className="card__hint">Loading racing config…</p>
-                                <p className="card__hint" style={{ marginTop: 6 }}>Purchase a BIKE from THE SYSTEM with AIBA.</p>
-                                <button type="button" className="btn btn--secondary" onClick={refreshBikeRacing} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
-                            </>
-                        )}
+                    <div className="flow-switch" role="group" aria-label="Bike flow">
+                        {['garage', 'system', 'market', 'race', 'leaderboard'].map((f) => (
+                            <button key={f} type="button" className={`flow-switch__btn ${bikeFlow === f ? 'is-active' : ''}`} onClick={() => setBikeFlow(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}</button>
+                        ))}
                     </div>
-                    <div className="card">
-                        <div className="card__title">Buy a bike from the system</div>
-                        <p className="card__hint">Purchase a racing bike from the system for AIBA.</p>
-                        {systemBikes.length === 0 ? (
-                            <p className="guide-tip">No system bikes. Refresh to load.</p>
-                        ) : (
-                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
-                                {systemBikes.map((entry) => {
-                                    const classLabel = entry.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === entry.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === entry.bikeClass).label : (entry.bikeClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing bike';
-                                    return (
-                                        <li key={entry.id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                            <span>{entry.name} — {classLabel} — SPD{entry.topSpeed} ACC{entry.acceleration} HND{entry.handling} DUR{entry.durability} — {entry.priceAiba} AIBA</span>
-                                            <button type="button" className="btn btn--primary" onClick={() => buySystemBike(entry.id)} disabled={busy}>Buy</button>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        )}
-                        {bikeMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{bikeMsg}</p> : null}
-                    </div>
-                    <div className="card">
-                        <div className="card__title">2. Buy a racing bike</div>
-                        <p className="card__hint">Purchase a bike from other players with AIBA.</p>
-                        {bikeListings.length === 0 ? (
-                            <p className="guide-tip">No bikes for sale. Check back later or create your own above.</p>
-                        ) : (
-                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
-                                {bikeListings.map((l) => {
-                                    const bike = l.bike || l.bikeId;
-                                    const classLabel = bike?.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === bike.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === bike.bikeClass).label : (bike?.bikeClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing bike';
-                                    return (
-                                        <li key={l._id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                            <span>Bike #{String(l.bikeId?._id ?? l.bikeId).slice(-6)} — {classLabel} — {l.priceAIBA} AIBA</span>
-                                            <button type="button" className="btn btn--primary" onClick={async () => { setBusy(true); setBikeMsg(''); try { await api.post('/api/bike-racing/buy-bike', { requestId: uuid(), listingId: l._id }); setBikeMsg('Purchased.'); await refreshBikeRacing(); await refreshEconomy(); } catch (e) { setBikeMsg(getErrorMessage(e, 'Buy failed.')); } finally { setBusy(false); } }} disabled={busy}>Buy</button>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        )}
-                    </div>
-                    <div className="card">
-                        <div className="card__title">My bikes</div>
-                        {myBikes.length === 0 ? <p className="guide-tip">No bikes. Create or buy one above.</p> : (
-                            <ul style={{ listStyle: 'none', padding: 0 }}>{myBikes.map((b) => {
-                                const classLabel = b.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === b.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === b.bikeClass).label : (b.bikeClass || 'Racing bike');
-                                return <li key={b._id}>#{String(b._id).slice(-6)} — {classLabel} — SPD{b.topSpeed} ACC{b.acceleration} HND{b.handling} DUR{b.durability}</li>;
-                            })}</ul>
-                        )}
-                    </div>
-                    <div className="card">
-                        <div className="card__title">Enter race</div>
-                        <p className="card__hint">Entry fee: {bikeRacingConfig?.entryFeeAiba ?? 10} AIBA.</p>
-                        <select className="select" value={bikeEnterRaceId} onChange={(e) => setBikeEnterRaceId(e.target.value)} style={{ marginTop: 6, minWidth: '100%' }}>
-                            <option value="">Select race</option>
-                            {bikeRaces.map((r) => <option key={r._id} value={r._id}>{r.trackId} {r.league} — {r.entryCount ?? 0}/{r.maxEntries}</option>)}
-                        </select>
-                        <select className="select" value={bikeEnterBikeId} onChange={(e) => setBikeEnterBikeId(e.target.value)} style={{ marginTop: 8, minWidth: '100%' }}>
-                            <option value="">Select bike</option>
-                            {myBikes.map((b) => {
-                                const classLabel = b.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === b.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === b.bikeClass).label : (b.bikeClass || 'Bike');
-                                return <option key={b._id} value={b._id}>#{String(b._id).slice(-6)} — {classLabel}</option>;
-                            })}
-                        </select>
-                        <button type="button" className="btn btn--primary" onClick={enterBikeRace} disabled={busy || !bikeEnterRaceId || !bikeEnterBikeId} style={{ marginTop: 8 }}>Enter race</button>
-                    </div>
-                    {bikeLeaderboard.length > 0 ? (
-                        <div className="card">
-                            <div className="card__title">Leaderboard</div>
-                            <ol style={{ margin: 0, paddingLeft: 20 }}>{bikeLeaderboard.slice(0, 10).map((r) => <li key={r.telegramId}>#{r.rank} — {r.totalPoints} pts, {r.wins} wins, {r.aibaEarned} AIBA</li>)}</ol>
+                    {bikeFlow === 'garage' && (
+                        <>
+                            <div className="card sheet-card">
+                                <div className="card__title">1. Create a racing bike</div>
+                                {bikeRacingConfig ? (
+                                    <>
+                                        <p className="card__hint">Cost: {bikeRacingConfig.createBikeCostAiba > 0 ? `${bikeRacingConfig.createBikeCostAiba} AIBA` : ''}{bikeRacingConfig.createBikeCostAiba > 0 && bikeRacingConfig.createBikeCostTonNano > 0 ? ' or ' : ''}{bikeRacingConfig.createBikeCostTonNano > 0 ? `${(bikeRacingConfig.createBikeCostTonNano / 1e9).toFixed(1)} TON` : ''}</p>
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                                            {bikeRacingConfig.createBikeCostAiba > 0 ? <button type="button" className="btn btn--primary" onClick={createBikeAiba} disabled={busy}><IconBike /> Create with AIBA</button> : null}
+                                            {bikeRacingConfig.createBikeCostTonNano > 0 && bikeRacingConfig.walletForTon ? (
+                                                <>
+                                                    <input className="input" value={bikeCreateTxHash} onChange={(e) => setBikeCreateTxHash(e.target.value)} placeholder="TON tx hash" style={{ flex: '1 1 180px', minWidth: 0 }} />
+                                                    <button type="button" className="btn btn--primary" onClick={createBikeTon} disabled={busy || !bikeCreateTxHash.trim()}>Create with TON</button>
+                                                </>
+                                            ) : null}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p className="card__hint">Loading racing config…</p>
+                                        <p className="card__hint" style={{ marginTop: 6 }}>Purchase a BIKE from THE SYSTEM with AIBA.</p>
+                                        <button type="button" className="btn btn--secondary" onClick={refreshBikeRacing} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
+                                    </>
+                                )}
+                            </div>
+                            <div className="card sheet-card">
+                                <div className="card__title">My bikes</div>
+                                {myBikes.length === 0 ? <p className="guide-tip">No bikes. Create or buy one above.</p> : (
+                                    <ul style={{ listStyle: 'none', padding: 0 }}>{myBikes.map((b) => {
+                                        const classLabel = b.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === b.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === b.bikeClass).label : (b.bikeClass || 'Racing bike');
+                                        return <li key={b._id} className="sheet-list-row">#{String(b._id).slice(-6)} — {classLabel} — SPD{b.topSpeed} ACC{b.acceleration} HND{b.handling} DUR{b.durability}</li>;
+                                    })}</ul>
+                                )}
+                            </div>
+                        </>
+                    )}
+                    {bikeFlow === 'system' && (
+                        <div className="card sheet-card">
+                            <div className="card__title">Buy a bike from the system</div>
+                            <p className="card__hint">Purchase a racing bike from the system for AIBA.</p>
+                            {systemBikes.length === 0 ? (
+                                <p className="guide-tip">No system bikes. Refresh to load.</p>
+                            ) : (
+                                <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                    {systemBikes.map((entry) => {
+                                        const classLabel = entry.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === entry.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === entry.bikeClass).label : (entry.bikeClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing bike';
+                                        return (
+                                            <li key={entry.id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                                <span>{entry.name} — {classLabel} — SPD{entry.topSpeed} ACC{entry.acceleration} HND{entry.handling} DUR{entry.durability} — {entry.priceAiba} AIBA</span>
+                                                <button type="button" className="btn btn--primary" onClick={() => buySystemBike(entry.id)} disabled={busy}>Buy</button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            )}
+                            {bikeMsg ? <p className={`status-banner ${bikeMsg.includes('Purchased') ? 'status-banner--success' : 'status-banner--error'}`} style={{ marginTop: 8 }}>{bikeMsg}</p> : null}
                         </div>
-                    ) : null}
+                    )}
+                    {bikeFlow === 'market' && (
+                        <div className="card sheet-card">
+                            <div className="card__title">2. Buy a racing bike</div>
+                            <p className="card__hint">Purchase a bike from other players with AIBA.</p>
+                            {bikeListings.length === 0 ? (
+                                <p className="guide-tip">No bikes for sale. Check back later or create your own above.</p>
+                            ) : (
+                                <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                    {bikeListings.map((l) => {
+                                        const bike = l.bike || l.bikeId;
+                                        const classLabel = bike?.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === bike.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === bike.bikeClass).label : (bike?.bikeClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing bike';
+                                        return (
+                                            <li key={l._id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                                <span>Bike #{String(l.bikeId?._id ?? l.bikeId).slice(-6)} — {classLabel} — {l.priceAIBA} AIBA</span>
+                                                <button type="button" className="btn btn--primary" onClick={async () => { setBusy(true); setBikeMsg(''); try { await api.post('/api/bike-racing/buy-bike', { requestId: uuid(), listingId: l._id }); setBikeMsg('Purchased.'); await refreshBikeRacing(); await refreshEconomy(); } catch (e) { setBikeMsg(getErrorMessage(e, 'Buy failed.')); } finally { setBusy(false); } }} disabled={busy}>Buy</button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            )}
+                        </div>
+                    )}
+                    {bikeFlow === 'race' && (
+                        <div className="card sheet-card">
+                            <div className="card__title">Enter race</div>
+                            <p className="card__hint">Entry fee: {bikeRacingConfig?.entryFeeAiba ?? 10} AIBA. When race is full, it runs and rewards are paid.</p>
+                            <select className="select" value={bikeEnterRaceId} onChange={(e) => setBikeEnterRaceId(e.target.value)} style={{ marginTop: 6, minWidth: '100%' }}>
+                                <option value="">Select race</option>
+                                {bikeRaces.map((r) => <option key={r._id} value={r._id}>{r.trackId} {r.league} — {r.entryCount ?? 0}/{r.maxEntries} — {r.entryFeeAiba ?? bikeRacingConfig?.entryFeeAiba ?? 10} AIBA</option>)}
+                            </select>
+                            <select className="select" value={bikeEnterBikeId} onChange={(e) => setBikeEnterBikeId(e.target.value)} style={{ marginTop: 8, minWidth: '100%' }}>
+                                <option value="">Select bike</option>
+                                {myBikes.map((b) => {
+                                    const classLabel = b.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === b.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === b.bikeClass).label : (b.bikeClass || 'Bike');
+                                    return <option key={b._id} value={b._id}>#{String(b._id).slice(-6)} — {classLabel}</option>;
+                                })}
+                            </select>
+                            <button type="button" className="btn btn--primary" onClick={enterBikeRace} disabled={busy || !bikeEnterRaceId || !bikeEnterBikeId} style={{ marginTop: 8 }}>Enter race</button>
+                            {bikeMsg ? <p className={`status-banner ${bikeMsg.includes('Purchased') || bikeMsg.includes('Entered') ? 'status-banner--success' : bikeMsg.includes('failed') || bikeMsg.includes('Failed') ? 'status-banner--error' : 'status-banner--info'}`} style={{ marginTop: 8 }}>{bikeMsg}</p> : null}
+                        </div>
+                    )}
+                    {bikeFlow === 'leaderboard' && (
+                        <div className="card sheet-card">
+                            <div className="card__title">Leaderboard</div>
+                            <p className="card__hint">Top by total points.</p>
+                            {bikeLeaderboard.length > 0 ? (
+                                <ol style={{ margin: 0, paddingLeft: 20 }}>{bikeLeaderboard.slice(0, 10).map((r) => <li key={r.telegramId} className="sheet-list-row">#{r.rank} — {r.totalPoints} pts, {r.wins} wins, {r.aibaEarned} AIBA</li>)}</ol>
+                            ) : <p className="guide-tip">No leaderboard data. Enter races to climb the ranks.</p>}
+                        </div>
+                    )}
                 </section>
 
                 {/* ─── Multiverse (NFT: own, stake, earn) ────────────────────────── */}
