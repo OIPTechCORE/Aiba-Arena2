@@ -1,7 +1,7 @@
 'use client';
 
 import { TonConnectButton, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createApi, getErrorMessage } from '../lib/api';
 import { getTelegramUserUnsafe } from '../lib/telegram';
 import { buildRewardClaimPayload } from '../lib/tonRewardClaim';
@@ -220,6 +220,7 @@ export default function HomePage() {
     const [economyMe, setEconomyMe] = useState(null);
     const [tutorialStep, setTutorialStep] = useState(0);
     const [tab, setTab] = useState('home');
+    const scrollToFaqRef = useRef(false);
     const [dailyStatus, setDailyStatus] = useState(null);
     const [showCinematicIntro, setShowCinematicIntro] = useState(false);
     const [mintNftMsg, setMintNftMsg] = useState('');
@@ -262,12 +263,18 @@ export default function HomePage() {
     async function refreshListings() {
         setBusy(true);
         try {
-            const [listRes, sysRes] = await Promise.all([
-                api.get('/api/marketplace/listings').catch(() => ({ data: [] })),
-                api.get('/api/marketplace/system-brokers').catch(() => ({ data: [] })),
+            const [listResult, sysResult] = await Promise.allSettled([
+                api.get('/api/marketplace/listings'),
+                api.get('/api/marketplace/system-brokers'),
             ]);
-            setListings(Array.isArray(listRes.data) ? listRes.data : []);
-            setSystemBrokers(Array.isArray(sysRes.data) ? sysRes.data : []);
+            if (listResult.status === 'fulfilled' && listResult.value?.data != null)
+                setListings(Array.isArray(listResult.value.data) ? listResult.value.data : []);
+            else
+                setListings([]);
+            if (sysResult.status === 'fulfilled' && sysResult.value?.data != null)
+                setSystemBrokers(Array.isArray(sysResult.value.data) ? sysResult.value.data : []);
+            else
+                setSystemBrokers([]);
         } catch {
             setListings([]);
             setSystemBrokers([]);
@@ -525,22 +532,23 @@ export default function HomePage() {
     const [carEnterCarId, setCarEnterCarId] = useState('');
     async function refreshCarRacing() {
         try {
-            const [config, tracks, races, cars, listings, leaderboard, systemCars] = await Promise.all([
-                api.get('/api/car-racing/config').then((r) => r.data).catch(() => null),
-                api.get('/api/car-racing/tracks').then((r) => r.data).catch(() => []),
-                api.get('/api/car-racing/races').then((r) => r.data).catch(() => []),
-                api.get('/api/car-racing/cars').then((r) => r.data).catch(() => []),
-                api.get('/api/car-racing/listings').then((r) => r.data).catch(() => []),
-                api.get('/api/car-racing/leaderboard').then((r) => r.data).catch(() => []),
-                api.get('/api/car-racing/system-cars').then((r) => r.data).catch(() => []),
+            const results = await Promise.allSettled([
+                api.get('/api/car-racing/config'),
+                api.get('/api/car-racing/tracks'),
+                api.get('/api/car-racing/races'),
+                api.get('/api/car-racing/cars'),
+                api.get('/api/car-racing/listings'),
+                api.get('/api/car-racing/leaderboard'),
+                api.get('/api/car-racing/system-cars'),
             ]);
-            setCarRacingConfig(config);
-            setCarTracks(Array.isArray(tracks) ? tracks : []);
-            setCarRaces(Array.isArray(races) ? races : []);
-            setMyCars(Array.isArray(cars) ? cars : []);
-            setCarListings(Array.isArray(listings) ? listings : []);
-            setCarLeaderboard(Array.isArray(leaderboard) ? leaderboard : []);
-            setSystemCars(Array.isArray(systemCars) ? systemCars : []);
+            const get = (i) => (results[i]?.status === 'fulfilled' && results[i].value?.data != null ? results[i].value.data : (i === 0 ? null : []));
+            setCarRacingConfig(get(0));
+            setCarTracks(Array.isArray(get(1)) ? get(1) : []);
+            setCarRaces(Array.isArray(get(2)) ? get(2) : []);
+            setMyCars(Array.isArray(get(3)) ? get(3) : []);
+            setCarListings(Array.isArray(get(4)) ? get(4) : []);
+            setCarLeaderboard(Array.isArray(get(5)) ? get(5) : []);
+            setSystemCars(Array.isArray(get(6)) ? get(6) : []);
         } catch {
             setCarRaces([]);
             setMyCars([]);
@@ -621,22 +629,23 @@ export default function HomePage() {
     const [bikeEnterBikeId, setBikeEnterBikeId] = useState('');
     async function refreshBikeRacing() {
         try {
-            const [config, tracks, races, bikes, listings, leaderboard, systemBikes] = await Promise.all([
-                api.get('/api/bike-racing/config').then((r) => r.data).catch(() => null),
-                api.get('/api/bike-racing/tracks').then((r) => r.data).catch(() => []),
-                api.get('/api/bike-racing/races').then((r) => r.data).catch(() => []),
-                api.get('/api/bike-racing/bikes').then((r) => r.data).catch(() => []),
-                api.get('/api/bike-racing/listings').then((r) => r.data).catch(() => []),
-                api.get('/api/bike-racing/leaderboard').then((r) => r.data).catch(() => []),
-                api.get('/api/bike-racing/system-bikes').then((r) => r.data).catch(() => []),
+            const results = await Promise.allSettled([
+                api.get('/api/bike-racing/config'),
+                api.get('/api/bike-racing/tracks'),
+                api.get('/api/bike-racing/races'),
+                api.get('/api/bike-racing/bikes'),
+                api.get('/api/bike-racing/listings'),
+                api.get('/api/bike-racing/leaderboard'),
+                api.get('/api/bike-racing/system-bikes'),
             ]);
-            setBikeRacingConfig(config);
-            setBikeTracks(Array.isArray(tracks) ? tracks : []);
-            setBikeRaces(Array.isArray(races) ? races : []);
-            setMyBikes(Array.isArray(bikes) ? bikes : []);
-            setBikeListings(Array.isArray(listings) ? listings : []);
-            setBikeLeaderboard(Array.isArray(leaderboard) ? leaderboard : []);
-            setSystemBikes(Array.isArray(systemBikes) ? systemBikes : []);
+            const get = (i) => (results[i]?.status === 'fulfilled' && results[i].value?.data != null ? results[i].value.data : (i === 0 ? null : []));
+            setBikeRacingConfig(get(0));
+            setBikeTracks(Array.isArray(get(1)) ? get(1) : []);
+            setBikeRaces(Array.isArray(get(2)) ? get(2) : []);
+            setMyBikes(Array.isArray(get(3)) ? get(3) : []);
+            setBikeListings(Array.isArray(get(4)) ? get(4) : []);
+            setBikeLeaderboard(Array.isArray(get(5)) ? get(5) : []);
+            setSystemBikes(Array.isArray(get(6)) ? get(6) : []);
         } catch {
             setBikeRaces([]);
             setMyBikes([]);
@@ -936,7 +945,7 @@ export default function HomePage() {
         if (tab === 'charity') refreshCharityAll();
         if (tab === 'university') refreshUniversity();
         if (tab === 'updates') refreshUpdatesAll();
-        if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); }
+        if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshReferralMe().catch(() => {}); }
         if (tab === 'carRacing') refreshCarRacing().catch(() => {});
         if (tab === 'bikeRacing') refreshBikeRacing().catch(() => {});
         if (tab === 'multiverse') refreshMultiverse().catch(() => {});
@@ -947,6 +956,11 @@ export default function HomePage() {
         // Seamless UX: scroll active panel into view when tab changes
         const el = document.querySelector('.tab-content');
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (tab === 'updates' && scrollToFaqRef.current) {
+            scrollToFaqRef.current = false;
+            const t = setTimeout(() => document.getElementById('faq-support')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 400);
+            return () => clearTimeout(t);
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab]);
 
@@ -1689,6 +1703,14 @@ export default function HomePage() {
     const [refCodeInput, setRefCodeInput] = useState('');
     const [refMsg, setRefMsg] = useState('');
 
+    async function refreshReferralMe() {
+        try {
+            const res = await api.get('/api/referrals/me');
+            setMyReferral(res?.data ?? null);
+        } catch {
+            setMyReferral(null);
+        }
+    }
     async function createReferral() {
         setBusy(true);
         setRefMsg('');
@@ -2030,6 +2052,11 @@ export default function HomePage() {
                     </p>
                 ) : null}
                 {status ? <p className={`status-msg ${status.toLowerCase().includes('fail') ? 'status-msg--error' : ''}`} style={{ margin: 0, width: '100%' }}>{status}</p> : null}
+                <div className="quick-nav" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10, alignItems: 'center' }}>
+                    <button type="button" className="btn btn--ghost" style={{ padding: '6px 10px', fontSize: '0.85rem' }} onClick={() => setTab('home')} aria-label="Go to Home"><IconHome /> Home</button>
+                    <button type="button" className="btn btn--ghost" style={{ padding: '6px 10px', fontSize: '0.85rem' }} onClick={() => setTab('university')} aria-label="User guide">User guide</button>
+                    <button type="button" className="btn btn--ghost" style={{ padding: '6px 10px', fontSize: '0.85rem' }} onClick={() => { scrollToFaqRef.current = true; setTab('updates'); }} aria-label="FAQ and support">FAQ &amp; support</button>
+                </div>
             </header>
 
             <div className="balance-strip" style={{ marginTop: 0, marginBottom: 8 }}>
@@ -2854,11 +2881,11 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* ─── University (AIBA ARENA UNIVERSITY) ─────────────────────── */}
+                {/* ─── University (User Guide / AIBA ARENA UNIVERSITY) ─────────── */}
                 <section className={`tab-panel ${tab === 'university' ? 'is-active' : ''}`} aria-hidden={tab !== 'university'}>
                     <div className="card card--elevated card--university university-hero">
-                        <div className="card__title">AIBA ARENA UNIVERSITY</div>
-                        <p className="card__hint" style={{ marginTop: 8 }}>Super Futuristic learning hub. Learn, master, excel.</p>
+                        <div className="card__title">User guide — AIBA ARENA UNIVERSITY</div>
+                        <p className="card__hint" style={{ marginTop: 8 }}>Complete systematic guide. Learn brokers, arenas, economy, guilds, and pro tips. Expand courses below.</p>
                         <p className="card__hint" style={{ marginTop: 4 }}>
                             Progress: <strong>{universityProgress?.completedCount ?? 0}</strong> / <strong>{universityTotalModules || universityCourses.reduce((n, c) => n + (c.modules?.length || 0), 0)}</strong> modules
                             {universityProgress?.graduate ? <span className="university-hero__graduate"> · You graduated!</span> : ' · Complete all to earn the University Graduate badge.'}
@@ -3160,13 +3187,22 @@ export default function HomePage() {
                             </div>
                         )}
                     </div>
-                    <div className="card card--elevated">
+                    <div className="card card--elevated" id="faq-support">
                         <div className="card__title">FAQ &amp; support</div>
+                        <p className="card__hint" style={{ marginBottom: 12 }}>Systematic answers to common questions. For the full learning path, use <strong>User guide</strong> (University) from the header.</p>
                         <div className="comms-faq">
+                            <p className="card__hint"><strong>How do I start?</strong> Go to Home → create a broker (New broker) if you have none → pick an arena → Run battle. Earn NEUR and AIBA. See User guide for step-by-step.</p>
+                            <p className="card__hint"><strong>How do I get a broker?</strong> Home: New broker (free starter). Or Market: buy from system (AIBA) or from other players. Brokers tab: combine two brokers.</p>
+                            <p className="card__hint"><strong>How do I earn NEUR / AIBA?</strong> Run battles (Home or Arenas). NEUR is off-chain; AIBA can be claimed on-chain via Wallet → Vault (connect wallet, create claim, sign tx).</p>
                             <p className="card__hint"><strong>How do I earn Stars?</strong> Win battles. Each win grants Stars (Telegram Stars–style currency).</p>
-                            <p className="card__hint"><strong>Where is my AIBA?</strong> After a battle, claim on-chain from the Vault or enable Auto-claim. Check Wallet → Vault.</p>
+                            <p className="card__hint"><strong>Where is my AIBA?</strong> Balance shows off-chain credits. To receive on-chain: connect wallet, then after a battle use Create claim or enable Auto-claim. Wallet tab → Vault.</p>
                             <p className="card__hint"><strong>What are Diamonds?</strong> Rare TON ecosystem asset. You get Diamonds on your first battle win.</p>
                             <p className="card__hint"><strong>Badges?</strong> Profile badges (verified, top leader, etc.) are assigned by the team or earned (e.g. top leaderboard).</p>
+                            <p className="card__hint"><strong>Referrals?</strong> Referrals tab: create your code (My code), share it. When someone applies your code, you both get bonuses (NEUR/AIBA if configured).</p>
+                            <p className="card__hint"><strong>Car / Bike racing?</strong> Create or buy a car or bike (AIBA or TON), enter open races, earn AIBA by finish position. System shop sells cars/bikes for AIBA.</p>
+                            <p className="card__hint"><strong>Market?</strong> Sell a broker for AIBA or buy one (from players or from the system). Withdraw from guild first if your broker is in a guild pool.</p>
+                            <p className="card__hint"><strong>Guilds?</strong> Guilds tab: create or join a group. Guild Wars arena sends part of rewards to the guild. Deposit brokers into the guild pool for guild wars.</p>
+                            <p className="card__hint"><strong>Support?</strong> Check announcements above. For bugs or requests, contact the team via the channel or link provided in announcements.</p>
                         </div>
                     </div>
                 </section>

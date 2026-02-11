@@ -9,6 +9,19 @@ const { validateBody } = require('../middleware/validate');
 
 router.use(requireTelegram);
 
+// GET /api/referrals/me — get current user's referral code (if any) for preloading "Share your link"
+router.get('/me', async (req, res) => {
+    try {
+        const telegramId = String(req.telegramId || '');
+        const referral = await Referral.findOne({ ownerTelegramId: telegramId, active: true }).lean();
+        if (!referral) return res.json(null);
+        res.json({ code: referral.code, _id: referral._id });
+    } catch (err) {
+        console.error('Referrals me error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
 function makeCode() {
     return crypto.randomBytes(5).toString('hex'); // 10 chars
 }
