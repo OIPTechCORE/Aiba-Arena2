@@ -68,7 +68,7 @@ body,
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     background-image: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-space) 100%);
-    perspective: var(--perspective-view);
+    /* No perspective/transform: would create containing block and break fixed header */
 }
 
 /* ─── App shell ─────────────────────────────────────────────────────────── */
@@ -81,8 +81,8 @@ body,
     padding-left: max(12px, env(safe-area-inset-left));
     max-width: min(560px, 100vw);
     margin: 0 auto;
-    transform-style: preserve-3d;
     width: 100%;
+    /* No transform-style/transform: would break position:sticky/fixed on header */
 }
 
 /* Compact header: AIBA, Home, Profile, Guide, FAQs, Settings, Connect Wallet — single line */
