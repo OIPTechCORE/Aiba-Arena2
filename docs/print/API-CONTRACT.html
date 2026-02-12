@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>API CONTRACT — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>API CONTRACT</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>API Contract — Multiverse Expansion</h1>
+<p><strong>Version:</strong> Feb 2025 <strong>Status:</strong> Phase 1 baseline (schemas + endpoints for new systems).</p>
+<p>This document defines the <strong>API surface</strong> for Realms, Missions, Mentors, Assets, Marketplace, Governance, and Treasury telemetry.</p>
+<hr/>
+<h2>1) Realms &amp; Missions</h2>
+<p><strong>GET</strong> <code>/api/realms</code> Returns <code>{ realms: Realm[] }</code></p>
+<p><strong>GET</strong> <code>/api/realms/:key</code> Returns <code>{ realm: Realm }</code></p>
+<p><strong>GET</strong> <code>/api/missions?realmKey=...</code> Returns <code>{ missions: Mission[] }</code></p>
+<p><strong>POST</strong> <code>/api/missions/complete</code> Body: <code>{ missionId }</code> Returns <code>{ ok: true, rewardAiba, rewardNeur, xp }</code></p>
+<hr/>
+<h2>2) Mentors</h2>
+<p><strong>GET</strong> <code>/api/mentors</code> Returns <code>{ mentors: Mentor[] }</code></p>
+<p><strong>POST</strong> <code>/api/mentors/assign</code> Body: <code>{ mentorId }</code> Returns <code>{ ok: true }</code></p>
+<p><strong>POST</strong> <code>/api/mentors/upgrade</code> Body: <code>{ mentorId }</code> Returns <code>{ ok: true, costAiba }</code></p>
+<hr/>
+<h2>3) Assets &amp; Marketplace</h2>
+<p><strong>POST</strong> <code>/api/assets/mint</code> Body: <code>{ category, name, realmKey, metadataUri }</code> Returns <code>{ asset }</code></p>
+<p><strong>POST</strong> <code>/api/assets/upgrade</code> Body: <code>{ assetId }</code> Returns <code>{ asset }</code></p>
+<p><strong>GET</strong> <code>/api/assets/mine</code> Returns <code>{ assets: Asset[] }</code></p>
+<h3>3a) Broker Marketplace (Brokers)</h3>
+<p><strong>GET</strong> <code>/api/marketplace/listings</code> Query: <code>limit</code> Returns <code>Listing[]</code></p>
+<p><strong>POST</strong> <code>/api/marketplace/list</code> Body: <code>{ brokerId, priceAIBA, priceNEUR }</code> Returns <code>Listing</code></p>
+<p><strong>POST</strong> <code>/api/marketplace/delist</code> Body: <code>{ listingId }</code> Returns <code>{ ok: true, listing }</code></p>
+<p><strong>POST</strong> <code>/api/marketplace/buy</code> Body: <code>{ listingId }</code> Returns <code>{ ok: true, broker, listingId }</code></p>
+<h3>3b) Asset Marketplace (NFT Assets)</h3>
+<p><strong>GET</strong> <code>/api/asset-marketplace/listings</code> Query: <code>listingType</code> Returns <code>{ listings: AssetListing[] }</code></p>
+<p><strong>GET</strong> <code>/api/asset-marketplace/onchain-info</code> Query: <code>listingId</code> Returns <code>{ listingId, priceAiba, escrowAddress, escrowJettonWallet, jettonMaster }</code></p>
+<p><strong>POST</strong> <code>/api/asset-marketplace/list</code> Body: <code>{ assetId, priceAiba, listingType }</code> Returns <code>{ listing }</code></p>
+<p><strong>POST</strong> <code>/api/asset-marketplace/buy</code> Body: <code>{ listingId }</code> Returns <code>{ ok: true, asset }</code></p>
+<p><strong>POST</strong> <code>/api/asset-marketplace/rent</code> Body: <code>{ listingId, durationHours }</code> Returns <code>{ rental }</code></p>
+<hr/>
+<h2>4) Governance</h2>
+<p><strong>GET</strong> <code>/api/governance/proposals</code> Returns <code>{ proposals: GovernanceProposal[] }</code></p>
+<p><strong>POST</strong> <code>/api/governance/propose</code> Body: <code>{ title, description, actions[] }</code> Returns <code>{ proposal }</code></p>
+<p><strong>POST</strong> <code>/api/governance/vote</code> Body: <code>{ proposalId, vote: 'for'|'against' }</code> Returns <code>{ ok: true }</code></p>
+<hr/>
+<h2>5) Treasury &amp; Telemetry</h2>
+<p><strong>GET</strong> <code>/api/treasury/summary</code> Returns <code>{ balanceAiba, balanceNeur, totalPaidOutAiba, totalPaidOutNeur }</code></p>
+<p><strong>GET</strong> <code>/api/treasury/ops</code> Returns <code>{ ops: TreasuryOp[] }</code></p>
+<p><strong>GET</strong> <code>/api/comms/status</code> Returns <code>{ status: &quot;operational&quot;, updatedAt }</code></p>
+<hr/>
+<h2>6) Admin (ops tuning)</h2>
+<p><strong>GET</strong> <code>/api/admin/realms</code> <strong>POST</strong> <code>/api/admin/realms</code> (create/update)</p>
+<p><strong>GET</strong> <code>/api/admin/economy/config</code> <strong>PATCH</strong> <code>/api/admin/economy/config</code> <strong>GET</strong> <code>/api/admin/economy/day</code> <strong>GET</strong> <code>/api/admin/economy/ledger</code> <strong>GET</strong> <code>/api/admin/economy/simulate</code> <strong>POST</strong> <code>/api/admin/economy/credit-user</code></p>
+<p><strong>GET</strong> <code>/api/admin/marketplace/metrics</code> <strong>GET</strong> <code>/api/admin/treasury</code> <strong>POST</strong> <code>/api/admin/treasury/fund</code> <strong>GET</strong> <code>/api/admin/treasury/reserve</code> <strong>POST</strong> <code>/api/admin/treasury/reserve/fund</code> <strong>GET</strong> <code>/api/admin/treasury/buyback</code> <strong>POST</strong> <code>/api/admin/treasury/buyback/fund</code> <strong>PATCH</strong> <code>/api/admin/treasury/oracle</code> <strong>GET</strong> <code>/api/admin/treasury-ops/metrics</code></p>
+<hr/>
+<h2>Types (summary)</h2>
+<ul>
+<li><strong>Mission</strong>: <code>{ realmKey, title, description, type, rewardAiba, rewardNeur, xp, order, requirements, active }</code></li>
+<li><strong>Mentor</strong>: <code>{ key, name, realmKey, tier, description, perks[], stakingRequiredAiba, active }</code></li>
+<li><strong>Asset</strong>: <code>{ ownerId, category, name, realmKey, rarity, level, upgradeCount, status, metadataUri, stats }</code></li>
+<li><strong>AssetListing</strong>: <code>{ assetId, sellerId, priceAiba, listingType, status, feeBps, expiresAt }</code></li>
+<li><strong>Rental</strong>: <code>{ assetId, ownerId, renterId, priceAiba, durationHours, status, startedAt, endsAt }</code></li>
+<li><strong>GovernanceProposal</strong>: <code>{ title, description, status, votesFor, votesAgainst, startAt, endAt, actions[] }</code></li>
+<li><strong>TreasuryOp</strong>: <code>{ type, amountAiba, source, refId }</code></li>
+</ul>
+  </div>
+</body>
+</html>

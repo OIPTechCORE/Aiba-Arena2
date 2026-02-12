@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>UNIVERSAL SPEC — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>UNIVERSAL SPEC</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Universal Spec — AIBA Arena Multiverse</h1>
+<p><strong>Version:</strong> Feb 2025 <strong>Scope:</strong> Full‑system spec across backend, miniapp, admin, contracts, docs, ops.</p>
+<p>This document is the <strong>authoritative source of truth</strong> for the Multiverse University, economy, assets, arenas, governance, and rewards. It unifies vision and implementation targets.</p>
+<hr/>
+<h2>1) Architecture Overview</h2>
+<h3>1.1 System roles</h3>
+<ul>
+<li><strong>Backend (API)</strong> — auth, game logic, economy, storage, admin, telemetry.</li>
+<li><strong>Contracts (TON)</strong> — token, vault, staking, marketplace escrow, claims.</li>
+<li><strong>Admin panel</strong> — ops controls and tuning.</li>
+<li><strong>Docs/Ops</strong> — deployment, monitoring, runbook.</li>
+</ul>
+<h3>1.2 High‑level flow</h3>
+<pre><code>flowchart LR
+  user[User] --&gt; miniapp[Miniapp_UI]
+  miniapp --&gt; api[Backend_API]
+  api --&gt; db[(MongoDB)]
+  api --&gt; contracts[Tact_Contracts]
+  admin[AdminPanel] --&gt; api
+  api --&gt; metrics[Metrics_Logs]</code></pre>
+<h3>1.3 Primary user loop</h3>
+<ol>
+<li><strong>Build</strong> AI assets</li>
+<li><strong>Compete</strong> in arenas</li>
+<li><strong>Earn</strong> AIBA</li>
+<li><strong>Reinvest</strong> into learning/assets</li>
+</ol>
+<hr/>
+<h2>2) Domain Model Glossary</h2>
+<table>
+<thead><tr>
+<th>Entity</th>
+<th>Purpose</th>
+<th>Key lifecycle states</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>User</strong></td>
+<td>identity, balances, badges, roles</td>
+<td>new → active → suspended</td>
+</tr>
+<tr>
+<td><strong>Realm</strong></td>
+<td>themed AI learning world</td>
+<td>draft → active → archived</td>
+</tr>
+<tr>
+<td><strong>Course</strong></td>
+<td>realm learning unit</td>
+<td>draft → active → deprecated</td>
+</tr>
+<tr>
+<td><strong>Mission</strong></td>
+<td>task/quest within a realm</td>
+<td>available → in_progress → completed</td>
+</tr>
+<tr>
+<td><strong>Mentor</strong></td>
+<td>AI guide entity</td>
+<td>base → upgraded → elite</td>
+</tr>
+<tr>
+<td><strong>Asset</strong></td>
+<td>AI agent/module/system</td>
+<td>minted → listed → owned → rented</td>
+</tr>
+<tr>
+<td><strong>AssetListing</strong></td>
+<td>market entry</td>
+<td>active → sold → cancelled</td>
+</tr>
+<tr>
+<td><strong>Rental</strong></td>
+<td>time‑bound asset usage</td>
+<td>active → expired</td>
+</tr>
+<tr>
+<td><strong>Arena</strong></td>
+<td>competition mode</td>
+<td>open → active → settled</td>
+</tr>
+<tr>
+<td><strong>Battle</strong></td>
+<td>single run</td>
+<td>pending → resolved</td>
+</tr>
+<tr>
+<td><strong>EconomyConfig</strong></td>
+<td>tuning parameters</td>
+<td>active → superseded</td>
+</tr>
+<tr>
+<td><strong>TreasuryOp</strong></td>
+<td>treasury/burn ledger</td>
+<td>recorded</td>
+</tr>
+<tr>
+<td><strong>GovernanceProposal</strong></td>
+<td>DAO decision item</td>
+<td>draft → voting → executed</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>3) Feature Matrix by Phase</h2>
+<table>
+<thead><tr>
+<th>Phase</th>
+<th>Key features</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Phase 0</strong></td>
+<td>Unified spec, architecture, glossary, feature matrix</td>
+</tr>
+<tr>
+<td><strong>Phase 1</strong></td>
+<td>Data models, API contracts, contract interfaces</td>
+</tr>
+<tr>
+<td><strong>Phase 2</strong></td>
+<td>Tact contracts: mint/burn/upgrade, escrow splits, staking</td>
+</tr>
+<tr>
+<td><strong>Phase 3</strong></td>
+<td>Backend: realms/missions/mentors, marketplace, token flows, governance</td>
+</tr>
+<tr>
+<td><strong>Phase 4</strong></td>
+<td>Miniapp UX: realms, assets, mentors, governance, wallet flows</td>
+</tr>
+<tr>
+<td><strong>Phase 5</strong></td>
+<td>Admin: realm config, fee tuning, treasury &amp; burn telemetry</td>
+</tr>
+<tr>
+<td><strong>Phase 6/7</strong></td>
+<td>Docs, deployment, tests, functional validation</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>4) Economy Principles</h2>
+<ul>
+<li><strong>Token sinks</strong> (burns, staking) are required to avoid inflation.</li>
+<li><strong>Rewards are performance‑based</strong>, not random.</li>
+<li><strong>Treasury</strong> funds ops, market stabilization, competitions.</li>
+</ul>
+<hr/>
+<h2>5) Implementation Targets (Phase 1–7)</h2>
+<h3>5.1 Data models (backend)</h3>
+<ul>
+<li>Extend <code>User</code> with <code>roles</code>, <code>reputation</code>, <code>mentorId</code>, <code>assetCount</code>.</li>
+<li>Extend <code>EconomyConfig</code> with splits: burn / treasury / rewards / staking.</li>
+</ul>
+<h3>5.2 Contracts</h3>
+<ul>
+<li><strong>Escrow</strong> with fee splits.</li>
+<li><strong>Staking</strong> for governance &amp; mentor tiers.</li>
+<li><strong>Reward vault</strong> remains source of claim‑based payouts.</li>
+</ul>
+<h3>5.3 Backend routes</h3>
+<p>Routes for realms, missions, mentors, asset marketplace, governance, treasury metrics.</p>
+<h3>5.4 Miniapp UX</h3>
+<p>Tabs: Realms, Assets, Governance (or sections inside existing tabs).</p>
+<h3>5.5 Admin</h3>
+<p>Admin controls for realms, rewards, fees, treasury, burns.</p>
+<hr/>
+<p>This spec is the <strong>Phase 0 deliverable</strong> and should be updated after each major release.</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AUDIT AND STATUS — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>AUDIT AND STATUS</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Audit &amp; status — Project assessment, leaderboard, ecosystems, vision</h1>
+<p>Single reference for codebase audits and status checks: project assessment, leaderboard &amp; groups, ecosystems (NFT, staking, CoE, Wall of Fame), and vision vs implementation.</p>
+<hr/>
+<h2>1. Project assessment (summary)</h2>
+<p><strong>Scope:</strong> Contracts, backend, miniapp, admin, docs, CI.</p>
+<p><strong>Status:</strong> Feature-complete for testnet/MVP. Contracts build and have tests; backend has production-readiness checks and Vercel serverless; miniapp implements full user flow. Mainnet readiness requires env, key isolation, monitoring, backups (see DEPLOYMENT-AND-ENV.md and OPERATIONS.md).</p>
+<table>
+<thead><tr>
+<th>Component</th>
+<th>Path</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Contracts</td>
+<td><code>contracts/</code></td>
+<td>Tact/Blueprint; build + tests</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td><code>backend/</code></td>
+<td>Express, Mongoose; <code>backend/tests/</code> Node --test</td>
+</tr>
+<tr>
+<td>Miniapp</td>
+<td><code>miniapp/</code></td>
+<td>Next.js 14, TonConnect</td>
+</tr>
+<tr>
+<td>Admin</td>
+<td><code>admin-panel/</code></td>
+<td>Next.js, backend API</td>
+</tr>
+<tr>
+<td>Docs</td>
+<td><code>docs/</code></td>
+<td>Deployment, operations, testing, feature plans</td>
+</tr>
+<tr>
+<td>CI</td>
+<td><code>.github/workflows/ci.yml</code></td>
+<td>Build, test, lint, miniapp &amp; admin build</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>2. Leaderboard &amp; groups</h2>
+<ul>
+<li><strong>Top leaders create groups:</strong> Top N by score (config: <code>leaderboardTopFreeCreate</code>, default 50) can create a guild without paying TON. Rank = count of users with higher total score + 1.</li>
+<li><strong>Guild benefits:</strong> Guild Wars arena, guild vault (NEUR/AIBA), deposit brokers to pool, boost count &amp; visibility, join/leave. Implemented in <code>guilds</code> routes and miniapp Guilds tab.</li>
+</ul>
+<hr/>
+<h2>3. Ecosystems audit (NFT, staking, CoE, Wall of Fame)</h2>
+<table>
+<thead><tr>
+<th>Ecosystem</th>
+<th>Backend</th>
+<th>Miniapp</th>
+<th>Verdict</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>NFT creator</strong></td>
+<td>Broker mint (AIBA → BrokerMintJob), create-with-TON, metadata</td>
+<td>Brokers tab mint; Market “Create broker (pay TON)”</td>
+<td>Present; optional: dedicated tab, gallery, “Creator Lab”</td>
+</tr>
+<tr>
+<td><strong>Staking</strong></td>
+<td>Staking model, stake/unstake/claim, APY</td>
+<td>Wallet tab staking card</td>
+<td>Present; optional: dedicated “Yield Vault” tab</td>
+</tr>
+<tr>
+<td><strong>Center of Excellence</strong></td>
+<td>No CoE model/routes</td>
+<td>No CoE tab</td>
+<td>Absent; University tab is the learning hub</td>
+</tr>
+<tr>
+<td><strong>Wall of Fame</strong></td>
+<td>Leaderboard, badges</td>
+<td>Leaderboard tab, badges in profile/leaderboard</td>
+<td>Present (leaderboard + badges)</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>4. Vision vs codebase</h2>
+<p>Use this section to track high-level vision vs implementation. Key alignments: battles, economy (NEUR/AIBA), brokers, marketplace, guilds, referrals, car/bike racing, university, charity, multiverse (NFT/stake), governance, wallet (TonConnect, claim). Gaps: optional enhancements (e.g. CoE as branded product, NFT gallery, dedicated staking tab) and operational hardening (monitoring, backups, key rotation) per OPERATIONS.md.</p>
+<hr/>
+<h2>5. Up-to-date check</h2>
+<p>When auditing “is everything up to date”: (1) Backend and miniapp env match DEPLOYMENT-AND-ENV.md. (2) All required env set for target (localhost vs prod). (3) CI green; backend and miniapp tests pass. (4) No committed secrets; runbook and monitoring in place for production.</p>
+  </div>
+</body>
+</html>

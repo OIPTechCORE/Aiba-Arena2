@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>OPERATIONS — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>OPERATIONS</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Operations — Runbook, monitoring, production readiness</h1>
+<p>Single doc for day-to-day ops: key management, incident response, monitoring, and production readiness status.</p>
+<hr/>
+<h2>1. Production readiness status</h2>
+<p><strong>Summary:</strong> Stack is <strong>testnet/MVP-ready</strong> with fail-fast checks. For <strong>mainnet/production</strong> you must: set all required env, use a secret manager, separate and rotate keys, and configure monitoring + backups.</p>
+<table>
+<thead><tr>
+<th>Area</th>
+<th>Status</th>
+<th>Action</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Testnet / MVP</td>
+<td>✅ Ready</td>
+<td>Backend, miniapp, admin; fail-fast in prod.</td>
+</tr>
+<tr>
+<td>Prod env + CORS</td>
+<td>🔴 Required</td>
+<td>Set in backend so it starts (see DEPLOYMENT-AND-ENV.md).</td>
+</tr>
+<tr>
+<td>Keys &amp; secrets</td>
+<td>🔴 Required</td>
+<td>Separate keys; secret manager; rotate if exposed.</td>
+</tr>
+<tr>
+<td>Ops (monitor/backup/runbook)</td>
+<td>🔴 Required</td>
+<td>Monitoring, backups, runbook follow-through.</td>
+</tr>
+<tr>
+<td>Rate limit (multi-instance)</td>
+<td>🟡 Recommended</td>
+<td>Redis or shared store if multiple backend instances.</td>
+</tr>
+<tr>
+<td>Signing isolation</td>
+<td>🟡 Recommended</td>
+<td>Dedicated signer/KMS + allow-lists for claims.</td>
+</tr>
+</tbody></table>
+<p><strong>What’s enforced at startup (<code>APP_ENV=prod</code>):</strong> CORS, Telegram token + initData age, admin JWT + password hash, battle seed, vault/claim env (all-or-nothing, mainnet TON), no legacy pending-AIBA dispatch. See DEPLOYMENT-AND-ENV.md § Mainnet.</p>
+<hr/>
+<h2>2. Key management</h2>
+<table>
+<thead><tr>
+<th>Purpose</th>
+<th>Env / asset</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Contract deploy</td>
+<td>(Blueprint wallet)</td>
+<td>Separate from runtime; never in backend env</td>
+</tr>
+<tr>
+<td>Reward-claim signer</td>
+<td><code>ORACLE_PRIVATE_KEY_HEX</code></td>
+<td>64 hex chars; rotate via vault <code>set_oracle</code> + backend secret</td>
+</tr>
+<tr>
+<td>Admin JWT</td>
+<td><code>ADMIN_JWT_SECRET</code></td>
+<td>≥ 32 chars; rotate invalidates tokens</td>
+</tr>
+<tr>
+<td>Admin login</td>
+<td><code>ADMIN_EMAIL</code> + <code>ADMIN_PASSWORD_HASH</code></td>
+<td>Prefer bcrypt; no plaintext in prod</td>
+</tr>
+<tr>
+<td>Telegram bot</td>
+<td><code>TELEGRAM_BOT_TOKEN</code></td>
+<td>Rotate in BotFather; update backend</td>
+</tr>
+<tr>
+<td>Battle determinism</td>
+<td><code>BATTLE_SEED_SECRET</code></td>
+<td>≥ 32 chars; changing changes seeds</td>
+</tr>
+<tr>
+<td>TON wallets</td>
+<td><code>CREATED_BROKERS_WALLET</code>, <code>BOOST_*</code>, <code>GIFTS_WALLET</code>, etc.</td>
+<td>Receive TON for features</td>
+</tr>
+</tbody></table>
+<p><strong>Key rotation:</strong> Rotate <code>BATTLE_SEED_SECRET</code>, <code>ADMIN_JWT_SECRET</code>, <code>TELEGRAM_BOT_TOKEN</code>, <code>ORACLE_PRIVATE_KEY_HEX</code> (requires vault <code>set_oracle</code> + backend update). Document and rehearse oracle rotation.</p>
+<p><strong>Oracle key rotation:</strong> Update on-chain oracle key (<code>set_oracle</code>), update <code>ORACLE_PRIVATE_KEY_HEX</code> in secret manager, restart backend, verify <code>GET /api/vault/last-seqno</code>. Monitor claim failures and TON provider after.</p>
+<hr/>
+<h2>3. Incident response</h2>
+<ul>
+<li><strong>Mongo:</strong> Backend logs + connection status</li>
+<li><strong>TON:</strong> <code>TON_PROVIDER_URL</code> / <code>TON_API_KEY</code> reachable</li>
+<li><strong>Claims failing:</strong> <code>GET /api/vault/inventory</code>; <code>GET /api/vault/last-seqno?to=&lt;addr&gt;</code></li>
+<li><strong>Battles failing:</strong> Broker energy/cooldowns; <code>anomalyFlags</code> and bans</li>
+</ul>
+<p><strong>Boot crash:</strong> Check logs for “Production readiness checks failed” / “PROD_READINESS_FAILED”. Fix missing/unsafe env (see DEPLOYMENT-AND-ENV.md).</p>
+<p><strong>Suspected oracle compromise:</strong> Rotate <code>ORACLE_PRIVATE_KEY_HEX</code> and vault oracle on-chain ASAP; pause or rate-limit claims; audit logs; re-issue operator credentials.</p>
+<p><strong>Admin auth compromise:</strong> Rotate <code>ADMIN_JWT_SECRET</code> and admin password (<code>ADMIN_PASSWORD_HASH</code>).</p>
+<p><strong>Telegram token compromise:</strong> Rotate <code>TELEGRAM_BOT_TOKEN</code> in BotFather; update backend.</p>
+<hr/>
+<h2>4. Monitoring and alerting</h2>
+<p><strong>Setup:</strong> Log drain to a log platform; uptime checks for <code>GET /health</code>; Prometheus scraping for <code>GET /metrics</code>; TON provider error monitoring.</p>
+<p><strong>Metrics endpoint:</strong> <code>GET /metrics</code> (Prometheus). Includes: <code>aiba_http_request_duration_seconds</code>, <code>aiba_battle_runs_total</code>, <code>aiba_battle_anomalies_total</code>, <code>aiba_auto_bans_total</code>, <code>aiba_economy_emissions_total</code>, <code>aiba_economy_sinks_total</code>, <code>aiba_economy_withdrawals_total</code>. Treasury: <code>GET /api/treasury/ops</code>.</p>
+<p><strong>Suggested alerts:</strong> Battle anomaly/auto-ban spikes; economy ledger anomalies; vault low TON/jettons; Mongo reconnects; API/battle error rate &gt; threshold; rate limit 429 spikes.</p>
+<p><strong>Thresholds (examples):</strong> API error &gt;5% over 10m; battle error &gt;2%; vault TON below <code>MIN_VAULT_TON_NANO</code>; Mongo reconnects &gt;3 in 5m.</p>
+<hr/>
+<h2>5. Security checklist (pre-mainnet)</h2>
+<ul>
+<li>[ ] All prod env set; <code>APP_ENV=prod</code>; backend starts without PROD_READINESS_FAILED</li>
+<li>[ ] CORS set to production frontend URLs only</li>
+<li>[ ] Monitoring and backups configured; restore tested</li>
+<li>[ ] Runbook and security playbooks read and agreed</li>
+<li>[ ] <code>ENABLE_LEGACY_PENDING_AIBA_DISPATCH</code> not true in production</li>
+</ul>
+<p><strong>Data migrations:</strong> Prefer additive schema changes; add indexes for new lookups; backfill idempotent and batched.</p>
+  </div>
+</body>
+</html>

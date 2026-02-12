@@ -96,17 +96,14 @@ router.post(
     '/stake',
     requireTelegram,
     validateBody({
-        universeId: { type: 'objectId', required: true },
-        tokenId: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
+        brokerId: { type: 'objectId', required: true },
     }),
     async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const requestId = getIdempotencyKey(req);
-        if (!requestId) return res.status(400).json({ error: 'requestId required' });
 
-        const brokerId = String(req.body?.brokerId ?? '').trim();
+        const brokerId = String(req.validatedBody?.brokerId ?? req.body?.brokerId ?? '').trim();
         if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
         const broker = await Broker.findById(brokerId);
@@ -140,14 +137,14 @@ router.post(
     '/unstake',
     requireTelegram,
     validateBody({
-        stakeId: { type: 'objectId', required: true },
+        brokerId: { type: 'objectId', required: true },
     }),
     async (req, res) => {
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
 
-        const brokerId = String(req.body?.brokerId ?? '').trim();
+        const brokerId = String(req.validatedBody?.brokerId ?? req.body?.brokerId ?? '').trim();
         if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
         const stake = await NftStake.findOne({ brokerId, telegramId });

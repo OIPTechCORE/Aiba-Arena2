@@ -155,6 +155,11 @@ const IconSettings = () => (
         <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-1.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h1.09a1.65 1.65 0 001.51-1 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-1.09a1.65 1.65 0 00-1.51 1z" />
     </svg>
 );
+const IconSearch = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+    </svg>
+);
 /* Futuristic Stars (Telegram Stars–style) */
 const IconStar = () => (
     <svg className="icon-svg icon-svg--star" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -186,6 +191,34 @@ const BADGE_LABELS = {
 const BROKERS_EXPLANATION = 'Brokers are your AI agents that compete in 3D arenas. Each has stats (INT, SPD, RISK) and energy. They earn AIBA and NEUR from battles, can be combined to merge stats, minted as NFTs, or traded on the Market.';
 const ARENAS_EXPLANATION = 'Arenas are battle modes where your broker competes. Choose prediction, simulation, strategyWars, arbitrage, or guildWars (requires a guild). Run a battle to earn AIBA, Stars, and sometimes Diamonds.';
 const GUILDS_EXPLANATION = 'Guilds (groups) let you team up with others: create or join a group, deposit brokers into the shared pool, and compete in Guild Wars. Top leaders create free; others can pay TON to create. Boost a guild with TON to give it benefits.';
+
+const ARENA_OPTIONS = [
+    { value: 'prediction', label: 'Prediction' },
+    { value: 'simulation', label: 'Simulation' },
+    { value: 'strategyWars', label: 'Strategy Wars' },
+    { value: 'arbitrage', label: 'Arbitrage' },
+    { value: 'guildWars', label: 'Guild Wars' },
+];
+
+/* 4×4 home grid: quick access to features (eduSUITE-style) */
+const HOME_GRID_ITEMS = [
+    { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
+    { id: 'market', label: 'Market', Icon: IconMarket },
+    { id: 'arenas', label: 'Arenas', Icon: IconArena },
+    { id: 'guilds', label: 'Guilds', Icon: IconGuilds },
+    { id: 'carRacing', label: 'Car Racing', Icon: IconCar },
+    { id: 'bikeRacing', label: 'Bike Racing', Icon: IconBike },
+    { id: 'tasks', label: 'Tasks', Icon: IconTasks },
+    { id: 'leaderboard', label: 'Leaderboard', Icon: IconLeaderboard },
+    { id: 'multiverse', label: 'Multiverse', Icon: IconMultiverse },
+    { id: 'university', label: 'University', Icon: IconUniversity },
+    { id: 'wallet', label: 'Wallet', Icon: IconWallet },
+    { id: 'profile', label: 'Profile', Icon: IconProfile },
+    { id: 'charity', label: 'Charity', Icon: IconHeart },
+    { id: 'realms', label: 'Realms', Icon: IconWorld },
+    { id: 'updates', label: 'Updates', Icon: IconUpdates },
+    { id: 'settings', label: 'Settings', Icon: IconSettings },
+];
 
 const TAB_LIST = [
     { id: 'home', label: 'Home', Icon: IconHome },
@@ -265,6 +298,7 @@ export default function HomePage() {
     const [tasksMsg, setTasksMsg] = useState('');
     const [marketFlow, setMarketFlow] = useState('overview'); // overview | trade | system | boosts
     const [balanceStripVisible, setBalanceStripVisible] = useState(true);
+    const [dashboardSearch, setDashboardSearch] = useState('');
     const lastScrollYRef = useRef(0);
     const [carFlow, setCarFlow] = useState('garage'); // garage | system | market | race | leaderboard
     const [bikeFlow, setBikeFlow] = useState('garage'); // garage | system | market | race | leaderboard
@@ -2090,12 +2124,9 @@ export default function HomePage() {
                 </div>
             ) : null}
             <header className="app-header app-header--android">
-                <div className="app-header__brand">
+                <div className="app-header__row">
                     <h1 className="aiba-app__title">AIBA</h1>
-                </div>
-                <div className="app-header__nav">
                     <button type="button" className="btn btn--ghost header-nav__btn" onClick={() => setTab('home')} aria-label="Go to Home" title="Home">
-                        <IconHome />
                         <span className="header-nav__label">Home</span>
                     </button>
                     <button type="button" className="btn btn--ghost header-nav__btn header-nav__btn--profile" onClick={() => setTab('profile')} aria-label="Profile" title="Profile">
@@ -2107,22 +2138,18 @@ export default function HomePage() {
                         <span className="header-nav__label">Profile</span>
                     </button>
                     <button type="button" className="btn btn--ghost header-nav__btn" onClick={() => setTab('university')} aria-label="Guide" title="Guide">
-                        <IconUniversity />
                         <span className="header-nav__label">Guide</span>
                     </button>
                     <button type="button" className="btn btn--ghost header-nav__btn" onClick={() => { scrollToFaqRef.current = true; setTab('updates'); }} aria-label="FAQs" title="FAQs">
-                        <IconUpdates />
                         <span className="header-nav__label">FAQs</span>
                     </button>
                     <button type="button" className="btn btn--ghost header-nav__btn quick-nav__btn--settings" onClick={() => setTab('settings')} aria-label="Settings" title="Settings">
-                        <IconSettings />
                         <span className="header-nav__label">Settings</span>
                     </button>
-                </div>
-                <div className="app-header__wallet">
-                    {wallet ? (
-                        <TonConnectButton />
-                    ) : (
+                    <div className="app-header__wallet">
+                        {wallet ? (
+                            <TonConnectButton />
+                        ) : (
                         <button
                             type="button"
                             className="btn btn--primary connect-wallet-btn"
@@ -2132,10 +2159,11 @@ export default function HomePage() {
                             <IconWallet />
                             <span>Connect Wallet</span>
                         </button>
-                    )}
+                        )}
+                    </div>
                 </div>
                 {IS_DEV ? (
-                    <p className="aiba-app__sub" style={{ marginTop: 4 }}>
+                    <p className="aiba-app__sub app-header__sub">
                         Backend: {BACKEND_URL}
                         <span style={{ display: 'block', marginTop: 2, color: 'var(--text-muted)', fontSize: '0.7rem' }}>
                             Connect Wallet: works best on deployed HTTPS app. On localhost use a wallet extension or ngrok.
@@ -2204,7 +2232,81 @@ export default function HomePage() {
             <div className="tab-content">
                 {/* ─── Home ───────────────────────────────────────────────────── */}
                 <section className={`tab-panel major-tab major-tab--home ${tab === 'home' ? 'is-active' : ''}`} aria-hidden={tab !== 'home'}>
-                    <div className="card card--elevated home-overview major-tab__hero" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                    {/* Welcome message */}
+                    <p className="home-welcome">
+                        Welcome back {tgUser?.first_name || tgUser?.username || 'there'}!
+                    </p>
+                    {/* Global search bar */}
+                    <div className="home-search-wrap">
+                        <span className="home-search__icon" aria-hidden><IconSearch /></span>
+                        <input
+                            type="search"
+                            className="home-search__input"
+                            placeholder="Search brokers, market, arenas..."
+                            value={dashboardSearch}
+                            onChange={(e) => setDashboardSearch(e.target.value)}
+                            aria-label="Search brokers, market, and arenas"
+                        />
+                    </div>
+                    {/* Search results (when query present) */}
+                    {dashboardSearch.trim() ? (() => {
+                        const q = dashboardSearch.trim().toLowerCase();
+                        const arenaMatches = ARENA_OPTIONS.filter((a) => a.label.toLowerCase().includes(q) || a.value.toLowerCase().includes(q));
+                        const brokerMatches = brokers.filter((b) => String(b._id).toLowerCase().includes(q) || String(`${b.intelligence}${b.speed}${b.risk}`).includes(q));
+                        const gridMatches = HOME_GRID_ITEMS.filter((g) => g.label.toLowerCase().includes(q));
+                        const marketMatch = /market|buy|sell|listing/i.test(q);
+                        const hasResults = arenaMatches.length > 0 || brokerMatches.length > 0 || gridMatches.length > 0 || marketMatch;
+                        if (!hasResults) return <p className="guide-tip" style={{ marginTop: 8 }}>No matches. Try arena names, broker IDs, or feature names.</p>;
+                        return (
+                            <div className="home-search-panel card" style={{ marginTop: 8 }}>
+                                {arenaMatches.length > 0 ? (
+                                    <div className="home-search-results__group">
+                                        <span className="home-search-results__label">Arenas</span>
+                                        {arenaMatches.map((a) => (
+                                            <button key={a.value} type="button" className="home-search-results__item" onClick={() => { setArena(a.value); setTab('arenas'); setDashboardSearch(''); }}>{a.label}</button>
+                                        ))}
+                                    </div>
+                                ) : null}
+                                {brokerMatches.length > 0 ? (
+                                    <div className="home-search-results__group">
+                                        <span className="home-search-results__label">Brokers</span>
+                                        {brokerMatches.slice(0, 5).map((b) => (
+                                            <button key={b._id} type="button" className="home-search-results__item" onClick={() => { setSelectedBrokerId(b._id); setTab('brokers'); setDashboardSearch(''); }}>#{b._id.slice(-6)} INT{b.intelligence} SPD{b.speed}</button>
+                                        ))}
+                                    </div>
+                                ) : null}
+                                {marketMatch ? (
+                                    <div className="home-search-results__group">
+                                        <button type="button" className="home-search-results__item" onClick={() => { setTab('market'); setDashboardSearch(''); }}>Go to Market</button>
+                                    </div>
+                                ) : null}
+                                {gridMatches.length > 0 ? (
+                                    <div className="home-search-results__group">
+                                        <span className="home-search-results__label">Features</span>
+                                        {gridMatches.map((g) => (
+                                            <button key={g.id} type="button" className="home-search-results__item" onClick={() => { setTab(g.id); setDashboardSearch(''); }}>{g.label}</button>
+                                        ))}
+                                    </div>
+                                ) : null}
+                            </div>
+                        );
+                    })() : null}
+                    {/* 4×4 icon grid */}
+                    <div className="home-grid" aria-label="Quick access to features">
+                        {HOME_GRID_ITEMS.map(({ id, label, Icon }) => (
+                            <button
+                                key={id}
+                                type="button"
+                                className="home-grid__item"
+                                onClick={() => setTab(id)}
+                                aria-label={label}
+                            >
+                                <span className="home-grid__icon"><Icon /></span>
+                                <span className="home-grid__label">{label}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <div className="card card--elevated home-overview major-tab__hero" style={{ borderLeft: '4px solid var(--accent-cyan)', marginTop: 16 }}>
                         <div className="card__title">Home Command Center</div>
                         <p className="card__hint">Battle-ready Android UI/UX dashboard. Manage brokers, run fights, and jump into tasks fast.</p>
                         <div className="home-overview__stats">

@@ -15,8 +15,8 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="en">
-            <body className="aiba-miniapp">
+        <html lang="en" suppressHydrationWarning>
+            <body className="aiba-miniapp" suppressHydrationWarning>
                 <Providers>{children}</Providers>
             </body>
         </html>

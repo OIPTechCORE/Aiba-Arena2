@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>API AND READINESS AUDIT — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>API AND READINESS AUDIT</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>API &amp; User Readiness Audit</h1>
+<p><strong>Date:</strong> 2025-02-11 <strong>Scope:</strong> All miniapp API calls vs backend endpoints; production readiness.</p>
+<hr/>
+<h2>1. API &amp; Endpoint Audit</h2>
+<h3>1.1 Summary</h3>
+<table>
+<thead><tr>
+<th>Category</th>
+<th>Frontend Calls</th>
+<th>Backend Routes</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Brokers</td>
+<td>6</td>
+<td>6</td>
+<td>✅ All match</td>
+</tr>
+<tr>
+<td>Battle</td>
+<td>1</td>
+<td>1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Economy</td>
+<td>2</td>
+<td>2</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Wallet</td>
+<td>1</td>
+<td>1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Daily</td>
+<td>2</td>
+<td>2</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Leaderboard</td>
+<td>2</td>
+<td>2</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Guilds</td>
+<td>7</td>
+<td>7</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Charity</td>
+<td>5</td>
+<td>5</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Announcements</td>
+<td>1</td>
+<td>1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Comms</td>
+<td>1</td>
+<td>1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>University</td>
+<td>6</td>
+<td>6</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Realms</td>
+<td>1</td>
+<td>1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Missions</td>
+<td>2</td>
+<td>2</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Mentors</td>
+<td>5</td>
+<td>5</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Assets</td>
+<td>3</td>
+<td>3</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Asset Marketplace</td>
+<td>6</td>
+<td>6</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Governance</td>
+<td>2</td>
+<td>2</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DAO</td>
+<td>3</td>
+<td>3</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Referrals</td>
+<td>3</td>
+<td>3</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Vault</td>
+<td>2</td>
+<td>2</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Ads</td>
+<td>1</td>
+<td>1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Tasks</td>
+<td>1</td>
+<td>1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Marketplace</td>
+<td>5</td>
+<td>5</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Stars Store</td>
+<td>3</td>
+<td>3</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Boosts</td>
+<td>3</td>
+<td>3</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Staking</td>
+<td>4</td>
+<td>4</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Multiverse</td>
+<td>6</td>
+<td>6</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Car Racing</td>
+<td>10</td>
+<td>10</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Bike Racing</td>
+<td>10</td>
+<td>10</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Gifts</td>
+<td>3</td>
+<td>3</td>
+<td>✅</td>
+</tr>
+</tbody></table>
+<p><strong>Result: All frontend API calls have corresponding backend routes. No missing endpoints.</strong></p>
+<hr/>
+<h3>1.2 Proxy &amp; CORS</h3>
+<table>
+<thead><tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Uses Proxy?</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>/api/brokers/starter</code></td>
+<td>POST</td>
+<td><strong>Yes</strong></td>
+<td>Same-origin proxy to avoid CORS/405 on Vercel+Telegram</td>
+</tr>
+<tr>
+<td>All other broker calls</td>
+<td>Mixed</td>
+<td>No</td>
+<td>Direct to backend; GET requests typically avoid preflight</td>
+</tr>
+</tbody></table>
+<p><strong>Recommendation:</strong> If other broker POST endpoints (combine, mint-nft, create-with-ton) fail with 405/CORS in production, extend the Next.js proxy at <code>miniapp/src/app/api/brokers/[[...path]]/route.js</code> to handle them.</p>
+<hr/>
+<h3>1.3 Verified Path Mappings</h3>
+<table>
+<thead><tr>
+<th>Frontend Path</th>
+<th>Backend Route</th>
+<th>Method</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>/api/leaderboard</code></td>
+<td>leaderboard <code>/</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/leaderboard/my-rank</code></td>
+<td>leaderboard <code>/my-rank</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/tasks</code></td>
+<td>tasks <code>/</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/marketplace/listings</code></td>
+<td>marketplace <code>/listings</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/marketplace/system-brokers</code></td>
+<td>marketplace <code>/system-brokers</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/marketplace/buy-system-broker</code></td>
+<td>marketplace <code>/buy-system-broker</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/marketplace/list</code></td>
+<td>marketplace <code>/list</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/marketplace/buy</code></td>
+<td>marketplace <code>/buy</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/stars-store/config</code></td>
+<td>starsStore <code>/config</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/stars-store/buy-with-aiba</code></td>
+<td>starsStore <code>/buy-with-aiba</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/stars-store/buy-with-ton</code></td>
+<td>starsStore <code>/buy-with-ton</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/brokers/create-with-ton</code></td>
+<td>brokers <code>/create-with-ton</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/brokers/mine</code></td>
+<td>brokers <code>/mine</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/brokers/starter</code></td>
+<td>brokers <code>/starter</code></td>
+<td>POST</td>
+<td>✅ (via proxy)</td>
+</tr>
+<tr>
+<td><code>/api/brokers/combine</code></td>
+<td>brokers <code>/combine</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/brokers/mint-nft</code></td>
+<td>brokers <code>/mint-nft</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/boosts/buy-profile-with-ton</code></td>
+<td>boosts <code>/buy-profile-with-ton</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/boosts/mine</code></td>
+<td>boosts <code>/mine</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/boosts/buy</code></td>
+<td>boosts <code>/buy</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/gifts/received</code></td>
+<td>gifts <code>/received</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/gifts/sent</code></td>
+<td>gifts <code>/sent</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/gifts/send</code></td>
+<td>gifts <code>/send</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/multiverse/*</code></td>
+<td>multiverse</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/car-racing/*</code></td>
+<td>carRacing</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/bike-racing/*</code></td>
+<td>bikeRacing</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/staking/*</code></td>
+<td>staking</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/dao/proposals</code></td>
+<td>dao <code>/proposals</code></td>
+<td>GET/POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/dao/vote</code></td>
+<td>dao <code>/vote</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/ads</code></td>
+<td>ads <code>/</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/economy/me</code></td>
+<td>economy <code>/me</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/economy/claim-aiba</code></td>
+<td>economy <code>/claim-aiba</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/daily/status</code></td>
+<td>daily <code>/status</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/daily/claim</code></td>
+<td>daily <code>/claim</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/wallet/connect</code></td>
+<td>wallet <code>/connect</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/battle/run</code></td>
+<td>battle <code>/run</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/guilds/list</code></td>
+<td>guilds <code>/list</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/guilds/mine</code></td>
+<td>guilds <code>/mine</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/guilds/create</code></td>
+<td>guilds <code>/create</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/guilds/:id/boost</code></td>
+<td>guilds <code>/:guildId/boost</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/guilds/join</code></td>
+<td>guilds <code>/join</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/guilds/deposit-broker</code></td>
+<td>guilds <code>/deposit-broker</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/guilds/withdraw-broker</code></td>
+<td>guilds <code>/withdraw-broker</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/charity/*</code></td>
+<td>charity</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/announcements</code></td>
+<td>announcements <code>/</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/comms/status</code></td>
+<td>app direct</td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/university/*</code></td>
+<td>university</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/realms</code></td>
+<td>realms <code>/</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/missions</code></td>
+<td>missions <code>/</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/mentors/*</code></td>
+<td>mentors</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/assets/*</code></td>
+<td>assets</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/asset-marketplace/*</code></td>
+<td>assetMarketplace</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/governance/*</code></td>
+<td>governance</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/referrals/*</code></td>
+<td>referrals</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/vault/*</code></td>
+<td>vault</td>
+<td>Mixed</td>
+<td>✅</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>2. User Readiness Audit</h2>
+<h3>2.1 Production Checklist</h3>
+<table>
+<thead><tr>
+<th>Item</th>
+<th>Status</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Backend env (production)</strong></td>
+<td>⚠️ Verify</td>
+<td><code>MONGO_URI</code>, <code>APP_ENV=prod</code>, <code>CORS_ORIGIN</code>, <code>TELEGRAM_BOT_TOKEN</code>, <code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code>, <code>ADMIN_JWT_SECRET</code>, <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD_HASH</code>, <code>BATTLE_SEED_SECRET</code></td>
+</tr>
+<tr>
+<td><strong>Miniapp env</strong></td>
+<td>⚠️ Verify</td>
+<td><code>NEXT_PUBLIC_BACKEND_URL</code> = backend URL (required for broker proxy)</td>
+</tr>
+<tr>
+<td><strong>CORS</strong></td>
+<td>⚠️ Verify</td>
+<td>Backend <code>CORS_ORIGIN</code> must include miniapp origin (e.g. <code>https://aiba-arena2.vercel.app</code>)</td>
+</tr>
+<tr>
+<td><strong>Telegram bot</strong></td>
+<td>⚠️ Verify</td>
+<td>Menu/link opens miniapp; token in backend</td>
+</tr>
+<tr>
+<td><strong>Production readiness</strong></td>
+<td>✅</td>
+<td><code>enforceProductionReadiness()</code> runs at startup; fails if critical vars missing</td>
+</tr>
+</tbody></table>
+<hr/>
+<h3>2.2 Functional Readiness</h3>
+<table>
+<thead><tr>
+<th>Feature</th>
+<th>Readiness</th>
+<th>Gaps</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Auth</strong></td>
+<td>✅</td>
+<td>Telegram initData; x-telegram-id fallback for dev</td>
+</tr>
+<tr>
+<td><strong>Error handling</strong></td>
+<td>✅</td>
+<td>getErrorMessage, status messages, try/catch</td>
+</tr>
+<tr>
+<td><strong>Loading states</strong></td>
+<td>✅</td>
+<td><code>busy</code> flag disables buttons during requests</td>
+</tr>
+<tr>
+<td><strong>Broker creation</strong></td>
+<td>✅</td>
+<td>Proxy fixes 405; requireTelegram on backend</td>
+</tr>
+<tr>
+<td><strong>Battle flow</strong></td>
+<td>✅</td>
+<td>Run battle, claim, economy refresh</td>
+</tr>
+<tr>
+<td><strong>Marketplace</strong></td>
+<td>✅</td>
+<td>List, buy, system brokers</td>
+</tr>
+<tr>
+<td><strong>Guilds</strong></td>
+<td>✅</td>
+<td>Create, join, deposit/withdraw brokers, boost</td>
+</tr>
+<tr>
+<td><strong>Staking/Multiverse</strong></td>
+<td>✅</td>
+<td>Stake, unstake, claim</td>
+</tr>
+<tr>
+<td><strong>Car/Bike racing</strong></td>
+<td>✅</td>
+<td>Config, create, buy, enter</td>
+</tr>
+<tr>
+<td><strong>University</strong></td>
+<td>✅</td>
+<td>Courses, progress, mint badges</td>
+</tr>
+<tr>
+<td><strong>Charity</strong></td>
+<td>✅</td>
+<td>Campaigns, donate, leaderboard</td>
+</tr>
+<tr>
+<td><strong>Vault/Claims</strong></td>
+<td>⚠️ Config-dependent</td>
+<td>Needs <code>ARENA_VAULT_ADDRESS</code>, <code>AIBA_JETTON_MASTER</code>, <code>ORACLE_*</code>, <code>TON_PROVIDER_URL</code> for on-chain claims</td>
+</tr>
+<tr>
+<td><strong>TON payments</strong></td>
+<td>⚠️ Config-dependent</td>
+<td>Various TON wallets (GIFTS_WALLET, BOOST_GROUP_WALLET, etc.) for buy-with-TON flows</td>
+</tr>
+</tbody></table>
+<hr/>
+<h3>2.3 Known Gaps / Recommendations</h3>
+<ol>
+</ol>
+<p>Only <code>/api/brokers/starter</code> uses the proxy. If <code>create-with-ton</code>, <code>combine</code>, or <code>mint-nft</code> return 405/CORS in production, add them to the proxy or extend the proxy to forward all broker POST requests.</p>
+<ol>
+</ol>
+<p>On-chain AIBA claims require vault + oracle config. If not set, users can still earn off-chain credits; claims will fail with a clear message.</p>
+<ol>
+</ol>
+<p>Assets use <code>User</code> model and <code>ownerId</code>; economy uses <code>telegramId</code>. Ensure User documents exist for Telegram users before asset flows.</p>
+<ol>
+</ol>
+<p>Frontend expects <code>res.data?.missions</code>; backend returns <code>{ missions: [...] }</code> → ✅ matches.</p>
+<ol>
+</ol>
+<p>Frontend expects <code>res.data?.mentors</code>; backend returns <code>{ mentors }</code> → ✅ matches.</p>
+<hr/>
+<h3>2.4 Deployment Verification</h3>
+<p>Before going live:</p>
+<ol>
+<li>- <code>GET /health</code> → <code>{ ok: true }</code></li>
+<li>- <code>GET /api/comms/status</code> → <code>{ status: 'operational' }</code></li>
+<li>- Test one auth-required call (e.g. <code>POST /api/brokers/starter</code>) from Telegram WebApp</li>
+</ol>
+<ol>
+<li>- Opens in Telegram</li>
+<li>- Balance strip loads (economy/me)</li>
+<li>- New broker button works (proxy)</li>
+<li>- Run battle completes</li>
+</ol>
+<ol>
+<li>- Backend: All required vars per <code>docs/DEPLOYMENT-AND-ENV.md</code></li>
+<li>- Miniapp: <code>NEXT_PUBLIC_BACKEND_URL</code> points to deployed backend</li>
+</ol>
+<hr/>
+<h2>3. Conclusion</h2>
+<p><strong>APIs:</strong> All miniapp API calls map to existing backend endpoints. No missing or incorrect routes.</p>
+<p><strong>Readiness:</strong> The app is functionally ready for users provided:</p>
+<ul>
+<li>CORS includes the miniapp origin</li>
+<li>New broker flow works via the proxy</li>
+<li>Optional features (vault, TON payments) require their respective env vars</li>
+</ul>
+  </div>
+</body>
+</html>
