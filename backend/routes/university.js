@@ -70,6 +70,18 @@ const COURSES = [
             { id: 'wall-of-fame', title: 'Wall of Fame', body: 'Leaderboards rank players by score, AIBA, NEUR, or battles. Badges (e.g. verified, top leader) appear on profiles and leaderboards. Climb the ranks and earn recognition.' },
         ],
     },
+    {
+        id: 'referrals-racing-market',
+        title: 'Referrals, Racing & Market',
+        shortDescription: 'Referral codes, car/bike racing, broker market, guild withdrawal.',
+        order: 6,
+        modules: [
+            { id: 'referrals', title: 'Referrals', body: 'Go to the Referrals tab: create your code (My code), share it. When someone applies your code at signup or in-app, you both get bonuses (NEUR or AIBA if configured). Top referrers appear on the leaderboard.' },
+            { id: 'car-bike-racing', title: 'Car & Bike Racing', body: 'Create or buy a car or bike with AIBA or TON. Enter open races from the Car Racing or Bike Racing tabs. Earn AIBA by finish position. The system shop sells cars/bikes for AIBA.' },
+            { id: 'market', title: 'Market', body: 'Sell a broker for AIBA or buy one from players or from the system. Withdraw your broker from the guild pool first if it is deposited there—only brokers not in a guild pool can be listed.' },
+            { id: 'guild-withdrawal', title: 'Guild deposit & withdrawal', body: 'Deposit brokers into the guild pool for Guild Wars. To sell a deposited broker on the Market, withdraw it from the guild first from the Guilds tab.' },
+        ],
+    },
 ];
 
 function getTotalModuleCount() {

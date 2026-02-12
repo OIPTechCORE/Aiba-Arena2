@@ -203,9 +203,9 @@ const ARENA_OPTIONS = [
 /* 4×4 home grid: quick access to features (eduSUITE-style) */
 const HOME_GRID_ITEMS = [
     { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
+    { id: 'referrals', label: 'Referrals', Icon: IconShare },
     { id: 'market', label: 'Market', Icon: IconMarket },
     { id: 'arenas', label: 'Arenas', Icon: IconArena },
-    { id: 'guilds', label: 'Guilds', Icon: IconGuilds },
     { id: 'carRacing', label: 'Car Racing', Icon: IconCar },
     { id: 'bikeRacing', label: 'Bike Racing', Icon: IconBike },
     { id: 'tasks', label: 'Tasks', Icon: IconTasks },
@@ -222,6 +222,7 @@ const HOME_GRID_ITEMS = [
 
 const TAB_LIST = [
     { id: 'home', label: 'Home', Icon: IconHome },
+    { id: 'referrals', label: 'Referrals', Icon: IconShare },
     { id: 'profile', label: 'Profile', Icon: IconProfile },
     { id: 'settings', label: 'Settings', Icon: IconSettings },
     { id: 'tasks', label: 'Tasks', Icon: IconTasks },
@@ -1037,7 +1038,7 @@ export default function HomePage() {
         if (tab === 'charity') refreshCharityAll();
         if (tab === 'university') refreshUniversity();
         if (tab === 'updates') refreshUpdatesAll();
-        if (tab === 'home') refreshReferralMe().catch(() => {});
+        if (tab === 'home' || tab === 'referrals') { refreshReferralMe().catch(() => {}); refreshTopReferrers().catch(() => {}); }
         if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshReferralMe().catch(() => {}); }
         if (tab === 'carRacing') refreshCarRacing().catch(() => {});
         if (tab === 'bikeRacing') refreshBikeRacing().catch(() => {});
@@ -1372,6 +1373,7 @@ export default function HomePage() {
     const [universityTotalModules, setUniversityTotalModules] = useState(0);
     const [universityProgress, setUniversityProgress] = useState(null);
     const [universityMintInfo, setUniversityMintInfo] = useState(null);
+    const [universityMintCertificateInfo, setUniversityMintCertificateInfo] = useState(null);
     const [universityExpandedCourseId, setUniversityExpandedCourseId] = useState('');
     const [universityExpandedModuleKey, setUniversityExpandedModuleKey] = useState('');
     const [universityBadgeTxHash, setUniversityBadgeTxHash] = useState('');
@@ -1399,6 +1401,12 @@ export default function HomePage() {
             setUniversityMintInfo(mintRes.data || null);
         } catch {
             setUniversityMintInfo(null);
+        }
+        try {
+            const certRes = await api.get('/api/university/mint-full-certificate-info');
+            setUniversityMintCertificateInfo(certRes.data || null);
+        } catch {
+            setUniversityMintCertificateInfo(null);
         }
     }
     async function mintCourseBadge() {
@@ -1807,6 +1815,7 @@ export default function HomePage() {
     const [myReferral, setMyReferral] = useState(null);
     const [refCodeInput, setRefCodeInput] = useState('');
     const [refMsg, setRefMsg] = useState('');
+    const [topReferrers, setTopReferrers] = useState([]);
 
     async function refreshReferralMe() {
         try {
@@ -1844,6 +1853,15 @@ export default function HomePage() {
             setRefMsg('Referral failed (already used? wallet required? invalid code?).');
         } finally {
             setBusy(false);
+        }
+    }
+
+    async function refreshTopReferrers() {
+        try {
+            const res = await api.get('/api/referrals/top');
+            setTopReferrers(Array.isArray(res?.data) ? res.data : []);
+        } catch {
+            setTopReferrers([]);
         }
     }
 
@@ -2231,6 +2249,7 @@ export default function HomePage() {
                  tab === 'assets' ? 'Mint, upgrade, list, buy, and rent AI assets.' :
                  tab === 'governance' ? 'Propose and vote on ecosystem changes.' :
                  tab === 'updates' ? 'Stay informed. Announcements, status & support here.' :
+                 tab === 'referrals' ? 'Share your link, earn NEUR & AIBA when friends join. Apply a friend\'s code for bonuses.' :
                  tab === 'profile' ? 'Your profile, balances, badges, and account details.' :
                  tab === 'settings' ? 'App preferences, notifications, theme, and more.' :
                  'Daily NEUR, stake AIBA, or claim on-chain after a battle.'}
@@ -2382,36 +2401,10 @@ export default function HomePage() {
                             ) : null}
                         </div>
                     ) : null}
-                    <div className="card">
-                        <div className="card__title">Referrals</div>
-                        <p className="card__hint">Share your code or enter someone else&apos;s.</p>
-                        <div className="action-row">
-                            <button type="button" className="btn btn--secondary" onClick={createReferral} disabled={busy}><IconShare /> My code</button>
-                        </div>
-                        {myReferral?.code ? (
-                            <>
-                                <p className="card__hint" style={{ marginTop: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent-cyan)' }}>Your referral link</p>
-                                <p className="card__hint" style={{ marginTop: 4 }}>Share this link — when friends open it and apply your code, you both get bonuses.</p>
-                                {(() => {
-                                    const base = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://aiba-arena2-miniapp.vercel.app').replace(/\/+$/, '');
-                                    const refLink = `${base}/?ref=${encodeURIComponent(String(myReferral.code).toUpperCase())}`;
-                                    return (
-                                        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                            <a href={refLink} target="_blank" rel="noopener noreferrer" className="card__hint" style={{ wordBreak: 'break-all', color: 'var(--accent-cyan)', textDecoration: 'underline', fontSize: '0.85rem' }}>{refLink}</a>
-                                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                                <button type="button" className="btn btn--primary" onClick={() => { if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(refLink).then(() => setRefMsg('Link copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(refLink); } }}><IconShare /> Copy link</button>
-                                                <button type="button" className="btn btn--secondary" onClick={() => { const code = String(myReferral.code).toUpperCase(); const msg = `Join me on AIBA Arena! Use my referral code: ${code}\n${refLink}`; if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(msg).then(() => setRefMsg('Share message copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(msg); } }}>Copy share message</button>
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
-                            </>
-                        ) : null}
-                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                            <input className="input" value={refCodeInput} onChange={(e) => setRefCodeInput(e.target.value)} placeholder="Friend's code" style={{ flex: '1 1 180px' }} />
-                            <button type="button" className="btn btn--primary" onClick={useReferral} disabled={busy || !refCodeInput.trim()}>Apply</button>
-                        </div>
-                        {refMsg ? <p className="status-msg status-msg--success" style={{ marginTop: 8 }}>{refMsg}</p> : null}
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title"><IconShare /> Referrals</div>
+                        <p className="card__hint">Earn NEUR &amp; AIBA when friends join. Share your link or apply a friend&apos;s code.</p>
+                        <button type="button" className="btn btn--primary" onClick={() => setTab('referrals')} style={{ marginTop: 8 }}>Go to Referrals</button>
                     </div>
                     <div className="card">
                         <div className="card__title">Leaderboard</div>
@@ -2492,6 +2485,59 @@ export default function HomePage() {
                                     </li>
                                 ))}
                             </ul>
+                        )}
+                    </div>
+                </section>
+
+                {/* ─── Referrals (full) ─────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'referrals' ? 'is-active' : ''}`} aria-hidden={tab !== 'referrals'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title"><IconShare /> Referrals</div>
+                        <p className="card__hint">Share your code or enter someone else&apos;s. You both earn NEUR and AIBA (wallet required to apply).</p>
+                        <div className="action-row">
+                            <button type="button" className="btn btn--secondary" onClick={createReferral} disabled={busy}><IconShare /> My code</button>
+                        </div>
+                        {myReferral?.code ? (
+                            <>
+                                <p className="card__hint" style={{ marginTop: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent-cyan)' }}>Your referral link</p>
+                                <p className="card__hint" style={{ marginTop: 4 }}>Share this link — when friends open it and apply your code, you both get bonuses.</p>
+                                {(() => {
+                                    const base = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://aiba-arena2-miniapp.vercel.app').replace(/\/+$/, '');
+                                    const refLink = `${base}/?ref=${encodeURIComponent(String(myReferral.code).toUpperCase())}`;
+                                    return (
+                                        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                            <a href={refLink} target="_blank" rel="noopener noreferrer" className="card__hint" style={{ wordBreak: 'break-all', color: 'var(--accent-cyan)', textDecoration: 'underline', fontSize: '0.85rem' }}>{refLink}</a>
+                                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                                <button type="button" className="btn btn--primary" onClick={() => { if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(refLink).then(() => setRefMsg('Link copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(refLink); } }}><IconShare /> Copy link</button>
+                                                <button type="button" className="btn btn--secondary" onClick={() => { const code = String(myReferral.code).toUpperCase(); const msg = `Join me on AIBA Arena! Use my referral code: ${code}\n${refLink}`; if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(msg).then(() => setRefMsg('Share message copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(msg); } }}>Copy share message</button>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </>
+                        ) : null}
+                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <input className="input" value={refCodeInput} onChange={(e) => setRefCodeInput(e.target.value)} placeholder="Friend's code" style={{ flex: '1 1 180px' }} />
+                            <button type="button" className="btn btn--primary" onClick={useReferral} disabled={busy || !refCodeInput.trim()}>Apply</button>
+                        </div>
+                        {refMsg ? <p className="status-msg status-msg--success" style={{ marginTop: 8 }}>{refMsg}</p> : null}
+                    </div>
+                    <div className="card" style={{ marginTop: 12 }}>
+                        <div className="card__title">Top referrers</div>
+                        <p className="card__hint">Users who referred the most friends. Share your link to climb the ranks.</p>
+                        <button type="button" className="btn btn--secondary" onClick={refreshTopReferrers} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
+                        {topReferrers.length > 0 ? (
+                            <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
+                                {topReferrers.map((r, i) => (
+                                    <div key={r.telegramId || i} className="list-item">
+                                        <span className="list-item__rank">#{i + 1}</span>
+                                        <span className="list-item__name">{r.username || r.telegramId || 'Anonymous'}</span>
+                                        <span style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>{r.uses ?? 0} referrals</span>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="guide-tip" style={{ marginTop: 12 }}>No referrers yet. Be the first — share your link!</p>
                         )}
                     </div>
                 </section>
@@ -3263,11 +3309,11 @@ export default function HomePage() {
                             </div>
                         </div>
                     ) : null}
-                    {universityMintInfo?.canMintFullCertificate && !universityMintInfo?.alreadyMintedFullCertificate ? (
+                    {universityMintCertificateInfo?.canMint && !universityMintCertificateInfo?.alreadyMinted ? (
                         <div className="card card--elevated card--university" style={{ marginTop: 16 }}>
                             <div className="card__title">Mint Full Course Completion Certificate</div>
-                            <p className="card__hint">You completed all courses. Pay <strong>{universityMintInfo.fullCertificateCostTon ?? 15} TON</strong> to the University wallet and paste the transaction hash below to mint the certificate.</p>
-                            {universityMintInfo.walletAddress ? <p className="card__hint" style={{ fontSize: 11, wordBreak: 'break-all' }}>Wallet: {universityMintInfo.walletAddress}</p> : null}
+                            <p className="card__hint">You completed all courses. Pay <strong>{universityMintCertificateInfo.costTon ?? 15} TON</strong> to the University wallet and paste the transaction hash below to mint the certificate.</p>
+                            {universityMintCertificateInfo.walletAddress ? <p className="card__hint" style={{ fontSize: 11, wordBreak: 'break-all' }}>Wallet: {universityMintCertificateInfo.walletAddress}</p> : null}
                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
                                 <input
                                     type="text"

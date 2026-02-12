@@ -73,6 +73,7 @@ function createApp() {
     app.use('/api/admin/charity', require('./routes/adminCharity'));
     app.use('/api/announcements', require('./routes/announcements'));
     app.use('/api/admin/announcements', require('./routes/adminAnnouncements'));
+    app.use('/api/admin/referrals', require('./routes/adminReferrals'));
     app.use('/api/university', require('./routes/university'));
     app.use('/api/admin/university', require('./routes/adminUniversity'));
     app.use('/api/admin/multiverse', require('./routes/adminMultiverse'));

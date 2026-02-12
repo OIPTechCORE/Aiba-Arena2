@@ -19,7 +19,7 @@ function getAdminErrorMessage(error, fallback = 'Request failed.') {
 
 export default function AdminHome() {
     const [token, setToken] = useState('');
-    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod | stats | treasury | realms | marketplace | treasuryOps | governance | charity | comms | university
+    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod | stats | treasury | realms | marketplace | treasuryOps | governance | charity | comms | university | referrals | brokers
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -483,6 +483,14 @@ export default function AdminHome() {
         }
     };
 
+    const [referralStats, setReferralStats] = useState(null);
+    const [referralList, setReferralList] = useState([]);
+    const [referralUses, setReferralUses] = useState([]);
+    const [mintJobs, setMintJobs] = useState([]);
+    const [mintJobCompleteId, setMintJobCompleteId] = useState('');
+    const [mintJobNftCollection, setMintJobNftCollection] = useState('');
+    const [mintJobNftItem, setMintJobNftItem] = useState('');
+    const [mintJobMsg, setMintJobMsg] = useState('');
     const [adminStats, setAdminStats] = useState(null);
     const [charityCampaigns, setCharityCampaigns] = useState([]);
     const [charityStats, setCharityStats] = useState(null);
@@ -497,6 +505,88 @@ export default function AdminHome() {
     const [treasuryData, setTreasuryData] = useState(null);
     const [reserveData, setReserveData] = useState(null);
     const [buybackData, setBuybackData] = useState(null);
+    const [universityStats, setUniversityStats] = useState(null);
+    const [universityCourses, setUniversityCourses] = useState([]);
+    const [universityGraduates, setUniversityGraduates] = useState([]);
+    const fetchUniversityAll = async () => {
+        try {
+            const [statsRes, coursesRes, graduatesRes] = await Promise.all([
+                api.get('/api/admin/university/stats'),
+                api.get('/api/admin/university/courses'),
+                api.get('/api/admin/university/graduates', { params: { limit: 100 } }),
+            ]);
+            setUniversityStats(statsRes.data || null);
+            setUniversityCourses(Array.isArray(coursesRes.data?.courses) ? coursesRes.data.courses : []);
+            setUniversityGraduates(Array.isArray(graduatesRes.data) ? graduatesRes.data : []);
+        } catch {
+            setUniversityStats(null);
+            setUniversityCourses([]);
+            setUniversityGraduates([]);
+        }
+    };
+    const fetchReferralStats = async () => {
+        try {
+            const res = await api.get('/api/admin/referrals/stats');
+            setReferralStats(res.data || null);
+        } catch {
+            setReferralStats(null);
+        }
+    };
+    const fetchReferralList = async () => {
+        try {
+            const res = await api.get('/api/admin/referrals', { params: { limit: 100 } });
+            setReferralList(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setReferralList([]);
+        }
+    };
+    const fetchReferralUses = async () => {
+        try {
+            const res = await api.get('/api/admin/referrals/uses', { params: { limit: 50 } });
+            setReferralUses(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setReferralUses([]);
+        }
+    };
+    const deactivateReferral = async (id) => {
+        try {
+            await api.patch(`/api/admin/referrals/${id}`, { active: false });
+            await fetchReferralList();
+            await fetchReferralStats();
+        } catch {
+            // ignore
+        }
+    };
+    const fetchMintJobs = async () => {
+        try {
+            const res = await api.get('/api/admin/brokers/mint-jobs', { params: { status: 'pending' } });
+            setMintJobs(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setMintJobs([]);
+        }
+    };
+    const completeMintJob = async (jobId) => {
+        setMintJobMsg('');
+        const nftCollection = mintJobNftCollection.trim();
+        const nftItem = mintJobNftItem.trim();
+        if (!nftCollection || !nftItem) {
+            setMintJobMsg('Enter NFT collection and item address.');
+            return;
+        }
+        try {
+            await api.post(`/api/admin/brokers/mint-jobs/${jobId}/complete`, {
+                nftCollectionAddress: nftCollection,
+                nftItemAddress: nftItem,
+            });
+            setMintJobMsg('Job completed.');
+            setMintJobCompleteId('');
+            setMintJobNftCollection('');
+            setMintJobNftItem('');
+            await fetchMintJobs();
+        } catch (e) {
+            setMintJobMsg(getAdminErrorMessage(e, 'Complete failed.'));
+        }
+    };
     const fetchAdminStats = async () => {
         try {
             const res = await api.get('/api/admin/stats');
@@ -634,6 +724,13 @@ export default function AdminHome() {
             fetchCharityStats();
         }
         if (tab === 'comms') fetchAnnouncements();
+        if (tab === 'referrals') {
+            fetchReferralStats();
+            fetchReferralList();
+            fetchReferralUses();
+        }
+        if (tab === 'university') fetchUniversityAll();
+        if (tab === 'brokers') fetchMintJobs();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, tab]);
 
@@ -712,6 +809,12 @@ export default function AdminHome() {
                         </button>
                         <button onClick={() => setTab('university')} style={{ padding: '8px 12px' }}>
                             University
+                        </button>
+                        <button onClick={() => setTab('referrals')} style={{ padding: '8px 12px' }}>
+                            Referrals
+                        </button>
+                        <button onClick={() => setTab('brokers')} style={{ padding: '8px 12px' }}>
+                            Mint jobs
                         </button>
                         <div style={{ flex: 1 }} />
                         <button onClick={logout} style={{ padding: '8px 12px' }}>
@@ -1491,6 +1594,85 @@ export default function AdminHome() {
                                                 </div>
                                             ))}
                                             {universityGraduates.length > 50 ? <div style={{ color: '#666', fontSize: 12 }}>… and {universityGraduates.length - 50} more</div> : null}
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === 'referrals' ? (
+                            <>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                    <button onClick={() => { fetchReferralStats(); fetchReferralList(); fetchReferralUses(); }} style={{ padding: '8px 12px' }}>Refresh</button>
+                                </div>
+                                {referralStats ? (
+                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Referral stats</div>
+                                        <div>Active codes: {referralStats.totalActiveCodes ?? 0} · Total uses: {referralStats.totalReferralUses ?? 0}</div>
+                                        {referralStats.topReferrers?.length > 0 ? (
+                                            <div style={{ marginTop: 8, fontSize: 12 }}>
+                                                <div style={{ fontWeight: 600 }}>Top referrers</div>
+                                                {referralStats.topReferrers.map((r, i) => (
+                                                    <div key={r.ownerTelegramId} style={{ padding: 4 }}>#{i + 1} {r.username || r.ownerTelegramId} — {r.uses ?? 0} uses</div>
+                                                ))}
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                ) : null}
+                                <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>All referral codes</div>
+                                    {referralList.length === 0 ? <div style={{ color: '#666' }}>No codes.</div> : (
+                                        <div style={{ display: 'grid', gap: 8 }}>
+                                            {referralList.map((r) => (
+                                                <div key={r._id} style={{ padding: 10, border: '1px solid #eee', borderRadius: 8 }}>
+                                                    <div><strong>{r.code}</strong> · owner: {r.ownerTelegramId} · uses: {r.uses ?? 0}/{r.maxUses ?? 1000} · {r.active ? 'active' : 'inactive'}</div>
+                                                    {r.active ? <button onClick={() => deactivateReferral(r._id)} style={{ padding: '4px 8px', marginTop: 4 }}>Deactivate</button> : null}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Recent uses</div>
+                                    {referralUses.length === 0 ? <div style={{ color: '#666' }}>No uses.</div> : (
+                                        <div style={{ fontSize: 12 }}>
+                                            {referralUses.slice(0, 30).map((u) => (
+                                                <div key={u._id} style={{ padding: 4, borderBottom: '1px solid #eee' }}>
+                                                    {u.code} · referrer: {u.referrerTelegramId} → referee: {u.refereeTelegramId} · {u.createdAt ? new Date(u.createdAt).toISOString().slice(0, 19) : ''}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === 'brokers' ? (
+                            <>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                    <button onClick={fetchMintJobs} style={{ padding: '8px 12px' }}>Refresh</button>
+                                </div>
+                                {mintJobMsg ? <p style={{ marginTop: 8, color: mintJobMsg.startsWith('Job') ? '#066' : 'crimson' }}>{mintJobMsg}</p> : null}
+                                <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Pending broker mint jobs</div>
+                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>Complete each job by entering the NFT collection and item address after minting on-chain.</p>
+                                    {mintJobs.length === 0 ? <div style={{ color: '#666' }}>No pending jobs.</div> : (
+                                        <div style={{ display: 'grid', gap: 12 }}>
+                                            {mintJobs.map((j) => (
+                                                <div key={j._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                                    <div><strong>Broker:</strong> {j.brokerId} · created: {j.createdAt ? new Date(j.createdAt).toISOString().slice(0, 19) : ''}</div>
+                                                    {mintJobCompleteId === j._id ? (
+                                                        <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                                            <input value={mintJobNftCollection} onChange={(e) => setMintJobNftCollection(e.target.value)} placeholder="NFT collection address" style={{ padding: 8, minWidth: 300 }} />
+                                                            <input value={mintJobNftItem} onChange={(e) => setMintJobNftItem(e.target.value)} placeholder="NFT item address" style={{ padding: 8, minWidth: 300 }} />
+                                                            <button onClick={() => completeMintJob(j._id)} style={{ padding: '8px 12px' }}>Complete</button>
+                                                            <button onClick={() => { setMintJobCompleteId(''); setMintJobNftCollection(''); setMintJobNftItem(''); }} style={{ padding: '8px 12px' }}>Cancel</button>
+                                                        </div>
+                                                    ) : (
+                                                        <button onClick={() => setMintJobCompleteId(j._id)} style={{ padding: '6px 10px', marginTop: 8 }}>Complete job</button>
+                                                    )}
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
                                 </div>

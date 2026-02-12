@@ -7,6 +7,37 @@ const User = require('../models/User');
 const { getConfig, tryEmitNeur, creditNeurNoCap, tryEmitAiba, creditAibaNoCap } = require('../engine/economy');
 const { validateBody } = require('../middleware/validate');
 
+// GET /api/referrals/top — public: top referrers by uses (no auth)
+router.get('/top', async (_req, res) => {
+    try {
+        const refs = await Referral.aggregate([
+            { $match: { active: true, uses: { $gt: 0 } } },
+            { $sort: { uses: -1 } },
+            { $limit: 20 },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'ownerTelegramId',
+                    foreignField: 'telegramId',
+                    as: 'user',
+                },
+            },
+            { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+            {
+                $project: {
+                    telegramId: '$ownerTelegramId',
+                    username: '$user.username',
+                    uses: 1,
+                },
+            },
+        ]);
+        res.json(refs);
+    } catch (err) {
+        console.error('Referrals top error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
 router.use(requireTelegram);
 
 // GET /api/referrals/me — get current user's referral code (if any) for preloading "Share your link"
