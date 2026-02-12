@@ -76,12 +76,13 @@ body,
     min-height: 100vh;
     min-height: 100dvh;
     padding-top: max(14px, env(safe-area-inset-top));
-    padding-right: max(16px, env(safe-area-inset-right));
+    padding-right: max(12px, env(safe-area-inset-right));
     padding-bottom: max(92px, calc(env(safe-area-inset-bottom) + 72px));
-    padding-left: max(16px, env(safe-area-inset-left));
-    max-width: 560px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    max-width: min(560px, 100vw);
     margin: 0 auto;
     transform-style: preserve-3d;
+    width: 100%;
 }
 
 /* Compact header: title + wallet + status — clean, seamless, layered */
@@ -112,8 +113,65 @@ body,
     display: flex;
     align-items: center;
     gap: 8px;
-    flex: 1;
+    flex: 0 0 auto;
     min-width: 0;
+}
+
+.app-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: center;
+}
+
+.header-nav__btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    border-radius: 10px;
+    color: var(--text-secondary);
+}
+
+.header-nav__btn:hover {
+    color: var(--text-primary);
+    background: var(--android-state-layer);
+}
+
+.header-nav__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.header-nav__avatar--fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-glass);
+    color: var(--text-muted);
+}
+
+.header-nav__avatar--fallback .icon-svg {
+    width: 14px;
+    height: 14px;
+}
+
+.header-nav__label {
+    white-space: nowrap;
+}
+
+.app-header__wallet {
+    flex: 0 0 auto;
 }
 
 .aiba-app__title {
@@ -901,7 +959,7 @@ body,
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
+    gap: clamp(8px, 2.5vw, 12px);
     padding: 12px 14px;
     background: var(--bg-glass);
     border: 1px solid var(--border-subtle);
@@ -1050,14 +1108,15 @@ body,
 /* ─── Action row (quick actions) ────────────────────────────────────────── */
 .action-row {
     display: flex;
-    gap: 8px;
+    gap: clamp(6px, 2vw, 8px);
     flex-wrap: wrap;
     margin-top: 10px;
     margin-bottom: 4px;
 }
 
 .action-row--android .btn {
-    min-width: 124px;
+    min-width: min(124px, 28vw);
+    flex: 1 1 auto;
 }
 
 /* ─── Home + Tasks Phase 2 cards ─────────────────────────────────────────── */
@@ -1728,16 +1787,40 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
 .profile-name { font-weight: 600; font-size: 1rem; }
 .profile-username, .profile-id { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
 
-/* Header wallet area responsive: wrap or shrink on narrow screens */
+/* Header responsive: wrap or shrink on narrow screens */
 @media (max-width: 360px) {
-    .app-header__wallet .connect-wallet-btn span {
-        display: none;
-    }
-    .app-header__wallet .connect-wallet-btn {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
+    .app-header__brand .aiba-app__title { font-size: 1rem; }
+    .app-header__nav .header-nav__label { display: none; }
+    .app-header__nav .header-nav__btn { min-width: 40px; padding: 6px 8px; }
+    .app-header__wallet .connect-wallet-btn span { display: none; }
+    .app-header__wallet .connect-wallet-btn { padding-left: 10px; padding-right: 10px; }
 }
+
+@media (max-width: 280px) {
+    .app-header { gap: 8px 12px; }
+    .app-header__nav { gap: 4px; }
+}
+
+/* Seamless responsiveness: balance strip, cards, hero */
+@media (max-width: 400px) {
+    .balance-strip { padding: 10px 12px; gap: 8px; }
+    .balance-strip__value { font-size: 0.9rem; }
+    .quick-nav { gap: 6px; }
+    .quick-nav__btn { padding: 6px 10px; font-size: 0.82rem; }
+}
+
+@media (max-width: 400px) {
+    .card { padding: 12px 14px; }
+    .hero-center__title { font-size: clamp(1.2rem, 5vw, 1.4rem); }
+    .hero-center__sub { font-size: 0.88rem; }
+}
+
+/* Ensure touch targets and overflow handling */
+@media (max-width: 500px) {
+    .android-bottom-nav__btn { min-width: 72px; }
+}
+
+.card, .balance-strip { max-width: 100%; }
 
 /* ─── Status message ────────────────────────────────────────────────────── */
 .status-msg {

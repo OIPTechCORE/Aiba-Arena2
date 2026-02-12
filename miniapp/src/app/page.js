@@ -2077,6 +2077,20 @@ export default function HomePage() {
                 <div className="app-header__brand">
                     <h1 className="aiba-app__title">AIBA Arena</h1>
                 </div>
+                <div className="app-header__nav">
+                    <button type="button" className="btn btn--ghost header-nav__btn" onClick={() => setTab('home')} aria-label="Go to Home" title="Home">
+                        <IconHome />
+                        <span className="header-nav__label">Home</span>
+                    </button>
+                    <button type="button" className="btn btn--ghost header-nav__btn header-nav__btn--profile" onClick={() => setTab('profile')} aria-label="Profile" title="Profile">
+                        {tgUser?.photo_url ? (
+                            <img src={tgUser.photo_url} alt="" className="header-nav__avatar" />
+                        ) : (
+                            <span className="header-nav__avatar header-nav__avatar--fallback"><IconProfile /></span>
+                        )}
+                        <span className="header-nav__label">Profile</span>
+                    </button>
+                </div>
                 <div className="app-header__wallet">
                     {wallet ? (
                         <TonConnectButton />
@@ -2102,17 +2116,8 @@ export default function HomePage() {
                 ) : null}
                 {status ? <p className={`status-msg ${status.toLowerCase().includes('fail') ? 'status-msg--error' : ''}`} style={{ margin: 0, width: '100%' }}>{status}</p> : null}
                 <div className="quick-nav">
-                    <button type="button" className="btn btn--ghost quick-nav__btn" onClick={() => setTab('home')} aria-label="Go to Home"><IconHome /> Home</button>
                     <button type="button" className="btn btn--ghost quick-nav__btn" onClick={() => setTab('university')} aria-label="Guide">Guide</button>
                     <button type="button" className="btn btn--ghost quick-nav__btn" onClick={() => { scrollToFaqRef.current = true; setTab('updates'); }} aria-label="FAQs">FAQs</button>
-                    <button type="button" className="btn btn--ghost quick-nav__btn quick-nav__btn--profile" onClick={() => setTab('profile')} aria-label="Profile">
-                        {tgUser?.photo_url ? (
-                            <img src={tgUser.photo_url} alt="" className="quick-nav__avatar" />
-                        ) : (
-                            <span className="quick-nav__avatar quick-nav__avatar--fallback"><IconProfile /></span>
-                        )}
-                        Profile
-                    </button>
                     <button type="button" className="btn btn--ghost quick-nav__btn quick-nav__btn--settings" onClick={() => setTab('settings')} aria-label="Settings">
                         <IconSettings />
                         Settings
