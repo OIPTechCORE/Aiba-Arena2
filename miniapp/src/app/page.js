@@ -221,6 +221,8 @@ export default function HomePage() {
     const wallet = useTonWallet();
     const [tonConnectUI] = useTonConnectUI();
     const api = useMemo(() => createApi(BACKEND_URL), []);
+    /* Same-origin proxy for broker endpoints to avoid CORS/405 when frontend and backend are on different origins */
+    const proxyApi = useMemo(() => createApi(''), []);
 
     const [status, setStatus] = useState('');
     const [brokers, setBrokers] = useState([]);
@@ -262,6 +264,8 @@ export default function HomePage() {
     const [taskProfile, setTaskProfile] = useState(null);
     const [tasksMsg, setTasksMsg] = useState('');
     const [marketFlow, setMarketFlow] = useState('overview'); // overview | trade | system | boosts
+    const [balanceStripVisible, setBalanceStripVisible] = useState(true);
+    const lastScrollYRef = useRef(0);
     const [carFlow, setCarFlow] = useState('garage'); // garage | system | market | race | leaderboard
     const [bikeFlow, setBikeFlow] = useState('garage'); // garage | system | market | race | leaderboard
 
@@ -1002,6 +1006,7 @@ export default function HomePage() {
         if (tab === 'governance') { refreshProposals().catch(() => {}); }
         if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); }
         // Keep header visible: scroll to top so header is never hidden on tab change
+        setBalanceStripVisible(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         if (tab === 'updates' && scrollToFaqRef.current) {
             scrollToFaqRef.current = false;
@@ -1010,6 +1015,18 @@ export default function HomePage() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab]);
+
+    useEffect(() => {
+        const onScroll = () => {
+            const y = typeof window !== 'undefined' ? (window.scrollY ?? document.documentElement?.scrollTop ?? 0) : 0;
+            const delta = y - lastScrollYRef.current;
+            lastScrollYRef.current = y;
+            if (delta > 20 && y > 100) setBalanceStripVisible(false);
+            else if (delta < -10 || y < 60) setBalanceStripVisible(true);
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
 
     useEffect(() => {
         if (!battle) return;
@@ -1032,7 +1049,7 @@ export default function HomePage() {
         setBusy(true);
         setStatus('');
         try {
-            const res = await api.post('/api/brokers/starter', {});
+            const res = await proxyApi.post('/api/brokers/starter', {});
             const created = res?.data;
             if (created && created._id) {
                 setBrokers((prev) => [created, ...prev]);
@@ -2074,7 +2091,7 @@ export default function HomePage() {
             ) : null}
             <header className="app-header app-header--android">
                 <div className="app-header__brand">
-                    <h1 className="aiba-app__title">AIBA Arena</h1>
+                    <h1 className="aiba-app__title">AIBA</h1>
                 </div>
                 <div className="app-header__nav">
                     <button type="button" className="btn btn--ghost header-nav__btn" onClick={() => setTab('home')} aria-label="Go to Home" title="Home">
@@ -2096,6 +2113,10 @@ export default function HomePage() {
                     <button type="button" className="btn btn--ghost header-nav__btn" onClick={() => { scrollToFaqRef.current = true; setTab('updates'); }} aria-label="FAQs" title="FAQs">
                         <IconUpdates />
                         <span className="header-nav__label">FAQs</span>
+                    </button>
+                    <button type="button" className="btn btn--ghost header-nav__btn quick-nav__btn--settings" onClick={() => setTab('settings')} aria-label="Settings" title="Settings">
+                        <IconSettings />
+                        <span className="header-nav__label">Settings</span>
                     </button>
                 </div>
                 <div className="app-header__wallet">
@@ -2122,30 +2143,26 @@ export default function HomePage() {
                     </p>
                 ) : null}
                 {status ? <p className={`status-msg ${status.toLowerCase().includes('fail') ? 'status-msg--error' : ''}`} style={{ margin: 0, width: '100%' }}>{status}</p> : null}
-                <div className="quick-nav">
-                    <button type="button" className="btn btn--ghost quick-nav__btn quick-nav__btn--settings" onClick={() => setTab('settings')} aria-label="Settings">
-                        <IconSettings />
-                        Settings
-                    </button>
-                </div>
             </header>
 
-            <div className="balance-strip" style={{ marginTop: 0, marginBottom: 8 }}>
-                {Array.isArray(economyMe?.badges) && economyMe.badges.includes('verified') ? (
-                    <span className="balance-strip__verified" title="Verified">✓</span>
-                ) : null}
-                <span className="balance-strip__label">NEUR</span>
-                <span className="balance-strip__value balance-strip__value--neur">{Number(economyMe?.neurBalance ?? 0)}</span>
-                <span className="balance-strip__label">AIBA</span>
-                <span className="balance-strip__value balance-strip__value--aiba">{Number(economyMe?.aibaBalance ?? 0)}</span>
-                <span className="balance-strip__label balance-strip__label--star" title="Telegram Stars–style in-app currency"><IconStar /></span>
-                <span className="balance-strip__value balance-strip__value--stars">{Number(economyMe?.starsBalance ?? 0)}</span>
-                <span className="balance-strip__label balance-strip__label--diamond" title="TON ecosystem premium asset"><IconDiamond /></span>
-                <span className="balance-strip__value balance-strip__value--diamonds">{Number(economyMe?.diamondsBalance ?? 0)}</span>
-                <label className="check-wrap" style={{ marginLeft: 'auto', marginTop: 0 }}>
-                    <input type="checkbox" checked={autoClaimOnBattle} onChange={(e) => setAutoClaimOnBattle(Boolean(e.target.checked))} />
-                    Auto-claim
-                </label>
+            <div className={`quick-nav-wrap ${!balanceStripVisible ? 'quick-nav-wrap--hidden' : ''}`}>
+                <div className="balance-strip" style={{ marginTop: 0, marginBottom: 0 }}>
+                    {Array.isArray(economyMe?.badges) && economyMe.badges.includes('verified') ? (
+                        <span className="balance-strip__verified" title="Verified">✓</span>
+                    ) : null}
+                    <span className="balance-strip__label">NEUR</span>
+                    <span className="balance-strip__value balance-strip__value--neur">{Number(economyMe?.neurBalance ?? 0)}</span>
+                    <span className="balance-strip__label">AIBA</span>
+                    <span className="balance-strip__value balance-strip__value--aiba">{Number(economyMe?.aibaBalance ?? 0)}</span>
+                    <span className="balance-strip__label balance-strip__label--star" title="Telegram Stars–style in-app currency"><IconStar /></span>
+                    <span className="balance-strip__value balance-strip__value--stars">{Number(economyMe?.starsBalance ?? 0)}</span>
+                    <span className="balance-strip__label balance-strip__label--diamond" title="TON ecosystem premium asset"><IconDiamond /></span>
+                    <span className="balance-strip__value balance-strip__value--diamonds">{Number(economyMe?.diamondsBalance ?? 0)}</span>
+                    <label className="check-wrap" style={{ marginLeft: 'auto', marginTop: 0 }}>
+                        <input type="checkbox" checked={autoClaimOnBattle} onChange={(e) => setAutoClaimOnBattle(Boolean(e.target.checked))} />
+                        Auto-claim
+                    </label>
+                </div>
             </div>
 
             <div className="hero-center hero-center--compact" aria-hidden="false">
