@@ -1800,7 +1800,34 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
 .profile-name { font-weight: 600; font-size: 1rem; }
 .profile-username, .profile-id { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
 
-/* Header responsive: wrap or shrink on narrow screens */
+/* Desktop: header and buttons always visible, never moving */
+@media (min-width: 769px) {
+    .app-header__nav .header-nav__label { display: inline-flex !important; }
+    .app-header__wallet .connect-wallet-btn span { display: inline !important; }
+    .header-nav__btn,
+    .header-nav__btn:hover,
+    .header-nav__btn:active,
+    .quick-nav__btn,
+    .quick-nav__btn:hover,
+    .quick-nav__btn:active,
+    .app-header .btn,
+    .app-header .btn:hover,
+    .app-header .btn:active {
+        transform: none !important;
+    }
+    .android-bottom-nav__btn,
+    .android-bottom-nav__btn:hover,
+    .android-bottom-nav__btn:active {
+        transform: none !important;
+    }
+    .header-nav__btn,
+    .quick-nav__btn,
+    .app-header .btn {
+        transition: background 0.15s, color 0.15s !important;
+    }
+}
+
+/* Header responsive: wrap or shrink on narrow screens only */
 @media (max-width: 480px) {
     .app-header__nav .header-nav__btn { min-width: 40px; padding: 6px 6px; }
 }
