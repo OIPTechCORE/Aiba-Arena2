@@ -1012,6 +1012,7 @@ export default function HomePage() {
         refreshBrokers().catch(() => {});
         refreshEconomy().catch(() => {});
         refreshDailyStatus().catch(() => {});
+        refreshReferralMe().catch(() => {});
         try {
             if (typeof localStorage !== 'undefined' && !localStorage.getItem('aiba_cinematic_seen')) {
                 setShowCinematicIntro(true);
@@ -1020,6 +1021,11 @@ export default function HomePage() {
             }
         } catch {
             // ignore
+        }
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const ref = params.get('ref');
+            if (ref) setRefCodeInput(String(ref).trim().toUpperCase());
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -1031,6 +1037,7 @@ export default function HomePage() {
         if (tab === 'charity') refreshCharityAll();
         if (tab === 'university') refreshUniversity();
         if (tab === 'updates') refreshUpdatesAll();
+        if (tab === 'home') refreshReferralMe().catch(() => {});
         if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshReferralMe().catch(() => {}); }
         if (tab === 'carRacing') refreshCarRacing().catch(() => {});
         if (tab === 'bikeRacing') refreshBikeRacing().catch(() => {});
@@ -2383,9 +2390,21 @@ export default function HomePage() {
                         </div>
                         {myReferral?.code ? (
                             <>
-                                <p className="card__hint" style={{ marginTop: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent-cyan)' }}>Share your link on socials</p>
-                                <p className="card__hint" style={{ marginTop: 4 }}>Your code: <strong style={{ color: 'var(--accent-cyan)' }}>{String(myReferral.code).toUpperCase()}</strong></p>
-                                <button type="button" className="btn btn--secondary" style={{ marginTop: 8 }} onClick={() => { const code = String(myReferral.code).toUpperCase(); const msg = `Join me on AIBA Arena! Use my referral code: ${code}`; if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(msg).then(() => setRefMsg('Copied to clipboard.')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(msg); } }}>Copy share message</button>
+                                <p className="card__hint" style={{ marginTop: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent-cyan)' }}>Your referral link</p>
+                                <p className="card__hint" style={{ marginTop: 4 }}>Share this link — when friends open it and apply your code, you both get bonuses.</p>
+                                {(() => {
+                                    const base = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://aiba-arena2-miniapp.vercel.app').replace(/\/+$/, '');
+                                    const refLink = `${base}/?ref=${encodeURIComponent(String(myReferral.code).toUpperCase())}`;
+                                    return (
+                                        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                            <a href={refLink} target="_blank" rel="noopener noreferrer" className="card__hint" style={{ wordBreak: 'break-all', color: 'var(--accent-cyan)', textDecoration: 'underline', fontSize: '0.85rem' }}>{refLink}</a>
+                                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                                <button type="button" className="btn btn--primary" onClick={() => { if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(refLink).then(() => setRefMsg('Link copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(refLink); } }}><IconShare /> Copy link</button>
+                                                <button type="button" className="btn btn--secondary" onClick={() => { const code = String(myReferral.code).toUpperCase(); const msg = `Join me on AIBA Arena! Use my referral code: ${code}\n${refLink}`; if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(msg).then(() => setRefMsg('Share message copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(msg); } }}>Copy share message</button>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </>
                         ) : null}
                         <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -3477,6 +3496,9 @@ export default function HomePage() {
                         <div className="card__title">FAQs</div>
                         <p className="card__hint" style={{ marginBottom: 12 }}>Systematic answers to common questions. For the full learning path, use <strong>Guide</strong> (University) from the header.</p>
                         <div className="comms-faq">
+                            <p className="card__hint"><strong>What is AI Broker Battle Arena?</strong> AI Broker Battle Arena (AIBA) is a Telegram Mini App where you own AI brokers, enter battle arenas, run fights, and earn NEUR and AIBA. It combines trading-sim AI agents (brokers) with competitive arenas and an economy you can withdraw on-chain.</p>
+                            <p className="card__hint"><strong>What is AI Broker?</strong> An AI Broker is your AI agent with stats (INT, SPD, RISK) and energy. You create, own, combine, trade, or mint brokers. They compete in arenas, earn AIBA and NEUR from battles, and can be listed on the Market.</p>
+                            <p className="card__hint"><strong>What is Battle Arena?</strong> A Battle Arena is a game mode where your broker competes—prediction, simulation, strategyWars, arbitrage, or guildWars. Run a battle, get a score, and earn AIBA, Stars, and sometimes Diamonds.</p>
                             <p className="card__hint"><strong>How do I start?</strong> Go to Home → create a broker (New broker) if you have none → pick an arena → Run battle. Earn NEUR and AIBA. See Guide for step-by-step.</p>
                             <p className="card__hint"><strong>How do I get a broker?</strong> Home: New broker (free starter). Or Market: buy from system (AIBA) or from other players. Brokers tab: combine two brokers.</p>
                             <p className="card__hint"><strong>How do I earn NEUR / AIBA?</strong> Run battles (Home or Arenas). NEUR is off-chain; AIBA can be claimed on-chain via Wallet → Vault (connect wallet, create claim, sign tx).</p>
