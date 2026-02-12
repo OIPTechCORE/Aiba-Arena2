@@ -1001,9 +1001,8 @@ export default function HomePage() {
         if (tab === 'assets') { refreshAssets().catch(() => {}); refreshMarketListings().catch(() => {}); }
         if (tab === 'governance') { refreshProposals().catch(() => {}); }
         if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); }
-        // Seamless UX: scroll active panel into view when tab changes
-        const el = document.querySelector('.tab-content');
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Keep header visible: scroll to top so header is never hidden on tab change
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         if (tab === 'updates' && scrollToFaqRef.current) {
             scrollToFaqRef.current = false;
             const t = setTimeout(() => document.getElementById('faq-support')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 400);

@@ -98,6 +98,7 @@ body,
 
 .app-header--android {
     position: sticky;
+    position: -webkit-sticky;
     top: max(0px, env(safe-area-inset-top));
     z-index: 100;
     min-height: 56px;
@@ -202,8 +203,13 @@ body,
 /* Tab content: only active panel visible — modular multi-tabbed UI */
 .tab-content {
     margin-top: 8px;
-    scroll-margin-top: 12px;
+    scroll-margin-top: 220px;
     margin-bottom: 14px;
+}
+
+/* Scroll targets: reserve space for sticky header + balance + hero so header is never hidden */
+#faq-support {
+    scroll-margin-top: 220px;
 }
 
 /* ─── Android bottom navigation (sticky) ─────────────────────────────────── */
@@ -1835,7 +1841,8 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
 
 /* Body/html: prevent horizontal overflow, never hide header */
 html, body { overflow-x: hidden; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+body { scroll-padding-top: 80px; }
 
 /* ─── Status message ────────────────────────────────────────────────────── */
 .status-msg {
