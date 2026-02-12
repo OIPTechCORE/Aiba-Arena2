@@ -1,6 +1,6 @@
 # Telegram Mini App — UI/UX Audit & Alignment
 
-This document summarizes the UI/UX deep check and improvements applied so the mini app meets the target: **futuristic, intuitive, 3D, bold, with deep guidance**.
+This document summarizes the UI/UX deep check and improvements applied so the mini app meets the target: **Android UI/UX, intuitive navigation, consistent spacing, and deep guidance**.
 
 ---
 
@@ -8,13 +8,13 @@ This document summarizes the UI/UX deep check and improvements applied so the mi
 
 | Principle | Status | Implementation |
 |-----------|--------|-----------------|
-| **Futuristic** | ✅ | Orbitron + Exo 2, cyan/magenta/gold palette, glass panels, glow accents |
+| **Android UI/UX language** | ✅ | Android app shell (sticky app bar + bottom nav), consistent spacing rhythm, touch-friendly components |
 | **Very intuitive & beautiful** | ✅ | Clear hierarchy, contextual guide-tip per tab, step indicators in tutorial |
-| **3D futuristic experience** | ✅ | CSS perspective, 3D shadows on cards/buttons, translateZ in tab animation, depth on icons |
-| **Bold & eye-catching** | ✅ | Stronger button 3D step shadows, hover lift, cyan glow, elevated cards with border-glass |
+| **Android interaction model** | ✅ | Bottom navigation for primary destinations, segmented flow switches for Market/Racing, sheet-style detail cards |
+| **Bold & eye-catching** | ✅ | Strong contrast surfaces, clear active states, elevated cards, focused accents |
 | **Deep guidance** | ✅ | 4-step tutorial with detailed copy, cinematic hint (swipe tabs), per-tab guide-tip, `.guide-section-intro` and `.guide-step` styles |
-| **Futuristic images & icons (3D)** | ✅ | Global icon drop-shadow + subtle glow; tab active state adds cyan glow; Star/Diamond icons already had glow |
-| **Futuristic buttons (3D)** | ✅ | Primary/secondary/success use step shadow + hover translateY; active press state; ghost tabs get 3D when active |
+| **Android icon + action clarity** | ✅ | Consistent icon sizing in nav/actions, clear selected states, action labels tuned for quick scan |
+| **Android action feedback** | ✅ | Press/active states, disabled states, and status banners are consistent across flows |
 | **Clean, seamless, modular, multi-card, multi-tabbed** | ✅ | Single-page multi-tab layout, card-based sections, tab bar with scroll, consistent spacing and borders |
 
 ---
@@ -22,17 +22,16 @@ This document summarizes the UI/UX deep check and improvements applied so the mi
 ## Files Touched
 
 - **miniapp/src/app/globals.css**  
-  - 3D variables (`--shadow-3d-button`, `--shadow-3d-card`, `--perspective-view`).  
-  - Body + `.aiba-miniapp` unified; perspective on body.  
-  - Buttons: stronger 3D step, hover lift, active press.  
-  - Tab bar: 3D pill, active state with step shadow and glow.  
-  - Cards: `--shadow-3d-card`, hover depth.  
-  - Icons: global 3D drop-shadow + glow on primary/success.  
-  - Balance strip: 3D shadow + backdrop blur.  
+  - Android spacing variables and component sizing tokens.  
+  - Body + `.aiba-miniapp` unified with Android-first typography and surface system.  
+  - Buttons: touch-target sizing, clearer pressed/disabled states.  
+  - Bottom navigation: Android UI/UX destination nav with active indicator styling.  
+  - Cards and sheets: Material-style surface + elevation hierarchy.  
+  - Balance strip and banners: consistent Android feedback styling.  
   - Guide: `.guide-tip` enhancement, `.guide-section-intro`, `.guide-step`.  
-  - Cinematic: `.cinematic__hint`, stronger enter button 3D.  
-  - Tutorial card: 3D shadow, step indicator ready.  
-  - Tab panel: `tabIn` with translateZ.  
+  - Cinematic: `.cinematic__hint`, responsive intro shell.  
+  - Tutorial card: step indicator and readable hierarchy.  
+  - Tab panel: smooth transition tuned for mobile responsiveness.  
   - App header: subtle border for separation.
 
 - **miniapp/src/app/page.js**  
@@ -63,7 +62,7 @@ This document summarizes the UI/UX deep check and improvements applied so the mi
 ## Up-to-date verification (Feb 2025)
 
 - **Miniapp:** `miniapp/src/app/page.js` — 15 tabs (Home, Brokers, Market, Car Racing, Bike Racing, Multiverse, Arenas, Guilds, Charity, University, Realms, Assets, Governance, Updates, Wallet); cinematic intro + 4-step tutorial; guide-tip per tab; Connect Wallet opens wallet list modal. **Aligned.**
-- **Styles:** `miniapp/src/app/globals.css` — 3D variables, buttons, cards, tab bar, balance strip, guide styles, cinematic/tutorial; TonConnect modal responsive (#tc-widget-root, safe-area, 100dvh). **Aligned.**
+- **Styles:** `miniapp/src/app/globals.css` — Android UI/UX tokens, buttons, cards, app shell, flow sheets, guide styles, cinematic/tutorial; TonConnect modal responsive (#tc-widget-root, safe-area, 100dvh). **Aligned.**
 - **Layout:** `miniapp/src/app/layout.js` — body `aiba-miniapp`; viewport with viewportFit cover. **Aligned.**
 
 *Last updated: UI/UX deep check; Connect Wallet modal + responsive. Verified Feb 2025.*

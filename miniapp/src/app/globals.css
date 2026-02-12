@@ -1,42 +1,41 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   AIBA ARENA — Futuristic 3D Mini App Design System
-   Deep guidance, bold visuals, glass + glow, intuitive hierarchy
+   AIBA ARENA — Android-first mini app design system
+   Material-like hierarchy, touch-first controls, consistent navigation
    ═══════════════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 :root {
     color-scheme: dark;
-    /* Core palette — deep space / cyber */
-    --bg-deep: #050510;
-    --bg-space: #0a0a1a;
-    --bg-panel: rgba(12, 18, 38, 0.85);
-    --bg-glass: rgba(18, 28, 52, 0.6);
-    --accent-cyan: #00f0ff;
-    --accent-magenta: #e040fb;
-    --accent-gold: #ffd700;
-    --accent-green: #00e676;
-    --accent-blue: #2196f3;
-    --text-primary: #f0f4ff;
-    --text-secondary: #a0b0d0;
-    --text-muted: #60708a;
-    --border-glass: rgba(0, 240, 255, 0.25);
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.4);
-    --glow-magenta: 0 0 20px rgba(224, 64, 251, 0.35);
-    --glow-gold: 0 0 16px rgba(255, 215, 0, 0.35);
-    --shadow-deep: 0 8px 32px rgba(0, 0, 0, 0.5);
-    --shadow-3d: 0 4px 0 rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4);
-    /* 3D futuristic experience: depth and perspective */
-    --shadow-3d-button: 0 5px 0 rgba(0, 0, 0, 0.35), 0 10px 30px rgba(0, 0, 0, 0.4);
-    --shadow-3d-card: 0 8px 0 rgba(0, 0, 0, 0.2), 0 16px 48px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    --perspective-view: 1200px;
+    /* Material-like dark palette */
+    --bg-deep: #0f1115;
+    --bg-space: #13161b;
+    --bg-panel: rgba(24, 28, 35, 0.92);
+    --bg-glass: rgba(28, 33, 42, 0.88);
+    --accent-cyan: #8ab4f8;
+    --accent-magenta: #9aa0a6;
+    --accent-gold: #fbbc04;
+    --accent-green: #34a853;
+    --accent-blue: #8ab4f8;
+    --text-primary: #e8eaed;
+    --text-secondary: #c7cacf;
+    --text-muted: #9aa0a6;
+    --border-glass: rgba(138, 180, 248, 0.35);
+    --border-subtle: rgba(255, 255, 255, 0.12);
+    --glow-cyan: 0 0 0 rgba(0, 0, 0, 0);
+    --glow-magenta: 0 0 0 rgba(0, 0, 0, 0);
+    --glow-gold: 0 0 0 rgba(0, 0, 0, 0);
+    --shadow-deep: 0 12px 28px rgba(0, 0, 0, 0.45);
+    --shadow-3d: 0 2px 8px rgba(0, 0, 0, 0.34);
+    --shadow-3d-button: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.25);
+    --shadow-3d-card: 0 1px 2px rgba(0, 0, 0, 0.34), 0 6px 18px rgba(0, 0, 0, 0.3);
+    --perspective-view: none;
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-pill: 999px;
-    --font-display: 'Orbitron', sans-serif;
-    --font-body: 'Exo 2', system-ui, sans-serif;
+    --font-display: 'Roboto', system-ui, sans-serif;
+    --font-body: 'Roboto', system-ui, sans-serif;
     /* Android rhythm */
     --android-space-1: 8px;
     --android-space-2: 12px;
@@ -45,14 +44,21 @@
     --android-title-size: 0.98rem;
     --android-body-size: 0.9rem;
     --android-hint-size: 0.8rem;
-    --android-btn-height: 44px;
+    --android-btn-height: 48px;
+    --android-motion-fast: 120ms;
+    --android-motion-standard: 220ms;
+    --android-motion-emphasized: 280ms;
+    --android-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --android-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --android-state-layer: rgba(138, 180, 248, 0.14);
+    --android-state-layer-strong: rgba(138, 180, 248, 0.22);
 }
 
 * {
     box-sizing: border-box;
 }
 
-/* Unified shell: both body classes get the same futuristic base */
+/* Unified shell for Android-first app chrome */
 body,
 .aiba-miniapp {
     margin: 0;
@@ -61,11 +67,7 @@ body,
     background: var(--bg-deep);
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
-    background-image:
-        radial-gradient(ellipse 120% 80% at 50% -20%, rgba(0, 240, 255, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse 80% 60% at 80% 100%, rgba(224, 64, 251, 0.06) 0%, transparent 50%),
-        linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-space) 100%);
-    /* Subtle 3D context for the whole app */
+    background-image: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-space) 100%);
     perspective: var(--perspective-view);
 }
 
@@ -97,11 +99,13 @@ body,
     position: sticky;
     top: max(0px, env(safe-area-inset-top));
     z-index: 20;
+    min-height: 56px;
     margin-bottom: 10px;
     padding-top: 8px;
-    background: linear-gradient(180deg, rgba(10, 14, 30, 0.94) 0%, rgba(10, 14, 30, 0.78) 100%);
-    backdrop-filter: blur(14px);
+    background: rgba(19, 22, 27, 0.96);
+    backdrop-filter: blur(10px);
     border-radius: 0 0 var(--radius-md) var(--radius-md);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 6px rgba(0, 0, 0, 0.28);
 }
 
 .app-header__brand {
@@ -114,14 +118,11 @@ body,
 
 .aiba-app__title {
     font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.35rem;
-    letter-spacing: 0.08em;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 0.01em;
     margin: 0;
-    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-cyan) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
 }
 
 .aiba-app__sub {
@@ -155,13 +156,14 @@ body,
     overflow-x: auto;
     overflow-y: hidden;
     padding: 8px 8px;
-    border-radius: 14px;
+    border-radius: 20px;
     border: 1px solid var(--border-subtle);
-    background: rgba(10, 14, 28, 0.96);
-    backdrop-filter: blur(14px);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: rgba(24, 28, 35, 0.98);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 20px rgba(0, 0, 0, 0.38);
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
+    scroll-snap-type: x proximity;
 }
 
 .android-bottom-nav__track::-webkit-scrollbar {
@@ -175,32 +177,63 @@ body,
 
 .android-bottom-nav__btn {
     flex: 0 0 auto;
-    min-width: 72px;
+    min-width: 80px;
     max-width: 108px;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 4px;
-    padding: 8px 8px;
+    min-height: 52px;
+    padding: 8px 10px;
     border: 1px solid transparent;
     border-radius: 12px;
     background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    transition:
+        color var(--android-motion-standard) var(--android-ease-standard),
+        background var(--android-motion-standard) var(--android-ease-standard),
+        border-color var(--android-motion-standard) var(--android-ease-standard),
+        transform var(--android-motion-fast) var(--android-ease-standard);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    scroll-snap-align: center;
 }
 
 .android-bottom-nav__btn:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--android-state-layer);
 }
 
 .android-bottom-nav__btn--active {
     color: var(--accent-cyan);
     border-color: var(--border-glass);
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.16) 0%, rgba(224, 64, 251, 0.08) 100%);
-    box-shadow: 0 0 16px rgba(0, 240, 255, 0.26);
+    background: rgba(138, 180, 248, 0.2);
+    box-shadow: inset 0 0 0 1px rgba(138, 180, 248, 0.28);
+}
+
+.android-bottom-nav__btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    opacity: 0;
+    transition: opacity var(--android-motion-fast) var(--android-ease-standard);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.android-bottom-nav__btn > * {
+    position: relative;
+    z-index: 1;
+}
+
+.android-bottom-nav__btn:active::after,
+.android-bottom-nav__btn:focus-visible::after {
+    background: var(--android-state-layer-strong);
+    opacity: 1;
 }
 
 .android-bottom-nav__icon {
@@ -234,21 +267,21 @@ body,
 }
 
 @keyframes tabIn {
-    from { opacity: 0; transform: translateY(8px) translateZ(-8px); }
-    to { opacity: 1; transform: translateY(0) translateZ(0); }
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Elevated card — bolder 3D depth for key sections (eye-catching) */
+/* Elevated card for key Android surfaces */
 .card--elevated {
-    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.25), 0 16px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.34), 0 8px 22px rgba(0, 0, 0, 0.3);
     border-color: var(--border-glass);
 }
 
 .card--elevated:hover {
-    box-shadow: 0 10px 0 rgba(0, 0, 0, 0.22), 0 20px 56px rgba(0, 0, 0, 0.42), 0 0 20px rgba(0, 240, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.34), 0 12px 28px rgba(0, 0, 0, 0.34);
 }
 
-/* ─── Futuristic 3D buttons (bold, eye-catching) ────────────────────────── */
+/* ─── Android action buttons ─────────────────────────────────────────────── */
 .btn {
     font-family: var(--font-body);
     font-weight: 600;
@@ -259,18 +292,58 @@ body,
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    transition:
+        transform var(--android-motion-fast) var(--android-ease-standard),
+        box-shadow var(--android-motion-standard) var(--android-ease-standard),
+        filter var(--android-motion-standard) var(--android-ease-standard),
+        background var(--android-motion-standard) var(--android-ease-standard);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     position: relative;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
+    transform-style: flat;
+    box-shadow: var(--shadow-3d-button);
+    overflow: hidden;
+    isolation: isolate;
 }
 
 .btn:active:not(:disabled) {
-    transform: translateY(2px) scale(0.98);
+    transform: scale(0.98);
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    opacity: 0;
+    transition: opacity var(--android-motion-fast) var(--android-ease-standard);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.btn > * {
+    position: relative;
+    z-index: 1;
+}
+
+.btn:hover:not(:disabled)::after {
+    background: var(--android-state-layer);
+    opacity: 1;
+}
+
+.btn:active:not(:disabled)::after,
+.btn:focus-visible::after {
+    background: var(--android-state-layer-strong);
+    opacity: 1;
+}
+
+.btn:focus-visible,
+.flow-switch__btn:focus-visible,
+.android-bottom-nav__btn:focus-visible {
+    outline: 2px solid rgba(138, 180, 248, 0.7);
+    outline-offset: 2px;
 }
 
 .btn:disabled {
@@ -279,55 +352,50 @@ body,
     transform: none;
 }
 
-/* Primary — cyan glow, strong 3D step, lift on hover */
+/* Primary — Android emphasis action */
 .btn--primary {
-    background: linear-gradient(180deg, #00e5ef 0%, #00a8b8 100%);
-    color: #001a1f;
-    box-shadow: 0 5px 0 #006670, 0 10px 30px rgba(0, 0, 0, 0.35), var(--glow-cyan);
+    background: var(--accent-cyan);
+    color: #0a1220;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.32), 0 3px 8px rgba(0, 0, 0, 0.24);
 }
 
 .btn--primary:hover:not(:disabled) {
-    filter: brightness(1.12);
-    transform: translateY(-2px);
-    box-shadow: 0 7px 0 #006670, 0 14px 36px rgba(0, 0, 0, 0.4), 0 0 32px rgba(0, 240, 255, 0.55);
+    filter: brightness(1.03);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3), 0 6px 14px rgba(0, 0, 0, 0.24);
 }
 
 .btn--primary:active:not(:disabled) {
-    transform: translateY(3px);
-    box-shadow: 0 2px 0 #006670, 0 6px 20px rgba(0, 0, 0, 0.35), var(--glow-cyan);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
-/* Secondary — glass outline, 3D depth */
+/* Secondary — outlined Android action */
 .btn--secondary {
     background: var(--bg-glass);
     color: var(--accent-cyan);
     border: 1px solid var(--border-glass);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .btn--secondary:hover:not(:disabled) {
-    background: rgba(0, 240, 255, 0.12);
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25), var(--glow-cyan), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    transform: translateY(-1px);
+    background: rgba(138, 180, 248, 0.14);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 /* Success / CTA */
 .btn--success {
-    background: linear-gradient(180deg, #00e676 0%, #00a852 100%);
-    color: #002a12;
-    box-shadow: 0 5px 0 #006b3a, 0 0 16px rgba(0, 230, 118, 0.35);
+    background: var(--accent-green);
+    color: #071b0f;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.32), 0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn--success:hover:not(:disabled) {
-    filter: brightness(1.1);
-    transform: translateY(-2px);
-    box-shadow: 0 7px 0 #006b3a, 0 0 24px rgba(0, 230, 118, 0.5);
+    filter: brightness(1.04);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28), 0 6px 14px rgba(0, 0, 0, 0.2);
 }
 
 .btn--success:active:not(:disabled) {
-    transform: translateY(3px);
-    box-shadow: 0 2px 0 #006b3a, 0 0 20px rgba(0, 230, 118, 0.4);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
 /* Danger / caution */
@@ -342,7 +410,7 @@ body,
     box-shadow: 0 6px 0 #8b0000, 0 0 16px rgba(255, 82, 82, 0.35);
 }
 
-/* Ghost — minimal, for tabs; active state is bold 3D */
+/* Ghost — minimal for dense action groups */
 .btn--ghost {
     background: transparent;
     color: var(--text-secondary);
@@ -354,7 +422,7 @@ body,
     background: rgba(255, 255, 255, 0.06);
 }
 
-/* ─── Tab bar (pill, 3D futuristic) — scrollable, clean, multi-tabbed ──────── */
+/* ─── Tab bar (scrollable segmented controls) ─────────────────────────────── */
 .tab-bar {
     display: flex;
     gap: 8px;
@@ -366,8 +434,8 @@ body,
     background: var(--bg-glass);
     border-radius: var(--radius-pill);
     border: 1px solid var(--border-subtle);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24), 0 4px 10px rgba(0, 0, 0, 0.2);
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
 }
@@ -389,17 +457,17 @@ body,
 }
 
 .tab-bar .btn--active {
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.28) 0%, rgba(224, 64, 251, 0.18) 100%);
+    background: rgba(138, 180, 248, 0.2);
     color: var(--accent-cyan);
     border: 1px solid var(--border-glass);
-    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25), 0 0 18px rgba(0, 240, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(138, 180, 248, 0.24);
 }
 
 .tab-bar .btn--active:hover:not(:disabled) {
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25), 0 0 22px rgba(0, 240, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(138, 180, 248, 0.32);
 }
 
-/* Futuristic 3D tab icons (inline SVG with depth + glow) */
+/* Tab icons */
 .tab-bar .icon-svg {
     width: 18px;
     height: 18px;
@@ -409,30 +477,32 @@ body,
 }
 
 .tab-bar .btn--active .icon-svg {
-    filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.6)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
-/* ─── Cards / panels (glass, 3D depth — modular multi-card UI) ────────────── */
+/* ─── Cards / panels (Android surface + elevation) ───────────────────────── */
 .card {
     background: var(--bg-glass);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     padding: var(--android-space-3);
     margin-top: var(--android-space-2);
-    backdrop-filter: blur(12px);
-    box-shadow: var(--shadow-3d-card), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow-3d-card);
+    transition:
+        transform var(--android-motion-standard) var(--android-ease-standard),
+        box-shadow var(--android-motion-standard) var(--android-ease-standard);
 }
 
 .card:hover {
-    box-shadow: 0 10px 0 rgba(0, 0, 0, 0.18), 0 20px 52px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.34), 0 10px 24px rgba(0, 0, 0, 0.3);
 }
 
 .card__title {
     font-family: var(--font-display);
-    font-weight: 700;
+    font-weight: 600;
     font-size: var(--android-title-size);
-    letter-spacing: 0.04em;
+    letter-spacing: 0.01em;
     margin: 0 0 10px 0;
     color: var(--text-primary);
     display: flex;
@@ -444,7 +514,7 @@ body,
     content: '';
     width: 4px;
     height: 18px;
-    background: linear-gradient(180deg, var(--accent-cyan), var(--accent-magenta));
+    background: var(--accent-cyan);
     border-radius: 2px;
 }
 
@@ -455,7 +525,7 @@ body,
     line-height: 1.5;
 }
 
-/* ─── Inputs (futuristic outline + glow focus) ───────────────────────────── */
+/* ─── Inputs (Android form field style) ─────────────────────────────────── */
 .input {
     width: 100%;
     max-width: 320px;
@@ -464,10 +534,12 @@ body,
     font-family: var(--font-body);
     font-size: var(--android-body-size);
     color: var(--text-primary);
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(16, 20, 26, 0.9);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+        border-color var(--android-motion-standard) var(--android-ease-standard),
+        box-shadow var(--android-motion-standard) var(--android-ease-standard);
 }
 
 .input::placeholder {
@@ -477,7 +549,7 @@ body,
 .input:focus {
     outline: none;
     border-color: var(--accent-cyan);
-    box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.2);
+    box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.25);
 }
 
 .select {
@@ -486,7 +558,7 @@ body,
     font-family: var(--font-body);
     font-size: var(--android-body-size);
     color: var(--text-primary);
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(16, 20, 26, 0.92);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -496,10 +568,10 @@ body,
 .select:focus {
     outline: none;
     border-color: var(--accent-cyan);
-    box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.15);
+    box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.2);
 }
 
-/* ─── Cinematic intro (full-screen 3D futuristic experience) ────────────── */
+/* ─── Cinematic intro (full-screen Android-themed welcome) ───────────────── */
 .cinematic {
     position: fixed;
     inset: 0;
@@ -681,7 +753,7 @@ body,
     border-radius: 2px;
 }
 
-/* ─── Nav Hub: futuristic grid of 15 section buttons ─────────────────────── */
+/* ─── Nav Hub: grid of section buttons ───────────────────────────────────── */
 .nav-hub {
     margin: 20px 0 16px 0;
     padding: 0 4px;
@@ -778,7 +850,7 @@ body,
     word-break: break-word;
 }
 
-/* ─── Tutorial overlay (glass modal, 3D futuristic) ───────────────────────── */
+/* ─── Tutorial overlay (Android modal style) ─────────────────────────────── */
 .tutorial-overlay {
     position: fixed;
     inset: 0;
@@ -824,7 +896,7 @@ body,
     justify-content: flex-end;
 }
 
-/* ─── Balance strip (wallet bar — 3D futuristic) ──────────────────────────── */
+/* ─── Balance strip (wallet summary) ─────────────────────────────────────── */
 .balance-strip {
     display: flex;
     flex-wrap: wrap;
@@ -836,7 +908,7 @@ body,
     border-radius: var(--radius-md);
     margin-top: 12px;
     font-size: 0.85rem;
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28), 0 6px 18px rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(8px);
 }
 
@@ -868,20 +940,20 @@ body,
     width: 16px;
     height: 16px;
 }
-.balance-strip__label--star .icon-svg { color: #ffc107; filter: drop-shadow(0 0 6px rgba(255, 193, 7, 0.5)); }
-.balance-strip__label--diamond .icon-svg { color: #b8e0f0; filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.4)); }
+.balance-strip__label--star .icon-svg { color: #ffc107; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.24)); }
+.balance-strip__label--diamond .icon-svg { color: #b8e0f0; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.24)); }
 
 .balance-strip__value--stars {
     color: #ffc107;
-    text-shadow: 0 0 10px rgba(255, 193, 7, 0.35);
+    text-shadow: none;
 }
 
 .balance-strip__value--diamonds {
     color: #b8e0f0;
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.35);
+    text-shadow: none;
 }
 
-/* ─── Profile badges (X-style, futuristic pills) ─────────────────────────── */
+/* ─── Profile badges (pill chips) ────────────────────────────────────────── */
 .card--identity .card__title {
     margin-bottom: 10px;
 }
@@ -938,7 +1010,7 @@ body,
     box-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
 }
 
-/* ─── Stars / Diamonds wallet cards (futuristic) ────────────────────────── */
+/* ─── Stars / Diamonds wallet cards ─────────────────────────────────────── */
 .card--stars {
     border-color: rgba(255, 193, 7, 0.4);
     box-shadow: 0 0 24px rgba(255, 193, 7, 0.12), inset 0 1px 0 rgba(255, 193, 7, 0.08);
@@ -989,6 +1061,82 @@ body,
 }
 
 /* ─── Home + Tasks Phase 2 cards ─────────────────────────────────────────── */
+.major-tab {
+    --major-tab-title-size: 1.02rem;
+    --major-tab-hint-size: 0.84rem;
+    --major-tab-line-height: 1.52;
+}
+
+.major-tab .card {
+    margin-top: var(--android-space-3);
+}
+
+.major-tab .card__title {
+    font-size: var(--major-tab-title-size);
+    line-height: 1.34;
+}
+
+.major-tab .card__hint {
+    font-size: var(--major-tab-hint-size);
+    line-height: var(--major-tab-line-height);
+}
+
+.major-tab .action-row {
+    margin-top: var(--android-space-3);
+}
+
+.major-tab .flow-switch {
+    margin-top: var(--android-space-3);
+    margin-bottom: var(--android-space-2);
+}
+
+.major-tab .sheet-card {
+    margin-top: var(--android-space-3);
+}
+
+.major-tab .btn .icon-svg {
+    width: 19px;
+    height: 19px;
+}
+
+.major-tab__hero .card__title {
+    font-size: 1.08rem;
+}
+
+.major-tab__subcopy {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+    opacity: 0.92;
+}
+
+.sheet-list {
+    list-style: none;
+    padding: 0;
+    margin: var(--android-space-2) 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--android-space-1);
+}
+
+.sheet-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--android-space-2);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sheet-list-item__text {
+    font-size: var(--android-body-size);
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
 .home-overview {
     border-radius: 16px;
 }
@@ -1131,7 +1279,7 @@ body,
     margin-top: 14px;
 }
 
-/* ─── Futuristic 3D icons (used in buttons and cards) ────────────────────── */
+/* ─── Shared icon sizing (buttons and cards) ─────────────────────────────── */
 .guide-icon,
 .icon-wrap {
     display: inline-flex;
@@ -1147,9 +1295,9 @@ body,
     height: 22px;
 }
 
-/* Global 3D icon effect: depth + subtle glow for futuristic feel */
+/* Global icon style */
 .icon-svg {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35)) drop-shadow(0 0 4px rgba(0, 240, 255, 0.15));
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 .btn .icon-svg {
@@ -1159,7 +1307,7 @@ body,
 
 .btn--primary .icon-svg,
 .btn--success .icon-svg {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.25));
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
 }
 
 /* ─── Deep guidance: tips, section intros, onboarding ─────────────────────── */
@@ -1168,26 +1316,26 @@ body,
     color: var(--text-secondary);
     margin-top: 10px;
     padding: 12px 14px;
-    background: rgba(0, 240, 255, 0.08);
+    background: rgba(138, 180, 248, 0.1);
     border-left: 4px solid var(--accent-cyan);
     border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     line-height: 1.45;
 }
 
-/* Section intro block for tab/screen-level guidance (bold, eye-catching) */
+/* Section intro block for tab/screen-level guidance */
 .guide-section-intro {
     font-family: var(--font-body);
     font-size: 0.85rem;
     color: var(--text-secondary);
     margin: 0 0 14px 0;
     padding: 14px 16px;
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.06) 0%, rgba(224, 64, 251, 0.04) 100%);
+    background: rgba(138, 180, 248, 0.08);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     border-left: 4px solid var(--accent-cyan);
     line-height: 1.5;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
 }
 
 /* Step indicator for tutorials / multi-step flows */
@@ -1287,7 +1435,7 @@ body,
     margin: 0;
 }
 
-/* ─── AIBA ARENA UNIVERSITY (super futuristic learning hub) ───────────────── */
+/* ─── AIBA ARENA UNIVERSITY (learning hub) ───────────────────────────────── */
 .card--university.university-hero {
     border-color: rgba(0, 240, 255, 0.35);
     box-shadow: 0 0 24px rgba(0, 240, 255, 0.12), inset 0 1px 0 rgba(0, 240, 255, 0.08);
@@ -1515,6 +1663,71 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
     gap: 8px;
 }
 
+/* Header quick navigation follows Android touch targets */
+.quick-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--android-space-1);
+    margin-top: var(--android-space-2);
+    align-items: center;
+}
+
+.quick-nav__btn {
+    min-height: var(--android-btn-height);
+    padding: 8px 12px;
+    font-size: var(--android-body-size);
+    border-radius: 10px;
+}
+
+.quick-nav__avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.quick-nav__avatar--fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-glass);
+    color: var(--text-muted);
+}
+
+.quick-nav__avatar--fallback .icon-svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Profile tab: avatar + details */
+.profile-avatar-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.profile-avatar--fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-glass);
+    color: var(--text-muted);
+}
+.profile-avatar--fallback .icon-svg {
+    width: 32px;
+    height: 32px;
+}
+.profile-info { flex: 1; min-width: 0; }
+.profile-name { font-weight: 600; font-size: 1rem; }
+.profile-username, .profile-id { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+
 /* Header wallet area responsive: wrap or shrink on narrow screens */
 @media (max-width: 360px) {
     .app-header__wallet .connect-wallet-btn span {
@@ -1547,14 +1760,14 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
     color: #69f0ae;
 }
 
-/* ─── Flow segmented controls (Phase 3/4 sheet-style flows) ────────────────── */
+/* ─── Flow segmented controls (Phase 3/4 Android sheets) ─────────────────── */
 .flow-switch {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
     margin: var(--android-space-2) 0;
     padding: 6px 8px;
-    background: var(--bg-glass);
+    background: rgba(20, 24, 31, 0.92);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     backdrop-filter: blur(12px);
@@ -1563,32 +1776,62 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
 .flow-switch__btn {
     flex: 1 1 auto;
     min-width: 0;
-    padding: 8px 12px;
+    min-height: 44px;
+    padding: 10px 12px;
     font-size: var(--android-body-size);
     font-weight: 600;
     color: var(--text-secondary);
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(13, 16, 21, 0.86);
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    transition:
+        color var(--android-motion-standard) var(--android-ease-standard),
+        background var(--android-motion-standard) var(--android-ease-standard),
+        border-color var(--android-motion-standard) var(--android-ease-standard),
+        transform var(--android-motion-fast) var(--android-ease-standard);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
 }
 
 .flow-switch__btn:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--android-state-layer);
 }
 
 .flow-switch__btn.is-active {
     color: var(--accent-cyan);
     border-color: var(--border-glass);
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.18) 0%, rgba(224, 64, 251, 0.08) 100%);
+    background: rgba(138, 180, 248, 0.2);
 }
 
-/* Sheet-style cards with enter animation */
+.flow-switch__btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    opacity: 0;
+    transition: opacity var(--android-motion-fast) var(--android-ease-standard);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.flow-switch__btn > * {
+    position: relative;
+    z-index: 1;
+}
+
+.flow-switch__btn:active::after,
+.flow-switch__btn:focus-visible::after {
+    background: var(--android-state-layer-strong);
+    opacity: 1;
+}
+
+/* Sheet-style cards with Android motion */
 .sheet-card {
     margin-top: var(--android-space-2);
-    animation: sheetCardIn 0.28s ease;
+    animation: sheetCardIn 0.22s ease-out;
 }
 
 @keyframes sheetCardIn {
@@ -1635,7 +1878,30 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
     background: rgba(0, 0, 0, 0.2);
 }
 
-/* ─── Checkbox (futuristic) ─────────────────────────────────────────────── */
+@media (hover: none) {
+    .btn:hover:not(:disabled)::after {
+        opacity: 0;
+    }
+
+    .android-bottom-nav__btn:hover,
+    .flow-switch__btn:hover {
+        background: transparent;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tab-panel,
+    .sheet-card,
+    .btn,
+    .android-bottom-nav__btn,
+    .flow-switch__btn,
+    .card {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ─── Checkbox ───────────────────────────────────────────────────────────── */
 .check-wrap {
     display: inline-flex;
     align-items: center;

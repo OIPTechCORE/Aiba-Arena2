@@ -2,6 +2,17 @@
 
 Related docs have been merged so there are fewer, clearer files.
 
+## Android UI/UX rollout navigation (Phase 1–4)
+
+| Phase | UI label | Primary docs |
+|------|----------|--------------|
+| **Phase 1** | **Fast Win — Android UI/UX shell (top app bar + sticky bottom nav)** | `USER-GUIDE.md`, `TELEGRAM-MINI-APP-UI-UX-AUDIT.md` |
+| **Phase 2** | **Home + Tasks card redesign (spacing, typography, button sizing)** | `USER-GUIDE.md`, `TESTING.md` |
+| **Phase 3** | **Market + Racing flow redesign (sheet-style detail views)** | `FEATURE-PLANS.md`, `USER-GUIDE.md`, `TESTING.md` |
+| **Phase 4** | **Component system cleanup + theming + QA pass** | `AUDIT-AND-STATUS.md`, `TESTING.md`, `OPERATIONS.md` |
+
+Use this phase table first, then open the detailed docs below.
+
 | Doc | Contents |
 |-----|----------|
 | **DEPLOYMENT-AND-ENV.md** | Localhost, Vercel, Telegram: env checklist, backend + miniapp + admin, security, mainnet readiness. |

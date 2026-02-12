@@ -144,6 +144,17 @@ const IconTasks = () => (
         <path d="M4 6h.01" /><path d="M4 12h.01" /><path d="M4 18h.01" />
     </svg>
 );
+const IconProfile = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+    </svg>
+);
+const IconSettings = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-1.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h1.09a1.65 1.65 0 001.51-1 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-1.09a1.65 1.65 0 00-1.51 1z" />
+    </svg>
+);
 /* Futuristic Stars (Telegram Stars–style) */
 const IconStar = () => (
     <svg className="icon-svg icon-svg--star" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -178,6 +189,8 @@ const GUILDS_EXPLANATION = 'Guilds (groups) let you team up with others: create 
 
 const TAB_LIST = [
     { id: 'home', label: 'Home', Icon: IconHome },
+    { id: 'profile', label: 'Profile', Icon: IconProfile },
+    { id: 'settings', label: 'Settings', Icon: IconSettings },
     { id: 'tasks', label: 'Tasks', Icon: IconTasks },
     { id: 'leaderboard', label: 'Leaderboard', Icon: IconLeaderboard },
     { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
@@ -1984,6 +1997,7 @@ export default function HomePage() {
         { title: 'Battle', text: 'Run battle to compete. You earn NEUR and AIBA.' },
         { title: 'Next', text: 'Stake AIBA, mint NFTs, join groups, claim on-chain. Good luck!' },
     ];
+    const tgUser = getTelegramUserUnsafe();
 
     return (
         <div className="aiba-app">
@@ -2087,10 +2101,22 @@ export default function HomePage() {
                     </p>
                 ) : null}
                 {status ? <p className={`status-msg ${status.toLowerCase().includes('fail') ? 'status-msg--error' : ''}`} style={{ margin: 0, width: '100%' }}>{status}</p> : null}
-                <div className="quick-nav" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10, alignItems: 'center' }}>
-                    <button type="button" className="btn btn--ghost" style={{ padding: '6px 10px', fontSize: '0.85rem' }} onClick={() => setTab('home')} aria-label="Go to Home"><IconHome /> Home</button>
-                    <button type="button" className="btn btn--ghost" style={{ padding: '6px 10px', fontSize: '0.85rem' }} onClick={() => setTab('university')} aria-label="User guide">User guide</button>
-                    <button type="button" className="btn btn--ghost" style={{ padding: '6px 10px', fontSize: '0.85rem' }} onClick={() => { scrollToFaqRef.current = true; setTab('updates'); }} aria-label="FAQ and support">FAQ &amp; support</button>
+                <div className="quick-nav">
+                    <button type="button" className="btn btn--ghost quick-nav__btn" onClick={() => setTab('home')} aria-label="Go to Home"><IconHome /> Home</button>
+                    <button type="button" className="btn btn--ghost quick-nav__btn" onClick={() => setTab('university')} aria-label="Guide">Guide</button>
+                    <button type="button" className="btn btn--ghost quick-nav__btn" onClick={() => { scrollToFaqRef.current = true; setTab('updates'); }} aria-label="FAQs">FAQs</button>
+                    <button type="button" className="btn btn--ghost quick-nav__btn quick-nav__btn--profile" onClick={() => setTab('profile')} aria-label="Profile">
+                        {tgUser?.photo_url ? (
+                            <img src={tgUser.photo_url} alt="" className="quick-nav__avatar" />
+                        ) : (
+                            <span className="quick-nav__avatar quick-nav__avatar--fallback"><IconProfile /></span>
+                        )}
+                        Profile
+                    </button>
+                    <button type="button" className="btn btn--ghost quick-nav__btn quick-nav__btn--settings" onClick={() => setTab('settings')} aria-label="Settings">
+                        <IconSettings />
+                        Settings
+                    </button>
                 </div>
             </header>
 
@@ -2143,15 +2169,17 @@ export default function HomePage() {
                  tab === 'assets' ? 'Mint, upgrade, list, buy, and rent AI assets.' :
                  tab === 'governance' ? 'Propose and vote on ecosystem changes.' :
                  tab === 'updates' ? 'Stay informed. Announcements, status & support here.' :
+                 tab === 'profile' ? 'Your profile, balances, badges, and account details.' :
+                 tab === 'settings' ? 'App preferences, notifications, theme, and more.' :
                  'Daily NEUR, stake AIBA, or claim on-chain after a battle.'}
             </p>
 
             <div className="tab-content">
                 {/* ─── Home ───────────────────────────────────────────────────── */}
-                <section className={`tab-panel ${tab === 'home' ? 'is-active' : ''}`} aria-hidden={tab !== 'home'}>
-                    <div className="card card--elevated home-overview" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                <section className={`tab-panel major-tab major-tab--home ${tab === 'home' ? 'is-active' : ''}`} aria-hidden={tab !== 'home'}>
+                    <div className="card card--elevated home-overview major-tab__hero" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
                         <div className="card__title">Home Command Center</div>
-                        <p className="card__hint">Battle-ready Android-style dashboard. Manage brokers, run fights, and jump into tasks fast.</p>
+                        <p className="card__hint">Battle-ready Android UI/UX dashboard. Manage brokers, run fights, and jump into tasks fast.</p>
                         <div className="home-overview__stats">
                             <span className="home-stat-pill">AIBA {Number(economyMe?.aibaBalance ?? 0)}</span>
                             <span className="home-stat-pill">NEUR {Number(economyMe?.neurBalance ?? 0)}</span>
@@ -2498,8 +2526,8 @@ export default function HomePage() {
                 </section>
 
                 {/* ─── Market ─────────────────────────────────────────────────── */}
-                <section className={`tab-panel ${tab === 'market' ? 'is-active' : ''}`} aria-hidden={tab !== 'market'}>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                <section className={`tab-panel major-tab major-tab--market ${tab === 'market' ? 'is-active' : ''}`} aria-hidden={tab !== 'market'}>
+                    <div className="card card--elevated major-tab__hero" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
                         <div className="card__title">What are brokers?</div>
                         <p className="card__hint">{BROKERS_EXPLANATION}</p>
                     </div>
@@ -2578,10 +2606,10 @@ export default function HomePage() {
                             {systemBrokers.length === 0 ? (
                                 <p className="guide-tip">No system brokers. Refresh to load.</p>
                             ) : (
-                                <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                <ul className="sheet-list">
                                     {systemBrokers.map((entry) => (
-                                        <li key={entry.id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                            <span>{entry.name} — INT{entry.intelligence} SPD{entry.speed} RISK{entry.risk} — {entry.priceAiba} AIBA</span>
+                                        <li key={entry.id} className="sheet-list-item">
+                                            <span className="sheet-list-item__text">{entry.name} — INT{entry.intelligence} SPD{entry.speed} RISK{entry.risk} — {entry.priceAiba} AIBA</span>
                                             <button type="button" className="btn btn--primary" onClick={() => buySystemBroker(entry.id)} disabled={busy}><IconBuy /> Buy</button>
                                         </li>
                                     ))}
@@ -2605,11 +2633,11 @@ export default function HomePage() {
                 </section>
 
                 {/* ─── Car Racing (Autonomous) ───────────────────────────────────── */}
-                <section className={`tab-panel ${tab === 'carRacing' ? 'is-active' : ''}`} aria-hidden={tab !== 'carRacing'}>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                <section className={`tab-panel major-tab major-tab--car ${tab === 'carRacing' ? 'is-active' : ''}`} aria-hidden={tab !== 'carRacing'}>
+                    <div className="card card--elevated major-tab__hero" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
                         <div className="card__title">Car Racing</div>
                         <p className="card__hint">Autonomous car racing. Create or buy a car, enter open races, earn AIBA by finish position.</p>
-                        <p className="card__hint" style={{ marginTop: 6, fontSize: 11, opacity: 0.9 }}>Inspired by the most powerful racing cars: Formula 1, Le Mans, Can-Am, IndyCar, Group B, GT1, Electric, Drag, Touring/DTM, Hillclimb, NASCAR, Historic, Hypercar, Extreme prototypes.</p>
+                        <p className="major-tab__subcopy">Inspired by the most powerful racing cars: Formula 1, Le Mans, Can-Am, IndyCar, Group B, GT1, Electric, Drag, Touring/DTM, Hillclimb, NASCAR, Historic, Hypercar, Extreme prototypes.</p>
                         <button type="button" className="btn btn--secondary" onClick={refreshCarRacing} disabled={busy}><IconRefresh /> Refresh</button>
                         {carMsg ? <p className={`status-banner ${carMsg.includes('Purchased') || carMsg.includes('Entered') || carMsg.includes('Created') ? 'status-banner--success' : carMsg.includes('failed') || carMsg.includes('Failed') ? 'status-banner--error' : 'status-banner--info'}`} style={{ marginTop: 8 }}>{carMsg}</p> : null}
                     </div>
@@ -2661,12 +2689,12 @@ export default function HomePage() {
                         {systemCars.length === 0 ? (
                             <p className="guide-tip">No system cars. Refresh to load.</p>
                         ) : (
-                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                            <ul className="sheet-list">
                                 {systemCars.map((entry) => {
                                     const classLabel = entry.carClass && carRacingConfig?.carClasses?.find((x) => x.id === entry.carClass)?.label ? carRacingConfig.carClasses.find((x) => x.id === entry.carClass).label : (entry.carClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing car';
                                     return (
-                                        <li key={entry.id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                            <span>{entry.name} — {classLabel} — SPD{entry.topSpeed} ACC{entry.acceleration} HND{entry.handling} DUR{entry.durability} — {entry.priceAiba} AIBA</span>
+                                        <li key={entry.id} className="sheet-list-item">
+                                            <span className="sheet-list-item__text">{entry.name} — {classLabel} — SPD{entry.topSpeed} ACC{entry.acceleration} HND{entry.handling} DUR{entry.durability} — {entry.priceAiba} AIBA</span>
                                             <button type="button" className="btn btn--primary" onClick={() => buySystemCar(entry.id)} disabled={busy}>Buy</button>
                                         </li>
                                     );
@@ -2683,13 +2711,13 @@ export default function HomePage() {
                         {carListings.length === 0 ? (
                             <p className="guide-tip">No cars for sale. Check back later or create your own above.</p>
                         ) : (
-                            <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                            <ul className="sheet-list">
                                 {carListings.map((l) => {
                                     const car = l.car || l.carId;
                                     const classLabel = car?.carClass && carRacingConfig?.carClasses?.find((x) => x.id === car.carClass)?.label ? carRacingConfig.carClasses.find((x) => x.id === car.carClass).label : (car?.carClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing car';
                                     return (
-                                        <li key={l._id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                            <span>Car #{String(l.carId?._id ?? l.carId).slice(-6)} — {classLabel} — {l.priceAIBA} AIBA</span>
+                                        <li key={l._id} className="sheet-list-item">
+                                            <span className="sheet-list-item__text">Car #{String(l.carId?._id ?? l.carId).slice(-6)} — {classLabel} — {l.priceAIBA} AIBA</span>
                                             <button type="button" className="btn btn--primary" onClick={async () => { setBusy(true); setCarMsg(''); try { await api.post('/api/car-racing/buy-car', { requestId: uuid(), listingId: l._id }); setCarMsg('Purchased.'); await refreshCarRacing(); await refreshEconomy(); } catch (e) { setCarMsg(getErrorMessage(e, 'Buy failed.')); } finally { setBusy(false); } }} disabled={busy}>Buy</button>
                                         </li>
                                     );
@@ -2729,11 +2757,11 @@ export default function HomePage() {
                 </section>
 
                 {/* ─── Bike Racing (Autonomous) ───────────────────────────────────── */}
-                <section className={`tab-panel ${tab === 'bikeRacing' ? 'is-active' : ''}`} aria-hidden={tab !== 'bikeRacing'}>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-magenta)' }}>
+                <section className={`tab-panel major-tab major-tab--bike ${tab === 'bikeRacing' ? 'is-active' : ''}`} aria-hidden={tab !== 'bikeRacing'}>
+                    <div className="card card--elevated major-tab__hero" style={{ borderLeft: '4px solid var(--accent-magenta)' }}>
                         <div className="card__title">Bike Racing</div>
                         <p className="card__hint">Autonomous motorcycle racing. Create or buy a bike, enter open races, earn AIBA.</p>
-                        <p className="card__hint" style={{ marginTop: 6, fontSize: 11, opacity: 0.9 }}>Inspired by the most powerful racing &amp; high-performance motorcycles: Hyper-Track (H2R, MTT 420RR), Superbikes (M 1000 RR, Fireblade, R1M), Sportbikes (Ninja H2, Hayabusa), Track Racing, Historic GP (NSR500, Desmosedici), Electric (Energica, LiveWire), Exotic (Bimota, NCR), Big Torque (Rocket 3, VMAX), MotoGP, Supersport, Hypersport, Classic TT, Concepts.</p>
+                        <p className="major-tab__subcopy">Inspired by the most powerful racing &amp; high-performance motorcycles: Hyper-Track (H2R, MTT 420RR), Superbikes (M 1000 RR, Fireblade, R1M), Sportbikes (Ninja H2, Hayabusa), Track Racing, Historic GP (NSR500, Desmosedici), Electric (Energica, LiveWire), Exotic (Bimota, NCR), Big Torque (Rocket 3, VMAX), MotoGP, Supersport, Hypersport, Classic TT, Concepts.</p>
                         <button type="button" className="btn btn--secondary" onClick={refreshBikeRacing} disabled={busy}><IconRefresh /> Refresh</button>
                         {bikeMsg ? <p className={`status-banner ${bikeMsg.includes('Purchased') || bikeMsg.includes('Entered') ? 'status-banner--success' : bikeMsg.includes('failed') || bikeMsg.includes('Failed') ? 'status-banner--error' : 'status-banner--info'}`} style={{ marginTop: 8 }}>{bikeMsg}</p> : null}
                     </div>
@@ -2785,12 +2813,12 @@ export default function HomePage() {
                             {systemBikes.length === 0 ? (
                                 <p className="guide-tip">No system bikes. Refresh to load.</p>
                             ) : (
-                                <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                <ul className="sheet-list">
                                     {systemBikes.map((entry) => {
                                         const classLabel = entry.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === entry.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === entry.bikeClass).label : (entry.bikeClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing bike';
                                         return (
-                                            <li key={entry.id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                                <span>{entry.name} — {classLabel} — SPD{entry.topSpeed} ACC{entry.acceleration} HND{entry.handling} DUR{entry.durability} — {entry.priceAiba} AIBA</span>
+                                            <li key={entry.id} className="sheet-list-item">
+                                                <span className="sheet-list-item__text">{entry.name} — {classLabel} — SPD{entry.topSpeed} ACC{entry.acceleration} HND{entry.handling} DUR{entry.durability} — {entry.priceAiba} AIBA</span>
                                                 <button type="button" className="btn btn--primary" onClick={() => buySystemBike(entry.id)} disabled={busy}>Buy</button>
                                             </li>
                                         );
@@ -2807,13 +2835,13 @@ export default function HomePage() {
                             {bikeListings.length === 0 ? (
                                 <p className="guide-tip">No bikes for sale. Check back later or create your own above.</p>
                             ) : (
-                                <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
+                                <ul className="sheet-list">
                                     {bikeListings.map((l) => {
                                         const bike = l.bike || l.bikeId;
                                         const classLabel = bike?.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === bike.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === bike.bikeClass).label : (bike?.bikeClass || '').replace(/([A-Z])/g, ' $1').trim() || 'Racing bike';
                                         return (
-                                            <li key={l._id} className="list-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                                <span>Bike #{String(l.bikeId?._id ?? l.bikeId).slice(-6)} — {classLabel} — {l.priceAIBA} AIBA</span>
+                                            <li key={l._id} className="sheet-list-item">
+                                                <span className="sheet-list-item__text">Bike #{String(l.bikeId?._id ?? l.bikeId).slice(-6)} — {classLabel} — {l.priceAIBA} AIBA</span>
                                                 <button type="button" className="btn btn--primary" onClick={async () => { setBusy(true); setBikeMsg(''); try { await api.post('/api/bike-racing/buy-bike', { requestId: uuid(), listingId: l._id }); setBikeMsg('Purchased.'); await refreshBikeRacing(); await refreshEconomy(); } catch (e) { setBikeMsg(getErrorMessage(e, 'Buy failed.')); } finally { setBusy(false); } }} disabled={busy}>Buy</button>
                                             </li>
                                         );
@@ -3013,7 +3041,7 @@ export default function HomePage() {
                 {/* ─── University (User Guide / AIBA ARENA UNIVERSITY) ─────────── */}
                 <section className={`tab-panel ${tab === 'university' ? 'is-active' : ''}`} aria-hidden={tab !== 'university'}>
                     <div className="card card--elevated card--university university-hero">
-                        <div className="card__title">User guide — AIBA ARENA UNIVERSITY</div>
+                        <div className="card__title">Guide — AIBA ARENA UNIVERSITY</div>
                         <p className="card__hint" style={{ marginTop: 8 }}>Complete systematic guide. Learn brokers, arenas, economy, guilds, and pro tips. Expand courses below.</p>
                         <p className="card__hint" style={{ marginTop: 4 }}>
                             Progress: <strong>{universityProgress?.completedCount ?? 0}</strong> / <strong>{universityTotalModules || universityCourses.reduce((n, c) => n + (c.modules?.length || 0), 0)}</strong> modules
@@ -3317,10 +3345,10 @@ export default function HomePage() {
                         )}
                     </div>
                     <div className="card card--elevated" id="faq-support">
-                        <div className="card__title">FAQ &amp; support</div>
-                        <p className="card__hint" style={{ marginBottom: 12 }}>Systematic answers to common questions. For the full learning path, use <strong>User guide</strong> (University) from the header.</p>
+                        <div className="card__title">FAQs</div>
+                        <p className="card__hint" style={{ marginBottom: 12 }}>Systematic answers to common questions. For the full learning path, use <strong>Guide</strong> (University) from the header.</p>
                         <div className="comms-faq">
-                            <p className="card__hint"><strong>How do I start?</strong> Go to Home → create a broker (New broker) if you have none → pick an arena → Run battle. Earn NEUR and AIBA. See User guide for step-by-step.</p>
+                            <p className="card__hint"><strong>How do I start?</strong> Go to Home → create a broker (New broker) if you have none → pick an arena → Run battle. Earn NEUR and AIBA. See Guide for step-by-step.</p>
                             <p className="card__hint"><strong>How do I get a broker?</strong> Home: New broker (free starter). Or Market: buy from system (AIBA) or from other players. Brokers tab: combine two brokers.</p>
                             <p className="card__hint"><strong>How do I earn NEUR / AIBA?</strong> Run battles (Home or Arenas). NEUR is off-chain; AIBA can be claimed on-chain via Wallet → Vault (connect wallet, create claim, sign tx).</p>
                             <p className="card__hint"><strong>How do I earn Stars?</strong> Win battles. Each win grants Stars (Telegram Stars–style currency).</p>
@@ -3336,10 +3364,107 @@ export default function HomePage() {
                     </div>
                 </section>
 
+                {/* ─── Profile ────────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'profile' ? 'is-active' : ''}`} aria-hidden={tab !== 'profile'}>
+                    <div className="card card--elevated card--identity profile-panel">
+                        <div className="profile-avatar-row">
+                            {tgUser?.photo_url ? (
+                                <img src={tgUser.photo_url} alt="" className="profile-avatar" />
+                            ) : (
+                                <span className="profile-avatar profile-avatar--fallback"><IconProfile /></span>
+                            )}
+                            <div className="profile-info">
+                                <div className="profile-name">{tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || tgUser.username || 'User' : 'User'}</div>
+                                {tgUser?.username ? <div className="profile-username">@{tgUser.username}</div> : null}
+                                {tgUser?.id ? <div className="profile-id">Telegram ID: {tgUser.id}</div> : null}
+                            </div>
+                        </div>
+                        <div className="identity-badges" style={{ marginTop: 12 }}>
+                            {Array.isArray(economyMe?.badges) && economyMe.badges.length > 0 ? (
+                                economyMe.badges.map((badgeId) => {
+                                    const meta = BADGE_LABELS[badgeId] || { label: badgeId, color: 'var(--text-muted)' };
+                                    return (
+                                        <span key={badgeId} className="badge-pill" style={{ borderColor: meta.color, color: meta.color }} title={meta.title || meta.label} data-badge={badgeId === 'verified' ? 'verified' : undefined}>{meta.label}</span>
+                                    );
+                                })
+                            ) : (
+                                <span className="card__hint">No badges yet. Earn or get assigned by admins.</span>
+                            )}
+                        </div>
+                        {economyMe?.profileBoostedUntil && new Date(economyMe.profileBoostedUntil) > new Date() ? (
+                            <p className="card__hint" style={{ marginTop: 8, color: 'var(--accent-cyan)' }}>Profile boosted until {new Date(economyMe.profileBoostedUntil).toLocaleString()}</p>
+                        ) : null}
+                        <div className="profile-balances" style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                            <span className="home-stat-pill">NEUR {Number(economyMe?.neurBalance ?? 0)}</span>
+                            <span className="home-stat-pill">AIBA {Number(economyMe?.aibaBalance ?? 0)}</span>
+                            <span className="home-stat-pill"><IconStar /> Stars {Number(economyMe?.starsBalance ?? 0)}</span>
+                            <span className="home-stat-pill"><IconDiamond /> Diamonds {Number(economyMe?.diamondsBalance ?? 0)}</span>
+                            <span className="home-stat-pill">Brokers {brokers.length}</span>
+                        </div>
+                        <button type="button" className="btn btn--secondary" onClick={() => setTab('wallet')} style={{ marginTop: 16 }}><IconWallet /> Wallet &amp; more</button>
+                    </div>
+                </section>
+
+                {/* ─── Settings ────────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'settings' ? 'is-active' : ''}`} aria-hidden={tab !== 'settings'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title"><IconSettings /> Settings</div>
+                        <p className="card__hint">App preferences, notifications, and account options.</p>
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Notifications</div>
+                        <p className="card__hint">Battle results, rewards, and announcements.</p>
+                        <label className="check-wrap" style={{ marginTop: 8 }}>
+                            <input type="checkbox" defaultChecked readOnly />
+                            Push notifications
+                        </label>
+                        <label className="check-wrap" style={{ marginTop: 6 }}>
+                            <input type="checkbox" defaultChecked readOnly />
+                            Battle win alerts
+                        </label>
+                        <label className="check-wrap" style={{ marginTop: 6 }}>
+                            <input type="checkbox" defaultChecked readOnly />
+                            Reward &amp; claim reminders
+                        </label>
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Appearance</div>
+                        <p className="card__hint">Theme and display preferences.</p>
+                        <div className="settings-options" style={{ marginTop: 8 }}>
+                            <label className="check-wrap"><input type="radio" name="theme" defaultChecked /> Dark (default)</label>
+                            <label className="check-wrap" style={{ marginTop: 6 }}><input type="radio" name="theme" /> Light</label>
+                            <label className="check-wrap" style={{ marginTop: 6 }}><input type="radio" name="theme" /> System</label>
+                        </div>
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Sound &amp; haptics</div>
+                        <p className="card__hint">Audio and vibration feedback.</p>
+                        <label className="check-wrap" style={{ marginTop: 8 }}><input type="checkbox" defaultChecked readOnly /> Sound effects</label>
+                        <label className="check-wrap" style={{ marginTop: 6 }}><input type="checkbox" defaultChecked readOnly /> Haptic feedback</label>
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Privacy &amp; data</div>
+                        <p className="card__hint">Data handling and visibility.</p>
+                        <p className="card__hint" style={{ marginTop: 8 }}>Profile visible on leaderboard: <strong>Yes</strong></p>
+                        <p className="card__hint">Data is used for gameplay, rewards, and support.</p>
+                    </div>
+                    <div className="card">
+                        <div className="card__title">About</div>
+                        <p className="card__hint">AIBA Arena — Own AI brokers. Compete in 3D arenas. Earn NEUR &amp; AIBA.</p>
+                        <p className="card__hint" style={{ marginTop: 6 }}>Version: 1.0.0</p>
+                        <p className="card__hint">Backend: {BACKEND_URL}</p>
+                    </div>
+                    <div className="card">
+                        <div className="card__title">Support</div>
+                        <button type="button" className="btn btn--ghost" onClick={() => { scrollToFaqRef.current = true; setTab('updates'); }} style={{ marginTop: 6 }}>FAQs &amp; support</button>
+                        <button type="button" className="btn btn--ghost" onClick={() => setTab('university')} style={{ marginTop: 6, marginLeft: 8 }}>Guide</button>
+                    </div>
+                </section>
+
                 {/* ─── Wallet ─────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'wallet' ? 'is-active' : ''}`} aria-hidden={tab !== 'wallet'}>
                     <div className="card card--elevated card--identity">
-                        <div className="card__title">Profile</div>
+                        <div className="card__title">Wallet &amp; profile</div>
                         <div className="identity-badges">
                             {Array.isArray(economyMe?.badges) && economyMe.badges.length > 0 ? (
                                 economyMe.badges.map((badgeId) => {
