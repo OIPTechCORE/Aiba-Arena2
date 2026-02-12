@@ -99,7 +99,7 @@ body,
 .app-header--android {
     position: sticky;
     top: max(0px, env(safe-area-inset-top));
-    z-index: 20;
+    z-index: 100;
     min-height: 56px;
     margin-bottom: 10px;
     padding-top: 8px;
@@ -107,6 +107,11 @@ body,
     backdrop-filter: blur(10px);
     border-radius: 0 0 var(--radius-md) var(--radius-md);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 6px rgba(0, 0, 0, 0.28);
+}
+
+/* Ensure header is never hidden: high z-index, no parent clipping */
+.aiba-app > header.app-header {
+    flex-shrink: 0;
 }
 
 .app-header__brand {
@@ -120,10 +125,11 @@ body,
 .app-header__nav {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: clamp(4px, 1.2vw, 8px);
     flex: 1 1 auto;
     min-width: 0;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .header-nav__btn {
@@ -134,8 +140,8 @@ body,
     gap: 2px;
     min-height: 44px;
     min-width: 44px;
-    padding: 6px 10px;
-    font-size: 0.7rem;
+    padding: 6px 8px;
+    font-size: clamp(0.6rem, 1.8vw, 0.7rem);
     border-radius: 10px;
     color: var(--text-secondary);
 }
@@ -1722,13 +1728,14 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
     gap: 8px;
 }
 
-/* Header quick navigation follows Android touch targets */
+/* Header quick navigation — Settings only; seamlessly responsive */
 .quick-nav {
     display: flex;
     flex-wrap: wrap;
     gap: var(--android-space-1);
     margin-top: var(--android-space-2);
     align-items: center;
+    width: 100%;
 }
 
 .quick-nav__btn {
@@ -1788,16 +1795,20 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
 .profile-username, .profile-id { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
 
 /* Header responsive: wrap or shrink on narrow screens */
-@media (max-width: 360px) {
+@media (max-width: 480px) {
+    .app-header__nav .header-nav__btn { min-width: 40px; padding: 6px 6px; }
+}
+
+@media (max-width: 400px) {
     .app-header__brand .aiba-app__title { font-size: 1rem; }
     .app-header__nav .header-nav__label { display: none; }
-    .app-header__nav .header-nav__btn { min-width: 40px; padding: 6px 8px; }
+    .app-header__nav .header-nav__btn { min-width: 38px; padding: 6px 4px; }
     .app-header__wallet .connect-wallet-btn span { display: none; }
     .app-header__wallet .connect-wallet-btn { padding-left: 10px; padding-right: 10px; }
 }
 
-@media (max-width: 280px) {
-    .app-header { gap: 8px 12px; }
+@media (max-width: 320px) {
+    .app-header { gap: 6px 10px; }
     .app-header__nav { gap: 4px; }
 }
 
@@ -1821,6 +1832,10 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
 }
 
 .card, .balance-strip { max-width: 100%; }
+
+/* Body/html: prevent horizontal overflow, never hide header */
+html, body { overflow-x: hidden; }
+html { scroll-behavior: smooth; }
 
 /* ─── Status message ────────────────────────────────────────────────────── */
 .status-msg {

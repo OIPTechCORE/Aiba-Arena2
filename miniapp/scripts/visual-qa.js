@@ -20,7 +20,7 @@ async function measure(el, label) {
 
 /** Check quick-nav for expected labels and report inconsistencies */
 async function verifyQuickNav(page) {
-  const expected = ['Guide', 'FAQs', 'Settings'];
+  const expected = ['Settings'];
   const inconsistencies = [];
   const btns = await page.$$('.quick-nav__btn');
   const actual = [];

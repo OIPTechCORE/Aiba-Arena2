@@ -2090,6 +2090,14 @@ export default function HomePage() {
                         )}
                         <span className="header-nav__label">Profile</span>
                     </button>
+                    <button type="button" className="btn btn--ghost header-nav__btn" onClick={() => setTab('university')} aria-label="Guide" title="Guide">
+                        <IconUniversity />
+                        <span className="header-nav__label">Guide</span>
+                    </button>
+                    <button type="button" className="btn btn--ghost header-nav__btn" onClick={() => { scrollToFaqRef.current = true; setTab('updates'); }} aria-label="FAQs" title="FAQs">
+                        <IconUpdates />
+                        <span className="header-nav__label">FAQs</span>
+                    </button>
                 </div>
                 <div className="app-header__wallet">
                     {wallet ? (
@@ -2116,8 +2124,6 @@ export default function HomePage() {
                 ) : null}
                 {status ? <p className={`status-msg ${status.toLowerCase().includes('fail') ? 'status-msg--error' : ''}`} style={{ margin: 0, width: '100%' }}>{status}</p> : null}
                 <div className="quick-nav">
-                    <button type="button" className="btn btn--ghost quick-nav__btn" onClick={() => setTab('university')} aria-label="Guide">Guide</button>
-                    <button type="button" className="btn btn--ghost quick-nav__btn" onClick={() => { scrollToFaqRef.current = true; setTab('updates'); }} aria-label="FAQs">FAQs</button>
                     <button type="button" className="btn btn--ghost quick-nav__btn quick-nav__btn--settings" onClick={() => setTab('settings')} aria-label="Settings">
                         <IconSettings />
                         Settings
