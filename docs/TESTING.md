@@ -133,3 +133,38 @@ This builds contracts and runs Jest tests in `tests/*.spec.ts`.
 - **New miniapp page/flow:** Ensure `miniapp` build still passes; add E2E later if needed.
 
 Running these tests before every release keeps the game reliable for the community.
+
+---
+
+## 7. Extended test plan (Realms, Assets, Governance, etc.)
+
+**Scope:** Realms, Missions, Mentors, Assets, Asset Marketplace, Governance, Treasury Ops.
+
+### Backend API checks
+
+- `GET /api/realms` — list (seeded or empty)
+- `GET /api/missions?realmKey=...` — missions
+- `POST /api/missions/complete` — rewards AIBA/NEUR
+- `GET /api/mentors`, `POST /api/mentors/assign`
+- `POST /api/assets/mint`, `POST /api/assets/upgrade`, `GET /api/assets/mine`
+- `POST /api/asset-marketplace/list`, `buy`, `rent`
+- `GET /api/governance/proposals`, `POST /api/governance/propose`, `POST /api/governance/vote`
+- `GET /api/treasury/ops` — burn/treasury/rewards/staking ledger
+
+### Miniapp UX checks
+
+- Tabs: Realms, Assets, Governance present
+- Realms: realm select, mission list, complete mission updates balances
+- Mentors: assign mentor, status message updates
+- Assets: mint, upgrade, list, buy, rent flows
+- Governance: propose and vote flows
+
+### Admin checks
+
+- Realms tab: create/update realm, list view
+- Marketplace tab: metrics load
+- Treasury Ops tab: metrics load
+
+### Contracts
+
+- Build: `npm run build`; tests: `npm test` (AiAssetRegistry, AiAssetMarketplaceEscrow, etc.)

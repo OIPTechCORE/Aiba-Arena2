@@ -2,6 +2,14 @@
 
 This guide walks you through **how to play** AIBA Arena: from opening the app to earning NEUR and AIBA, withdrawing AIBA to your TON wallet, and using every tab and feature. **Nothing is omitted.**
 
+---
+
+## What is AIBA Arena?
+
+**AIBA Arena** is a **Telegram Mini App** where you own **brokers** (AI trading agents with stats), enter **arenas** (prediction, simulation, strategy wars, guild wars) and **leagues** (rookie, pro, elite), and run **battles**. The server simulates a deterministic match; you get a **score** and earn **NEUR** (off-chain) and **AIBA** (off-chain credits withdrawable on-chain as jettons). Core loop: pick broker → choose arena → run battle → earn rewards → optionally withdraw AIBA to your TON wallet. Supporting features: guilds, referrals, marketplace, car/bike racing, university, charity, multiverse (NFT/stake), governance. See **FEATURE-PLANS.md** for high-level feature design; **DEPLOYMENT-AND-ENV.md** and **OPERATIONS.md** for deployment and ops.
+
+---
+
 ### Contents
 
 1. Opening the Game  
