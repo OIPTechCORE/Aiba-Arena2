@@ -36,6 +36,9 @@ const BrokerSchema = new mongoose.Schema(
 
         // Guild pool (optional)
         guildId: { type: mongoose.Schema.Types.ObjectId, ref: 'Guild', default: null, index: true },
+        // Rental (optional)
+        rentedByTelegramId: { type: String, default: '', trim: true },
+        rentedUntil: { type: Date, default: null },
 
         // Create-with-TON idempotency: one broker per txHash
         createdWithTonTxHash: { type: String, default: '', trim: true, sparse: true, index: true },

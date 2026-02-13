@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ADVISORY TOKENOMICS VIRAL FOUNDER REVENUE — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>ADVISORY TOKENOMICS VIRAL FOUNDER REVENUE</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Advisory: 1 Trillion AIBA, Viral Growth &amp; Billions (Users, AIBA, Founders)</h1>
+<p><strong>Scope:</strong> Tokenomics, viral mechanics, user/founder revenue, AIBA market cap. <strong>Context:</strong> AIBA Arena — Telegram Mini App, TON blockchain, AI Broker battle arena. <strong>Method:</strong> Deep global scan of backend, contracts, economy, referrals, racing, marketplace.</p>
+<hr/>
+<h2>Executive Summary</h2>
+<table>
+<thead><tr>
+<th>Topic</th>
+<th>Key Takeaway</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>1T AIBA Mint</strong></td>
+<td>Feasible; requires vault sizing, emission caps, and decimal policy. Supply must align with sinks (burns, staking, treasury) to avoid hyperinflation.</td>
+</tr>
+<tr>
+<td><strong>Viral Growth</strong></td>
+<td>Telegram distribution, referral loops (tiered 10th=2×, 100th=5× done), share via Telegram, leaderboard, guilds, gifts. K-factor target &gt; 0.3.</td>
+</tr>
+<tr>
+<td><strong>Users → Billions</strong></td>
+<td>Multi-path: battles (2 AIBA/score), referrals (10–50 AIBA), racing, staking (15% APY), NFT staking (12%), missions, marketplace. At scale, top players can earn $10k–$100k+/yr.</td>
+</tr>
+<tr>
+<td><strong>AIBA → Billions MC</strong></td>
+<td>1T supply × $0.001 = $1B FDV. Path: adoption → circulating supply growth → burns → scarcity → price. Realistic: $100M–$1B with 1M–10M DAU.</td>
+</tr>
+<tr>
+<td><strong>Founders → Billions</strong></td>
+<td>TON wallets (create broker, boost, guild, car/bike, university, stars) + treasury (25% of fee splits). Need 10M+ DAU or token appreciation.</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>0. Deep Scan — Codebase Summary</h2>
+<table>
+<thead><tr>
+<th>Area</th>
+<th>Location</th>
+<th>Key Findings</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Token contract</strong></td>
+<td><code>contracts/aiba_token.tact</code></td>
+<td>Mint message; owner-only; mintable; SafeTokenBurn</td>
+</tr>
+<tr>
+<td><strong>Vault</strong></td>
+<td><code>contracts/</code>, <code>scripts/deployAibaArena.ts</code></td>
+<td>ArenaRewardVault; oracle-signed claims</td>
+</tr>
+<tr>
+<td><strong>Economy caps</strong></td>
+<td><code>backend/models/EconomyConfig.js</code></td>
+<td>dailyCapAiba 1M, dailyCapNeur 10M; per-arena maps</td>
+</tr>
+<tr>
+<td><strong>Reward formula</strong></td>
+<td><code>backend/routes/battle.js</code></td>
+<td>score × baseRewardAibaPerScore (2) × mode.multiplier × boost</td>
+</tr>
+<tr>
+<td><strong>Referrals</strong></td>
+<td><code>backend/routes/referrals.js</code></td>
+<td>Tiered: 10th=2×, 100th=5×; NEUR + AIBA to referrer/referee</td>
+</tr>
+<tr>
+<td><strong>Racing</strong></td>
+<td><code>carRacing.js</code>, <code>bikeRacing.js</code></td>
+<td>Entry fee AIBA → pool; 3% fee; position bonus (1.5×→0.5×)</td>
+</tr>
+<tr>
+<td><strong>Marketplace</strong></td>
+<td><code>marketplace.js</code></td>
+<td>3% fee → token splits (Burn 15%, Treasury 25%, Rewards 50%, Staking 10%)</td>
+</tr>
+<tr>
+<td><strong>Asset fees</strong></td>
+<td><code>assets.js</code>, <code>assetMarketplace.js</code></td>
+<td>Mint 100 AIBA, upgrade 50 AIBA → computeTokenSplits</td>
+</tr>
+<tr>
+<td><strong>TON streams</strong></td>
+<td><code>.env.example</code>, routes</td>
+<td>11 wallets: broker, boost, guild, gifts, stars, car, bike, university</td>
+</tr>
+<tr>
+<td><strong>Staking</strong></td>
+<td>EconomyConfig</td>
+<td>stakingApyPercent 15; nftStakingApyPercent 12</td>
+</tr>
+<tr>
+<td><strong>Share</strong></td>
+<td><code>miniapp/src/lib/telegram.js</code></td>
+<td>shareViaTelegram() → t.me/share/url</td>
+</tr>
+<tr>
+<td><strong>Trainers</strong></td>
+<td><code>backend/routes/trainers.js</code>, <code>miniapp/src/app/trainer/</code></td>
+<td>Global network, dashboard, leaderboard; 5 AIBA/user, 20 AIBA/recruited trainer; viral recruitment</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>1. Minting 1 Trillion AIBA Tokens</h2>
+<h3>1.1 Current System</h3>
+<ul>
+<li><strong>Units:</strong> MVP assumes 1 token = 1 smallest unit (no decimals). If you adopt 9 decimals (like many jettons), 1T display = <code>1e21</code> smallest units</li>
+<li><strong>Vault:</strong> <code>ArenaRewardVault</code> receives minted AIBA; users claim via signed messages</li>
+<li><strong>Emission:</strong> Off-chain <code>EconomyDay</code> caps (<code>dailyCapAiba</code>, <code>dailyCapAibaByArena</code>) limit how much AIBA is credited per day</li>
+</ul>
+<h3>1.2 Allocation Strategy (Example for 1T Supply)</h3>
+<table>
+<thead><tr>
+<th>Bucket</th>
+<th>%</th>
+<th>Amount</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Vault (rewards)</td>
+<td>40%</td>
+<td>400B</td>
+<td>Battle/racing/quest rewards; drip over years</td>
+</tr>
+<tr>
+<td>Treasury</td>
+<td>15%</td>
+<td>150B</td>
+<td>Ops, liquidity, buybacks</td>
+</tr>
+<tr>
+<td>Staking rewards</td>
+<td>20%</td>
+<td>200B</td>
+<td>APY pool; vested over time</td>
+</tr>
+<tr>
+<td>Team/Advisors</td>
+<td>10%</td>
+<td>100B</td>
+<td>Vesting (e.g. 4yr, 1yr cliff)</td>
+</tr>
+<tr>
+<td>Ecosystem/Liquidity</td>
+<td>10%</td>
+<td>100B</td>
+<td>CEX/DEX liquidity, partnerships</td>
+</tr>
+<tr>
+<td>Community/Airdrops</td>
+<td>5%</td>
+<td>50B</td>
+<td>Launch, referrals, campaigns</td>
+</tr>
+</tbody></table>
+<h3>1.3 Emission Schedule vs Caps</h3>
+<ul>
+<li><strong>For 1T:</strong> Increase caps gradually or use time-based unlock (e.g. 400B vault = 2M/day for ~550 days)</li>
+<li><strong>Anti-inflation:</strong> Burns (marketplace fees, asset fees) and staking locks reduce circulating supply</li>
+</ul>
+<h3>1.4 Technical Steps</h3>
+<ol>
+<li><strong>Mint to Vault:</strong> <code>scripts/mintAibaToVault.ts</code> — amount in smallest units (1T = <code>1e12</code> if 1:1)</li>
+<li><strong>Adjust EconomyConfig:</strong></li>
+<li>- <code>dailyCapAiba</code> — tune for target emission curve</li>
+<li>- <code>baseRewardAibaPerScore</code> — keep low early; increase as adoption grows</li>
+<li><strong>Decimal policy:</strong> Decide 1:1 vs 9 decimals early; affects all UI and contract calls</li>
+</ol>
+<h3>1.5 Risks</h3>
+<table>
+<thead><tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Hyperinflation</td>
+<td>Strict daily caps; aggressive burns; long vesting</td>
+</tr>
+<tr>
+<td>Vault drain</td>
+<td>Monitor claim rate; top up periodically from treasury mint</td>
+</tr>
+<tr>
+<td>Regulatory</td>
+<td>Structure team/treasury vesting; avoid &quot;security&quot; classification in target jurisdictions</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>2. How to Make the Game Go Viral</h2>
+<h3>2.1 Current Viral Mechanics (In Codebase)</h3>
+<table>
+<thead><tr>
+<th>Mechanic</th>
+<th>Status</th>
+<th>Location</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Referrals</td>
+<td>✅</td>
+<td><code>referrals.js</code>; NEUR/AIBA; tiered 10th=2×, 100th=5×</td>
+</tr>
+<tr>
+<td>Share after battle</td>
+<td>✅</td>
+<td><code>shareViaTelegram()</code>; t.me/share/url</td>
+</tr>
+<tr>
+<td>Share referral link</td>
+<td>✅</td>
+<td>Share via Telegram button on Referrals tab</td>
+</tr>
+<tr>
+<td>Leaderboard</td>
+<td>✅</td>
+<td>Global + per-arena; badges for top players</td>
+</tr>
+<tr>
+<td>Guilds</td>
+<td>✅</td>
+<td>Guild wars; 20% NEUR to guild vault</td>
+</tr>
+<tr>
+<td>Gifts</td>
+<td>✅</td>
+<td>Pay TON to send gift; recipient notified</td>
+</tr>
+<tr>
+<td>Top referrers</td>
+<td>✅</td>
+<td><code>/api/referrals/top</code>; milestone hints in UI</td>
+</tr>
+</tbody></table>
+<h3>2.2 Amplification Strategies</h3>
+<h4>A. Referral Loop (Partially Implemented)</h4>
+<ul>
+<li><strong>Next:</strong></li>
+<li>- Referral leaderboard with exclusive badges/NFTs</li>
+<li>- &quot;Invite 3 to unlock X&quot; — gated content (e.g. premium arena)</li>
+<li>- Influencer codes; UTM tracking on ref links</li>
+</ul>
+<h4>B. Telegram-Native Virality</h4>
+<ul>
+<li><strong>Built-in sharing:</strong> <code>WebApp.share()</code> — &quot;I just won 50 AIBA!&quot;</li>
+<li><strong>Bot commands:</strong> <code>/start ref=CODE</code> — deep links from ads/channels</li>
+<li><strong>Notifications:</strong> Battle win push; &quot;Your friend just joined&quot; — both drive re-engagement</li>
+</ul>
+<h4>C. Social Proof &amp; FOMO</h4>
+<ul>
+<li><strong>&quot;X players online&quot;</strong> — activity indicator</li>
+<li><strong>Limited-time arenas/events</strong> — seasonal modes, double rewards</li>
+<li><strong>Exclusive items:</strong> First 1000 mint, time-limited badges</li>
+</ul>
+<h4>D. Gamification Loops</h4>
+<ul>
+<li><strong>Achievements:</strong> &quot;10 battles in 1 day&quot; → badge + AIBA</li>
+<li><strong>Seasonal leagues:</strong> Reset + rewards; fresh competition</li>
+<li><strong>Guild wars events:</strong> Weekend tournaments; winner takes pool</li>
+</ul>
+<h4>E. Content &amp; Community</h4>
+<ul>
+<li><strong>Influencer codes:</strong> Custom referral codes for partners</li>
+<li><strong>Meme/telegram stickers:</strong> Brand assets for organic sharing</li>
+</ul>
+<h3>2.3 Viral K-Factor Estimation</h3>
+<ul>
+<li><strong>Target:</strong> K &gt; 0.3 for sustainable virality</li>
+<li><strong>Example:</strong> 1 user invites 3 (i=3); 15% convert (c=0.15) → K = 0.45</li>
+<li><strong>Measurement:</strong> Track <code>referrals/use</code> per user; cohort conversion; time-to-first-invite</li>
+</ul>
+<hr/>
+<h2>3. A. Users → Billions: How Players Earn</h2>
+<h3>3A.1 User Earning Paths (From Codebase)</h3>
+<table>
+<thead><tr>
+<th>Path</th>
+<th>Source</th>
+<th>Formula / Amount</th>
+<th>Config</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Battles</strong></td>
+<td>Battle win</td>
+<td>score × 2 (baseRewardAibaPerScore) × mode.mult × boost</td>
+<td>EconomyConfig</td>
+</tr>
+<tr>
+<td><strong>Referrals</strong></td>
+<td>Per referee</td>
+<td>Referrer: 10 AIBA base; 2× at 10 refs; 5× at 100</td>
+<td>referralRewardAibaReferrer</td>
+</tr>
+<tr>
+<td><strong>Referrals (referee)</strong></td>
+<td>Apply code</td>
+<td>5 AIBA base; 1.5× at 10; 2× at 100</td>
+<td>referralRewardAibaReferee</td>
+</tr>
+<tr>
+<td><strong>NEUR</strong></td>
+<td>Battles, referrals, daily</td>
+<td>score × baseRewardNeurPerScore; 250/150 ref; 50 daily</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Racing</strong></td>
+<td>Car/Bike race</td>
+<td>Pool × positionBonus / N; 3% fee; entry 10 AIBA</td>
+<td>carEntryFeeAiba, carRacingFeeBps</td>
+</tr>
+<tr>
+<td><strong>Staking</strong></td>
+<td>Lock AIBA</td>
+<td>15% APY (stakingApyPercent)</td>
+<td>EconomyConfig</td>
+</tr>
+<tr>
+<td><strong>NFT staking</strong></td>
+<td>Stake Broker NFT</td>
+<td>12% APY; 5 AIBA/day (nftStakingRewardPerDayAiba)</td>
+<td>EconomyConfig</td>
+</tr>
+<tr>
+<td><strong>Missions</strong></td>
+<td>Complete mission</td>
+<td>rewardAiba, rewardNeur (admin-set)</td>
+<td>Mission model</td>
+</tr>
+<tr>
+<td><strong>Tasks</strong></td>
+<td>Complete task</td>
+<td>rewardAiba, rewardNeur (admin-set)</td>
+<td>Task model</td>
+</tr>
+<tr>
+<td><strong>Marketplace</strong></td>
+<td>Sell broker/car/bike</td>
+<td>price − 3% fee; seller receives 97%</td>
+<td>marketplaceFeeBps</td>
+</tr>
+</tbody></table>
+<h3>3A.2 User Earning Scenarios (Illustrative)</h3>
+<p>Assume AIBA = $0.001 for conservative; $0.01 for bullish.</p>
+<table>
+<thead><tr>
+<th>User Type</th>
+<th>Monthly Activity</th>
+<th>AIBA Earned/mo</th>
+<th>@ $0.001</th>
+<th>@ $0.01</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Casual (3 battles/day)</td>
+<td>~90 battles, avg score 80</td>
+<td>~14,400 AIBA</td>
+<td>$14</td>
+<td>$144</td>
+</tr>
+<tr>
+<td>Active (10 battles/day)</td>
+<td>~300 battles</td>
+<td>~48,000 AIBA</td>
+<td>$48</td>
+<td>$480</td>
+</tr>
+<tr>
+<td>Referrer (5 refs/mo)</td>
+<td>5 × 10 AIBA</td>
+<td>50 AIBA</td>
+<td>$0.05</td>
+<td>$0.50</td>
+</tr>
+<tr>
+<td>Power referrer (50 refs)</td>
+<td>50 × 20 (tiered avg)</td>
+<td>~1,000 AIBA</td>
+<td>$1</td>
+<td>$10</td>
+</tr>
+<tr>
+<td>Top referrer (500 refs)</td>
+<td>500 × 25 (5× tier)</td>
+<td>~12,500 AIBA</td>
+<td>$12.50</td>
+<td>$125</td>
+</tr>
+<tr>
+<td>Staker (100k AIBA)</td>
+<td>15% APY</td>
+<td>~1,250 AIBA/mo</td>
+<td>$1.25</td>
+<td>$12.50</td>
+</tr>
+<tr>
+<td>Racer (10 races, 50% win)</td>
+<td>Entry 10 AIBA; win share</td>
+<td>Net positive if wins</td>
+<td>varies</td>
+<td>varies</td>
+</tr>
+<tr>
+<td>Marketplace seller</td>
+<td>5 brokers @ 1k AIBA</td>
+<td>4,850 (after 3% fee)</td>
+<td>$4.85</td>
+<td>$48.50</td>
+</tr>
+</tbody></table>
+<h3>3A.3 Path to &quot;Billions for Users&quot; (Collectively)</h3>
+<ul>
+<li>At <strong>1M DAU</strong>, 5 battles/user/day, avg 80 score → 1M × 30 × 5 × 80 × 2 = <strong>24B AIBA/month</strong> from battles alone (if cap allows).</li>
+<li><strong> dailyCapAiba = 1M</strong> → max 30M AIBA/month from battles (cap-limited).</li>
+<li>To reach <strong>$1B total user earnings/year</strong>:</li>
+<li>- Need ~1B AIBA distributed/year at $0.001 → <strong>83M AIBA/month</strong> → raise dailyCapAiba to ~2.7M+.</li>
+<li>- Or AIBA at $0.01 → <strong>83M AIBA/month</strong> at $0.01 = $830M/year; add referrals, racing, staking → <strong>$1B+</strong>.</li>
+<li><strong>Individual whales:</strong> Top leaderboard players (10 battles/day, 100 score, 365 days) → 730k AIBA/year. At $0.01 = <strong>$7,300/year</strong>. With referrals (500) + staking + marketplace → <strong>$10k–$50k+/year</strong> for top 0.1%.</li>
+</ul>
+<hr/>
+<h2>4. B. AIBA Token → Billions Market Cap</h2>
+<h3>4B.1 Supply &amp; FDV</h3>
+<ul>
+<li><strong>FDV</strong> = Supply × Price</li>
+</ul>
+<table>
+<thead><tr>
+<th>AIBA Price</th>
+<th>FDV</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>$0.0001</td>
+<td>$100M</td>
+</tr>
+<tr>
+<td>$0.001</td>
+<td>$1B</td>
+</tr>
+<tr>
+<td>$0.01</td>
+<td>$10B</td>
+</tr>
+<tr>
+<td>$0.10</td>
+<td>$100B</td>
+</tr>
+</tbody></table>
+<h3>4B.2 Circulating Supply &amp; Burns</h3>
+<ul>
+<li><strong>Locked:</strong> Staking (15% APY pool), team vesting, treasury → reduces effective circulating supply</li>
+<li><strong>Emission:</strong> Vault drips → increases circulating supply until caps or allocation exhausted</li>
+</ul>
+<p><strong>Net effect:</strong> Early = inflation (emission &gt; burns). Mature = deflation (burns + locks &gt; emission) → upward price pressure.</p>
+<h3>4B.3 Path to $1B Market Cap</h3>
+<table>
+<thead><tr>
+<th>Phase</th>
+<th>Circulating (est.)</th>
+<th>Price Target</th>
+<th>FDV</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Launch</td>
+<td>10B (1%)</td>
+<td>$0.0001</td>
+<td>$1M</td>
+</tr>
+<tr>
+<td>Traction (100k DAU)</td>
+<td>50B (5%)</td>
+<td>$0.0002</td>
+<td>$10M</td>
+</tr>
+<tr>
+<td>Growth (500k DAU)</td>
+<td>100B (10%)</td>
+<td>$0.002</td>
+<td>$200M</td>
+</tr>
+<tr>
+<td>Scale (2M DAU)</td>
+<td>200B (20%)</td>
+<td>$0.005</td>
+<td>$1B</td>
+</tr>
+<tr>
+<td>Breakout (10M DAU)</td>
+<td>400B (40%)</td>
+<td>$0.01</td>
+<td>$4B</td>
+</tr>
+</tbody></table>
+<p><strong>Drivers:</strong> DAU growth, dailyCapAiba tune, burns from marketplace/asset fees, CEX/DEX listings, treasury buybacks.</p>
+<h3>4B.4 Risk Factors</h3>
+<ul>
+<li><strong>No product-market fit:</strong> Low retention → no sustained demand</li>
+<li><strong>Regulatory:</strong> Token classification may restrict liquidity/listing</li>
+</ul>
+<hr/>
+<h2>5. C. Founders → Billions</h2>
+<h3>5.1 Revenue Streams (From Codebase)</h3>
+<table>
+<thead><tr>
+<th>Stream</th>
+<th>Type</th>
+<th>Dest</th>
+<th>Config</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Create broker (TON)</td>
+<td>TON</td>
+<td>CREATED_BROKERS_WALLET</td>
+<td>createBrokerCostTonNano (1 TON default)</td>
+</tr>
+<tr>
+<td>Boost profile (TON)</td>
+<td>TON</td>
+<td>BOOST_PROFILE_WALLET</td>
+<td>boostProfileCostTonNano</td>
+</tr>
+<tr>
+<td>Gifts (TON)</td>
+<td>TON</td>
+<td>GIFTS_WALLET</td>
+<td>giftCostTonNano</td>
+</tr>
+<tr>
+<td>Create guild (TON)</td>
+<td>TON</td>
+<td>LEADER_BOARD_WALLET</td>
+<td>createGroupCostTonNano</td>
+</tr>
+<tr>
+<td>Boost guild (TON)</td>
+<td>TON</td>
+<td>BOOST_GROUP_WALLET</td>
+<td>boostGroupCostTonNano</td>
+</tr>
+<tr>
+<td>Battle boost (TON)</td>
+<td>TON</td>
+<td>BOOST_TON_WALLET</td>
+<td>boostCostTonNano</td>
+</tr>
+<tr>
+<td>Stars Store (TON)</td>
+<td>TON</td>
+<td>STARS_STORE_WALLET</td>
+<td>starsStorePackPriceTonNano</td>
+</tr>
+<tr>
+<td>Car create (TON)</td>
+<td>TON</td>
+<td>CAR_RACING_WALLET</td>
+<td>createCarCostTonNano</td>
+</tr>
+<tr>
+<td>Bike create (TON)</td>
+<td>TON</td>
+<td>MOTORCYCLE_RACING_WALLET</td>
+<td>createBikeCostTonNano</td>
+</tr>
+<tr>
+<td>Marketplace fee</td>
+<td>AIBA</td>
+<td>Burn/Treasury/splits</td>
+<td>marketplaceFeeBps (3%)</td>
+</tr>
+<tr>
+<td>Asset mint/upgrade</td>
+<td>AIBA</td>
+<td>TreasuryOp (splits)</td>
+<td>tokenSplitTreasuryBps (25%)</td>
+</tr>
+<tr>
+<td>University badges</td>
+<td>TON</td>
+<td>UNIVERSITY_BADGE_TON_WALLET</td>
+<td>10 TON, 15 TON</td>
+</tr>
+<tr>
+<td>Trainers (AIBA)</td>
+<td>AIBA</td>
+<td>Ecosystem (claim-rewards)</td>
+<td>5 AIBA per qualified referee, 20 AIBA per recruited trainer (on approval)</td>
+</tr>
+</tbody></table>
+<p><strong>Token splits (EconomyConfig):</strong> Burn 15%, Treasury 25%, Rewards 50%, Staking 10%. Treasury = founder-controlled if keys are held by team.</p>
+<h3>5.2 TON Revenue Model (Conservative)</h3>
+<p>Assume TON ≈ $5 (illustrative).</p>
+<table>
+<thead><tr>
+<th>Action</th>
+<th>Cost (TON)</th>
+<th>Users Doing It</th>
+<th>Monthly Revenue (USD)</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Create broker</td>
+<td>1</td>
+<td>5% of DAU</td>
+<td>0.05 × DAU × 1 × $5</td>
+</tr>
+<tr>
+<td>Boost profile</td>
+<td>1</td>
+<td>2%</td>
+<td>0.02 × DAU × 1 × $5</td>
+</tr>
+<tr>
+<td>Gift</td>
+<td>1</td>
+<td>1%</td>
+<td>0.01 × DAU × 1 × $5</td>
+</tr>
+<tr>
+<td>Create guild</td>
+<td>1</td>
+<td>0.5%</td>
+<td>0.005 × DAU × 1 × $5</td>
+</tr>
+<tr>
+<td>Boost guild</td>
+<td>1</td>
+<td>1%</td>
+<td>0.01 × DAU × 1 × $5</td>
+</tr>
+<tr>
+<td>Car/Bike create</td>
+<td>1</td>
+<td>3%</td>
+<td>0.03 × DAU × 1 × $5</td>
+</tr>
+<tr>
+<td>University badge</td>
+<td>10–15</td>
+<td>0.1%</td>
+<td>0.001 × DAU × 12 × $5</td>
+</tr>
+</tbody></table>
+<p><strong>Blended:</strong> ~0.1 TON/user/month from paying users → <strong>0.1 × DAU × $5 = $0.5 × DAU</strong> per month from TON.</p>
+<h3>5.3 AIBA Revenue Model (Treasury Share)</h3>
+<ul>
+<li><strong>Effective:</strong> 3% × 25% = 0.75% of GMV to treasury</li>
+<li>If GMV = 100M AIBA/month and AIBA = $0.001 → $100k GMV → $750 to treasury</li>
+<li>At scale: 1B AIBA GMV, AIBA $0.01 → $10M GMV → $75k treasury/month</li>
+</ul>
+<h3>5.4 &quot;Billions for Founders&quot; Scenarios</h3>
+<p><strong>Scenario A: 1M DAU, $5 TON</strong></p>
+<ul>
+<li>Annual TON: <strong>~$6M</strong></li>
+<li>To reach $1B from TON: need ~167× more → <strong>~167M DAU</strong> (or much higher ARPU)</li>
+</ul>
+<p><strong>Scenario B: 10M DAU, $10 TON, 0.2 TON ARPU</strong></p>
+<ul>
+<li>Plus AIBA treasury (e.g. $50M/year from fees) → <strong>~$290M/year</strong></li>
+<li>To reach $1B: ~3.5 years at that run rate, or 35M DAU</li>
+</ul>
+<p><strong>Scenario C: 50M DAU, $15 TON, 0.3 TON ARPU</strong></p>
+<ul>
+<li>This scale implies viral success + strong retention + premium features</li>
+</ul>
+<p><strong>Scenario D: Token Appreciation</strong></p>
+<ul>
+<li>At $0.001 → $100M. At $0.0001 → $10M</li>
+<li>Requires adoption, liquidity, and sustained demand</li>
+</ul>
+<h3>5.5 Levers to Maximize Founder Revenue</h3>
+<table>
+<thead><tr>
+<th>Lever</th>
+<th>Action</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>DAU</strong></td>
+<td>Referral + viral mechanics; Telegram ads; influencer partnerships</td>
+</tr>
+<tr>
+<td><strong>ARPU</strong></td>
+<td>Premium arenas, battle boost, guild creation, car/bike creation</td>
+</tr>
+<tr>
+<td><strong>Retention</strong></td>
+<td>Streaks, seasons, guild loyalty, achievement hooks</td>
+</tr>
+<tr>
+<td><strong>TON price</strong></td>
+<td>Hedging; treasury diversification</td>
+</tr>
+<tr>
+<td><strong>Token allocation</strong></td>
+<td>Team/treasury %; vesting schedule</td>
+</tr>
+<tr>
+<td><strong>New revenue</strong></td>
+<td>Ads (Telegram Ads, in-game), subscriptions, NFT royalties</td>
+</tr>
+</tbody></table>
+<h3>5.6 Realistic Ranges</h3>
+<table>
+<thead><tr>
+<th>Milestone</th>
+<th>DAU</th>
+<th>TON Revenue (est.)</th>
+<th>AIBA Treasury (est.)</th>
+<th>Timeframe</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Early traction</td>
+<td>10k</td>
+<td>$5k/mo</td>
+<td>$1k/mo</td>
+<td>6–12 mo</td>
+</tr>
+<tr>
+<td>Growth</td>
+<td>100k</td>
+<td>$50k/mo</td>
+<td>$10k/mo</td>
+<td>12–24 mo</td>
+</tr>
+<tr>
+<td>Scale</td>
+<td>1M</td>
+<td>$500k/mo</td>
+<td>$100k/mo</td>
+<td>24–36 mo</td>
+</tr>
+<tr>
+<td>Breakout</td>
+<td>10M</td>
+<td>$5M/mo</td>
+<td>$1M/mo</td>
+<td>36+ mo</td>
+</tr>
+<tr>
+<td>Billions</td>
+<td>50M+</td>
+<td>$200M+/mo</td>
+<td>$50M+/mo</td>
+<td>5+ years</td>
+</tr>
+</tbody></table>
+<p><strong>&quot;Billions&quot;</strong> is achievable only at <strong>tens of millions of DAU</strong> and/or <strong>large token appreciation</strong> (founders holding a meaningful % of supply). The game has strong mechanics; execution on distribution and retention is the bottleneck.</p>
+<hr/>
+<h2>6. Action Items</h2>
+<h3>For 1T Mint</h3>
+<ol>
+<li>[ ] Set decimal policy (1:1 vs 9 decimals)</li>
+<li>[ ] Size vault for 3–5 year emission; adjust <code>dailyCapAiba</code></li>
+<li>[ ] Deploy and mint; document in runbook</li>
+</ol>
+<h3>For Viral Growth</h3>
+<ol>
+<li>[x] Add referral leaderboard + exclusive badges (<code>/api/referrals/top</code>; top 3 styled in Referrals tab)</li>
+<li>[x] Integrate <code>WebApp.share()</code> / shareViaTelegram post-battle + referral</li>
+<li>[ ] Launch seasonal events / limited-time modes</li>
+<li>[x] Track K-factor and cohort conversion (<code>GET /api/admin/referrals/metrics</code> — K estimate, avg refs, conversion hint)</li>
+<li>[x] Invite 3 to unlock — 1% battle reward bonus when user has 3+ referrals; config <code>referralUnlock3BonusBps</code> (EconomyConfig)</li>
+</ol>
+<h3>For Founder Revenue</h3>
+<ol>
+<li>[ ] Model ARPU by cohort; A/B test premium features</li>
+<li>[ ] Plan token vesting (team, advisors) for legal/regulatory clarity</li>
+<li>[ ] Consider treasury diversification (TON → stablecoins, etc.)</li>
+</ol>
+<hr/>
+<h2>7. Related</h2>
+<ul>
+<li><a href="./GAME-FUNCTIONALITY.md">GAME-FUNCTIONALITY.md</a> — Battle engine, economy, API</li>
+<li><a href="./TRAINERS-MANUAL.md">TRAINERS-MANUAL.md</a> — Global trainers/coaches network, dashboard, leaderboard, viral recruitment, rewards</li>
+<li><a href="./REPORTS-MONITORING.md">REPORTS-MONITORING.md</a> — Cross-validation of all advisory and audit reports vs codebase</li>
+</ul>
+<hr/>
+<h2>8. Disclaimer</h2>
+<p>This document is advisory. Revenue projections are illustrative and depend on market conditions, execution, competition, and regulation. Token economics and legal structure should be reviewed by qualified advisors. Past performance of similar projects does not guarantee future results.</p>
+  </div>
+</body>
+</html>

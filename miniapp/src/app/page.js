@@ -3,7 +3,7 @@
 import { TonConnectButton, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createApi, getErrorMessage } from '../lib/api';
-import { getTelegramUserUnsafe } from '../lib/telegram';
+import { getTelegramUserUnsafe, shareViaTelegram } from '../lib/telegram';
 import { buildRewardClaimPayload } from '../lib/tonRewardClaim';
 import { buildJettonTransferPayload, buildListingForwardPayload } from '../lib/tonJetton';
 
@@ -138,6 +138,31 @@ const IconLeaderboard = () => (
         <path d="M6 9H4.5a2.5 2.5 0 010-5H6" /><path d="M18 9h1.5a2.5 2.5 0 000-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2h-3v10.5a2.5 2.5 0 01-5 0V2H6v10.5a2.5 2.5 0 01-5 0" />
     </svg>
 );
+const IconTrophy = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M8 21h8" /><path d="M12 17v4" /><path d="M7 4h10v4a5 5 0 01-10 0V4z" /><path d="M5 4h2v2" /><path d="M17 4h2v2" /><path d="M12 7v4" /><path d="M7 10H5a3 3 0 003 3h2" /><path d="M17 10h2a3 3 0 01-3 3h-2" /><path d="M8 14h8" />
+    </svg>
+);
+const IconBoss = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="12" cy="12" r="10" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /><path d="M2 12h20" />
+    </svg>
+);
+const IconPremium = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M12 2L2 8l4 14h12l4-14L12 2z" /><path d="M12 2v20" /><path d="M2 8h20" /><path d="M6 22l6-14 6 14" />
+    </svg>
+);
+const IconRent = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><path d="M9 22V12h6v10" />
+    </svg>
+);
+const IconBreed = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M12 2v4" /><path d="M12 18v4" /><path d="M4.93 4.93l2.83 2.83" /><path d="M16.24 16.24l2.83 2.83" /><path d="M2 12h4" /><path d="M18 12h4" /><path d="M4.93 19.07l2.83-2.83" /><path d="M16.24 7.76l2.83-2.83" /><circle cx="12" cy="12" r="3" />
+    </svg>
+);
 const IconTasks = () => (
     <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M9 6h11" /><path d="M9 12h11" /><path d="M9 18h11" />
@@ -185,6 +210,7 @@ const BADGE_LABELS = {
     university_graduate: { label: 'University Graduate', color: 'var(--accent-cyan)', title: 'Completed all University modules' },
     course_completion: { label: 'Course Completion', color: 'var(--accent-green)', title: 'Minted after completing at least one course' },
     full_course_completion_certificate: { label: 'Full Course Certificate', color: 'var(--accent-gold)', title: 'Minted after completing all courses' },
+    top_referrer: { label: 'Top Referrer', color: 'var(--accent-cyan)', title: 'Top 3 on referral leaderboard' },
 };
 
 /* Short explanations for tabs (what brokers, arenas, guilds are) */
@@ -200,11 +226,39 @@ const ARENA_OPTIONS = [
     { value: 'guildWars', label: 'Guild Wars' },
 ];
 
+/* Hero banner content per tab */
+const HERO_BY_TAB = {
+    home: { title: 'AI BROKER ARENA', sub: 'Own AI brokers. Compete in 3D arenas. Earn NEUR & AIBA.', hint: 'Swipe the tab bar to explore Home, Brokers, Market, Racing, and more.', buttonLabel: 'FAQs', buttonAction: 'updates' },
+    brokers: { title: 'BROKERS', sub: BROKERS_EXPLANATION, hint: 'New broker, tasks, run battle, vault. Combine or mint NFT.', buttonLabel: 'View', buttonAction: 'scroll' },
+    tasks: { title: 'TASK CENTER', sub: 'Personalized mission queue for every player profile.', hint: 'Newcomer, fighter, trader, racer, social, scholar, and investor.', buttonLabel: 'View', buttonAction: 'scroll' },
+    leaderboard: { title: 'LEADERBOARD', sub: 'Global ranks by score, AIBA, NEUR, or battles.', hint: 'Run battles to climb the ranks.', buttonLabel: 'View', buttonAction: 'scroll' },
+    referrals: { title: 'REFERRALS', sub: 'Earn NEUR & AIBA when friends join.', hint: 'Share your link or apply a friend\'s code.', buttonLabel: 'View', buttonAction: 'scroll' },
+    arenas: { title: 'ARENAS', sub: ARENAS_EXPLANATION, hint: 'Choose arena and run battle. Guild Wars needs a guild.', buttonLabel: 'View', buttonAction: 'scroll' },
+    guilds: { title: 'GUILDS', sub: GUILDS_EXPLANATION, hint: 'Create or join a group; deposit brokers to the pool.', buttonLabel: 'View', buttonAction: 'scroll' },
+    market: { title: 'MARKET', sub: 'Sell a broker for AIBA or buy one.', hint: 'Withdraw from guild first to list.', buttonLabel: 'View', buttonAction: 'scroll' },
+    tournaments: { title: 'TOURNAMENTS', sub: 'Enter AIBA tournaments. Compete, win prizes from the pool.', hint: 'Pay AIBA to enter; top 4 share the prize pool.', buttonLabel: 'View', buttonAction: 'scroll' },
+    globalBoss: { title: 'GLOBAL BOSS', sub: 'Fight the community boss. Damage from battles counts. Share reward pool.', hint: 'Run battles to deal damage. When boss falls, top damagers earn AIBA.', buttonLabel: 'View', buttonAction: 'scroll' },
+    carRacing: { title: 'CAR RACING', sub: 'Autonomous car racing. Create or buy a car, enter open races.', hint: 'Earn AIBA by finish position. System shop sells cars for AIBA.', buttonLabel: 'View', buttonAction: 'scroll' },
+    bikeRacing: { title: 'BIKE RACING', sub: 'Autonomous motorcycle racing. Create or buy a bike, enter races.', hint: 'Earn AIBA by finish position.', buttonLabel: 'View', buttonAction: 'scroll' },
+    multiverse: { title: 'NFT MULTIVERSE', sub: 'Own Broker NFTs, stake them to earn AIBA daily.', hint: 'Mint from Brokers tab (pay AIBA).', buttonLabel: 'View', buttonAction: 'scroll' },
+    charity: { title: 'COMMUNITY IMPACT', sub: 'Unite for Good. Donate NEUR or AIBA to causes.', hint: 'Every contribution counts.', buttonLabel: 'View', buttonAction: 'scroll' },
+    university: { title: 'AIBA ARENA UNIVERSITY', sub: 'Complete systematic guide. Learn brokers, arenas, economy, guilds.', hint: 'Expand courses below. Complete all to earn the University Graduate badge.', buttonLabel: 'View', buttonAction: 'scroll' },
+    realms: { title: 'AI REALMS', sub: 'Select a realm and complete missions to earn rewards.', hint: 'Explore AI Realms and complete missions.', buttonLabel: 'View', buttonAction: 'scroll' },
+    assets: { title: 'AI ASSETS', sub: 'Mint, upgrade, list, buy, and rent AI assets.', hint: 'AI Agent, AI Brain, AI Creator, AI Workflow, AI System.', buttonLabel: 'View', buttonAction: 'scroll' },
+    governance: { title: 'GOVERNANCE', sub: 'Create proposals and vote. Community-driven decisions.', hint: 'Propose and vote on ecosystem changes.', buttonLabel: 'View', buttonAction: 'scroll' },
+    updates: { title: 'UPDATES & FAQs', sub: 'Announcements, status & support.', hint: 'Stay informed. News, maintenance and answers to common questions.', buttonLabel: 'View', buttonAction: 'scroll' },
+    profile: { title: 'PROFILE', sub: 'Your profile, balances, badges, and account details.', hint: 'Wallet & more.', buttonLabel: 'View', buttonAction: 'scroll' },
+    settings: { title: 'SETTINGS', sub: 'App preferences, notifications, and account options.', hint: 'Theme, sound, privacy, and more.', buttonLabel: 'View', buttonAction: 'scroll' },
+    wallet: { title: 'WALLET', sub: 'Claim AIBA on-chain. Stake, DAO, Stars, Diamonds.', hint: 'Connect wallet, create claim, sign tx. Daily NEUR, stake AIBA.', buttonLabel: 'View', buttonAction: 'scroll' },
+};
+
 /* 4×4 home grid: quick access to features (eduSUITE-style) */
 const HOME_GRID_ITEMS = [
     { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
     { id: 'referrals', label: 'Referrals', Icon: IconShare },
     { id: 'market', label: 'Market', Icon: IconMarket },
+    { id: 'tournaments', label: 'Tournaments NEW', Icon: IconTrophy },
+    { id: 'globalBoss', label: 'Global Boss NEW', Icon: IconBoss },
     { id: 'arenas', label: 'Arenas', Icon: IconArena },
     { id: 'carRacing', label: 'Car Racing', Icon: IconCar },
     { id: 'bikeRacing', label: 'Bike Racing', Icon: IconBike },
@@ -227,6 +281,8 @@ const TAB_LIST = [
     { id: 'settings', label: 'Settings', Icon: IconSettings },
     { id: 'tasks', label: 'Tasks', Icon: IconTasks },
     { id: 'leaderboard', label: 'Leaderboard', Icon: IconLeaderboard },
+    { id: 'tournaments', label: 'Tournaments NEW', Icon: IconTrophy },
+    { id: 'globalBoss', label: 'Global Boss NEW', Icon: IconBoss },
     { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
     { id: 'market', label: 'Market', Icon: IconMarket },
     { id: 'carRacing', label: 'Car Racing', Icon: IconCar },
@@ -303,6 +359,23 @@ export default function HomePage() {
     const lastScrollYRef = useRef(0);
     const [carFlow, setCarFlow] = useState('garage'); // garage | system | market | race | leaderboard
     const [bikeFlow, setBikeFlow] = useState('garage'); // garage | system | market | race | leaderboard
+    const [tournaments, setTournaments] = useState([]);
+    const [selectedTournament, setSelectedTournament] = useState(null);
+    const [tournamentBrokerId, setTournamentBrokerId] = useState('');
+    const [tournamentsMsg, setTournamentsMsg] = useState('');
+    const [globalBoss, setGlobalBoss] = useState(null);
+    const [globalBossMsg, setGlobalBossMsg] = useState('');
+    const [premiumStatus, setPremiumStatus] = useState(null);
+    const [premiumTxHash, setPremiumTxHash] = useState('');
+    const [premiumMsg, setPremiumMsg] = useState('');
+    const [brokerRentals, setBrokerRentals] = useState([]);
+    const [rentalPricePerHour, setRentalPricePerHour] = useState('');
+    const [listRentalBrokerId, setListRentalBrokerId] = useState('');
+    const [rentalMsg, setRentalMsg] = useState('');
+    const [breedBrokerA, setBreedBrokerA] = useState('');
+    const [breedBrokerB, setBreedBrokerB] = useState('');
+    const [breedingMsg, setBreedingMsg] = useState('');
+    const [comboClaimMsg, setComboClaimMsg] = useState('');
 
     // Leaderboard
     const [leaderboard, setLeaderboard] = useState([]);
@@ -411,6 +484,157 @@ export default function HomePage() {
             await refreshEconomy();
         } catch (e) {
             setMarketMsg(getErrorMessage(e, 'Buy failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // Tournaments
+    async function refreshTournaments() {
+        try {
+            const res = await api.get('/api/tournaments', { params: { status: 'all' } });
+            setTournaments(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setTournaments([]);
+        }
+    }
+    async function enterTournament(tId, brokerId) {
+        if (!brokerId) return;
+        setBusy(true);
+        setTournamentsMsg('');
+        try {
+            await api.post(`/api/tournaments/${tId}/enter`, { brokerId });
+            setTournamentsMsg('Entered!');
+            await refreshTournaments();
+            await refreshEconomy();
+        } catch (e) {
+            setTournamentsMsg(getErrorMessage(e, 'Entry failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // Global Boss
+    async function refreshGlobalBoss() {
+        try {
+            const res = await api.get('/api/global-boss');
+            setGlobalBoss(res.data || null);
+        } catch {
+            setGlobalBoss(null);
+        }
+    }
+
+    // Premium
+    async function refreshPremiumStatus() {
+        try {
+            const res = await api.get('/api/premium/status');
+            setPremiumStatus(res.data || null);
+        } catch {
+            setPremiumStatus(null);
+        }
+    }
+    async function buyPremium() {
+        if (!premiumTxHash.trim()) return;
+        setBusy(true);
+        setPremiumMsg('');
+        try {
+            const res = await api.post('/api/premium/buy', { txHash: premiumTxHash.trim() });
+            setPremiumMsg(`Premium activated until ${res.data?.premiumUntil ? new Date(res.data.premiumUntil).toLocaleDateString() : '—'}.`);
+            setPremiumTxHash('');
+            await refreshPremiumStatus();
+        } catch (e) {
+            setPremiumMsg(getErrorMessage(e, 'Purchase failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // Broker Rental
+    async function refreshBrokerRentals() {
+        try {
+            const res = await api.get('/api/broker-rental');
+            setBrokerRentals(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setBrokerRentals([]);
+        }
+    }
+    async function listBrokerForRent() {
+        if (!listRentalBrokerId || !rentalPricePerHour.trim()) return;
+        setBusy(true);
+        setRentalMsg('');
+        try {
+            await api.post('/api/broker-rental/list', { brokerId: listRentalBrokerId, priceAibaPerHour: Number(rentalPricePerHour) });
+            setRentalMsg('Listed for rent.');
+            setListRentalBrokerId('');
+            setRentalPricePerHour('');
+            await refreshBrokerRentals();
+            await refreshBrokers();
+        } catch (e) {
+            setRentalMsg(getErrorMessage(e, 'List failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function rentBroker(rentalId) {
+        setBusy(true);
+        setRentalMsg('');
+        try {
+            await api.post(`/api/broker-rental/${rentalId}/rent`);
+            setRentalMsg('Rented for 1 hour.');
+            await refreshBrokerRentals();
+            await refreshBrokers();
+            await refreshEconomy();
+        } catch (e) {
+            setRentalMsg(getErrorMessage(e, 'Rent failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function unlistRental(rentalId) {
+        setBusy(true);
+        setRentalMsg('');
+        try {
+            await api.post(`/api/broker-rental/${rentalId}/unlist`);
+            setRentalMsg('Unlisted.');
+            await refreshBrokerRentals();
+            await refreshBrokers();
+        } catch (e) {
+            setRentalMsg(getErrorMessage(e, 'Unlist failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // Breeding
+    async function breedBrokers() {
+        if (!breedBrokerA || !breedBrokerB) return;
+        setBusy(true);
+        setBreedingMsg('');
+        try {
+            const res = await api.post('/api/breeding/breed', { brokerIdA: breedBrokerA, brokerIdB: breedBrokerB });
+            setBreedingMsg(`Bred! New broker ID: ${res.data?.child?._id || '—'}.`);
+            setBreedBrokerA('');
+            setBreedBrokerB('');
+            await refreshBrokers();
+            await refreshEconomy();
+        } catch (e) {
+            setBreedingMsg(getErrorMessage(e, 'Breed failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // Daily Combo
+    async function claimCombo() {
+        setBusy(true);
+        setComboClaimMsg('');
+        try {
+            const res = await api.post('/api/daily/combo-claim');
+            setComboClaimMsg(`Claimed ${res.data?.bonusAiba ?? 0} AIBA!`);
+            await refreshDailyStatus();
+            await refreshEconomy();
+        } catch (e) {
+            setComboClaimMsg(getErrorMessage(e, 'Claim failed.'));
         } finally {
             setBusy(false);
         }
@@ -1027,11 +1251,16 @@ export default function HomePage() {
             const params = new URLSearchParams(window.location.search);
             const ref = params.get('ref');
             if (ref) setRefCodeInput(String(ref).trim().toUpperCase());
+            const trainer = params.get('trainer');
+            if (trainer) {
+                api.post('/api/trainers/register-use', { code: String(trainer).trim().toUpperCase() }).catch(() => {});
+            }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
+        if (tab === 'brokers') { refreshBrokers().catch(() => {}); }
         if (tab === 'leaderboard') refreshLeaderboard().catch(() => {});
         if (tab === 'tasks') refreshTasks().catch(() => {});
         if (tab === 'guilds') refreshMyRank().catch(() => {});
@@ -1039,14 +1268,16 @@ export default function HomePage() {
         if (tab === 'university') refreshUniversity();
         if (tab === 'updates') refreshUpdatesAll();
         if (tab === 'home' || tab === 'referrals') { refreshReferralMe().catch(() => {}); refreshTopReferrers().catch(() => {}); }
-        if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshReferralMe().catch(() => {}); }
+        if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshReferralMe().catch(() => {}); refreshBrokerRentals().catch(() => {}); }
         if (tab === 'carRacing') refreshCarRacing().catch(() => {});
         if (tab === 'bikeRacing') refreshBikeRacing().catch(() => {});
         if (tab === 'multiverse') refreshMultiverse().catch(() => {});
         if (tab === 'realms') { refreshRealms().catch(() => {}); refreshMissions(selectedRealmKey).catch(() => {}); refreshMentors().catch(() => {}); }
         if (tab === 'assets') { refreshAssets().catch(() => {}); refreshMarketListings().catch(() => {}); }
         if (tab === 'governance') { refreshProposals().catch(() => {}); }
-        if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); }
+        if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshDailyStatus().catch(() => {}); refreshPremiumStatus().catch(() => {}); }
+        if (tab === 'tournaments') { refreshTournaments().catch(() => {}); refreshBrokers().catch(() => {}); }
+        if (tab === 'globalBoss') { refreshGlobalBoss().catch(() => {}); }
         // Keep header visible: scroll to top so header is never hidden on tab change
         setBalanceStripVisible(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2218,25 +2449,30 @@ export default function HomePage() {
                 </div>
             </div>
 
-            <div className="hero-center hero-center--compact" aria-hidden="false">
-                <h2 className="hero-center__title">AI BROKER ARENA</h2>
-                <p className="hero-center__sub">Own AI brokers. Compete in 3D arenas. Earn NEUR &amp; AIBA.</p>
-                <p className="hero-center__hint">Swipe the tab bar to explore Home, Brokers, Market, Racing, and more.</p>
-                <button
-                    type="button"
-                    className="hero-center__enter hero-center__enter--btn"
-                    onClick={() => document.querySelector('.tab-content')?.scrollIntoView({ behavior: 'smooth' })}
-                    aria-label="Scroll to content"
-                >
-                    Enter
-                </button>
-            </div>
+            {(() => {
+                const hero = HERO_BY_TAB[tab] || HERO_BY_TAB.home;
+                return (
+                    <div className="hero-center hero-center--compact" aria-hidden="false">
+                        <h2 className="hero-center__title">{hero.title}</h2>
+                        <p className="hero-center__sub">{hero.sub}</p>
+                        <p className="hero-center__hint">{hero.hint}</p>
+                        <button
+                            type="button"
+                            className="hero-center__enter hero-center__enter--btn"
+                            onClick={() => hero.buttonAction === 'updates' ? setTab('updates') : document.querySelector('.tab-content')?.scrollIntoView({ behavior: 'smooth' })}
+                            aria-label={hero.buttonLabel}
+                        >
+                            {hero.buttonLabel}
+                        </button>
+                    </div>
+                );
+            })()}
 
             <p className="guide-tip" style={{ marginTop: 0 }}>
-                {tab === 'home' ? 'Pick a broker and arena, then hit Run battle to earn.' :
+                {tab === 'home' ? 'Browse features, referrals, and leaderboard. Go to Brokers to create, battle, and manage.' :
                  tab === 'tasks' ? 'Personalized tasks for every user type: newcomer, trader, racer, social, scholar, and investor.' :
                  tab === 'leaderboard' ? 'Global ranks by score, AIBA, NEUR, or battles. Run battles to climb.' :
-                 tab === 'brokers' ? 'Merge two brokers or mint one as NFT.' :
+                 tab === 'brokers' ? 'New broker, tasks, run battle, vault. Combine or mint NFT.' :
                  tab === 'arenas' ? 'Choose arena and run battle. Guild Wars needs a guild.' :
                  tab === 'guilds' ? 'Create or join a group; deposit brokers to the pool.' :
                  tab === 'market' ? 'Sell a broker for AIBA or buy one. Withdraw from guild first to list.' :
@@ -2334,7 +2570,7 @@ export default function HomePage() {
                     </div>
                     <div className="card card--elevated home-overview major-tab__hero" style={{ borderLeft: '4px solid var(--accent-cyan)', marginTop: 16 }}>
                         <div className="card__title">Home Command Center</div>
-                        <p className="card__hint">Battle-ready Android UI/UX dashboard. Manage brokers, run fights, and jump into tasks fast.</p>
+                        <p className="card__hint">Your dashboard. Go to Brokers for New broker, Tasks, Run battle, and Vault.</p>
                         <div className="home-overview__stats">
                             <span className="home-stat-pill">AIBA {Number(economyMe?.aibaBalance ?? 0)}</span>
                             <span className="home-stat-pill">NEUR {Number(economyMe?.neurBalance ?? 0)}</span>
@@ -2342,98 +2578,9 @@ export default function HomePage() {
                             <span className="home-stat-pill">Brokers {brokers.length}</span>
                         </div>
                     </div>
-                    <div className="action-row action-row--android">
-                        <button type="button" className="btn btn--secondary" onClick={createStarterBroker} disabled={busy}><IconBrokers /> New broker</button>
-                        <button type="button" className="btn btn--secondary" onClick={() => setTab('tasks')} disabled={busy}><IconTasks /> Tasks</button>
-                        <button type="button" className="btn btn--secondary" onClick={refreshBrokers} disabled={busy}><IconRefresh /> Refresh</button>
-                        <button type="button" className="btn btn--primary" onClick={runBattle} disabled={busy || !selectedBrokerId}><IconRun /> Run battle</button>
-                        <button type="button" className="btn btn--secondary" onClick={refreshVaultInventory} disabled={busy}><IconVault /> Vault</button>
-                    </div>
-                    {status ? <p className={`status-msg ${status.toLowerCase().includes('fail') || status.includes('unreachable') ? 'status-msg--error' : ''}`} style={{ marginTop: 8, marginBottom: 0 }}>{status}</p> : null}
-                    {vaultInfo ? (
-                        <div className="card card--elevated">
-                            <div className="card__title">Vault</div>
-                            <p className="card__hint" style={{ wordBreak: 'break-all' }}>Address: {vaultInfo.vaultAddress}</p>
-                            <p className="card__hint">TON (nano): {vaultInfo.tonBalanceNano} · Jetton: {vaultInfo.jettonBalance}</p>
-                        </div>
-                    ) : null}
-                    <div className="card card--elevated">
-                        <div className="card__title">Arena & battle</div>
-                        <p className="card__hint">Pick broker and arena, then Run battle above.</p>
-                        {brokers.length === 0 ? (
-                            <p className="guide-tip">No brokers. Create a starter broker above.</p>
-                        ) : (
-                            <select className="select" value={selectedBrokerId} onChange={(e) => setSelectedBrokerId(e.target.value)} style={{ marginTop: 6, minWidth: '100%' }}>
-                                {brokers.map((b) => (
-                                    <option key={b._id} value={b._id}>#{b._id.slice(-6)} INT{b.intelligence} SPD{b.speed} RISK{b.risk} · energy {b.energy}</option>
-                                ))}
-                            </select>
-                        )}
-                        <p className="card__hint" style={{ marginTop: 10 }}>Arena</p>
-                        <select className="select" value={arena} onChange={(e) => setArena(e.target.value)} style={{ marginTop: 4, minWidth: '100%' }}>
-                            <option value="prediction">prediction</option>
-                            <option value="simulation">simulation</option>
-                            <option value="strategyWars">strategyWars</option>
-                            <option value="arbitrage">arbitrage</option>
-                            <option value="guildWars">guildWars</option>
-                        </select>
-                        {arena === 'guildWars' ? <p className="guide-tip">Guild Wars requires a guild. Rewards go to guild treasury.</p> : null}
-                    </div>
-                    {battle ? (
-                        <div className="card card--elevated">
-                            <div className="card__title">Battle result</div>
-                            <div className="victory-card">
-                                <div className="victory-card__badge">Victory</div>
-                                <div className="victory-card__score">Score {battle.score}</div>
-                                <div className="victory-card__meta">
-                                {arena} · {Number(battle.rewardAiba ?? 0)} AIBA
-                                {Number(battle.starsGranted ?? 0) > 0 ? ` · +${battle.starsGranted} Stars` : ''}
-                                {Number(battle.firstWinDiamond ?? 0) > 0 ? ` · +${battle.firstWinDiamond} Diamond (first win!)` : ''}
-                            </div>
-                                <button type="button" className="btn btn--primary" onClick={() => { const text = `My broker scored ${battle.score} in ${arena}! Reward: ${battle.rewardAiba} AIBA.`; const url = window?.location?.href || ''; navigator?.share?.({ title: 'AIBA Arena', text, url }).catch(() => {}); navigator?.clipboard?.writeText?.(text + ' ' + url); }}><IconShare /> Share</button>
-                            </div>
-                            {ad?.imageUrl ? (
-                                <div className="ad-box">
-                                    <div className="ad-box__label">Sponsored</div>
-                                    <img src={ad.imageUrl} alt="ad" onClick={() => { const u = String(ad?.linkUrl || '').trim(); if (u) (window?.Telegram?.WebApp?.openLink || window.open)(u, '_blank'); }} />
-                                    {ad.linkUrl ? <button type="button" className="btn btn--secondary" style={{ marginTop: 8 }} onClick={() => { const u = String(ad?.linkUrl || '').trim(); if (u) (window?.Telegram?.WebApp?.openLink || window.open)(u, '_blank'); }}>Open link</button> : null}
-                                </div>
-                            ) : null}
-                        </div>
-                    ) : null}
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
-                        <div className="card__title"><IconShare /> Referrals</div>
-                        <p className="card__hint">Earn NEUR &amp; AIBA when friends join. Share your link or apply a friend&apos;s code.</p>
-                        <button type="button" className="btn btn--primary" onClick={() => setTab('referrals')} style={{ marginTop: 8 }}>Go to Referrals</button>
-                    </div>
-                    <div className="card">
-                        <div className="card__title">Leaderboard</div>
-                        <p className="card__hint">Global ranks by score, AIBA, NEUR, or battles.</p>
-                        <div className="action-row">
-                            <select className="select" value={leaderboardBy} onChange={(e) => setLeaderboardBy(e.target.value)}><option value="score">By score</option><option value="aiba">By AIBA</option><option value="neur">By NEUR</option><option value="battles">By battles</option></select>
-                            <button type="button" className="btn btn--secondary" onClick={refreshLeaderboard} disabled={busy}><IconRefresh /> Refresh</button>
-                        </div>
-                        {leaderboard.length > 0 ? (
-                            leaderboard.slice(0, 12).map((row, i) => (
-                                <div key={row.telegramId || i} className="list-item">
-                                    <span className="list-item__rank">#{row.rank}</span>
-                                    <span className="list-item__name">
-                                        {row.username || row.telegramId}
-                                        {Array.isArray(row.badges) && row.badges.length > 0 ? (
-                                            <span className="list-item__badges">
-                                                {row.badges.slice(0, 3).map((badgeId) => {
-                                                    const meta = BADGE_LABELS[badgeId] || { label: badgeId, color: 'var(--text-muted)' };
-                                                    return (
-                                                        <span key={badgeId} className="badge-pill badge-pill--inline" style={{ borderColor: meta.color, color: meta.color }} title={meta.title || meta.label}>{meta.label}</span>
-                                                    );
-                                                })}
-                                            </span>
-                                        ) : null}
-                                    </span>
-                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>score {row.totalScore} · AIBA {row.totalAiba}</span>
-                                </div>
-                            ))
-                        ) : <p className="guide-tip">Run battles to appear on the board.</p>}
+                    <div className="card" style={{ marginTop: 12, borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title">Seasonal events <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>NEW</span></div>
+                        <p className="card__hint">Limited-time modes, double rewards, and exclusive arenas. Check Tournaments and Global Boss for active events.</p>
                     </div>
                 </section>
 
@@ -2491,6 +2638,17 @@ export default function HomePage() {
 
                 {/* ─── Referrals (full) ─────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'referrals' ? 'is-active' : ''}`} aria-hidden={tab !== 'referrals'}>
+                    {(myReferral?.uses ?? 0) < 3 ? (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)', marginBottom: 12 }}>
+                            <div className="card__title">Invite 3 to unlock <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>NEW</span></div>
+                            <p className="card__hint">Invite <strong>3 friends</strong> to unlock premium arena perks and bonus rewards. You have <strong>{myReferral?.uses ?? 0}/3</strong> — share your link below!</p>
+                        </div>
+                    ) : (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-green)', marginBottom: 12 }}>
+                            <div className="card__title">Unlocked</div>
+                            <p className="card__hint">You invited 3+ friends! Premium arena perks are unlocked. Keep sharing for 10× and 100× referral bonuses.</p>
+                        </div>
+                    )}
                     <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
                         <div className="card__title"><IconShare /> Referrals</div>
                         <p className="card__hint">Share your code or enter someone else&apos;s. You both earn NEUR and AIBA (wallet required to apply).</p>
@@ -2508,9 +2666,17 @@ export default function HomePage() {
                                         <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
                                             <a href={refLink} target="_blank" rel="noopener noreferrer" className="card__hint" style={{ wordBreak: 'break-all', color: 'var(--accent-cyan)', textDecoration: 'underline', fontSize: '0.85rem' }}>{refLink}</a>
                                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                                <button type="button" className="btn btn--primary" onClick={() => { if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(refLink).then(() => setRefMsg('Link copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(refLink); } }}><IconShare /> Copy link</button>
-                                                <button type="button" className="btn btn--secondary" onClick={() => { const code = String(myReferral.code).toUpperCase(); const msg = `Join me on AIBA Arena! Use my referral code: ${code}\n${refLink}`; if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(msg).then(() => setRefMsg('Share message copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(msg); } }}>Copy share message</button>
+                                                <button type="button" className="btn btn--primary" onClick={() => { if (shareViaTelegram({ text: `Join me on AIBA Arena! Use my referral code: ${String(myReferral.code).toUpperCase()}`, url: refLink })) setRefMsg('Share opened!'); else { if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(refLink).then(() => setRefMsg('Link copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(refLink); } } }}><IconShare /> Share via Telegram</button>
+                                                <button type="button" className="btn btn--secondary" onClick={() => { if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(refLink).then(() => setRefMsg('Link copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(refLink); } }}>Copy link</button>
+                                                <button type="button" className="btn btn--secondary" onClick={() => { const code = String(myReferral.code).toUpperCase(); const msg = `Join me on AIBA Arena! Use my referral code: ${code}\n${refLink}`; if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(msg).then(() => setRefMsg('Share message copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(msg); } }}>Copy message</button>
                                             </div>
+                                            {(myReferral.uses ?? 0) > 0 ? (
+                                                <p className="guide-tip" style={{ marginTop: 12 }}>
+                                                    Milestones: <strong>10 referrals → 2× bonus</strong> · <strong>100 referrals → 5× bonus</strong>. You have {myReferral.uses ?? 0} — {myReferral.uses >= 100 ? '5× active!' : myReferral.uses >= 10 ? '2× active!' : 'reach 10 for 2×.'}
+                                                </p>
+                                            ) : (
+                                                <p className="guide-tip" style={{ marginTop: 12 }}>Reach <strong>10 referrals</strong> for 2× bonus, <strong>100</strong> for 5× bonus.</p>
+                                            )}
                                         </div>
                                     );
                                 })()}
@@ -2531,7 +2697,14 @@ export default function HomePage() {
                                 {topReferrers.map((r, i) => (
                                     <div key={r.telegramId || i} className="list-item">
                                         <span className="list-item__rank">#{i + 1}</span>
-                                        <span className="list-item__name">{r.username || r.telegramId || 'Anonymous'}</span>
+                                        <span className="list-item__name">
+                                            {r.username || r.telegramId || 'Anonymous'}
+                                            {i < 3 ? (
+                                                <span className="badge-pill badge-pill--inline" style={{ marginLeft: 8, borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)' }} title="Top referrer">
+                                                    {i === 0 ? '1st' : i === 1 ? '2nd' : '3rd'}
+                                                </span>
+                                            ) : null}
+                                        </span>
                                         <span style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>{r.uses ?? 0} referrals</span>
                                     </div>
                                 ))}
@@ -2540,6 +2713,82 @@ export default function HomePage() {
                             <p className="guide-tip" style={{ marginTop: 12 }}>No referrers yet. Be the first — share your link!</p>
                         )}
                     </div>
+                    <div className="card" style={{ marginTop: 12, borderLeft: '4px solid var(--border-subtle)' }}>
+                        <div className="card__title">Viral K-factor <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}>NEW</span></div>
+                        <p className="card__hint">K = invites × conversion. Target K &gt; 0.3 for viral growth. You have {myReferral?.uses ?? 0} referrals. Invite 3 at 15% convert → K=0.45.</p>
+                    </div>
+                    <div className="card" style={{ marginTop: 12, borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">Become a trainer</div>
+                        <p className="card__hint">Train players, recruit trainers, earn AIBA. Exclusive digital portal.</p>
+                        <a href="/trainer" className="btn btn--secondary" style={{ marginTop: 8, display: 'inline-block' }}>Open trainer portal</a>
+                    </div>
+                </section>
+
+                {/* ─── Tournaments ───────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'tournaments' ? 'is-active' : ''}`} aria-hidden={tab !== 'tournaments'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title"><IconTrophy /> Tournaments <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>NEW</span></div>
+                        <p className="card__hint">Enter tournaments with a broker. Pay AIBA to join; top 4 share the prize pool when full.</p>
+                        <button type="button" className="btn btn--secondary" onClick={refreshTournaments} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
+                        {tournamentsMsg ? <p className={`status-msg ${tournamentsMsg.includes('Entered') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{tournamentsMsg}</p> : null}
+                    </div>
+                    {tournaments.length === 0 ? (
+                        <p className="guide-tip" style={{ marginTop: 12 }}>No tournaments yet. Admins create them.</p>
+                    ) : (
+                        <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
+                            {tournaments.map((t) => (
+                                <div key={t._id} className="card">
+                                    <div className="card__title">{t.name || t.league || 'Tournament'}</div>
+                                    <p className="card__hint">Pool: {t.prizePoolAiba ?? 0} AIBA · Entry: {t.entryCostAiba ?? 0} AIBA · Status: {t.status} · Max entries: {t.maxEntries ?? 0}</p>
+                                    {t.status === 'open' && (t.entries?.length ?? 0) < (t.maxEntries ?? 0) ? (
+                                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                            <select className="select" value={selectedTournament === t._id ? tournamentBrokerId : ''} onChange={(e) => { setSelectedTournament(t._id); setTournamentBrokerId(e.target.value); }}>
+                                                <option value="">Select broker</option>
+                                                {brokers.filter((b) => !b.guildId).map((b) => (
+                                                    <option key={b._id} value={b._id}>{b.specialty || 'Broker'} #{String(b._id).slice(-6)}</option>
+                                                ))}
+                                            </select>
+                                            <button type="button" className="btn btn--primary" onClick={() => enterTournament(t._id, selectedTournament === t._id ? tournamentBrokerId : null)} disabled={busy || !(selectedTournament === t._id && tournamentBrokerId)}>Enter</button>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </section>
+
+                {/* ─── Global Boss ──────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'globalBoss' ? 'is-active' : ''}`} aria-hidden={tab !== 'globalBoss'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-magenta)' }}>
+                        <div className="card__title"><IconBoss /> Global Boss <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-magenta)', color: 'var(--accent-magenta)' }}>NEW</span></div>
+                        <p className="card__hint">Run battles to deal damage. When the boss is defeated, top damagers share the reward pool.</p>
+                        <button type="button" className="btn btn--secondary" onClick={refreshGlobalBoss} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
+                    </div>
+                    {!globalBoss?.active ? (
+                        <p className="guide-tip" style={{ marginTop: 12 }}>No active boss. Admins spawn bosses. Run battles when one is active—your score counts as damage.</p>
+                    ) : (
+                        <div style={{ marginTop: 12 }}>
+                            <div className="card">
+                                <div className="card__title">Boss: {globalBoss.name || 'Raid Boss'}</div>
+                                <p className="card__hint">HP: {globalBoss.currentHp ?? 0} / {globalBoss.totalHp ?? 0} · Reward pool: {globalBoss.rewardPoolAiba ?? 0} AIBA</p>
+                                <div style={{ marginTop: 8, height: 12, background: 'var(--border)', borderRadius: 6, overflow: 'hidden' }}>
+                                    <div style={{ width: `${Math.max(0, Math.min(100, 100 * (globalBoss.currentHp ?? 0) / (globalBoss.totalHp || 1)))}%`, height: '100%', background: 'var(--accent-magenta)', borderRadius: 6 }} />
+                                </div>
+                            </div>
+                            {Array.isArray(globalBoss.topDamagers) && globalBoss.topDamagers.length > 0 ? (
+                                <div className="card" style={{ marginTop: 12 }}>
+                                    <div className="card__title">Top damagers</div>
+                                    {globalBoss.topDamagers.slice(0, 10).map((d, i) => (
+                                        <div key={d._id || i} className="list-item">
+                                            <span className="list-item__rank">#{i + 1}</span>
+                                            <span className="list-item__name">User {String(d._id || '').slice(-8) || '—'}</span>
+                                            <span style={{ color: 'var(--accent-magenta)', fontWeight: 600 }}>{d.totalDamage ?? 0} dmg</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : null}
+                        </div>
+                    )}
                 </section>
 
                 {/* ─── Global Leaderboard ──────────────────────────────────────── */}
@@ -2581,6 +2830,21 @@ export default function HomePage() {
                         <div className="card__title">What are brokers?</div>
                         <p className="card__hint">{BROKERS_EXPLANATION}</p>
                     </div>
+                    <div className="action-row action-row--android">
+                        <button type="button" className="btn btn--secondary" onClick={createStarterBroker} disabled={busy}><IconBrokers /> New broker</button>
+                        <button type="button" className="btn btn--secondary" onClick={() => setTab('tasks')} disabled={busy}><IconTasks /> Tasks</button>
+                        <button type="button" className="btn btn--secondary" onClick={refreshBrokers} disabled={busy}><IconRefresh /> Refresh</button>
+                        <button type="button" className="btn btn--primary" onClick={runBattle} disabled={busy || !selectedBrokerId}><IconRun /> Run battle</button>
+                        <button type="button" className="btn btn--secondary" onClick={refreshVaultInventory} disabled={busy}><IconVault /> Vault</button>
+                    </div>
+                    {status ? <p className={`status-msg ${status.toLowerCase().includes('fail') || status.includes('unreachable') ? 'status-msg--error' : ''}`} style={{ marginTop: 8, marginBottom: 0 }}>{status}</p> : null}
+                    {vaultInfo ? (
+                        <div className="card card--elevated">
+                            <div className="card__title">Vault</div>
+                            <p className="card__hint" style={{ wordBreak: 'break-all' }}>Address: {vaultInfo.vaultAddress}</p>
+                            <p className="card__hint">TON (nano): {vaultInfo.tonBalanceNano} · Jetton: {vaultInfo.jettonBalance}</p>
+                        </div>
+                    ) : null}
                     <div className="card card--elevated">
                         <div className="card__title">My brokers</div>
                         <p className="card__hint">Fight, combine two to merge stats, or mint as NFT.</p>
@@ -2596,6 +2860,18 @@ export default function HomePage() {
                                 {combineMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{combineMsg}</p> : null}
                             </div>
                         ) : null}
+                        {brokers.length >= 2 ? (
+                            <div className="card" style={{ marginTop: 10, borderLeft: '4px solid var(--accent-magenta)' }}>
+                                <div className="card__title"><IconBreed /> Breeding <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-magenta)', color: 'var(--accent-magenta)' }}>NEW</span></div>
+                                <p className="card__hint">Combine 2 brokers into 1 new broker (burns both). Cost: ~200 AIBA. Offspring inherits averaged stats.</p>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
+                                    <select className="select" value={breedBrokerA} onChange={(e) => setBreedBrokerA(e.target.value)}><option value="">Parent A</option>{brokers.map((b) => <option key={b._id} value={b._id}>#{b._id.slice(-6)}</option>)}</select>
+                                    <select className="select" value={breedBrokerB} onChange={(e) => setBreedBrokerB(e.target.value)}><option value="">Parent B</option>{brokers.filter((b) => b._id !== breedBrokerA).map((b) => <option key={b._id} value={b._id}>#{b._id.slice(-6)}</option>)}</select>
+                                    <button type="button" className="btn btn--primary" onClick={breedBrokers} disabled={busy || !breedBrokerA || !breedBrokerB}><IconBreed /> Breed</button>
+                                </div>
+                                {breedingMsg ? <p className={`status-msg ${breedingMsg.includes('Bred') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{breedingMsg}</p> : null}
+                            </div>
+                        ) : null}
                         {selectedBrokerId && brokers.find((b) => b._id === selectedBrokerId && !b.nftItemAddress) ? (
                             <div className="card" style={{ marginTop: 10 }}>
                                 <div className="card__title">Mint as NFT</div>
@@ -2605,7 +2881,7 @@ export default function HomePage() {
                             </div>
                         ) : null}
                         {brokers.length === 0 ? (
-                            <p className="guide-tip">No brokers. Go to Home and create a starter broker.</p>
+                            <p className="guide-tip">No brokers. Create a starter broker above.</p>
                         ) : (
                             <select className="select" value={selectedBrokerId} onChange={(e) => setSelectedBrokerId(e.target.value)} style={{ minWidth: '100%', marginTop: 6 }}>
                                 {brokers.map((b) => (
@@ -2614,6 +2890,41 @@ export default function HomePage() {
                             </select>
                         )}
                     </div>
+                    <div className="card card--elevated">
+                        <div className="card__title">Arena & battle</div>
+                        <p className="card__hint">Pick broker above, then Run battle.</p>
+                        <p className="card__hint" style={{ marginTop: 10 }}>Arena</p>
+                        <select className="select" value={arena} onChange={(e) => setArena(e.target.value)} style={{ marginTop: 4, minWidth: '100%' }}>
+                            <option value="prediction">prediction</option>
+                            <option value="simulation">simulation</option>
+                            <option value="strategyWars">strategyWars</option>
+                            <option value="arbitrage">arbitrage</option>
+                            <option value="guildWars">guildWars</option>
+                        </select>
+                        {arena === 'guildWars' ? <p className="guide-tip">Guild Wars requires a guild. Rewards go to guild treasury.</p> : null}
+                    </div>
+                    {battle ? (
+                        <div className="card card--elevated">
+                            <div className="card__title">Battle result</div>
+                            <div className="victory-card">
+                                <div className="victory-card__badge">Victory</div>
+                                <div className="victory-card__score">Score {battle.score}</div>
+                                <div className="victory-card__meta">
+                                    {arena} · {Number(battle.rewardAiba ?? 0)} AIBA
+                                    {Number(battle.starsGranted ?? 0) > 0 ? ` · +${battle.starsGranted} Stars` : ''}
+                                    {Number(battle.firstWinDiamond ?? 0) > 0 ? ` · +${battle.firstWinDiamond} Diamond (first win!)` : ''}
+                                </div>
+                                <button type="button" className="btn btn--primary" onClick={() => { const text = `My broker scored ${battle.score} in ${arena}! Reward: ${battle.rewardAiba} AIBA.`; shareViaTelegram({ title: 'AIBA Arena', text, url: window?.location?.href || '' }); }}><IconShare /> Share</button>
+                            </div>
+                            {ad?.imageUrl ? (
+                                <div className="ad-box">
+                                    <div className="ad-box__label">Sponsored</div>
+                                    <img src={ad.imageUrl} alt="ad" onClick={() => { const u = String(ad?.linkUrl || '').trim(); if (u) (window?.Telegram?.WebApp?.openLink || window.open)(u, '_blank'); }} />
+                                    {ad.linkUrl ? <button type="button" className="btn btn--secondary" style={{ marginTop: 8 }} onClick={() => { const u = String(ad?.linkUrl || '').trim(); if (u) (window?.Telegram?.WebApp?.openLink || window.open)(u, '_blank'); }}>Open link</button> : null}
+                                </div>
+                            ) : null}
+                        </div>
+                    ) : null}
                 </section>
 
                 {/* ─── Arenas ─────────────────────────────────────────────────── */}
@@ -2649,7 +2960,7 @@ export default function HomePage() {
                                     {Number(battle.starsGranted ?? 0) > 0 ? <span className="victory-card__meta-stars"> · <IconStar /> +{battle.starsGranted} Stars</span> : ''}
                                     {Number(battle.firstWinDiamond ?? 0) > 0 ? <span className="victory-card__meta-diamond"> · <IconDiamond /> +{battle.firstWinDiamond} Diamond (first win!)</span> : ''}
                                 </div>
-                                <button type="button" className="btn btn--primary" onClick={() => { const text = `My broker scored ${battle.score} in ${arena}! Reward: ${battle.rewardAiba} AIBA.`; navigator?.share?.({ title: 'AIBA Arena', text, url: window?.location?.href }).catch(() => {}); }}><IconShare /> Share</button>
+                                <button type="button" className="btn btn--primary" onClick={() => { const text = `My broker scored ${battle.score} in ${arena}! Reward: ${battle.rewardAiba} AIBA.`; shareViaTelegram({ title: 'AIBA Arena', text, url: window?.location?.href }); }}><IconShare /> Share</button>
                             </div>
                         </div>
                     ) : null}
@@ -2726,8 +3037,8 @@ export default function HomePage() {
                         <p className="card__hint">{BROKERS_EXPLANATION}</p>
                     </div>
                     <div className="flow-switch" role="group" aria-label="Market flow">
-                        {['overview', 'trade', 'system', 'boosts'].map((f) => (
-                            <button key={f} type="button" className={`flow-switch__btn ${marketFlow === f ? 'is-active' : ''}`} onClick={() => setMarketFlow(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}</button>
+                        {['overview', 'trade', 'rental', 'system', 'boosts'].map((f) => (
+                            <button key={f} type="button" className={`flow-switch__btn ${marketFlow === f ? 'is-active' : ''}`} onClick={() => setMarketFlow(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}{f === 'rental' ? ' NEW' : ''}</button>
                         ))}
                     </div>
                     {marketFlow === 'overview' && (
@@ -2791,6 +3102,48 @@ export default function HomePage() {
                                     </div>
                                 ))
                             ) : <p className="guide-tip">No listings.</p>}
+                        </div>
+                    )}
+                    {marketFlow === 'rental' && (
+                        <div className="card card--elevated sheet-card" style={{ borderLeft: '4px solid var(--accent-green)' }}>
+                            <div className="card__title"><IconRent /> Broker Rental <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>NEW</span></div>
+                            <p className="card__hint">List your broker for rent or rent one from others. Rent for 1 hour—cost goes to owner minus fee.</p>
+                            <div className="action-row">
+                                <button type="button" className="btn btn--secondary" onClick={refreshBrokerRentals} disabled={busy}><IconRefresh /> Refresh</button>
+                            </div>
+                            {rentalMsg ? <p className={`status-banner ${rentalMsg.includes('Rented') || rentalMsg.includes('Listed') || rentalMsg.includes('Unlisted') ? 'status-banner--success' : 'status-banner--error'}`}>{rentalMsg}</p> : null}
+                            <p className="card__hint" style={{ marginTop: 12 }}>List your broker for rent</p>
+                            <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                <select className="select" value={listRentalBrokerId} onChange={(e) => setListRentalBrokerId(e.target.value)}>
+                                    <option value="">Select broker</option>
+                                    {brokers.filter((b) => !b.guildId).map((b) => (
+                                        <option key={b._id} value={b._id}>#{b._id.slice(-6)} INT{b.intelligence} SPD{b.speed} RISK{b.risk}</option>
+                                    ))}
+                                </select>
+                                <input className="input" value={rentalPricePerHour} onChange={(e) => setRentalPricePerHour(e.target.value)} placeholder="Price (AIBA/hour)" style={{ width: 140 }} />
+                                <button type="button" className="btn btn--primary" onClick={listBrokerForRent} disabled={busy || !listRentalBrokerId || !rentalPricePerHour.trim()}><IconRent /> List for rent</button>
+                            </div>
+                            <p className="card__hint" style={{ marginTop: 16 }}>Available rentals</p>
+                            {brokerRentals.length === 0 ? (
+                                <p className="guide-tip" style={{ marginTop: 8 }}>No brokers listed for rent. List yours above!</p>
+                            ) : (
+                                <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
+                                    {brokerRentals.map((r) => {
+                                        const myId = getTelegramUserUnsafe()?.id?.toString() || '';
+                                        const isMine = String(r.ownerTelegramId || '') === myId;
+                                        return (
+                                            <div key={r._id} className="list-item">
+                                                <span>{r.brokerId ? `INT${r.brokerId.intelligence} SPD${r.brokerId.speed} RISK${r.brokerId.risk}` : 'Broker'} — {r.priceAibaPerHour ?? 0} AIBA/hr{isMine ? ' (yours)' : ''}</span>
+                                                {isMine ? (
+                                                    <button type="button" className="btn btn--secondary" onClick={() => unlistRental(r._id)} disabled={busy}>Unlist</button>
+                                                ) : (
+                                                    <button type="button" className="btn btn--primary" onClick={() => rentBroker(r._id)} disabled={busy}><IconRent /> Rent</button>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
                     )}
                     {marketFlow === 'system' && (
@@ -3508,6 +3861,41 @@ export default function HomePage() {
 
                 {/* ─── Updates (Unified Comms) ────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'updates' ? 'is-active' : ''}`} aria-hidden={tab !== 'updates'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card__title">App sections overview</div>
+                        <p className="card__hint">Quick reference to all sections. Use the tab bar or Home grid to navigate.</p>
+                        <div style={{ overflowX: 'auto', marginTop: 12 }}>
+                            <table className="sections-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '2px solid var(--border-subtle)' }}>
+                                        <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600, color: 'var(--accent-cyan)' }}>Section</th>
+                                        <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600, color: 'var(--accent-cyan)' }}>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Home</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>AI BROKER ARENA. Own AI brokers. Compete in 3D arenas. Earn NEUR &amp; AIBA. Swipe the tab bar to explore.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Brokers</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>New broker, tasks, run battle, vault. Combine or mint NFT. Brokers are your AI agents that compete in 3D arenas.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Tasks</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Personalized mission queue for every player profile: newcomer, fighter, trader, racer, social, scholar, and investor.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Leaderboard</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Global ranks by score, AIBA, NEUR, or battles. Run battles to climb the ranks.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Referrals</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Earn NEUR &amp; AIBA when friends join. Share your link or apply a friend&apos;s code.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Arenas</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Battle modes: prediction, simulation, strategyWars, arbitrage, guildWars. Choose arena and run battle.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Guilds</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Create or join a group, deposit brokers into the shared pool. Guild Wars arena sends rewards to the guild.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Market</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Sell a broker for AIBA or buy one. Withdraw from guild first to list.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Car Racing</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Autonomous car racing. Create or buy a car, enter open races, earn AIBA by finish position.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Bike Racing</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Autonomous motorcycle racing. Create or buy a bike, enter races, earn AIBA.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>NFT Multiverse</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Own Broker NFTs, stake them to earn AIBA daily. Mint from Brokers tab (pay AIBA).</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Community Impact</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Unite for Good. Donate NEUR or AIBA to causes. Every contribution counts.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>University</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Complete systematic guide. Learn brokers, arenas, economy, guilds. Complete all to earn the University Graduate badge.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>AI Realms</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Select a realm and complete missions to earn rewards.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>AI Assets</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Mint, upgrade, list, buy, and rent AI assets. AI Agent, AI Brain, AI Creator, AI Workflow, AI System.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Governance</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Create proposals and vote. Community-driven decisions.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Profile</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Your profile, balances, badges, and account details.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Settings</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>App preferences, notifications, theme, sound, privacy, and more.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Wallet</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Claim AIBA on-chain. Stake, DAO, Stars, Diamonds. Connect wallet, create claim, sign tx.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                     <div className="card card--elevated card--comms-status">
                         <div className="card__title">System status</div>
                         <p className="card__hint" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -3545,8 +3933,8 @@ export default function HomePage() {
                             <p className="card__hint"><strong>What is AI Broker Battle Arena?</strong> AI Broker Battle Arena (AIBA) is a Telegram Mini App where you own AI brokers, enter battle arenas, run fights, and earn NEUR and AIBA. It combines trading-sim AI agents (brokers) with competitive arenas and an economy you can withdraw on-chain.</p>
                             <p className="card__hint"><strong>What is AI Broker?</strong> An AI Broker is your AI agent with stats (INT, SPD, RISK) and energy. You create, own, combine, trade, or mint brokers. They compete in arenas, earn AIBA and NEUR from battles, and can be listed on the Market.</p>
                             <p className="card__hint"><strong>What is Battle Arena?</strong> A Battle Arena is a game mode where your broker competes—prediction, simulation, strategyWars, arbitrage, or guildWars. Run a battle, get a score, and earn AIBA, Stars, and sometimes Diamonds.</p>
-                            <p className="card__hint"><strong>How do I start?</strong> Go to Home → create a broker (New broker) if you have none → pick an arena → Run battle. Earn NEUR and AIBA. See Guide for step-by-step.</p>
-                            <p className="card__hint"><strong>How do I get a broker?</strong> Home: New broker (free starter). Or Market: buy from system (AIBA) or from other players. Brokers tab: combine two brokers.</p>
+                            <p className="card__hint"><strong>How do I start?</strong> Go to Brokers → create a broker (New broker) if you have none → pick an arena → Run battle. Earn NEUR and AIBA. See Guide for step-by-step.</p>
+                            <p className="card__hint"><strong>How do I get a broker?</strong> Brokers: New broker (free starter). Or Market: buy from system (AIBA) or from other players. Brokers tab: combine two brokers.</p>
                             <p className="card__hint"><strong>How do I earn NEUR / AIBA?</strong> Run battles (Home or Arenas). NEUR is off-chain; AIBA can be claimed on-chain via Wallet → Vault (connect wallet, create claim, sign tx).</p>
                             <p className="card__hint"><strong>How do I earn Stars?</strong> Win battles. Each win grants Stars (Telegram Stars–style currency).</p>
                             <p className="card__hint"><strong>Where is my AIBA?</strong> Balance shows off-chain credits. To receive on-chain: connect wallet, then after a battle use Create claim or enable Auto-claim. Wallet tab → Vault.</p>
@@ -3761,14 +4149,47 @@ export default function HomePage() {
                         </p>
                     </div>
                     {dailyStatus ? (
-                        <div className="card card--elevated">
-                            <div className="card__title">Daily reward</div>
-                            <p className="card__hint">
-                                {dailyStatus.alreadyClaimedToday ? 'Already claimed today.' : `Claim ${dailyStatus.dailyRewardNeur ?? 0} NEUR.`}
-                            </p>
-                            <button type="button" className="btn btn--success" onClick={claimDaily} disabled={busy || dailyStatus.alreadyClaimedToday}>
-                                <IconClaim /> {dailyStatus.alreadyClaimedToday ? 'Claimed' : 'Claim daily'}
-                            </button>
+                        <>
+                            <div className="card card--elevated">
+                                <div className="card__title">Streaks <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)' }}>NEW</span></div>
+                                <p className="card__hint">Login streak: <strong>{dailyStatus.loginStreakDays ?? 0}</strong> days · Battle win streak: <strong>{dailyStatus.battleWinStreak ?? 0}</strong> wins. Higher streaks increase battle rewards.</p>
+                            </div>
+                            <div className="card card--elevated">
+                                <div className="card__title">Daily reward</div>
+                                <p className="card__hint">
+                                    {dailyStatus.alreadyClaimedToday ? 'Already claimed today.' : `Claim ${dailyStatus.dailyRewardNeur ?? 0} NEUR.`}
+                                </p>
+                                <button type="button" className="btn btn--success" onClick={claimDaily} disabled={busy || dailyStatus.alreadyClaimedToday}>
+                                    <IconClaim /> {dailyStatus.alreadyClaimedToday ? 'Claimed' : 'Claim daily'}
+                                </button>
+                            </div>
+                            {dailyStatus.dailyCombo ? (
+                                <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                                    <div className="card__title">Daily Combo <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>NEW</span></div>
+                                    <p className="card__hint">Spend {dailyStatus.dailyCombo.requirementAiba ?? 0} AIBA today → claim {dailyStatus.dailyCombo.bonusAiba ?? 0} AIBA bonus. Progress: <strong>{dailyStatus.dailyCombo.spentTodayAiba ?? 0}/{dailyStatus.dailyCombo.requirementAiba ?? 0}</strong> AIBA.</p>
+                                    <button type="button" className="btn btn--primary" onClick={claimCombo} disabled={busy || !dailyStatus.dailyCombo.canClaim || dailyStatus.dailyCombo.alreadyClaimed}>
+                                        <IconClaim /> {dailyStatus.dailyCombo.alreadyClaimed ? 'Claimed' : dailyStatus.dailyCombo.canClaim ? 'Claim combo' : 'Not ready'}
+                                    </button>
+                                    {comboClaimMsg ? <p className={`status-msg ${comboClaimMsg.includes('Claimed') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{comboClaimMsg}</p> : null}
+                                </div>
+                            ) : null}
+                        </>
+                    ) : null}
+                    {premiumStatus ? (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                            <div className="card__title"><IconPremium /> Premium <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>NEW</span></div>
+                            {premiumStatus.hasPremium ? (
+                                <p className="card__hint" style={{ color: 'var(--accent-gold)' }}>Premium until {premiumStatus.premiumUntil ? new Date(premiumStatus.premiumUntil).toLocaleDateString() : '—'}. {premiumStatus.multiplier ? `${premiumStatus.multiplier}× battle rewards.` : ''}</p>
+                            ) : (
+                                <>
+                                    <p className="card__hint">Get {premiumStatus.multiplier ?? 2}× battle rewards for {(premiumStatus.costTonNano ?? 5e9) / 1e9} TON · {premiumStatus.durationDays ?? 30} days.</p>
+                                    <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                        <input className="input" value={premiumTxHash} onChange={(e) => setPremiumTxHash(e.target.value)} placeholder="Transaction hash" style={{ flex: '1 1 180px', minWidth: 0 }} />
+                                        <button type="button" className="btn btn--primary" onClick={buyPremium} disabled={busy || !premiumTxHash.trim()}><IconPremium /> Buy premium</button>
+                                    </div>
+                                    {premiumMsg ? <p className={`status-msg ${premiumMsg.includes('activated') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{premiumMsg}</p> : null}
+                                </>
+                            )}
                         </div>
                     ) : null}
                     {vaultInfo ? (

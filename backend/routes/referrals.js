@@ -46,7 +46,7 @@ router.get('/me', async (req, res) => {
         const telegramId = String(req.telegramId || '');
         const referral = await Referral.findOne({ ownerTelegramId: telegramId, active: true }).lean();
         if (!referral) return res.json(null);
-        res.json({ code: referral.code, _id: referral._id });
+        res.json({ code: referral.code, _id: referral._id, uses: referral.uses ?? 0 });
     } catch (err) {
         console.error('Referrals me error:', err);
         res.status(500).json({ error: 'internal server error' });
@@ -126,9 +126,18 @@ router.post(
     }
 
     // Reward attribution (NEUR; capped via economy emissions).
+    // Tiered multipliers (advisory): 10th referral = 2x, 100th = 5x
     const cfg = await getConfig();
-    const rReferrer = Math.max(0, Math.floor(Number(cfg.referralRewardNeurReferrer ?? 0)));
-    const rReferee = Math.max(0, Math.floor(Number(cfg.referralRewardNeurReferee ?? 0)));
+    let rReferrer = Math.max(0, Math.floor(Number(cfg.referralRewardNeurReferrer ?? 0)));
+    let rReferee = Math.max(0, Math.floor(Number(cfg.referralRewardNeurReferee ?? 0)));
+    const newUses = updated?.uses ?? ref.uses + 1;
+    if (newUses >= 100) {
+        rReferrer = Math.floor(rReferrer * 5);
+        rReferee = Math.floor(rReferee * 2);
+    } else if (newUses >= 10) {
+        rReferrer = Math.floor(rReferrer * 2);
+        rReferee = Math.floor(rReferee * 1.5);
+    }
 
     let creditedReferrer = 0;
     let creditedReferee = 0;
@@ -168,8 +177,16 @@ router.post(
     }
 
     // AIBA referral bonuses (vision: Referrals → AIBA bonuses)
-    const aReferrer = Math.max(0, Math.floor(Number(cfg.referralRewardAibaReferrer ?? 0)));
-    const aReferee = Math.max(0, Math.floor(Number(cfg.referralRewardAibaReferee ?? 0)));
+    // Tiered: 10th = 2x, 100th = 5x for referrer
+    let aReferrer = Math.max(0, Math.floor(Number(cfg.referralRewardAibaReferrer ?? 0)));
+    let aReferee = Math.max(0, Math.floor(Number(cfg.referralRewardAibaReferee ?? 0)));
+    if (newUses >= 100) {
+        aReferrer = Math.floor(aReferrer * 5);
+        aReferee = Math.floor(aReferee * 2);
+    } else if (newUses >= 10) {
+        aReferrer = Math.floor(aReferrer * 2);
+        aReferee = Math.floor(aReferee * 1.5);
+    }
     let creditedAibaReferrer = 0;
     let creditedAibaReferee = 0;
     const totalAiba = aReferrer + aReferee;

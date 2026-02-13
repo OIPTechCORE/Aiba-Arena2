@@ -37,12 +37,13 @@ Single reference for codebase audits and status checks: project assessment, lead
 | **Staking** | Staking model, stake/unstake/claim, APY | Wallet tab staking card | Present; optional: dedicated “Yield Vault” tab |
 | **Center of Excellence** | No CoE model/routes | No CoE tab | Absent; University tab is the learning hub |
 | **Wall of Fame** | Leaderboard, badges | Leaderboard tab, badges in profile/leaderboard | Present (leaderboard + badges) |
+| **Trainers** | Global network, dashboard, leaderboard | `/trainer` portal; network, leaderboard, profile editor; viral recruitment; 5 AIBA/user, 20 AIBA/recruited trainer | Present; Super Admin approves at /admin |
 
 ---
 
 ## 4. Vision vs codebase
 
-Use this section to track high-level vision vs implementation. Key alignments: battles, economy (NEUR/AIBA), brokers, marketplace, guilds, referrals, car/bike racing, university, charity, multiverse (NFT/stake), governance, wallet (TonConnect, claim). Gaps: optional enhancements (e.g. CoE as branded product, NFT gallery, dedicated staking tab) and operational hardening (monitoring, backups, key rotation) per OPERATIONS.md.
+Use this section to track high-level vision vs implementation. Key alignments: battles, economy (NEUR/AIBA), brokers, marketplace, guilds, referrals, car/bike racing, university, charity, multiverse (NFT/stake), governance, wallet (TonConnect, claim), **trainers** (global network, dashboard, leaderboard, viral recruitment, rewards). Gaps: optional enhancements (e.g. CoE as branded product, NFT gallery, dedicated staking tab) and operational hardening (monitoring, backups, key rotation) per OPERATIONS.md.
 
 ---
 

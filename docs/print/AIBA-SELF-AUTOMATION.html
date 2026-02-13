@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AIBA SELF AUTOMATION — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>AIBA SELF AUTOMATION</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>AIBA Self-Automation — What Is Possible</h1>
+<p>This doc explains what can be automated vs what requires manual/on-chain actions for the 1T AIBA mint and allocation strategy.</p>
+<hr/>
+<h2>1. Self-Automated Daily Caps ✅ <strong>IMPLEMENTED</strong></h2>
+<p><strong>Location:</strong> <code>backend/engine/economyAutomation.js</code>, <code>backend/routes/economyAutomation.js</code></p>
+<ul>
+<li>- <code>automationTargetEmissionPercentPerYear</code> — target % of 1T to emit per year (e.g. 10%)</li>
+<li>- <code>automationMinCapAiba</code> / <code>automationMaxCapAiba</code> — bounds</li>
+<li><strong>Trigger:</strong> <code>POST /api/admin/economy-automation/run</code> (admin-only)</li>
+<li><strong>Cron:</strong> Add a daily cron (e.g. 00:05 UTC) to call this endpoint for true automation</li>
+</ul>
+<hr/>
+<h2>2. Allocation Strategy ✅ <strong>IMPLEMENTED (Config)</strong></h2>
+<p><strong>Location:</strong> <code>backend/models/EconomyConfig.js</code> — fields:</p>
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>allocationVaultPct</code></td>
+<td>40</td>
+<td>% to vault (rewards)</td>
+</tr>
+<tr>
+<td><code>allocationTreasuryPct</code></td>
+<td>15</td>
+<td>% to treasury</td>
+</tr>
+<tr>
+<td><code>allocationStakingPct</code></td>
+<td>20</td>
+<td>% to staking</td>
+</tr>
+<tr>
+<td><code>allocationTeamPct</code></td>
+<td>10</td>
+<td>% to team</td>
+</tr>
+<tr>
+<td><code>allocationEcosystemPct</code></td>
+<td>10</td>
+<td>% to ecosystem</td>
+</tr>
+<tr>
+<td><code>allocationCommunityPct</code></td>
+<td>5</td>
+<td>% to community</td>
+</tr>
+</tbody></table>
+<ul>
+<li><strong>Minting:</strong> Actual minting is done via <code>scripts/mintAibaToVault.ts</code> — requires <strong>owner key</strong>. The allocation percentages guide <em>how much</em> to mint to each address.</li>
+</ul>
+<hr/>
+<h2>3. Self-Automated Minting ⚠️ <strong>NOT FULLY POSSIBLE (On-Chain Constraint)</strong></h2>
+<ul>
+<li><strong>Options:</strong></li>
+<li>1. <strong>Cron + script:</strong> Run <code>mintAibaToVault.ts</code> daily via cron with the owner key (semi-automated; key must be available to the runner)</li>
+<li>2. <strong>Oracle / relayer:</strong> An off-chain service holds the owner key and mints when conditions are met (e.g. vault below threshold)</li>
+<li>3. <strong>Contract upgrade:</strong> Deploy a new AibaToken with a &quot;minter&quot; role that can be a contract with scheduled logic — <strong>complex, requires contract change</strong></li>
+</ul>
+<p><strong>Practical:</strong> Use option 1 — cron + script with secure key storage. Document in runbook.</p>
+<hr/>
+<h2>4. Self-Automated Anti-Inflation ✅ <strong>PARTIALLY IMPLEMENTED</strong></h2>
+<ul>
+<li><strong>Staking locks:</strong> Users stake AIBA → reduces circulating supply.</li>
+<li><strong>Dynamic caps:</strong> The automation adjusts emission caps so that inflation stays within target (see §1).</li>
+<li><strong>What’s NOT automated:</strong> On-chain burns. The current flow records burns in <code>EconomyDay</code>; actual token burns would need a contract call (e.g. <code>SafeTokenBurn</code>). That requires either a backend job that holds the burner key or a user-triggered flow.</li>
+</ul>
+<hr/>
+<h2>5. Summary</h2>
+<table>
+<thead><tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Dynamic daily caps</td>
+<td>✅</td>
+<td>Admin trigger or cron</td>
+</tr>
+<tr>
+<td>Allocation config</td>
+<td>✅</td>
+<td>EconomyConfig fields</td>
+</tr>
+<tr>
+<td>Anti-inflation (burn tracking)</td>
+<td>✅</td>
+<td>Off-chain; on-chain burns need key</td>
+</tr>
+<tr>
+<td>Fully autonomous minting</td>
+<td>❌</td>
+<td>Owner key required; use cron + script</td>
+</tr>
+<tr>
+<td>Fully autonomous on-chain burns</td>
+<td>❌</td>
+<td>Requires signer/key</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>6. Enabling Automation</h2>
+<ol>
+<li>Set <code>automationTargetEmissionPercentPerYear</code> (e.g. 10 = 10%/year).</li>
+<li>Set <code>automationMinCapAiba</code> and <code>automationMaxCapAiba</code>.</li>
+<li>Add cron: <code>0 5 0 <em> </em> *</code> (00:05 UTC daily) → <code>curl -X POST /api/admin/economy-automation/run</code> with admin auth.</li>
+</ol>
+<hr/>
+<h2>7. Related Config (EconomyConfig)</h2>
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>referralUnlock3BonusBps</code></td>
+<td>100</td>
+<td>1% battle reward bonus when user has 3+ referrals (invite-3 unlock)</td>
+</tr>
+<tr>
+<td><code>trainerRewardAibaPerUser</code></td>
+<td>5</td>
+<td>AIBA per referred user with 3+ battles</td>
+</tr>
+<tr>
+<td><code>trainerRewardAibaPerRecruitedTrainer</code></td>
+<td>20</td>
+<td>AIBA per trainer recruited (when approved)</td>
+</tr>
+</tbody></table>
+  </div>
+</body>
+</html>

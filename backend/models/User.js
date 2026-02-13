@@ -13,6 +13,17 @@ const UserSchema = new mongoose.Schema(
         },
         lastSeenAt: { type: Date, default: null },
         lastDailyClaimAt: { type: Date, default: null },
+        // Streaks (innovations): login streak for battle reward multiplier
+        loginStreakDays: { type: Number, default: 0 },
+        lastLoginStreakDate: { type: String, default: '', trim: true }, // YYYY-MM-DD
+        battleWinStreak: { type: Number, default: 0 },
+        lastBattleWinAt: { type: Date, default: null },
+        // Daily combo: spend X AIBA today → claim bonus once
+        dailyComboSpentTodayAiba: { type: Number, default: 0 },
+        dailyComboSpentDate: { type: String, default: '', trim: true },
+        dailyComboClaimedAt: { type: Date, default: null },
+        // Premium subscription (5 TON/mo = 2x rewards)
+        premiumUntil: { type: Date, default: null },
         wallet: { type: String, default: '', trim: true },
         aibaBalance: { type: Number, default: 0 },
         pendingAIBA: { type: Number, default: 0 },

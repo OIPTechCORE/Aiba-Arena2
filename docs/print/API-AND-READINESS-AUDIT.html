@@ -13,7 +13,7 @@
   </div>
   <div class="doc-body">
 <h1>API &amp; User Readiness Audit</h1>
-<p><strong>Date:</strong> 2025-02-11 <strong>Scope:</strong> All miniapp API calls vs backend endpoints; production readiness.</p>
+<p><strong>Date:</strong> 2025-02 (updated) <strong>Scope:</strong> All miniapp API calls vs backend endpoints; Trainers, Premium, Economy Automation, Referrals metrics; production readiness.</p>
 <hr/>
 <h2>1. API &amp; Endpoint Audit</h2>
 <h3>1.1 Summary</h3>
@@ -205,8 +205,21 @@
 <td>3</td>
 <td>✅</td>
 </tr>
+<tr>
+<td>Trainers</td>
+<td>8</td>
+<td>8</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Premium</td>
+<td>2</td>
+<td>2</td>
+<td>✅</td>
+</tr>
 </tbody></table>
 <p><strong>Result: All frontend API calls have corresponding backend routes. No missing endpoints.</strong></p>
+<p><strong>Trainers:</strong> <code>me</code>, <code>apply</code>, <code>network</code>, <code>leaderboard</code>, <code>profile</code> (PATCH), <code>claim-rewards</code>, <code>register-use</code>, <code>recruit-link</code>. <strong>Economy Automation (admin):</strong> <code>POST /run</code>, <code>GET /allocation</code>.</p>
 <hr/>
 <h3>1.2 Proxy &amp; CORS</h3>
 <table>
@@ -565,6 +578,84 @@
 <td>Mixed</td>
 <td>✅</td>
 </tr>
+<tr>
+<td><code>/api/trainers/me</code></td>
+<td>trainers <code>/me</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/trainers/apply</code></td>
+<td>trainers <code>/apply</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/trainers/network</code></td>
+<td>trainers <code>/network</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/trainers/leaderboard</code></td>
+<td>trainers <code>/leaderboard</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/trainers/profile</code></td>
+<td>trainers <code>/profile</code></td>
+<td>PATCH</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/trainers/claim-rewards</code></td>
+<td>trainers <code>/claim-rewards</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/trainers/register-use</code></td>
+<td>trainers <code>/register-use</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/trainers/recruit-link</code></td>
+<td>trainers <code>/recruit-link</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/premium/status</code></td>
+<td>premium <code>/status</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/premium/buy</code></td>
+<td>premium <code>/buy</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/admin/economy-automation/run</code></td>
+<td>economyAutomation <code>/run</code></td>
+<td>POST</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/admin/economy-automation/allocation</code></td>
+<td>economyAutomation <code>/allocation</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>/api/admin/referrals/metrics</code></td>
+<td>adminReferrals <code>/metrics</code></td>
+<td>GET</td>
+<td>✅</td>
+</tr>
 </tbody></table>
 <hr/>
 <h2>2. User Readiness Audit</h2>
@@ -675,6 +766,21 @@
 <td><strong>TON payments</strong></td>
 <td>⚠️ Config-dependent</td>
 <td>Various TON wallets (GIFTS_WALLET, BOOST_GROUP_WALLET, etc.) for buy-with-TON flows</td>
+</tr>
+<tr>
+<td><strong>Trainers</strong></td>
+<td>✅</td>
+<td>Portal <code>/trainer</code>; network, leaderboard, dashboard; viral recruitment; profile editor</td>
+</tr>
+<tr>
+<td><strong>Invite-3 unlock</strong></td>
+<td>✅</td>
+<td>1% battle bonus when user has 3+ referrals; config <code>referralUnlock3BonusBps</code></td>
+</tr>
+<tr>
+<td><strong>K-factor metrics</strong></td>
+<td>✅</td>
+<td><code>GET /api/admin/referrals/metrics</code> — K estimate, avg refs, conversion hint</td>
 </tr>
 </tbody></table>
 <hr/>

@@ -222,15 +222,32 @@ if (!fs.existsSync(PRINT_DIR)) {
   fs.mkdirSync(PRINT_DIR, { recursive: true });
 }
 
-const mdFiles = fs.readdirSync(DOCS_DIR).filter((f) => f.endsWith('.md'));
+function collectMdFiles(dir, prefix = '') {
+  const files = [];
+  const items = fs.readdirSync(dir);
+  for (const item of items) {
+    const full = path.join(dir, item);
+    const stat = fs.statSync(full);
+    if (stat.isDirectory()) {
+      if (item !== 'print' && item !== 'templates') {
+        files.push(...collectMdFiles(full, prefix + item + '/'));
+      }
+    } else if (item.endsWith('.md')) {
+      files.push({ rel: prefix + item, full });
+    }
+  }
+  return files;
+}
+
+const mdFiles = collectMdFiles(DOCS_DIR);
 const entries = [];
 
-for (const file of mdFiles.sort()) {
-  const fullPath = path.join(DOCS_DIR, file);
-  const md = fs.readFileSync(fullPath, 'utf8');
-  const title = file.replace(/\.md$/, '').replace(/-/g, ' ');
+for (const { rel, full } of mdFiles.sort((a, b) => a.rel.localeCompare(b.rel))) {
+  const md = fs.readFileSync(full, 'utf8');
+  const base = path.basename(rel, '.md');
+  const title = base.replace(/-/g, ' ');
   const html = mdToHtml(md);
-  const outName = file.replace(/\.md$/, '.html');
+  const outName = rel.replace(/\.md$/, '.html').replace(/\//g, '-');
   const outPath = path.join(PRINT_DIR, outName);
   const docHtml = buildDoc(outName, title, html);
   fs.writeFileSync(outPath, docHtml, 'utf8');

@@ -122,6 +122,20 @@ Returns `{ status: "operational", updatedAt }`
 
 ---
 
+## 5a) Trainers (Global Network, Dashboard, Leaderboard)
+
+**GET** `/api/trainers/me` — My trainer stats (auth)  
+**POST** `/api/trainers/apply` — Apply to become trainer; body `{ ref? }`  
+**GET** `/api/trainers/network` — Public; query `sort`, `limit`  
+**GET** `/api/trainers/leaderboard` — Public; query `by`, `limit`  
+**PATCH** `/api/trainers/profile` — Update displayName, bio, specialty, region (auth)  
+**POST** `/api/trainers/claim-rewards` — Claim pending AIBA (auth)  
+**POST** `/api/trainers/register-use` — Record referee (auth)  
+**GET** `/api/trainers/recruit-link` — Query `ref`; returns `{ url, ref }`  
+**Admin:** `GET /api/admin/trainers`, `PATCH /api/admin/trainers/:id` (status: approve/suspend)
+
+---
+
 ## 6) Admin (ops tuning)
 
 **GET** `/api/admin/realms`  

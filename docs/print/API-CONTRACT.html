@@ -53,6 +53,9 @@
 <p><strong>GET</strong> <code>/api/treasury/ops</code> Returns <code>{ ops: TreasuryOp[] }</code></p>
 <p><strong>GET</strong> <code>/api/comms/status</code> Returns <code>{ status: &quot;operational&quot;, updatedAt }</code></p>
 <hr/>
+<h2>5a) Trainers (Global Network, Dashboard, Leaderboard)</h2>
+<p><strong>GET</strong> <code>/api/trainers/me</code> — My trainer stats (auth) <strong>POST</strong> <code>/api/trainers/apply</code> — Apply to become trainer; body <code>{ ref? }</code> <strong>GET</strong> <code>/api/trainers/network</code> — Public; query <code>sort</code>, <code>limit</code> <strong>GET</strong> <code>/api/trainers/leaderboard</code> — Public; query <code>by</code>, <code>limit</code> <strong>PATCH</strong> <code>/api/trainers/profile</code> — Update displayName, bio, specialty, region (auth) <strong>POST</strong> <code>/api/trainers/claim-rewards</code> — Claim pending AIBA (auth) <strong>POST</strong> <code>/api/trainers/register-use</code> — Record referee (auth) <strong>GET</strong> <code>/api/trainers/recruit-link</code> — Query <code>ref</code>; returns <code>{ url, ref }</code> <strong>Admin:</strong> <code>GET /api/admin/trainers</code>, <code>PATCH /api/admin/trainers/:id</code> (status: approve/suspend)</p>
+<hr/>
 <h2>6) Admin (ops tuning)</h2>
 <p><strong>GET</strong> <code>/api/admin/realms</code> <strong>POST</strong> <code>/api/admin/realms</code> (create/update)</p>
 <p><strong>GET</strong> <code>/api/admin/economy/config</code> <strong>PATCH</strong> <code>/api/admin/economy/config</code> <strong>GET</strong> <code>/api/admin/economy/day</code> <strong>GET</strong> <code>/api/admin/economy/ledger</code> <strong>GET</strong> <code>/api/admin/economy/simulate</code> <strong>POST</strong> <code>/api/admin/economy/credit-user</code></p>

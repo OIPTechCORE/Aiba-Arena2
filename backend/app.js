@@ -44,6 +44,9 @@ function createApp() {
     app.use('/api/admin/ads', require('./routes/adminAds'));
     app.use('/api/admin/game-modes', require('./routes/adminGameModes'));
     app.use('/api/admin/economy', require('./routes/adminEconomy'));
+    app.use('/api/admin/economy-automation', require('./routes/economyAutomation'));
+    app.use('/api/admin/tournaments', require('./routes/adminTournaments'));
+    app.use('/api/admin/global-boss', require('./routes/adminGlobalBoss'));
     app.use('/api/admin/mod', require('./routes/adminModeration'));
     app.use('/api/admin/treasury', require('./routes/adminTreasury'));
     app.use('/api/admin/governance', require('./routes/adminGovernance'));
@@ -81,6 +84,13 @@ function createApp() {
     app.use('/api/stars-store', require('./routes/starsStore'));
     app.use('/api/car-racing', require('./routes/carRacing'));
     app.use('/api/bike-racing', require('./routes/bikeRacing'));
+    app.use('/api/tournaments', require('./routes/tournaments'));
+    app.use('/api/global-boss', require('./routes/globalBoss'));
+    app.use('/api/premium', require('./routes/premium'));
+    app.use('/api/broker-rental', require('./routes/brokerRental'));
+    app.use('/api/breeding', require('./routes/breeding'));
+    app.use('/api/trainers', require('./routes/trainers'));
+    app.use('/api/admin/trainers', require('./routes/adminTrainers'));
 
     app.get('/api/comms/status', (_req, res) =>
         res.json({ status: 'operational', updatedAt: new Date().toISOString() }));

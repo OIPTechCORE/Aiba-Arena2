@@ -1,6 +1,6 @@
 # Printable docs
 
-All project docs are available as **print-friendly HTML**. Use them to print or save as PDF.
+All project docs (including `docs/marketing/`) are available as **print-friendly HTML**. Use them to print or save as PDF.
 
 ## Quick start
 
@@ -13,7 +13,7 @@ All project docs are available as **print-friendly HTML**. Use them to print or 
 
 ## What you get
 
-- **`docs/print/`** — One HTML file per Markdown doc, plus **`index.html`** (list of all docs).
+- **`docs/print/`** — One HTML file per Markdown doc (`docs/*.md` and `docs/marketing/*.md`), plus **`index.html`** (list of all docs).
 - **`docs/print.css`** — Shared styles: readable on screen and optimized for print (margins, page breaks, visible URLs when printing).
 
 ## Regenerating

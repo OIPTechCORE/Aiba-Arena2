@@ -170,6 +170,9 @@ router.patch(
         'createBikeCostAiba',
         'bikeEntryFeeAiba',
         'bikeRacingFeeBps',
+        'referralUnlock3BonusBps',
+        'trainerRewardAibaPerUser',
+        'trainerRewardAibaPerRecruitedTrainer',
     ]);
     const bodyKeys = req.body && typeof req.body === 'object' ? Object.keys(req.body) : [];
     const unknown = bodyKeys.filter((k) => !allowedTopLevel.has(k));
@@ -269,6 +272,9 @@ router.patch(
     maybeNum('createBikeCostAiba');
     maybeNum('bikeEntryFeeAiba');
     maybeNum('bikeRacingFeeBps');
+    maybeNum('referralUnlock3BonusBps');
+    maybeNum('trainerRewardAibaPerUser');
+    maybeNum('trainerRewardAibaPerRecruitedTrainer');
     if (req.body?.createBikeCostTonNano !== undefined) {
         const v = Number(req.body.createBikeCostTonNano);
         if (Number.isFinite(v) && v >= 0)

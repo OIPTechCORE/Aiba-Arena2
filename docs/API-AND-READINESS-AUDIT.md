@@ -1,7 +1,7 @@
 # API & User Readiness Audit
 
-**Date:** 2025-02-11  
-**Scope:** All miniapp API calls vs backend endpoints; production readiness.
+**Date:** 2025-02 (updated)  
+**Scope:** All miniapp API calls vs backend endpoints; Trainers, Premium, Economy Automation, Referrals metrics; production readiness.
 
 ---
 
@@ -41,8 +41,13 @@
 | Car Racing      | 10             | 10            | ✅ |
 | Bike Racing     | 10             | 10            | ✅ |
 | Gifts           | 3              | 3             | ✅ |
+| Trainers        | 8              | 8             | ✅ |
+| Premium         | 2              | 2             | ✅ |
 
 **Result: All frontend API calls have corresponding backend routes. No missing endpoints.**
+
+**Trainers:** `me`, `apply`, `network`, `leaderboard`, `profile` (PATCH), `claim-rewards`, `register-use`, `recruit-link`.  
+**Economy Automation (admin):** `POST /run`, `GET /allocation`.
 
 ---
 
@@ -115,6 +120,19 @@
 | `/api/governance/*` | governance | Mixed | ✅ |
 | `/api/referrals/*` | referrals | Mixed | ✅ |
 | `/api/vault/*` | vault | Mixed | ✅ |
+| `/api/trainers/me` | trainers `/me` | GET | ✅ |
+| `/api/trainers/apply` | trainers `/apply` | POST | ✅ |
+| `/api/trainers/network` | trainers `/network` | GET | ✅ |
+| `/api/trainers/leaderboard` | trainers `/leaderboard` | GET | ✅ |
+| `/api/trainers/profile` | trainers `/profile` | PATCH | ✅ |
+| `/api/trainers/claim-rewards` | trainers `/claim-rewards` | POST | ✅ |
+| `/api/trainers/register-use` | trainers `/register-use` | POST | ✅ |
+| `/api/trainers/recruit-link` | trainers `/recruit-link` | GET | ✅ |
+| `/api/premium/status` | premium `/status` | GET | ✅ |
+| `/api/premium/buy` | premium `/buy` | POST | ✅ |
+| `/api/admin/economy-automation/run` | economyAutomation `/run` | POST | ✅ |
+| `/api/admin/economy-automation/allocation` | economyAutomation `/allocation` | GET | ✅ |
+| `/api/admin/referrals/metrics` | adminReferrals `/metrics` | GET | ✅ |
 
 ---
 
@@ -149,6 +167,9 @@
 | **Charity** | ✅ | Campaigns, donate, leaderboard |
 | **Vault/Claims** | ⚠️ Config-dependent | Needs `ARENA_VAULT_ADDRESS`, `AIBA_JETTON_MASTER`, `ORACLE_*`, `TON_PROVIDER_URL` for on-chain claims |
 | **TON payments** | ⚠️ Config-dependent | Various TON wallets (GIFTS_WALLET, BOOST_GROUP_WALLET, etc.) for buy-with-TON flows |
+| **Trainers** | ✅ | Portal `/trainer`; network, leaderboard, dashboard; viral recruitment; profile editor |
+| **Invite-3 unlock** | ✅ | 1% battle bonus when user has 3+ referrals; config `referralUnlock3BonusBps` |
+| **K-factor metrics** | ✅ | `GET /api/admin/referrals/metrics` — K estimate, avg refs, conversion hint |
 
 ---
 

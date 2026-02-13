@@ -30,6 +30,50 @@ router.get(
     },
 );
 
+// GET /api/admin/referrals/metrics — K-factor, conversion hint, viral metrics
+router.get('/metrics', async (_req, res) => {
+    try {
+        const [totalCodes, totalUses, totalUsers, agg] = await Promise.all([
+            Referral.countDocuments({ active: true }),
+            ReferralUse.countDocuments(),
+            require('../models/User').countDocuments(),
+            Referral.aggregate([
+                { $match: { active: true, uses: { $gt: 0 } } },
+                {
+                    $group: {
+                        _id: null,
+                        totalUses: { $sum: '$uses' },
+                        avgUsesPerReferrer: { $avg: '$uses' },
+                        referrerCount: { $sum: 1 },
+                        maxUses: { $max: '$uses' },
+                    },
+                },
+            ]),
+        ]);
+        const a = agg[0] || {};
+        const totalReferrals = a.totalUses ?? totalUses;
+        const referrerCount = a.referrerCount ?? 0;
+        const avgUses = referrerCount > 0 ? (a.totalUses ?? 0) / referrerCount : 0;
+        // K = i × c; assume 15% conversion as illustrative; i = avg invites per referrer
+        const conversionEstimate = 0.15;
+        const kFactorEstimate = avgUses * conversionEstimate;
+        res.json({
+            totalActiveCodes: totalCodes,
+            totalReferralUses: totalUses,
+            totalUsers,
+            referrersWithUses: referrerCount,
+            avgUsesPerReferrer: Math.round(avgUses * 100) / 100,
+            maxUses: a.maxUses ?? 0,
+            kFactorEstimate: Math.round(kFactorEstimate * 1000) / 1000,
+            conversionEstimateUsed: conversionEstimate,
+            note: 'K > 0.3 = sustainable virality. Conversion is estimated; track cohort conversion for accuracy.',
+        });
+    } catch (err) {
+        console.error('Admin referrals metrics error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
 // GET /api/admin/referrals/stats — aggregate stats
 router.get('/stats', async (_req, res) => {
     try {

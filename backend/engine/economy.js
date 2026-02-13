@@ -1,6 +1,7 @@
 const EconomyDay = require('../models/EconomyDay');
 const EconomyConfig = require('../models/EconomyConfig');
 const User = require('../models/User');
+const { recordAibaSpendForDailyCombo } = require('./innovations');
 const LedgerEntry = require('../models/LedgerEntry');
 const mongoose = require('mongoose');
 const { metrics } = require('../metrics');
@@ -1003,6 +1004,7 @@ async function debitAibaFromUser(
         if (tx.ok) {
             if (tx.result?.ok && tx.result?.user) {
                 metrics?.economySinksTotal?.inc?.({ currency: 'AIBA', reason, arena, league }, Number(amt) || 0);
+                recordAibaSpendForDailyCombo(telegramId, amt).catch(() => {});
             }
             return tx.result;
         }
@@ -1051,6 +1053,7 @@ async function debitAibaFromUser(
             ).lean();
             await LedgerEntry.updateOne(ident, { $set: { applied: true } }).catch(() => {});
             metrics?.economySinksTotal?.inc?.({ currency: 'AIBA', reason, arena, league }, Number(amt) || 0);
+            recordAibaSpendForDailyCombo(telegramId, amt).catch(() => {});
             return { ok: true, user, repaired: true };
         }
         if (!created?.ok) return created;
@@ -1075,6 +1078,7 @@ async function debitAibaFromUser(
         ).lean();
         await LedgerEntry.updateOne({ _id: created.created?._id }, { $set: { applied: true } }).catch(() => {});
         metrics?.economySinksTotal?.inc?.({ currency: 'AIBA', reason, arena, league }, Number(amt) || 0);
+        recordAibaSpendForDailyCombo(telegramId, amt).catch(() => {});
         return { ok: true, user };
     }
 
@@ -1086,6 +1090,7 @@ async function debitAibaFromUser(
     if (!user) return { ok: false, reason: 'insufficient' };
 
     await recordBurnAiba(amt, { reason, arena, league, telegramId, sourceType, sourceId, requestId, battleId, meta });
+    recordAibaSpendForDailyCombo(telegramId, amt).catch(() => {});
     return { ok: true, user };
 }
 

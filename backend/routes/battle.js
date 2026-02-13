@@ -30,6 +30,8 @@ const { metrics } = require('../metrics');
 const { clampInt, applyEnergyRegen } = require('../engine/battleEnergy');
 const { buildBattleSeedMessage } = require('../engine/battleSeed');
 const { getBattleCooldownKey } = require('../engine/battleCooldown');
+const { getRewardMultiplier, updateBattleWinStreak, resetBattleWinStreak } = require('../engine/innovations');
+const { recordBossDamageFromBattle } = require('./globalBoss');
 
 function safeVaultClaimSeqno(user) {
     const n = Math.floor(Number(user?.vaultClaimSeqno ?? 0));
@@ -392,6 +394,12 @@ router.post(
             const multNeur = Number(mode?.rewardMultiplierNeur ?? 1) || 1;
             let proposedNeur = Math.max(0, Math.floor(score * cfg.baseRewardNeurPerScore * multNeur));
 
+            // Innovations: streak + premium + win streak multiplier
+            const innovationsMul = await getRewardMultiplier(telegramId, cfg);
+            if (innovationsMul > 1) {
+                proposedAiba = Math.max(0, Math.floor(proposedAiba * innovationsMul));
+                proposedNeur = Math.max(0, Math.floor(proposedNeur * innovationsMul));
+            }
             // Boost: active boost multiplies rewards
             const nowBoost = new Date();
             const activeBoost = await Boost.findOne({
@@ -469,6 +477,13 @@ router.post(
                 }
             }
 
+            // Innovations: update battle win streak
+            if (score > 0) {
+                updateBattleWinStreak(telegramId).catch(() => {});
+                recordBossDamageFromBattle(telegramId, score, null).catch(() => {});
+            } else {
+                resetBattleWinStreak(telegramId).catch(() => {});
+            }
             // Stars: per battle *win* only (Telegram Stars–style); ledger for audit
             const starReward = score > 0 ? Math.max(0, Math.floor(Number(cfg.starRewardPerBattle ?? 0))) : 0;
             if (starReward > 0) {

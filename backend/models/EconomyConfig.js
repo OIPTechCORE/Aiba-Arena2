@@ -131,6 +131,49 @@ const EconomyConfigSchema = new mongoose.Schema(
         createBikeCostAiba: { type: Number, default: 100 },
         bikeEntryFeeAiba: { type: Number, default: 10 },
         bikeRacingFeeBps: { type: Number, default: 300 },
+
+        // Innovations: Streaks
+        streakMultiplierAt7Days: { type: Number, default: 1.25 },
+        streakMultiplierAt30Days: { type: Number, default: 1.5 },
+        streakCapMultiplier: { type: Number, default: 2 },
+        battleWinStreakBonusBps: { type: Number, default: 100 }, // 1% per win streak, cap 5 wins
+        // Innovations: Daily Combo
+        dailyComboRequirementAiba: { type: Number, default: 100 },
+        dailyComboBonusAiba: { type: Number, default: 500 },
+        // Innovations: Premium
+        premiumCostTonNano: { type: Number, default: 5_000_000_000 },
+        premiumDurationDays: { type: Number, default: 30 },
+        premiumRewardMultiplier: { type: Number, default: 2 },
+        // Innovations: Creator economy (% of referred user earnings to creator)
+        creatorPercentBps: { type: Number, default: 200 }, // 2%
+        creatorTier100RefsBps: { type: Number, default: 300 },
+        creatorTier1000RefsBps: { type: Number, default: 500 },
+        creatorTier10000RefsBps: { type: Number, default: 700 },
+        // Innovations: Broker rental platform fee
+        brokerRentalFeeBps: { type: Number, default: 2000 }, // 20%
+        // Innovations: Tournament fee to treasury
+        tournamentFeeBps: { type: Number, default: 2000 }, // 20%
+        // Innovations: Predict/bet vig
+        predictVigBps: { type: Number, default: 300 }, // 3%
+        predictMaxBetAiba: { type: Number, default: 10_000 },
+        // Innovations: Breeding
+        breedCostAiba: { type: Number, default: 200 },
+        // Trainers: rewards from ecosystem
+        trainerRewardAibaPerUser: { type: Number, default: 5 }, // AIBA per referred user with 3+ battles
+        trainerRewardAibaPerRecruitedTrainer: { type: Number, default: 20 }, // AIBA per trainer you recruited (when approved)
+        // Invite-3 unlock: BPS bonus on battle rewards when user has 3+ referrals (default 100 = 1%)
+        referralUnlock3BonusBps: { type: Number, default: 100 },
+        // AIBA self-automation (dynamic caps)
+        automationEnabled: { type: Boolean, default: false },
+        automationTargetEmissionPercentPerYear: { type: Number, default: 10 },
+        automationMinCapAiba: { type: Number, default: 500_000 },
+        automationMaxCapAiba: { type: Number, default: 5_000_000 },
+        allocationVaultPct: { type: Number, default: 40 },
+        allocationTreasuryPct: { type: Number, default: 15 },
+        allocationStakingPct: { type: Number, default: 20 },
+        allocationTeamPct: { type: Number, default: 10 },
+        allocationEcosystemPct: { type: Number, default: 10 },
+        allocationCommunityPct: { type: Number, default: 5 },
     },
     { timestamps: true },
 );
