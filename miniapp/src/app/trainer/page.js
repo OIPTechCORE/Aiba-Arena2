@@ -18,7 +18,7 @@ export default function TrainerPage() {
     const [applyMsg, setApplyMsg] = useState('');
     const [claimMsg, setClaimMsg] = useState('');
     const [busy, setBusy] = useState(false);
-    const [tab, setTab] = useState('dashboard');
+    const [tab, setTab] = useState('network');
     const [network, setNetwork] = useState([]);
     const [leaderboard, setLeaderboard] = useState([]);
     const [leaderboardBy, setLeaderboardBy] = useState('impact');
@@ -34,7 +34,7 @@ export default function TrainerPage() {
         : '';
 
     useEffect(() => {
-        api.get('/api/trainers/me')
+        api.get('/api/trainers/me', { timeout: 8000 })
             .then((res) => {
                 setTrainer(res.data);
                 if (res.data?.displayName) setProfileDisplayName(res.data.displayName);
@@ -55,7 +55,7 @@ export default function TrainerPage() {
     useEffect(() => {
         if (tab === 'network') {
             const sort = networkSort === 'referred' ? 'referred' : networkSort === 'recruited' ? 'recruited' : networkSort === 'rewards' ? 'rewards' : 'impact';
-            api.get('/api/trainers/network', { params: { sort, limit: 100 } })
+            api.get('/api/trainers/network', { params: { sort, limit: 50 }, timeout: 8000 })
                 .then((res) => setNetwork(Array.isArray(res.data) ? res.data : []))
                 .catch(() => setNetwork([]));
         }
@@ -63,7 +63,7 @@ export default function TrainerPage() {
 
     useEffect(() => {
         if (tab === 'leaderboard') {
-            api.get('/api/trainers/leaderboard', { params: { by: leaderboardBy, limit: 100 } })
+            api.get('/api/trainers/leaderboard', { params: { by: leaderboardBy, limit: 50 }, timeout: 8000 })
                 .then((res) => setLeaderboard(Array.isArray(res.data) ? res.data : []))
                 .catch(() => setLeaderboard([]));
         }
@@ -92,7 +92,7 @@ export default function TrainerPage() {
         setBusy(true);
         setClaimMsg('');
         try {
-            const res = await api.post('/api/trainers/claim-rewards');
+            const res = await api.post('/api/trainers/claim-rewards', { requestId: `trainer-${Date.now()}` });
             setClaimMsg(`Claimed ${res.data?.claimedAiba ?? 0} AIBA!`);
             if (trainer) setTrainer({ ...trainer, rewardsEarnedAiba: (trainer.rewardsEarnedAiba || 0) + (res.data?.claimedAiba || 0) });
         } catch (e) {
@@ -134,14 +134,6 @@ export default function TrainerPage() {
         }
     }
 
-    if (loading) {
-        return (
-            <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>
-                Loading...
-            </div>
-        );
-    }
-
     return (
         <div style={{ padding: 24, maxWidth: 640, margin: '0 auto', minHeight: '100vh' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
@@ -173,9 +165,13 @@ export default function TrainerPage() {
                         </button>
                     ))}
                 </div>
-            ) : null}
+            )}
 
-            {!trainer?.isTrainer ? (
+            {loading && trainer === null ? (
+                <div style={{ padding: 16, border: '2px solid var(--border)', borderRadius: 12, marginBottom: 16, color: 'var(--text-muted)', fontSize: 14 }}>
+                    Checking account…
+                </div>
+            ) : !trainer?.isTrainer ? (
                 <div style={{ padding: 16, border: '2px solid var(--accent-cyan)', borderRadius: 12, marginBottom: 16 }}>
                     <h2 style={{ marginTop: 0, fontSize: 16 }}>Apply to become a trainer</h2>
                     <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 12 }}>
@@ -191,12 +187,12 @@ export default function TrainerPage() {
                     </button>
                     {applyMsg ? <p style={{ marginTop: 8, color: 'var(--accent-green)', fontSize: 13 }}>{applyMsg}</p> : null}
                 </div>
-            ) : trainer.status === 'pending' ? (
+            ) : trainer?.status === 'pending' ? (
                 <div style={{ padding: 16, border: '2px solid var(--accent-gold)', borderRadius: 12, marginBottom: 16 }}>
                     <h2 style={{ marginTop: 0, fontSize: 16 }}>Pending approval</h2>
                     <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Your code: <strong>{trainer.code}</strong>. Browse the network while you wait.</p>
                 </div>
-            ) : trainer.status === 'suspended' ? (
+            ) : trainer?.status === 'suspended' ? (
                 <div style={{ padding: 20, border: '2px solid #b45309', borderRadius: 12 }}>
                     <h2 style={{ marginTop: 0 }}>Suspended</h2>
                     <p style={{ color: 'var(--text-muted)' }}>Your trainer account is suspended. Contact support.</p>

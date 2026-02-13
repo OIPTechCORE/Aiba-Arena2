@@ -5,6 +5,7 @@ const GiftSchema = new mongoose.Schema(
         fromTelegramId: { type: String, required: true, index: true },
         toTelegramId: { type: String, required: true, index: true },
         amountNano: { type: Number, default: 0 },
+        amountAiba: { type: Number, default: 0 }, // AIBA gift (when > 0)
         txHash: { type: String, default: '', trim: true, index: true },
         message: { type: String, default: '', trim: true },
     },

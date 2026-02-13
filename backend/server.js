@@ -81,6 +81,20 @@ if (enableLegacyPendingAibaDispatch) {
             accrueMentorRewards().catch((err) => console.error('Cron mentor rewards failed:', err));
         });
 
+        // Holistic automated AIBA/TON oracle (when oracleAutoUpdateEnabled + oracleAibaUsd or fallback set)
+        const { runOracleUpdate, shouldRunOracleCron } = require('./engine/aibaTonOracle');
+        const oracleIntervalMin = Math.max(5, Number(process.env.ORACLE_UPDATE_INTERVAL_MINUTES) || 15);
+        cron.schedule(`*/${oracleIntervalMin} * * * *`, async () => {
+            try {
+                const should = await shouldRunOracleCron();
+                if (!should) return;
+                const r = await runOracleUpdate();
+                if (r.ok) console.log('Oracle: updated aibaPerTon=', r.oracleAibaPerTon);
+            } catch (err) {
+                console.error('Cron oracle update failed:', err);
+            }
+        });
+
         app.listen(process.env.PORT || 5000, () => console.log('Server listening'));
     } catch (err) {
         console.error('Backend startup failed:', err?.message || err);

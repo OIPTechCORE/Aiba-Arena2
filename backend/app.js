@@ -45,6 +45,7 @@ function createApp() {
     app.use('/api/admin/game-modes', require('./routes/adminGameModes'));
     app.use('/api/admin/economy', require('./routes/adminEconomy'));
     app.use('/api/admin/economy-automation', require('./routes/economyAutomation'));
+    app.use('/api/admin/oracle', require('./routes/adminOracle'));
     app.use('/api/admin/tournaments', require('./routes/adminTournaments'));
     app.use('/api/admin/global-boss', require('./routes/adminGlobalBoss'));
     app.use('/api/admin/mod', require('./routes/adminModeration'));
@@ -91,6 +92,8 @@ function createApp() {
     app.use('/api/breeding', require('./routes/breeding'));
     app.use('/api/trainers', require('./routes/trainers'));
     app.use('/api/admin/trainers', require('./routes/adminTrainers'));
+    app.use('/api/p2p-aiba', require('./routes/p2pAiba'));
+    app.use('/api/donate', require('./routes/donate'));
 
     app.get('/api/comms/status', (_req, res) =>
         res.json({ status: 'operational', updatedAt: new Date().toISOString() }));

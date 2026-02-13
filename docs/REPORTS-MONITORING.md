@@ -158,7 +158,8 @@ Run this when:
 | AUDIT-AND-STATUS | Trainers ecosystem, vision alignment | ✅ |
 | TRAINERS-MANUAL | ADVISORY, REPORTS-MONITORING, USER-GUIDE, API-AND-READINESS-AUDIT | ✅ |
 | OPERATIONS | Keys, incident response, monitoring (no trainer-specific section needed) | ✅ |
-| docs/README | All docs indexed including REPORTS-MONITORING, TRAINERS-MANUAL | ✅ |
+| docs/README | All docs indexed including REPORTS-MONITORING, TRAINERS-MANUAL, ORACLE-AIBA-TON | ✅ |
+| ORACLE-AIBA-TON | API-CONTRACT, ADVISORY-TOKENOMICS | ✅ |
 
 ---
 
@@ -175,3 +176,6 @@ Run this when:
 | Trainer viral recruitment | `?ref=CODE`, admin approval → 20 AIBA | TRAINERS-MANUAL |
 | Economy automation | `economyAutomation.js`, allocation | AIBA-SELF-AUTOMATION |
 | Token splits (15/25/50/10) | `tokenSplits.js`, EconomyConfig | ADVISORY |
+| Oracle AIBA/TON (automated) | `aibaTonOracle.js`, cron, GET /api/oracle/price, admin oracle | ORACLE-AIBA-TON |
+| Treasury ops | GET /api/treasury/ops | API-CONTRACT |
+| Miniapp backend alignment | Treasury ops, Mentors upgrade, Trainers enrichment, 3D arena visuals | USER-GUIDE, VISION-3D-ARENAS-STATUS |

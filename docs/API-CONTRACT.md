@@ -136,6 +136,31 @@ Returns `{ status: "operational", updatedAt }`
 
 ---
 
+## 5b) P2P AIBA & Buy AIBA with TON
+
+**GET** `/api/oracle/price` — Returns `{ aibaPerTon, neurPerAiba, updatedAt }` (AIBA per TON from automated oracle or manual config)  
+**GET** `/api/p2p-aiba/config` — Fees, oracle, wallet presence  
+**POST** `/api/p2p-aiba/send` — Body: `{ toTelegramId?, toUsername?, amountAiba, txHash }` — Pay TON fee → P2P_AIBA_SEND_WALLET; send AIBA to recipient  
+**POST** `/api/p2p-aiba/buy` — Body: `{ txHash }` — Pay TON → BUY_AIBA_WITH_TON_WALLET; receive AIBA at oracle rate minus fee
+
+---
+
+## 5c) Gifts (extended)
+
+**POST** `/api/gifts/send-aiba` — Body: `{ txHash, toTelegramId?, toUsername?, amountAiba, message? }` — Pay TON → AIBA_IN_GIFTS_WALLET; recipient receives AIBA
+
+---
+
+## 5d) Donate (broker, car, bike, gifts)
+
+**GET** `/api/donate/config` — Fee amounts, wallet presence  
+**POST** `/api/donate/broker` — Body: `{ brokerId, txHash }` — TON fee → DONATE_BROKER_WALLET  
+**POST** `/api/donate/car` — Body: `{ carId, txHash }` — TON fee → DONATE_CAR_WALLET  
+**POST** `/api/donate/bike` — Body: `{ bikeId, txHash }` — TON fee → DONATE_BIKE_WALLET  
+**POST** `/api/donate/gifts` — Body: `{ txHash }` — TON fee → DONATE_GIFTS_WALLET
+
+---
+
 ## 6) Admin (ops tuning)
 
 **GET** `/api/admin/realms`  
@@ -155,7 +180,9 @@ Returns `{ status: "operational", updatedAt }`
 **POST** `/api/admin/treasury/reserve/fund`  
 **GET** `/api/admin/treasury/buyback`  
 **POST** `/api/admin/treasury/buyback/fund`  
-**PATCH** `/api/admin/treasury/oracle`  
+**PATCH** `/api/admin/treasury/oracle` — Manual oracleAibaPerTon / oracleNeurPerAiba (one-off override)  
+**GET** `/api/admin/oracle/status` — Oracle config (auto-update, aibaUsd, min/max/fallback, lastUpdatedAt)  
+**POST** `/api/admin/oracle/update` — Trigger one oracle update cycle (fetches TON price, computes AIBA/TON, persists)  
 **GET** `/api/admin/treasury-ops/metrics`
 
 ---

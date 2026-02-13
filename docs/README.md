@@ -28,7 +28,8 @@ Use this phase table first, then open the detailed docs below.
 | **REPORTS-MONITORING.md** | Cross-validation of advisory/audit reports vs codebase; invite-3, K-factor, trainers. |
 | **TELEGRAM-APPS-MODERATION-ADVISORY.md** | Telegram Apps Moderation Center: approval probability, position in Apps Center, submission checklist. |
 | **INNOVATIONS-100X-ADVISORY.md** | Innovations to strike the game: tournaments, streaks, creator economy, predict/bet, subscription, rental, raid, breeding. 100× calculations for users, AIBA, founders. |
-| **API-CONTRACT.md** | API contract: Realms, Missions, Mentors, Assets, Governance, Treasury, Trainers. |
+| **API-CONTRACT.md** | API contract: Realms, Missions, Mentors, Assets, Governance, Treasury, Trainers, Oracle, P2P AIBA, Gifts, Donate. |
+| **ORACLE-AIBA-TON.md** | Holistic automated AIBA/TON oracle: formula, config, cron, admin API. |
 | **CONTRACT-DEPLOYMENT-ORDER.md** | Contract deployment order. |
 | **UNIVERSAL-SPEC.md** | Universal spec (if present). |
 | **CONNECT-WALLET-TON-SCAN.md** | Connect wallet, TON Scan. |

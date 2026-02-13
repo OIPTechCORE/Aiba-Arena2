@@ -8,16 +8,15 @@
 ## 1. Direct Answer
 
 ### Do we already have 3D super power futuristic arenas?
-**No.** The app currently has **arena modes as game logic** (prediction, simulation, strategyWars, arbitrage, guildWars) — but **no 3D visualization** to watch.
+**Yes (CSS visuals).** The app has **arena modes as game logic** (prediction, simulation, strategyWars, arbitrage, guildWars) and **futuristic arena visuals** (CSS gradient/glow, labeled "3D Super Power Arena").
 
 ### Can I see them?
-**No.** Battles are:
-1. Select arena (dropdown)
-2. Click "Run battle"
-3. Server returns **text result** (score, rewards)
-4. No canvas, WebGL, or 3D renderer
+**Yes.** You can see them in:
+1. **Home tab** — Hero banner "3D Super Power Futuristic Arenas" (tappable, goes to Arenas)
+2. **Arenas tab** — Main arena visual with "3D Super Power Arena" label
+3. **Brokers tab** — Victory and "Battle Complete" visuals after a battle
 
-The marketing copy ("Compete in 3D arenas") is **aspirational**. The vision document and UI hint at 3D, but the implementation is server-simulated + text-only result.
+These are **CSS-based** (gradients, glow, grid patterns) — not WebGL/Three.js. Battles are still server-simulated + text result. The visuals provide a futuristic "super power" aesthetic.
 
 ---
 
@@ -28,7 +27,9 @@ The marketing copy ("Compete in 3D arenas") is **aspirational**. The vision docu
 | Arena modes (prediction, simulation, etc.) | ✅ Implemented | `backend/engine/battleEngine.js`, miniapp arena select |
 | Battle simulation (deterministic formula) | ✅ Implemented | `simulateBattle()` |
 | Victory card (score + rewards) | ✅ Implemented | `page.js` victory-card |
-| 3D/WebGL/Canvas arena visualization | ❌ Not implemented | — |
+| Futuristic arena visuals (CSS gradient/glow) | ✅ Implemented | `miniapp/globals.css` `.arena-visual`, `page.js` Home + Arenas + Brokers |
+| Home hero "3D Super Power Futuristic Arenas" | ✅ Implemented | `page.js` Home tab (tappable → Arenas) |
+| 3D/WebGL/Three.js arena visualization | ❌ Not implemented | — |
 | Real-time battle animation | ❌ Not implemented | — |
 
 ---

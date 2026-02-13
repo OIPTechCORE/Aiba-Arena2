@@ -8,7 +8,9 @@ router.get('/price', async (_req, res) => {
         res.json({
             aibaPerTon: Number(cfg?.oracleAibaPerTon ?? 0),
             neurPerAiba: Number(cfg?.oracleNeurPerAiba ?? 0),
-            updatedAt: new Date().toISOString(),
+            updatedAt: cfg?.oracleLastUpdatedAt
+                ? new Date(cfg.oracleLastUpdatedAt).toISOString()
+                : new Date().toISOString(),
         });
     } catch (err) {
         console.error('Oracle price error:', err);

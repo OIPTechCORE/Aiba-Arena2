@@ -74,9 +74,18 @@ const EconomyConfigSchema = new mongoose.Schema(
         boostGroupCostTonNano: { type: Number, default: 1_000_000_000 },  // 1 TON default
         leaderboardTopFreeCreate: { type: Number, default: 50 },          // top N by score can create group for free
 
-        // Oracle / reserve (display only; admin can set)
+        // Oracle / reserve (display only; admin can set; automated when oracleAutoUpdateEnabled)
         oracleAibaPerTon: { type: Number, default: 0 },
         oracleNeurPerAiba: { type: Number, default: 0 },
+        // Holistic automated AIBA/TON oracle
+        oracleAutoUpdateEnabled: { type: Boolean, default: false },
+        oracleAibaUsd: { type: Number, default: 0 }, // price of 1 AIBA in USD; used to derive AIBA/TON = TON_USD/AIBA_USD
+        oracleMinAibaPerTon: { type: Number, default: 0 }, // clamp min (0 = no min)
+        oracleMaxAibaPerTon: { type: Number, default: 0 }, // clamp max (0 = no max)
+        oracleFallbackAibaPerTon: { type: Number, default: 0 }, // use when fetch fails
+        oracleLastUpdatedAt: { type: Date, default: null },
+        oracleTonUsdAtUpdate: { type: Number, default: 0 },
+        oracleUpdateIntervalMinutes: { type: Number, default: 15 },
 
         // Boosts (pay NEUR for temporary reward multiplier)
         boostCostNeur: { type: Number, default: 100 },
@@ -174,6 +183,17 @@ const EconomyConfigSchema = new mongoose.Schema(
         allocationTeamPct: { type: Number, default: 10 },
         allocationEcosystemPct: { type: Number, default: 10 },
         allocationCommunityPct: { type: Number, default: 5 },
+        // P2P AIBA send: TON fee (nano) required to send AIBA; goes to P2P_AIBA_SEND_WALLET
+        p2pAibaSendFeeTonNano: { type: Number, default: 100_000_000 }, // 0.1 TON default
+        // AIBA in gifts: cost = amountAiba / rate + fee. TON → AIBA_IN_GIFTS_WALLET
+        aibaInGiftsFeeTonNano: { type: Number, default: 100_000_000 }, // 0.1 TON fee on top of amount
+        // Buy AIBA with TON: spread (fee). User pays TON, gets AIBA at (oracle - spread).
+        buyAibaWithTonFeeBps: { type: Number, default: 500 }, // 5% fee (we give 95% of oracle rate)
+        // Donate broker/car/bike/gifts: TON fee to respective wallet
+        donateBrokerFeeTonNano: { type: Number, default: 500_000_000 }, // 0.5 TON
+        donateCarFeeTonNano: { type: Number, default: 500_000_000 },
+        donateBikeFeeTonNano: { type: Number, default: 500_000_000 },
+        donateGiftsFeeTonNano: { type: Number, default: 100_000_000 }, // 0.1 TON
     },
     { timestamps: true },
 );

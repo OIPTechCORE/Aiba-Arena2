@@ -71,6 +71,12 @@ router.patch(
         boostProfileDurationDays: { type: 'number', min: 0 },
         oracleAibaPerTon: { type: 'number', min: 0 },
         oracleNeurPerAiba: { type: 'number', min: 0 },
+        oracleAutoUpdateEnabled: { type: 'boolean' },
+        oracleAibaUsd: { type: 'number', min: 0 },
+        oracleMinAibaPerTon: { type: 'number', min: 0 },
+        oracleMaxAibaPerTon: { type: 'number', min: 0 },
+        oracleFallbackAibaPerTon: { type: 'number', min: 0 },
+        oracleUpdateIntervalMinutes: { type: 'number', min: 1, max: 1440 },
         starRewardPerBattle: { type: 'number', min: 0 },
         diamondRewardFirstWin: { type: 'number', min: 0 },
         topLeaderBadgeTopN: { type: 'number', min: 0 },
@@ -147,6 +153,12 @@ router.patch(
         'boostProfileDurationDays',
         'oracleAibaPerTon',
         'oracleNeurPerAiba',
+        'oracleAutoUpdateEnabled',
+        'oracleAibaUsd',
+        'oracleMinAibaPerTon',
+        'oracleMaxAibaPerTon',
+        'oracleFallbackAibaPerTon',
+        'oracleUpdateIntervalMinutes',
         'dailyCapAibaByArena',
         'dailyCapNeurByArena',
         'emissionWindowsUtc',
@@ -173,6 +185,13 @@ router.patch(
         'referralUnlock3BonusBps',
         'trainerRewardAibaPerUser',
         'trainerRewardAibaPerRecruitedTrainer',
+        'p2pAibaSendFeeTonNano',
+        'aibaInGiftsFeeTonNano',
+        'buyAibaWithTonFeeBps',
+        'donateBrokerFeeTonNano',
+        'donateCarFeeTonNano',
+        'donateBikeFeeTonNano',
+        'donateGiftsFeeTonNano',
     ]);
     const bodyKeys = req.body && typeof req.body === 'object' ? Object.keys(req.body) : [];
     const unknown = bodyKeys.filter((k) => !allowedTopLevel.has(k));
@@ -244,6 +263,15 @@ router.patch(
     maybeNum('boostProfileDurationDays');
     maybeNum('oracleAibaPerTon');
     maybeNum('oracleNeurPerAiba');
+    if (body.oracleAutoUpdateEnabled !== undefined) update.oracleAutoUpdateEnabled = Boolean(body.oracleAutoUpdateEnabled);
+    maybeNum('oracleAibaUsd');
+    maybeNum('oracleMinAibaPerTon');
+    maybeNum('oracleMaxAibaPerTon');
+    maybeNum('oracleFallbackAibaPerTon');
+    if (body.oracleUpdateIntervalMinutes !== undefined) {
+        const v = Number(body.oracleUpdateIntervalMinutes);
+        if (Number.isFinite(v) && v >= 1 && v <= 1440) update.oracleUpdateIntervalMinutes = Math.floor(v);
+    }
     maybeNum('starRewardPerBattle');
     maybeNum('diamondRewardFirstWin');
     maybeNum('topLeaderBadgeTopN');
@@ -275,6 +303,13 @@ router.patch(
     maybeNum('referralUnlock3BonusBps');
     maybeNum('trainerRewardAibaPerUser');
     maybeNum('trainerRewardAibaPerRecruitedTrainer');
+    maybeNum('p2pAibaSendFeeTonNano');
+    maybeNum('aibaInGiftsFeeTonNano');
+    maybeNum('buyAibaWithTonFeeBps');
+    maybeNum('donateBrokerFeeTonNano');
+    maybeNum('donateCarFeeTonNano');
+    maybeNum('donateBikeFeeTonNano');
+    maybeNum('donateGiftsFeeTonNano');
     if (req.body?.createBikeCostTonNano !== undefined) {
         const v = Number(req.body.createBikeCostTonNano);
         if (Number.isFinite(v) && v >= 0)

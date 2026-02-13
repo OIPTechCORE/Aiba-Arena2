@@ -17,15 +17,14 @@
 <hr/>
 <h2>1. Direct Answer</h2>
 <h3>Do we already have 3D super power futuristic arenas?</h3>
-<p><strong>No.</strong> The app currently has <strong>arena modes as game logic</strong> (prediction, simulation, strategyWars, arbitrage, guildWars) — but <strong>no 3D visualization</strong> to watch.</p>
+<p><strong>Yes (CSS visuals).</strong> The app has <strong>arena modes as game logic</strong> (prediction, simulation, strategyWars, arbitrage, guildWars) and <strong>futuristic arena visuals</strong> (CSS gradient/glow, labeled &quot;3D Super Power Arena&quot;).</p>
 <h3>Can I see them?</h3>
-<p><strong>No.</strong> Battles are:</p>
+<p><strong>Yes.</strong> You can see them in:</p>
 <ol>
-<li>Click &quot;Run battle&quot;</li>
-<li>Server returns <strong>text result</strong> (score, rewards)</li>
-<li>No canvas, WebGL, or 3D renderer</li>
+<li><strong>Arenas tab</strong> — Main arena visual with &quot;3D Super Power Arena&quot; label</li>
+<li><strong>Brokers tab</strong> — Victory and &quot;Battle Complete&quot; visuals after a battle</li>
 </ol>
-<p>The marketing copy (&quot;Compete in 3D arenas&quot;) is <strong>aspirational</strong>. The vision document and UI hint at 3D, but the implementation is server-simulated + text-only result.</p>
+<p>These are <strong>CSS-based</strong> (gradients, glow, grid patterns) — not WebGL/Three.js. Battles are still server-simulated + text result. The visuals provide a futuristic &quot;super power&quot; aesthetic.</p>
 <hr/>
 <h2>2. What Exists Today</h2>
 <table>
@@ -51,7 +50,17 @@
 <td><code>page.js</code> victory-card</td>
 </tr>
 <tr>
-<td>3D/WebGL/Canvas arena visualization</td>
+<td>Futuristic arena visuals (CSS gradient/glow)</td>
+<td>✅ Implemented</td>
+<td><code>miniapp/globals.css</code> <code>.arena-visual</code>, <code>page.js</code> Home + Arenas + Brokers</td>
+</tr>
+<tr>
+<td>Home hero &quot;3D Super Power Futuristic Arenas&quot;</td>
+<td>✅ Implemented</td>
+<td><code>page.js</code> Home tab (tappable → Arenas)</td>
+</tr>
+<tr>
+<td>3D/WebGL/Three.js arena visualization</td>
 <td>❌ Not implemented</td>
 <td>—</td>
 </tr>

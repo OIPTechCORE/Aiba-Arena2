@@ -2,6 +2,7 @@
 
 import { TonConnectButton, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { createApi, getErrorMessage } from '../lib/api';
 import { getTelegramUserUnsafe, shareViaTelegram } from '../lib/telegram';
 import { buildRewardClaimPayload } from '../lib/tonRewardClaim';
@@ -158,6 +159,21 @@ const IconRent = () => (
         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><path d="M9 22V12h6v10" />
     </svg>
 );
+const IconTrainer = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 00-3-3.87" />
+        <path d="M16 3.13a4 4 0 010 7.75" />
+        <path d="M12 12l2 4 4-2-2-4-2 2z" />
+    </svg>
+);
+const IconTreasury = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <rect x="2" y="4" width="20" height="16" rx="2" />
+        <path d="M12 8v8" /><path d="M8 12h8" />
+    </svg>
+);
 const IconBreed = () => (
     <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M12 2v4" /><path d="M12 18v4" /><path d="M4.93 4.93l2.83 2.83" /><path d="M16.24 16.24l2.83 2.83" /><path d="M2 12h4" /><path d="M18 12h4" /><path d="M4.93 19.07l2.83-2.83" /><path d="M16.24 7.76l2.83-2.83" /><circle cx="12" cy="12" r="3" />
@@ -218,7 +234,8 @@ const BROKERS_EXPLANATION = 'Brokers are your AI agents that compete in 3D arena
 const ARENAS_EXPLANATION = 'Arenas are battle modes where your broker competes. Choose prediction, simulation, strategyWars, arbitrage, or guildWars (requires a guild). Run a battle to earn AIBA, Stars, and sometimes Diamonds.';
 const GUILDS_EXPLANATION = 'Guilds (groups) let you team up with others: create or join a group, deposit brokers into the shared pool, and compete in Guild Wars. Top leaders create free; others can pay TON to create. Boost a guild with TON to give it benefits.';
 
-const ARENA_OPTIONS = [
+/* Fallback when game-modes API returns empty */
+const ARENA_OPTIONS_FALLBACK = [
     { value: 'prediction', label: 'Prediction' },
     { value: 'simulation', label: 'Simulation' },
     { value: 'strategyWars', label: 'Strategy Wars' },
@@ -245,6 +262,7 @@ const HERO_BY_TAB = {
     university: { title: 'AIBA ARENA UNIVERSITY', sub: 'Complete systematic guide. Learn brokers, arenas, economy, guilds.', hint: 'Expand courses below. Complete all to earn the University Graduate badge.', buttonLabel: 'View', buttonAction: 'scroll' },
     realms: { title: 'AI REALMS', sub: 'Select a realm and complete missions to earn rewards.', hint: 'Explore AI Realms and complete missions.', buttonLabel: 'View', buttonAction: 'scroll' },
     assets: { title: 'AI ASSETS', sub: 'Mint, upgrade, list, buy, and rent AI assets.', hint: 'AI Agent, AI Brain, AI Creator, AI Workflow, AI System.', buttonLabel: 'View', buttonAction: 'scroll' },
+    trainers: { title: 'TRAINERS & COACHES', sub: 'Global network of AIBA Arena trainers. Apply to earn AIBA when you help players learn. Recruit trainers, claim rewards.', hint: 'Network, leaderboard, dashboard. Apply with a trainer code or open the full portal.', buttonLabel: 'Open portal', buttonAction: 'trainers' },
     governance: { title: 'GOVERNANCE', sub: 'Create proposals and vote. Community-driven decisions.', hint: 'Propose and vote on ecosystem changes.', buttonLabel: 'View', buttonAction: 'scroll' },
     updates: { title: 'UPDATES & FAQs', sub: 'Announcements, status & support.', hint: 'Stay informed. News, maintenance and answers to common questions.', buttonLabel: 'View', buttonAction: 'scroll' },
     profile: { title: 'PROFILE', sub: 'Your profile, balances, badges, and account details.', hint: 'Wallet & more.', buttonLabel: 'View', buttonAction: 'scroll' },
@@ -252,52 +270,35 @@ const HERO_BY_TAB = {
     wallet: { title: 'WALLET', sub: 'Claim AIBA on-chain. Stake, DAO, Stars, Diamonds.', hint: 'Connect wallet, create claim, sign tx. Daily NEUR, stake AIBA.', buttonLabel: 'View', buttonAction: 'scroll' },
 };
 
-/* 4×4 home grid: quick access to features (eduSUITE-style) */
-const HOME_GRID_ITEMS = [
+/* Tab bar (footer): core play flow first — Home → Brokers → Arenas → Market → Tasks … */
+const TAB_LIST = [
+    { id: 'home', label: 'Home', Icon: IconHome },
     { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
-    { id: 'referrals', label: 'Referrals', Icon: IconShare },
-    { id: 'market', label: 'Market', Icon: IconMarket },
-    { id: 'tournaments', label: 'Tournaments NEW', Icon: IconTrophy },
-    { id: 'globalBoss', label: 'Global Boss NEW', Icon: IconBoss },
     { id: 'arenas', label: 'Arenas', Icon: IconArena },
-    { id: 'carRacing', label: 'Car Racing', Icon: IconCar },
-    { id: 'bikeRacing', label: 'Bike Racing', Icon: IconBike },
+    { id: 'market', label: 'Market', Icon: IconMarket },
     { id: 'tasks', label: 'Tasks', Icon: IconTasks },
     { id: 'leaderboard', label: 'Leaderboard', Icon: IconLeaderboard },
+    { id: 'tournaments', label: 'Tournaments', Icon: IconTrophy, badge: 'NEW' },
+    { id: 'globalBoss', label: 'Global Boss', Icon: IconBoss, badge: 'NEW' },
+    { id: 'carRacing', label: 'Car Racing', Icon: IconCar },
+    { id: 'bikeRacing', label: 'Bike Racing', Icon: IconBike },
+    { id: 'referrals', label: 'Referrals', Icon: IconShare },
+    { id: 'trainers', label: 'Trainers', Icon: IconTrainer },
+    { id: 'guilds', label: 'Guilds', Icon: IconGuilds },
     { id: 'multiverse', label: 'Multiverse', Icon: IconMultiverse },
     { id: 'university', label: 'University', Icon: IconUniversity },
     { id: 'wallet', label: 'Wallet', Icon: IconWallet },
     { id: 'profile', label: 'Profile', Icon: IconProfile },
     { id: 'charity', label: 'Charity', Icon: IconHeart },
-    { id: 'realms', label: 'Realms', Icon: IconWorld },
-    { id: 'updates', label: 'Updates', Icon: IconUpdates },
-    { id: 'settings', label: 'Settings', Icon: IconSettings },
-];
-
-const TAB_LIST = [
-    { id: 'home', label: 'Home', Icon: IconHome },
-    { id: 'referrals', label: 'Referrals', Icon: IconShare },
-    { id: 'profile', label: 'Profile', Icon: IconProfile },
-    { id: 'settings', label: 'Settings', Icon: IconSettings },
-    { id: 'tasks', label: 'Tasks', Icon: IconTasks },
-    { id: 'leaderboard', label: 'Leaderboard', Icon: IconLeaderboard },
-    { id: 'tournaments', label: 'Tournaments NEW', Icon: IconTrophy },
-    { id: 'globalBoss', label: 'Global Boss NEW', Icon: IconBoss },
-    { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
-    { id: 'market', label: 'Market', Icon: IconMarket },
-    { id: 'carRacing', label: 'Car Racing', Icon: IconCar },
-    { id: 'bikeRacing', label: 'Bike Racing', Icon: IconBike },
-    { id: 'multiverse', label: 'Multiverse', Icon: IconMultiverse },
-    { id: 'arenas', label: 'Arenas', Icon: IconArena },
-    { id: 'guilds', label: 'Guilds', Icon: IconGuilds },
-    { id: 'charity', label: 'Charity', Icon: IconHeart },
-    { id: 'university', label: 'University', Icon: IconUniversity },
     { id: 'realms', label: 'Realms', Icon: IconWorld },
     { id: 'assets', label: 'Assets', Icon: IconAsset },
     { id: 'governance', label: 'Governance', Icon: IconGov },
     { id: 'updates', label: 'Updates', Icon: IconUpdates },
-    { id: 'wallet', label: 'Wallet', Icon: IconWallet },
+    { id: 'settings', label: 'Settings', Icon: IconSettings },
 ];
+
+/* Home grid: derived from TAB_LIST (minus home) so grid always has all features */
+const HOME_GRID_ITEMS = TAB_LIST.filter((t) => t.id !== 'home');
 
 function uuid() {
     try {
@@ -376,10 +377,53 @@ export default function HomePage() {
     const [breedBrokerB, setBreedBrokerB] = useState('');
     const [breedingMsg, setBreedingMsg] = useState('');
     const [comboClaimMsg, setComboClaimMsg] = useState('');
+    const [gameModes, setGameModes] = useState([]);
+    const [league, setLeague] = useState('rookie');
+    const [treasurySummary, setTreasurySummary] = useState(null);
+    const [oraclePrice, setOraclePrice] = useState(null);
+    const [treasuryOps, setTreasuryOps] = useState([]);
+
+    const arenaOptions = gameModes.length > 0
+        ? gameModes.map((m) => ({ value: `${m.arena}:${m.league || 'rookie'}`, label: `${m.name || m.arena}${m.league && m.league !== 'rookie' ? ` (${m.league})` : ''}` }))
+        : ARENA_OPTIONS_FALLBACK.map((o) => ({ value: o.value, label: o.label }));
 
     // Leaderboard
     const [leaderboard, setLeaderboard] = useState([]);
     const [leaderboardBy, setLeaderboardBy] = useState('score');
+    async function refreshGameModes() {
+        try {
+            const res = await api.get('/api/game-modes');
+            const modes = Array.isArray(res.data) ? res.data : [];
+            setGameModes(modes);
+            if (modes.length > 0) {
+                const match = modes.find((m) => arena === m.arena || arena === `${m.arena}:${m.league || 'rookie'}`);
+                if (!match) setArena(`${modes[0].arena}:${modes[0].league || 'rookie'}`);
+            }
+        } catch {
+            setGameModes([]);
+        }
+    }
+    async function refreshTreasuryOracle() {
+        try {
+            const [tRes, oRes] = await Promise.all([
+                api.get('/api/treasury/summary'),
+                api.get('/api/oracle/price'),
+            ]);
+            setTreasurySummary(tRes?.data || null);
+            setOraclePrice(oRes?.data || null);
+        } catch {
+            setTreasurySummary(null);
+            setOraclePrice(null);
+        }
+    }
+    async function refreshTreasuryOps() {
+        try {
+            const res = await api.get('/api/treasury/ops');
+            setTreasuryOps(Array.isArray(res?.data?.ops) ? res.data.ops : []);
+        } catch {
+            setTreasuryOps([]);
+        }
+    }
     async function refreshLeaderboard() {
         setBusy(true);
         try {
@@ -484,6 +528,20 @@ export default function HomePage() {
             await refreshEconomy();
         } catch (e) {
             setMarketMsg(getErrorMessage(e, 'Buy failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function delistBroker(listingId) {
+        setBusy(true);
+        setMarketMsg('');
+        try {
+            await api.post('/api/marketplace/delist', { listingId });
+            setMarketMsg('Delisted.');
+            await refreshListings();
+            await refreshBrokers();
+        } catch (e) {
+            setMarketMsg(getErrorMessage(e, 'Delist failed.'));
         } finally {
             setBusy(false);
         }
@@ -764,6 +822,159 @@ export default function HomePage() {
         }
     }
 
+    // P2P AIBA send, Buy AIBA with TON, AIBA in gifts, Donate
+    const [p2pConfig, setP2pConfig] = useState(null);
+    const [donateConfig, setDonateConfig] = useState(null);
+    const [p2pTo, setP2pTo] = useState('');
+    const [p2pAmount, setP2pAmount] = useState('');
+    const [p2pTxHash, setP2pTxHash] = useState('');
+    const [p2pMsg, setP2pMsg] = useState('');
+    const [giftAibaTo, setGiftAibaTo] = useState('');
+    const [giftAibaAmount, setGiftAibaAmount] = useState('');
+    const [giftAibaTxHash, setGiftAibaTxHash] = useState('');
+    const [giftAibaMsg, setGiftAibaMsg] = useState('');
+    const [buyAibaTxHash, setBuyAibaTxHash] = useState('');
+    const [buyAibaMsg, setBuyAibaMsg] = useState('');
+    const [donateBrokerId, setDonateBrokerId] = useState('');
+    const [donateBrokerTxHash, setDonateBrokerTxHash] = useState('');
+    const [donateCarId, setDonateCarId] = useState('');
+    const [donateCarTxHash, setDonateCarTxHash] = useState('');
+    const [donateBikeId, setDonateBikeId] = useState('');
+    const [donateBikeTxHash, setDonateBikeTxHash] = useState('');
+    const [donateGiftsTxHash, setDonateGiftsTxHash] = useState('');
+    const [donateMsg, setDonateMsg] = useState('');
+    async function refreshP2pConfig() {
+        try {
+            const [p2p, donate] = await Promise.all([
+                api.get('/api/p2p-aiba/config'),
+                api.get('/api/donate/config'),
+            ]);
+            setP2pConfig(p2p.data || null);
+            setDonateConfig(donate.data || null);
+        } catch {
+            setP2pConfig(null);
+            setDonateConfig(null);
+        }
+    }
+    async function sendP2pAiba() {
+        if (!p2pTxHash.trim() || !p2pTo.trim() || !p2pAmount || parseInt(p2pAmount, 10) < 1) return;
+        setBusy(true);
+        setP2pMsg('');
+        try {
+            const body = { txHash: p2pTxHash.trim(), amountAiba: parseInt(p2pAmount, 10) };
+            if (/^\d+$/.test(p2pTo.trim())) body.toTelegramId = p2pTo.trim();
+            else body.toUsername = p2pTo.trim().replace(/^@/, '');
+            await api.post('/api/p2p-aiba/send', body);
+            setP2pMsg('AIBA sent.');
+            setP2pTo('');
+            setP2pAmount('');
+            setP2pTxHash('');
+            await refreshEconomy();
+        } catch (e) {
+            setP2pMsg(getErrorMessage(e, 'Send failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function sendAibaGift() {
+        if (!giftAibaTxHash.trim() || !giftAibaTo.trim() || !giftAibaAmount || parseInt(giftAibaAmount, 10) < 1) return;
+        setBusy(true);
+        setGiftAibaMsg('');
+        try {
+            const body = { txHash: giftAibaTxHash.trim(), amountAiba: parseInt(giftAibaAmount, 10) };
+            if (/^\d+$/.test(giftAibaTo.trim())) body.toTelegramId = giftAibaTo.trim();
+            else body.toUsername = giftAibaTo.trim().replace(/^@/, '');
+            await api.post('/api/gifts/send-aiba', body);
+            setGiftAibaMsg('AIBA gift sent.');
+            setGiftAibaTo('');
+            setGiftAibaAmount('');
+            setGiftAibaTxHash('');
+            await refreshGifts();
+            await refreshEconomy();
+        } catch (e) {
+            setGiftAibaMsg(getErrorMessage(e, 'Send failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function buyAibaWithTon() {
+        if (!buyAibaTxHash.trim()) return;
+        setBusy(true);
+        setBuyAibaMsg('');
+        try {
+            const res = await api.post('/api/p2p-aiba/buy', { txHash: buyAibaTxHash.trim() });
+            setBuyAibaMsg(`Received ${res.data?.aibaCredited ?? 0} AIBA!`);
+            setBuyAibaTxHash('');
+            await refreshEconomy();
+        } catch (e) {
+            setBuyAibaMsg(getErrorMessage(e, 'Buy failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function donateBroker() {
+        if (!donateBrokerId.trim() || !donateBrokerTxHash.trim()) return;
+        setBusy(true);
+        setDonateMsg('');
+        try {
+            await api.post('/api/donate/broker', { brokerId: donateBrokerId.trim(), txHash: donateBrokerTxHash.trim() });
+            setDonateMsg('Broker donated.');
+            setDonateBrokerId('');
+            setDonateBrokerTxHash('');
+            await refreshBrokers();
+        } catch (e) {
+            setDonateMsg(getErrorMessage(e, 'Donate failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function donateCar() {
+        if (!donateCarId.trim() || !donateCarTxHash.trim()) return;
+        setBusy(true);
+        setDonateMsg('');
+        try {
+            await api.post('/api/donate/car', { carId: donateCarId.trim(), txHash: donateCarTxHash.trim() });
+            setDonateMsg('Car donated.');
+            setDonateCarId('');
+            setDonateCarTxHash('');
+            await refreshCarRacing();
+        } catch (e) {
+            setDonateMsg(getErrorMessage(e, 'Donate failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function donateBike() {
+        if (!donateBikeId.trim() || !donateBikeTxHash.trim()) return;
+        setBusy(true);
+        setDonateMsg('');
+        try {
+            await api.post('/api/donate/bike', { bikeId: donateBikeId.trim(), txHash: donateBikeTxHash.trim() });
+            setDonateMsg('Bike donated.');
+            setDonateBikeId('');
+            setDonateBikeTxHash('');
+            await refreshBikeRacing();
+        } catch (e) {
+            setDonateMsg(getErrorMessage(e, 'Donate failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function donateGifts() {
+        if (!donateGiftsTxHash.trim()) return;
+        setBusy(true);
+        setDonateMsg('');
+        try {
+            await api.post('/api/donate/gifts', { txHash: donateGiftsTxHash.trim() });
+            setDonateMsg('Gifts donation recorded.');
+            setDonateGiftsTxHash('');
+        } catch (e) {
+            setDonateMsg(getErrorMessage(e, 'Donate failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+
     // NFT Multiverse: universes, my NFTs, stake/unstake, claim staking rewards
     const [multiverseUniverses, setMultiverseUniverses] = useState([]);
     const [multiverseMyNfts, setMultiverseMyNfts] = useState([]);
@@ -1037,7 +1248,7 @@ export default function HomePage() {
         setBusy(true);
         setBoostMsg('');
         try {
-            await api.post('/api/boosts/buy', { requestId: uuid() });
+            await api.post('/api/boosts/buy', { requestId: uuid(), boostKey: 'score_multiplier' });
             setBoostMsg('Boost activated.');
             await refreshBoosts();
             await refreshEconomy();
@@ -1260,22 +1471,26 @@ export default function HomePage() {
     }, []);
 
     useEffect(() => {
-        if (tab === 'brokers') { refreshBrokers().catch(() => {}); }
+        if (tab === 'brokers') { refreshBrokers().catch(() => {}); refreshGameModes().catch(() => {}); }
         if (tab === 'leaderboard') refreshLeaderboard().catch(() => {});
         if (tab === 'tasks') refreshTasks().catch(() => {});
         if (tab === 'guilds') refreshMyRank().catch(() => {});
+        if (tab === 'arenas') refreshGameModes().catch(() => {});
+        if (tab === 'wallet') { refreshTreasuryOracle().catch(() => {}); }
         if (tab === 'charity') refreshCharityAll();
         if (tab === 'university') refreshUniversity();
         if (tab === 'updates') refreshUpdatesAll();
         if (tab === 'home' || tab === 'referrals') { refreshReferralMe().catch(() => {}); refreshTopReferrers().catch(() => {}); }
+        if (tab === 'trainers') { refreshTrainerMe().catch(() => {}); refreshTrainersNetwork().catch(() => {}); refreshTrainersLeaderboard().catch(() => {}); }
         if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshReferralMe().catch(() => {}); refreshBrokerRentals().catch(() => {}); }
         if (tab === 'carRacing') refreshCarRacing().catch(() => {});
         if (tab === 'bikeRacing') refreshBikeRacing().catch(() => {});
         if (tab === 'multiverse') refreshMultiverse().catch(() => {});
         if (tab === 'realms') { refreshRealms().catch(() => {}); refreshMissions(selectedRealmKey).catch(() => {}); refreshMentors().catch(() => {}); }
         if (tab === 'assets') { refreshAssets().catch(() => {}); refreshMarketListings().catch(() => {}); }
-        if (tab === 'governance') { refreshProposals().catch(() => {}); }
-        if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshDailyStatus().catch(() => {}); refreshPremiumStatus().catch(() => {}); }
+        if (tab === 'governance') { refreshProposals().catch(() => {}); refreshTreasuryOracle().catch(() => {}); refreshTreasuryOps().catch(() => {}); }
+        if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshDailyStatus().catch(() => {}); refreshPremiumStatus().catch(() => {}); refreshP2pConfig().catch(() => {}); refreshOracle().catch(() => {}); }
+        if (tab === 'guilds') { refreshTopGuilds().catch(() => {}); }
         if (tab === 'tournaments') { refreshTournaments().catch(() => {}); refreshBrokers().catch(() => {}); }
         if (tab === 'globalBoss') { refreshGlobalBoss().catch(() => {}); }
         // Keep header visible: scroll to top so header is never hidden on tab change
@@ -1372,11 +1587,12 @@ export default function HomePage() {
         setBusy(true);
         try {
             setClaimStatus('');
+            const [a, l] = arena.includes(':') ? arena.split(':') : [arena, league || 'rookie'];
             const res = await api.post('/api/battle/run', {
                 requestId: uuid(),
                 brokerId: selectedBrokerId,
-                arena,
-                league: 'rookie',
+                arena: a,
+                league: l,
                 autoClaim: autoClaimOnBattle,
             });
             setBattle(res.data);
@@ -1765,6 +1981,19 @@ export default function HomePage() {
             setBusy(false);
         }
     }
+    async function upgradeMentor(mentorId) {
+        setBusy(true);
+        setStatus('');
+        try {
+            const res = await api.post('/api/mentors/upgrade', { mentorId });
+            setStatus(`Upgraded. Cost: ${res.data?.costAiba ?? 0} AIBA.`);
+            await refreshEconomy();
+        } catch (e) {
+            setStatus(getErrorMessage(e, 'Mentor upgrade failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
     async function stakeMentorOffchain() {
         if (!mentorStakeMentorId || !mentorStakeAmount) return;
         setBusy(true);
@@ -2037,6 +2266,69 @@ export default function HomePage() {
             await refreshEconomy();
         } catch (e) {
             setCharityMsg(getErrorMessage(e, 'Donation failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    // ----- Trainers (in-app) -----
+    const [trainerMe, setTrainerMe] = useState(null);
+    const [trainersNetwork, setTrainersNetwork] = useState([]);
+    const [trainersLeaderboard, setTrainersLeaderboard] = useState([]);
+    const [trainersSortBy, setTrainersSortBy] = useState('impact');
+    const [trainerApplyMsg, setTrainerApplyMsg] = useState('');
+    const [trainerClaimMsg, setTrainerClaimMsg] = useState('');
+    async function refreshTrainerMe() {
+        try {
+            const res = await api.get('/api/trainers/me');
+            setTrainerMe(res?.data ?? null);
+        } catch {
+            setTrainerMe(null);
+        }
+    }
+    async function refreshTrainersNetwork() {
+        try {
+            const res = await api.get('/api/trainers/network', { params: { sort: trainersSortBy, limit: 30 } });
+            setTrainersNetwork(Array.isArray(res?.data) ? res.data : []);
+        } catch {
+            setTrainersNetwork([]);
+        }
+    }
+    async function refreshTrainersLeaderboard() {
+        try {
+            const res = await api.get('/api/trainers/leaderboard', { params: { by: trainersSortBy, limit: 30 } });
+            setTrainersLeaderboard(Array.isArray(res?.data) ? res.data : []);
+        } catch {
+            setTrainersLeaderboard([]);
+        }
+    }
+    async function applyAsTrainer() {
+        setBusy(true);
+        setTrainerApplyMsg('');
+        try {
+            const res = await api.post('/api/trainers/apply', {});
+            if (res.data?.alreadyTrainer) {
+                setTrainerApplyMsg(`Already a trainer. Status: ${res.data.status}. Code: ${res.data.code}.`);
+            } else {
+                setTrainerApplyMsg(`Application submitted. Code: ${res.data?.code ?? '—'}. Await approval.`);
+            }
+            await refreshTrainerMe();
+        } catch (e) {
+            setTrainerApplyMsg(getErrorMessage(e, 'Apply failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function claimTrainerRewards() {
+        setBusy(true);
+        setTrainerClaimMsg('');
+        try {
+            const res = await api.post('/api/trainers/claim-rewards', { requestId: uuid() });
+            setTrainerClaimMsg(`Claimed ${res.data?.claimedAiba ?? 0} AIBA.`);
+            await refreshTrainerMe();
+            await refreshEconomy();
+        } catch (e) {
+            setTrainerClaimMsg(getErrorMessage(e, 'Claim failed.'));
         } finally {
             setBusy(false);
         }
@@ -2459,7 +2751,7 @@ export default function HomePage() {
                         <button
                             type="button"
                             className="hero-center__enter hero-center__enter--btn"
-                            onClick={() => hero.buttonAction === 'updates' ? setTab('updates') : document.querySelector('.tab-content')?.scrollIntoView({ behavior: 'smooth' })}
+                            onClick={() => hero.buttonAction === 'trainers' ? (typeof window !== 'undefined' && (window.location.href = '/trainer')) : hero.buttonAction === 'updates' ? setTab('updates') : document.querySelector('.tab-content')?.scrollIntoView({ behavior: 'smooth' })}
                             aria-label={hero.buttonLabel}
                         >
                             {hero.buttonLabel}
@@ -2486,6 +2778,7 @@ export default function HomePage() {
                  tab === 'governance' ? 'Propose and vote on ecosystem changes.' :
                  tab === 'updates' ? 'Stay informed. Announcements, status & support here.' :
                  tab === 'referrals' ? 'Share your link, earn NEUR & AIBA when friends join. Apply a friend\'s code for bonuses.' :
+                 tab === 'trainers' ? 'Global trainers network. Apply to earn AIBA, recruit trainers, claim rewards.' :
                  tab === 'profile' ? 'Your profile, balances, badges, and account details.' :
                  tab === 'settings' ? 'App preferences, notifications, theme, and more.' :
                  'Daily NEUR, stake AIBA, or claim on-chain after a battle.'}
@@ -2494,6 +2787,11 @@ export default function HomePage() {
             <div className="tab-content">
                 {/* ─── Home ───────────────────────────────────────────────────── */}
                 <section className={`tab-panel major-tab major-tab--home ${tab === 'home' ? 'is-active' : ''}`} aria-hidden={tab !== 'home'}>
+                    {/* 3D Super Power Arena showcase — visible on Home for discoverability */}
+                    <button type="button" className="arena-visual arena-visual--hero" onClick={() => setTab('arenas')} style={{ cursor: 'pointer', border: 'none', width: '100%', textAlign: 'left', background: 'transparent', padding: 0 }} aria-label="View 3D Super Power Arenas">
+                        <span className="arena-visual__label">3D Super Power Futuristic Arenas</span>
+                        <span className="arena-visual__cta" style={{ position: 'absolute', top: 12, right: 12, fontSize: '0.65rem', opacity: 0.9 }}>Battle →</span>
+                    </button>
                     {/* Welcome message */}
                     <p className="home-welcome">
                         Welcome back {tgUser?.first_name || tgUser?.username || 'there'}!
@@ -2555,16 +2853,19 @@ export default function HomePage() {
                     })() : null}
                     {/* 4×4 icon grid */}
                     <div className="home-grid" aria-label="Quick access to features">
-                        {HOME_GRID_ITEMS.map(({ id, label, Icon }) => (
+                        {HOME_GRID_ITEMS.map(({ id, label, Icon, badge }) => (
                             <button
                                 key={id}
                                 type="button"
                                 className="home-grid__item"
                                 onClick={() => setTab(id)}
-                                aria-label={label}
+                                aria-label={badge ? `${label} ${badge}` : label}
                             >
                                 <span className="home-grid__icon"><Icon /></span>
-                                <span className="home-grid__label">{label}</span>
+                                <span className="home-grid__label">
+                                    {label}
+                                    {badge === 'NEW' ? <span className="badge-new">{badge}</span> : null}
+                                </span>
                             </button>
                         ))}
                     </div>
@@ -2579,8 +2880,66 @@ export default function HomePage() {
                         </div>
                     </div>
                     <div className="card" style={{ marginTop: 12, borderLeft: '4px solid var(--accent-gold)' }}>
-                        <div className="card__title">Seasonal events <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>NEW</span></div>
+                        <div className="card__title">Seasonal events <span className="badge-new">NEW</span></div>
                         <p className="card__hint">Limited-time modes, double rewards, and exclusive arenas. Check Tournaments and Global Boss for active events.</p>
+                    </div>
+                </section>
+
+                {/* ─── Trainers ───────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'trainers' ? 'is-active' : ''}`} aria-hidden={tab !== 'trainers'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)', marginBottom: 16 }}>
+                        <div className="card__title"><IconTrainer /> Global Trainers &amp; Coaches</div>
+                        <p className="card__hint">Earn AIBA when you help players learn. Apply to become a trainer, recruit others, and claim rewards.</p>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+                            {!trainerMe ? (
+                                <button type="button" className="btn btn--primary" onClick={applyAsTrainer} disabled={busy}><IconTrainer /> Apply as trainer</button>
+                            ) : (
+                                <>
+                                    {trainerMe.status === 'approved' ? (
+                                        <>
+                                            <button type="button" className="btn btn--success" onClick={claimTrainerRewards} disabled={busy || (trainerMe.rewardsEarnedAiba ?? 0) <= 0}>Claim {(trainerMe.rewardsEarnedAiba ?? 0) > 0 ? `${trainerMe.rewardsEarnedAiba} AIBA` : 'rewards'}</button>
+                                            {trainerMe.code ? (
+                                                <div style={{ flex: '1 1 100%', marginTop: 8 }}>
+                                                    <p className="card__hint">Recruit link — share to invite new trainers:</p>
+                                                    <code style={{ wordBreak: 'break-all', fontSize: '0.8rem', display: 'block', marginTop: 4 }}>
+                                                        {typeof window !== 'undefined' ? `${window.location.origin}/trainer?ref=${String(trainerMe.code || '').toUpperCase()}` : `/trainer?ref=${trainerMe.code}`}
+                                                    </code>
+                                                    <button type="button" className="btn btn--ghost" style={{ marginTop: 6, fontSize: 12 }} onClick={() => { const u = typeof window !== 'undefined' ? `${window.location.origin}/trainer?ref=${String(trainerMe.code || '').toUpperCase()}` : ''; if (u && navigator?.clipboard) navigator.clipboard.writeText(u).then(() => setTrainerApplyMsg('Copied!')); }}>Copy link</button>
+                                                </div>
+                                            ) : null}
+                                        </>
+                                    ) : (
+                                        <p className="card__hint" style={{ color: 'var(--accent-gold)' }}>Status: {trainerMe.status}. Awaiting approval. Code: {trainerMe.code || '—'}</p>
+                                    )}
+                                </>
+                            )}
+                            <Link href="/trainer" className="btn btn--secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><IconTrainer /> Full portal</Link>
+                        </div>
+                        {trainerApplyMsg ? <p className={`status-msg ${trainerApplyMsg.includes('Claimed') || trainerApplyMsg.includes('submitted') || trainerApplyMsg.includes('Already') ? 'status-msg--success' : ''}`} style={{ marginTop: 12 }}>{trainerApplyMsg}</p> : null}
+                        {trainerClaimMsg ? <p className={`status-msg ${trainerClaimMsg.includes('Claimed') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{trainerClaimMsg}</p> : null}
+                    </div>
+                    <div className="card card--elevated" style={{ marginBottom: 12 }}>
+                        <div className="card__title">Leaderboard</div>
+                        <div style={{ marginBottom: 8 }}>
+                            {['impact', 'referred', 'recruited', 'rewards'].map((b) => (
+                                <button key={b} type="button" className={`btn btn--ghost ${trainersSortBy === b ? 'btn--primary' : ''}`} style={{ marginRight: 6, marginBottom: 4, fontSize: 12 }} onClick={() => { setTrainersSortBy(b); refreshTrainersLeaderboard(); }}>{b === 'impact' ? 'Impact' : b === 'referred' ? 'Referred' : b === 'recruited' ? 'Recruited' : 'Rewards'}</button>
+                            ))}
+                        </div>
+                        {trainersLeaderboard.length === 0 ? (
+                            <p className="card__hint">No trainers yet.</p>
+                        ) : (
+                            <div style={{ maxHeight: 180, overflowY: 'auto' }}>
+                                {trainersLeaderboard.slice(0, 15).map((t, i) => (
+                                    <div key={t._id || i} style={{ padding: '6px 0', borderBottom: '1px solid var(--border-subtle)', fontSize: '0.85rem' }}>
+                                        #{t.rank ?? i + 1} {t.displayName || t.username || t.code} · {trainersSortBy === 'referred' ? `${t.referredUserCount ?? 0} refs` : trainersSortBy === 'recruited' ? `${t.recruitedTrainerCount ?? 0} recruited` : trainersSortBy === 'rewards' ? `${t.rewardsEarnedAiba ?? 0} AIBA` : `Impact ${t.totalImpactScore ?? 0}`}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title">Rewards</div>
+                        <p className="card__hint">5 AIBA per referred user (3+ battles). 20 AIBA per trainer you recruit (when approved).</p>
                     </div>
                 </section>
 
@@ -2640,7 +2999,7 @@ export default function HomePage() {
                 <section className={`tab-panel ${tab === 'referrals' ? 'is-active' : ''}`} aria-hidden={tab !== 'referrals'}>
                     {(myReferral?.uses ?? 0) < 3 ? (
                         <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)', marginBottom: 12 }}>
-                            <div className="card__title">Invite 3 to unlock <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>NEW</span></div>
+                            <div className="card__title">Invite 3 to unlock <span className="badge-new">NEW</span></div>
                             <p className="card__hint">Invite <strong>3 friends</strong> to unlock premium arena perks and bonus rewards. You have <strong>{myReferral?.uses ?? 0}/3</strong> — share your link below!</p>
                         </div>
                     ) : (
@@ -2714,7 +3073,7 @@ export default function HomePage() {
                         )}
                     </div>
                     <div className="card" style={{ marginTop: 12, borderLeft: '4px solid var(--border-subtle)' }}>
-                        <div className="card__title">Viral K-factor <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}>NEW</span></div>
+                        <div className="card__title">Viral K-factor <span className="badge-new">NEW</span></div>
                         <p className="card__hint">K = invites × conversion. Target K &gt; 0.3 for viral growth. You have {myReferral?.uses ?? 0} referrals. Invite 3 at 15% convert → K=0.45.</p>
                     </div>
                     <div className="card" style={{ marginTop: 12, borderLeft: '4px solid var(--accent-cyan)' }}>
@@ -2727,7 +3086,7 @@ export default function HomePage() {
                 {/* ─── Tournaments ───────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'tournaments' ? 'is-active' : ''}`} aria-hidden={tab !== 'tournaments'}>
                     <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
-                        <div className="card__title"><IconTrophy /> Tournaments <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>NEW</span></div>
+                        <div className="card__title"><IconTrophy /> Tournaments <span className="badge-new">NEW</span></div>
                         <p className="card__hint">Enter tournaments with a broker. Pay AIBA to join; top 4 share the prize pool when full.</p>
                         <button type="button" className="btn btn--secondary" onClick={refreshTournaments} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
                         {tournamentsMsg ? <p className={`status-msg ${tournamentsMsg.includes('Entered') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{tournamentsMsg}</p> : null}
@@ -2760,7 +3119,7 @@ export default function HomePage() {
                 {/* ─── Global Boss ──────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'globalBoss' ? 'is-active' : ''}`} aria-hidden={tab !== 'globalBoss'}>
                     <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-magenta)' }}>
-                        <div className="card__title"><IconBoss /> Global Boss <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-magenta)', color: 'var(--accent-magenta)' }}>NEW</span></div>
+                        <div className="card__title"><IconBoss /> Global Boss <span className="badge-new badge-new--magenta">NEW</span></div>
                         <p className="card__hint">Run battles to deal damage. When the boss is defeated, top damagers share the reward pool.</p>
                         <button type="button" className="btn btn--secondary" onClick={refreshGlobalBoss} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
                     </div>
@@ -2862,7 +3221,7 @@ export default function HomePage() {
                         ) : null}
                         {brokers.length >= 2 ? (
                             <div className="card" style={{ marginTop: 10, borderLeft: '4px solid var(--accent-magenta)' }}>
-                                <div className="card__title"><IconBreed /> Breeding <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-magenta)', color: 'var(--accent-magenta)' }}>NEW</span></div>
+                                <div className="card__title"><IconBreed /> Breeding <span className="badge-new badge-new--magenta">NEW</span></div>
                                 <p className="card__hint">Combine 2 brokers into 1 new broker (burns both). Cost: ~200 AIBA. Offspring inherits averaged stats.</p>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
                                     <select className="select" value={breedBrokerA} onChange={(e) => setBreedBrokerA(e.target.value)}><option value="">Parent A</option>{brokers.map((b) => <option key={b._id} value={b._id}>#{b._id.slice(-6)}</option>)}</select>
@@ -2895,40 +3254,44 @@ export default function HomePage() {
                         <p className="card__hint">Pick broker above, then Run battle.</p>
                         <p className="card__hint" style={{ marginTop: 10 }}>Arena</p>
                         <select className="select" value={arena} onChange={(e) => setArena(e.target.value)} style={{ marginTop: 4, minWidth: '100%' }}>
-                            <option value="prediction">prediction</option>
-                            <option value="simulation">simulation</option>
-                            <option value="strategyWars">strategyWars</option>
-                            <option value="arbitrage">arbitrage</option>
-                            <option value="guildWars">guildWars</option>
+                            {arenaOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
-                        {arena === 'guildWars' ? <p className="guide-tip">Guild Wars requires a guild. Rewards go to guild treasury.</p> : null}
+                        {(arena === 'guildWars' || arena.startsWith?.('guildWars:')) ? <p className="guide-tip">Guild Wars requires a guild. Rewards go to guild treasury.</p> : null}
                     </div>
                     {battle ? (
-                        <div className="card card--elevated">
-                            <div className="card__title">Battle result</div>
-                            <div className="victory-card">
-                                <div className="victory-card__badge">Victory</div>
-                                <div className="victory-card__score">Score {battle.score}</div>
-                                <div className="victory-card__meta">
-                                    {arena} · {Number(battle.rewardAiba ?? 0)} AIBA
-                                    {Number(battle.starsGranted ?? 0) > 0 ? ` · +${battle.starsGranted} Stars` : ''}
-                                    {Number(battle.firstWinDiamond ?? 0) > 0 ? ` · +${battle.firstWinDiamond} Diamond (first win!)` : ''}
-                                </div>
-                                <button type="button" className="btn btn--primary" onClick={() => { const text = `My broker scored ${battle.score} in ${arena}! Reward: ${battle.rewardAiba} AIBA.`; shareViaTelegram({ title: 'AIBA Arena', text, url: window?.location?.href || '' }); }}><IconShare /> Share</button>
+                        <>
+                            <div className="arena-visual" role="img" aria-label="Battle arena">
+                                <span className="arena-visual__label">Victory</span>
                             </div>
-                            {ad?.imageUrl ? (
-                                <div className="ad-box">
-                                    <div className="ad-box__label">Sponsored</div>
-                                    <img src={ad.imageUrl} alt="ad" onClick={() => { const u = String(ad?.linkUrl || '').trim(); if (u) (window?.Telegram?.WebApp?.openLink || window.open)(u, '_blank'); }} />
-                                    {ad.linkUrl ? <button type="button" className="btn btn--secondary" style={{ marginTop: 8 }} onClick={() => { const u = String(ad?.linkUrl || '').trim(); if (u) (window?.Telegram?.WebApp?.openLink || window.open)(u, '_blank'); }}>Open link</button> : null}
+                            <div className="card card--elevated">
+                                <div className="card__title">Battle result</div>
+                                <div className="victory-card">
+                                    <div className="victory-card__badge">Victory</div>
+                                    <div className="victory-card__score">Score {battle.score}</div>
+                                    <div className="victory-card__meta">
+                                        {(arena.includes(':') ? arena.split(':')[0] : arena)} · {Number(battle.rewardAiba ?? 0)} AIBA
+                                        {Number(battle.starsGranted ?? 0) > 0 ? ` · +${battle.starsGranted} Stars` : ''}
+                                        {Number(battle.firstWinDiamond ?? 0) > 0 ? ` · +${battle.firstWinDiamond} Diamond (first win!)` : ''}
+                                    </div>
+                                    <button type="button" className="btn btn--primary" onClick={() => { const text = `My broker scored ${battle.score} in ${arena}! Reward: ${battle.rewardAiba} AIBA.`; shareViaTelegram({ title: 'AIBA Arena', text, url: window?.location?.href || '' }); }}><IconShare /> Share</button>
                                 </div>
-                            ) : null}
-                        </div>
+                                {ad?.imageUrl ? (
+                                    <div className="ad-box">
+                                        <div className="ad-box__label">Sponsored</div>
+                                        <img src={ad.imageUrl} alt="ad" onClick={() => { const u = String(ad?.linkUrl || '').trim(); if (u) (window?.Telegram?.WebApp?.openLink || window.open)(u, '_blank'); }} />
+                                        {ad.linkUrl ? <button type="button" className="btn btn--secondary" style={{ marginTop: 8 }} onClick={() => { const u = String(ad?.linkUrl || '').trim(); if (u) (window?.Telegram?.WebApp?.openLink || window.open)(u, '_blank'); }}>Open link</button> : null}
+                                    </div>
+                                ) : null}
+                            </div>
+                        </>
                     ) : null}
                 </section>
 
                 {/* ─── Arenas ─────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'arenas' ? 'is-active' : ''}`} aria-hidden={tab !== 'arenas'}>
+                    <div className="arena-visual" role="img" aria-label="Futuristic arena stage">
+                        <span className="arena-visual__label">3D Super Power Arena</span>
+                    </div>
                     <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
                         <div className="card__title">What are arenas?</div>
                         <p className="card__hint">{ARENAS_EXPLANATION}</p>
@@ -2937,32 +3300,33 @@ export default function HomePage() {
                         <div className="card__title">Arena</div>
                         <p className="card__hint">Choose battle mode. Guild Wars requires a guild.</p>
                         <select className="select" value={arena} onChange={(e) => setArena(e.target.value)} style={{ marginTop: 6, minWidth: '100%' }}>
-                            <option value="prediction">prediction</option>
-                            <option value="simulation">simulation</option>
-                            <option value="strategyWars">strategyWars</option>
-                            <option value="arbitrage">arbitrage</option>
-                            <option value="guildWars">guildWars</option>
+                            {arenaOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
-                        {arena === 'guildWars' ? <p className="guide-tip">Rewards go to guild treasury.</p> : null}
+                        {(arena === 'guildWars' || arena.startsWith?.('guildWars:')) ? <p className="guide-tip">Rewards go to guild treasury.</p> : null}
                     </div>
                     <div className="action-row">
                         <button type="button" className="btn btn--primary" onClick={runBattle} disabled={busy || !selectedBrokerId}><IconRun /> Run battle</button>
                         <button type="button" className="btn btn--secondary" onClick={refreshBrokers} disabled={busy}><IconRefresh /> Refresh</button>
                     </div>
                     {battle ? (
-                        <div className="card card--elevated">
-                            <div className="card__title">Battle result</div>
-                            <div className="victory-card">
-                                <div className="victory-card__badge">Victory</div>
-                                <div className="victory-card__score">Score {battle.score}</div>
-                                <div className="victory-card__meta">
-                                    {arena} · {Number(battle.rewardAiba ?? 0)} AIBA
-                                    {Number(battle.starsGranted ?? 0) > 0 ? <span className="victory-card__meta-stars"> · <IconStar /> +{battle.starsGranted} Stars</span> : ''}
-                                    {Number(battle.firstWinDiamond ?? 0) > 0 ? <span className="victory-card__meta-diamond"> · <IconDiamond /> +{battle.firstWinDiamond} Diamond (first win!)</span> : ''}
-                                </div>
-                                <button type="button" className="btn btn--primary" onClick={() => { const text = `My broker scored ${battle.score} in ${arena}! Reward: ${battle.rewardAiba} AIBA.`; shareViaTelegram({ title: 'AIBA Arena', text, url: window?.location?.href }); }}><IconShare /> Share</button>
+                        <>
+                            <div className="arena-visual" role="img" aria-label="Battle arena">
+                                <span className="arena-visual__label">Battle Complete</span>
                             </div>
-                        </div>
+                            <div className="card card--elevated">
+                                <div className="card__title">Battle result</div>
+                                <div className="victory-card">
+                                    <div className="victory-card__badge">Victory</div>
+                                    <div className="victory-card__score">Score {battle.score}</div>
+                                    <div className="victory-card__meta">
+                                        {(arena.includes(':') ? arena.split(':')[0] : arena)} · {Number(battle.rewardAiba ?? 0)} AIBA
+                                        {Number(battle.starsGranted ?? 0) > 0 ? <span className="victory-card__meta-stars"> · <IconStar /> +{battle.starsGranted} Stars</span> : ''}
+                                        {Number(battle.firstWinDiamond ?? 0) > 0 ? <span className="victory-card__meta-diamond"> · <IconDiamond /> +{battle.firstWinDiamond} Diamond (first win!)</span> : ''}
+                                    </div>
+                                    <button type="button" className="btn btn--primary" onClick={() => { const text = `My broker scored ${battle.score} in ${arena}! Reward: ${battle.rewardAiba} AIBA.`; shareViaTelegram({ title: 'AIBA Arena', text, url: window?.location?.href }); }}><IconShare /> Share</button>
+                                </div>
+                            </div>
+                        </>
                     ) : null}
                 </section>
 
@@ -2978,6 +3342,7 @@ export default function HomePage() {
                         <div className="action-row">
                             <button type="button" className="btn btn--secondary" onClick={() => { refreshMyRank(); refreshGuilds(); }} disabled={busy}><IconRefresh /> My rank</button>
                             <button type="button" className="btn btn--secondary" onClick={refreshAllGroups} disabled={busy}>Discover all</button>
+                            <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { const r = await api.get('/api/guilds/top'); setAllGroups(Array.isArray(r.data) ? r.data : []); } catch { setAllGroups([]); } finally { setBusy(false); } }} disabled={busy}>Top boosted</button>
                             <button type="button" className="btn btn--secondary" onClick={depositBrokerToGuild} disabled={busy || !selectedGuildId || !selectedBrokerId}>Deposit broker</button>
                             <button type="button" className="btn btn--secondary" onClick={withdrawBrokerFromGuild} disabled={busy || !selectedGuildId || !selectedBrokerId}>Withdraw broker</button>
                         </div>
@@ -3038,7 +3403,7 @@ export default function HomePage() {
                     </div>
                     <div className="flow-switch" role="group" aria-label="Market flow">
                         {['overview', 'trade', 'rental', 'system', 'boosts'].map((f) => (
-                            <button key={f} type="button" className={`flow-switch__btn ${marketFlow === f ? 'is-active' : ''}`} onClick={() => setMarketFlow(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}{f === 'rental' ? ' NEW' : ''}</button>
+                            <button key={f} type="button" className={`flow-switch__btn ${marketFlow === f ? 'is-active' : ''}`} onClick={() => setMarketFlow(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}{f === 'rental' ? <><span className="badge-new badge-new--green" style={{ marginLeft: 6 }}>NEW</span></> : ''}</button>
                         ))}
                     </div>
                     {marketFlow === 'overview' && (
@@ -3095,18 +3460,26 @@ export default function HomePage() {
                             </div>
                             {marketMsg ? <p className={`status-banner ${marketMsg.includes('Listed') || marketMsg.includes('Purchased') ? 'status-banner--success' : 'status-banner--error'}`}>{marketMsg}</p> : null}
                             {listings.length > 0 ? (
-                                listings.map((l) => (
-                                    <div key={l._id} className="list-item">
-                                        <span>INT{l.broker?.intelligence} SPD{l.broker?.speed} RISK{l.broker?.risk} — {l.priceAIBA} AIBA</span>
-                                        <button type="button" className="btn btn--primary" onClick={() => buyListing(l._id)} disabled={busy}><IconBuy /> Buy</button>
-                                    </div>
-                                ))
+                                listings.map((l) => {
+                                    const myId = getTelegramUserUnsafe()?.id?.toString() || '';
+                                    const isMine = String(l.sellerTelegramId || '') === myId;
+                                    return (
+                                        <div key={l._id} className="list-item">
+                                            <span>INT{l.broker?.intelligence} SPD{l.broker?.speed} RISK{l.broker?.risk} — {l.priceAIBA} AIBA{isMine ? ' (yours)' : ''}</span>
+                                            {isMine ? (
+                                                <button type="button" className="btn btn--secondary" onClick={() => delistBroker(l._id)} disabled={busy}>Delist</button>
+                                            ) : (
+                                                <button type="button" className="btn btn--primary" onClick={() => buyListing(l._id)} disabled={busy}><IconBuy /> Buy</button>
+                                            )}
+                                        </div>
+                                    );
+                                })
                             ) : <p className="guide-tip">No listings.</p>}
                         </div>
                     )}
                     {marketFlow === 'rental' && (
                         <div className="card card--elevated sheet-card" style={{ borderLeft: '4px solid var(--accent-green)' }}>
-                            <div className="card__title"><IconRent /> Broker Rental <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>NEW</span></div>
+                            <div className="card__title"><IconRent /> Broker Rental <span className="badge-new badge-new--green">NEW</span></div>
                             <p className="card__hint">List your broker for rent or rent one from others. Rent for 1 hour—cost goes to owner minus fee.</p>
                             <div className="action-row">
                                 <button type="button" className="btn btn--secondary" onClick={refreshBrokerRentals} disabled={busy}><IconRefresh /> Refresh</button>
@@ -3722,6 +4095,7 @@ export default function HomePage() {
 
                     <div className="card card--elevated" style={{ marginTop: 12 }}>
                         <div className="card__title">Mentors</div>
+                        <p className="card__hint">Assign a mentor for guidance. Upgrade (pay AIBA) to unlock higher tiers.</p>
                         {mentors.length === 0 ? (
                             <p className="card__hint">No mentors available.</p>
                         ) : (
@@ -3730,9 +4104,14 @@ export default function HomePage() {
                                     <div key={m._id || m.key} className="list-item">
                                         <div className="list-item__main">
                                             <div className="list-item__title">{m.name}</div>
-                                            <div className="list-item__desc">{m.description}</div>
+                                            <div className="list-item__desc">{m.description}{m.stakingRequiredAiba ? ` · Upgrade: ${m.stakingRequiredAiba} AIBA` : ''}</div>
                                         </div>
-                                        <button type="button" className="btn btn--ghost" onClick={() => assignMentor(m._id)} disabled={busy}>Assign</button>
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                            <button type="button" className="btn btn--ghost" onClick={() => assignMentor(m._id)} disabled={busy}>Assign</button>
+                                            {(m.stakingRequiredAiba || 0) > 0 ? (
+                                                <button type="button" className="btn btn--secondary" onClick={() => upgradeMentor(m._id)} disabled={busy} title={`Cost: ${m.stakingRequiredAiba} AIBA`}>Upgrade</button>
+                                            ) : null}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -3819,6 +4198,26 @@ export default function HomePage() {
 
                 {/* ─── Governance ───────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'governance' ? 'is-active' : ''}`} aria-hidden={tab !== 'governance'}>
+                    {treasurySummary ? (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-cyan)', marginBottom: 12 }}>
+                            <div className="card__title">Treasury</div>
+                            <p className="card__hint">{Number(treasurySummary.balanceAiba ?? 0).toLocaleString()} AIBA · {Number(treasurySummary.balanceNeur ?? 0).toLocaleString()} NEUR · Paid out: {Number(treasurySummary.totalPaidOutAiba ?? 0).toLocaleString()} AIBA</p>
+                            <button type="button" className="btn btn--ghost" onClick={() => refreshTreasuryOps()} style={{ marginTop: 6, fontSize: 12 }}><IconRefresh /> Refresh ops</button>
+                        </div>
+                    ) : null}
+                    {treasuryOps.length > 0 ? (
+                        <div className="card card--elevated" style={{ marginBottom: 12 }}>
+                            <div className="card__title">Recent Treasury Ops</div>
+                            <p className="card__hint">Burn, rewards, staking flows. Transparency for DAO.</p>
+                            <div style={{ maxHeight: 200, overflowY: 'auto', marginTop: 8 }}>
+                                {treasuryOps.slice(0, 30).map((op) => (
+                                    <div key={op._id} style={{ padding: '6px 0', borderBottom: '1px solid var(--border-subtle)', fontSize: '0.85rem' }}>
+                                        <strong>{op.type || 'op'}</strong> · {Number(op.amountAiba ?? 0).toLocaleString()} AIBA{op.source ? ` · ${op.source}` : ''}{op.refId ? ` · ${String(op.refId).slice(-8)}` : ''}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : null}
                     <div className="card card--elevated">
                         <div className="card__title">Create Proposal</div>
                         <input
@@ -3873,10 +4272,13 @@ export default function HomePage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Home</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>AI BROKER ARENA. Own AI brokers. Compete in 3D arenas. Earn NEUR &amp; AIBA. Swipe the tab bar to explore.</td></tr>
-                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Brokers</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>New broker, tasks, run battle, vault. Combine or mint NFT. Brokers are your AI agents that compete in 3D arenas.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Home</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>AI BROKER ARENA. Own AI brokers. Compete in 3D arenas. Earn NEUR &amp; AIBA. Swipe the tab bar or Home grid to explore.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Brokers</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>New broker, tasks, run battle, vault. Combine, breed, or mint NFT. Brokers are your AI agents that compete in 3D arenas.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Tasks</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Personalized mission queue for every player profile: newcomer, fighter, trader, racer, social, scholar, and investor.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Leaderboard</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Global ranks by score, AIBA, NEUR, or battles. Run battles to climb the ranks.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Tournaments</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Seasonal events, brackets, and competitive battles. Earn rewards by ranking.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Global Boss</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Community boss battles. Join forces to defeat the boss and earn shared rewards.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Trainers</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Global trainers network. Apply as trainer, recruit others, claim AIBA rewards.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Referrals</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Earn NEUR &amp; AIBA when friends join. Share your link or apply a friend&apos;s code.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Arenas</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Battle modes: prediction, simulation, strategyWars, arbitrage, guildWars. Choose arena and run battle.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Guilds</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Create or join a group, deposit brokers into the shared pool. Guild Wars arena sends rewards to the guild.</td></tr>
@@ -4048,6 +4450,27 @@ export default function HomePage() {
 
                 {/* ─── Wallet ─────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'wallet' ? 'is-active' : ''}`} aria-hidden={tab !== 'wallet'}>
+                    {(treasurySummary || oraclePrice) ? (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                            <div className="card__title"><IconTreasury /> Ecosystem</div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 8 }}>
+                                {treasurySummary ? (
+                                    <div>
+                                        <span className="card__hint">Treasury: </span>
+                                        <strong>{Number(treasurySummary.balanceAiba ?? 0).toLocaleString()} AIBA</strong> · <strong>{Number(treasurySummary.balanceNeur ?? 0).toLocaleString()} NEUR</strong>
+                                    </div>
+                                ) : null}
+                                {oraclePrice?.aibaPerTon ? (
+                                    <div>
+                                        <span className="card__hint">Live rate: </span>
+                                        <strong>{oraclePrice.aibaPerTon} AIBA/TON</strong>
+                                        {oraclePrice.updatedAt ? <span className="card__hint" style={{ marginLeft: 6 }}>({new Date(oraclePrice.updatedAt).toLocaleTimeString()})</span> : null}
+                                    </div>
+                                ) : null}
+                            </div>
+                            <button type="button" className="btn btn--ghost" onClick={() => refreshTreasuryOracle()} style={{ marginTop: 8, fontSize: 12 }}><IconRefresh /> Refresh</button>
+                        </div>
+                    ) : null}
                     <div className="card card--elevated card--identity">
                         <div className="card__title">Wallet &amp; profile</div>
                         <div className="identity-badges">
@@ -4134,6 +4557,91 @@ export default function HomePage() {
                             ) : null}
                         </div>
                     ) : null}
+                    {p2pConfig?.p2pWallet ? (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                            <div className="card__title">P2P AIBA send</div>
+                            <p className="card__hint">Send AIBA to another user. Fee: <strong>{(p2pConfig.p2pSendFeeTonNano / 1e9).toFixed(2)} TON</strong> (to P2P wallet). Pay fee, paste tx hash, then send.</p>
+                            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <input className="input" value={p2pTo} onChange={(e) => setP2pTo(e.target.value)} placeholder="Recipient: Telegram ID or @username" />
+                                <input className="input" type="number" min={1} value={p2pAmount} onChange={(e) => setP2pAmount(e.target.value)} placeholder="Amount AIBA" />
+                                <input className="input" value={p2pTxHash} onChange={(e) => setP2pTxHash(e.target.value)} placeholder="Tx hash (TON fee)" />
+                                <button type="button" className="btn btn--primary" onClick={sendP2pAiba} disabled={busy || !p2pTxHash.trim() || !p2pTo.trim() || !p2pAmount}>Send AIBA</button>
+                            </div>
+                            {p2pMsg ? <p className={`status-msg ${p2pMsg.includes('sent') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{p2pMsg}</p> : null}
+                        </div>
+                    ) : null}
+                    {p2pConfig?.buyWallet && (p2pConfig.oracleAibaPerTon || 0) > 0 ? (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-green)' }}>
+                            <div className="card__title">Buy AIBA with TON</div>
+                            <p className="card__hint">Send TON to the Buy AIBA wallet. Rate: {p2pConfig.oracleAibaPerTon} AIBA/TON (fee {(p2pConfig.buyFeeBps || 0) / 100}%). Any TON-supported wallet.</p>
+                            <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                <input className="input" value={buyAibaTxHash} onChange={(e) => setBuyAibaTxHash(e.target.value)} placeholder="Transaction hash" style={{ flex: '1 1 200px', minWidth: 0 }} />
+                                <button type="button" className="btn btn--primary" onClick={buyAibaWithTon} disabled={busy || !buyAibaTxHash.trim()}>Buy AIBA</button>
+                            </div>
+                            {buyAibaMsg ? <p className={`status-msg ${buyAibaMsg.includes('Received') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{buyAibaMsg}</p> : null}
+                        </div>
+                    ) : null}
+                    {p2pConfig?.aibaInGiftsWallet && (p2pConfig.oracleAibaPerTon || 0) > 0 ? (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-magenta)' }}>
+                            <div className="card__title">AIBA in gifts</div>
+                            <p className="card__hint">Pay TON and send AIBA to a recipient. Cost = amount/rate + fee. Set oracleAibaPerTon in Admin → Economy.</p>
+                            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <input className="input" value={giftAibaTo} onChange={(e) => setGiftAibaTo(e.target.value)} placeholder="Recipient: Telegram ID or @username" />
+                                <input className="input" type="number" min={1} value={giftAibaAmount} onChange={(e) => setGiftAibaAmount(e.target.value)} placeholder="Amount AIBA" />
+                                <input className="input" value={giftAibaTxHash} onChange={(e) => setGiftAibaTxHash(e.target.value)} placeholder="Transaction hash (TON)" />
+                                <button type="button" className="btn btn--secondary" onClick={sendAibaGift} disabled={busy || !giftAibaTxHash.trim() || !giftAibaTo.trim() || !giftAibaAmount}>Send AIBA gift</button>
+                            </div>
+                            {giftAibaMsg ? <p className={`status-msg ${giftAibaMsg.includes('sent') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{giftAibaMsg}</p> : null}
+                        </div>
+                    ) : null}
+                    {donateConfig?.broker || donateConfig?.car || donateConfig?.bike || donateConfig?.gifts ? (
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                            <div className="card__title">Donate</div>
+                            <p className="card__hint">Donate brokers, cars, bikes, or TON to gifts fund. TON fee goes to Super Admin wallet.</p>
+                            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                {donateConfig?.broker ? (
+                                    <div style={{ padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
+                                        <strong>Donate broker</strong> · {(donateConfig.donateBrokerFeeTonNano / 1e9).toFixed(1)} TON
+                                        <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+                                            <input className="input" value={donateBrokerId} onChange={(e) => setDonateBrokerId(e.target.value)} placeholder="Broker ID" style={{ flex: '1 1 120px', minWidth: 0 }} />
+                                            <input className="input" value={donateBrokerTxHash} onChange={(e) => setDonateBrokerTxHash(e.target.value)} placeholder="Tx hash" style={{ flex: '1 1 160px', minWidth: 0 }} />
+                                            <button type="button" className="btn btn--ghost" onClick={donateBroker} disabled={busy}>Donate</button>
+                                        </div>
+                                    </div>
+                                ) : null}
+                                {donateConfig?.car ? (
+                                    <div style={{ padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
+                                        <strong>Donate car</strong> · {(donateConfig.donateCarFeeTonNano / 1e9).toFixed(1)} TON
+                                        <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+                                            <input className="input" value={donateCarId} onChange={(e) => setDonateCarId(e.target.value)} placeholder="Car ID" style={{ flex: '1 1 120px', minWidth: 0 }} />
+                                            <input className="input" value={donateCarTxHash} onChange={(e) => setDonateCarTxHash(e.target.value)} placeholder="Tx hash" style={{ flex: '1 1 160px', minWidth: 0 }} />
+                                            <button type="button" className="btn btn--ghost" onClick={donateCar} disabled={busy}>Donate</button>
+                                        </div>
+                                    </div>
+                                ) : null}
+                                {donateConfig?.bike ? (
+                                    <div style={{ padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
+                                        <strong>Donate bike</strong> · {(donateConfig.donateBikeFeeTonNano / 1e9).toFixed(1)} TON
+                                        <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+                                            <input className="input" value={donateBikeId} onChange={(e) => setDonateBikeId(e.target.value)} placeholder="Bike ID" style={{ flex: '1 1 120px', minWidth: 0 }} />
+                                            <input className="input" value={donateBikeTxHash} onChange={(e) => setDonateBikeTxHash(e.target.value)} placeholder="Tx hash" style={{ flex: '1 1 160px', minWidth: 0 }} />
+                                            <button type="button" className="btn btn--ghost" onClick={donateBike} disabled={busy}>Donate</button>
+                                        </div>
+                                    </div>
+                                ) : null}
+                                {donateConfig?.gifts ? (
+                                    <div style={{ padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
+                                        <strong>Donate gifts</strong> · {(donateConfig.donateGiftsFeeTonNano / 1e9).toFixed(1)} TON
+                                        <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+                                            <input className="input" value={donateGiftsTxHash} onChange={(e) => setDonateGiftsTxHash(e.target.value)} placeholder="Tx hash" style={{ flex: '1 1 200px', minWidth: 0 }} />
+                                            <button type="button" className="btn btn--ghost" onClick={donateGifts} disabled={busy}>Donate</button>
+                                        </div>
+                                    </div>
+                                ) : null}
+                            </div>
+                            {donateMsg ? <p className={`status-msg ${donateMsg.includes('donated') || donateMsg.includes('recorded') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{donateMsg}</p> : null}
+                        </div>
+                    ) : null}
                     <div className="card card--stars">
                         <div className="card__title"><IconStar /> Stars</div>
                         <p className="card__hint">Telegram Stars–style in-app currency. Earn from every battle win; use for digital value, tips & perks in the ecosystem.</p>
@@ -4151,7 +4659,7 @@ export default function HomePage() {
                     {dailyStatus ? (
                         <>
                             <div className="card card--elevated">
-                                <div className="card__title">Streaks <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)' }}>NEW</span></div>
+                                <div className="card__title">Streaks <span className="badge-new badge-new--cyan">NEW</span></div>
                                 <p className="card__hint">Login streak: <strong>{dailyStatus.loginStreakDays ?? 0}</strong> days · Battle win streak: <strong>{dailyStatus.battleWinStreak ?? 0}</strong> wins. Higher streaks increase battle rewards.</p>
                             </div>
                             <div className="card card--elevated">
@@ -4165,7 +4673,7 @@ export default function HomePage() {
                             </div>
                             {dailyStatus.dailyCombo ? (
                                 <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
-                                    <div className="card__title">Daily Combo <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>NEW</span></div>
+                                    <div className="card__title">Daily Combo <span className="badge-new badge-new--gold">NEW</span></div>
                                     <p className="card__hint">Spend {dailyStatus.dailyCombo.requirementAiba ?? 0} AIBA today → claim {dailyStatus.dailyCombo.bonusAiba ?? 0} AIBA bonus. Progress: <strong>{dailyStatus.dailyCombo.spentTodayAiba ?? 0}/{dailyStatus.dailyCombo.requirementAiba ?? 0}</strong> AIBA.</p>
                                     <button type="button" className="btn btn--primary" onClick={claimCombo} disabled={busy || !dailyStatus.dailyCombo.canClaim || dailyStatus.dailyCombo.alreadyClaimed}>
                                         <IconClaim /> {dailyStatus.dailyCombo.alreadyClaimed ? 'Claimed' : dailyStatus.dailyCombo.canClaim ? 'Claim combo' : 'Not ready'}
@@ -4177,7 +4685,7 @@ export default function HomePage() {
                     ) : null}
                     {premiumStatus ? (
                         <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
-                            <div className="card__title"><IconPremium /> Premium <span className="badge-pill badge-pill--inline" style={{ fontSize: '0.7em', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>NEW</span></div>
+                            <div className="card__title"><IconPremium /> Premium <span className="badge-new badge-new--gold">NEW</span></div>
                             {premiumStatus.hasPremium ? (
                                 <p className="card__hint" style={{ color: 'var(--accent-gold)' }}>Premium until {premiumStatus.premiumUntil ? new Date(premiumStatus.premiumUntil).toLocaleDateString() : '—'}. {premiumStatus.multiplier ? `${premiumStatus.multiplier}× battle rewards.` : ''}</p>
                             ) : (
@@ -4271,17 +4779,20 @@ export default function HomePage() {
             </div>
             <nav className="android-bottom-nav" aria-label="Primary navigation">
                 <div className="android-bottom-nav__track">
-                    {TAB_LIST.map(({ id, label, Icon }) => (
+                    {TAB_LIST.map(({ id, label, Icon, badge }) => (
                         <button
                             key={id}
                             type="button"
                             className={`android-bottom-nav__btn ${tab === id ? 'android-bottom-nav__btn--active' : ''}`}
                             onClick={() => setTab(id)}
                             aria-pressed={tab === id}
-                            aria-label={label}
+                            aria-label={badge ? `${label} ${badge}` : label}
                         >
                             <span className="android-bottom-nav__icon"><Icon /></span>
-                            <span className="android-bottom-nav__label">{label}</span>
+                            <span className="android-bottom-nav__label">
+                                {label}
+                                {badge === 'NEW' ? <span className="badge-new">{badge}</span> : null}
+                            </span>
                         </button>
                     ))}
                 </div>
