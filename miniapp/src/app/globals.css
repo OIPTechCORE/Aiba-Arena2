@@ -13,14 +13,14 @@
     --bg-space: #1a140e;
     --bg-panel: rgba(45, 32, 22, 0.96);
     --bg-glass: rgba(38, 28, 20, 0.94);
-    /* Primary accents — warm gold chain */
+    /* Primary accents — warm gold/amber (match admin panel bold orange-gold) */
     --accent-cyan: #f5a623;
     --accent-magenta: #f59e0b;
     --accent-gold: #ffcc00;
+    --accent-amber: #f5a623;
     --accent-green: #22c55e;
     --accent-blue: #fbbf24;
     --accent-orange: #f97316;
-    --accent-amber: #fbbf24;
     /* Text — cream & caramel */
     --text-primary: #fef3e2;
     --text-secondary: #e8d4b8;
@@ -133,8 +133,8 @@ body,
     background: rgba(26, 21, 16, 0.98);
     backdrop-filter: blur(12px);
     border-radius: 0 0 var(--radius-md) var(--radius-md);
-    border-bottom: 1px solid rgba(255, 200, 92, 0.2);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 200, 92, 0.1);
+    border-bottom: 1px solid rgba(255, 204, 0, 0.35);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 204, 0, 0.15);
     max-width: min(560px, 100vw);
     margin: 0 auto;
 }
@@ -208,11 +208,12 @@ body,
 
 .aiba-app__title {
     font-family: var(--font-display);
-    font-weight: 700;
+    font-weight: 800;
     font-size: 1.2rem;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
     margin: 0;
-    color: var(--text-primary);
+    color: var(--accent-gold);
+    text-shadow: 0 0 24px rgba(255, 204, 0, 0.3);
 }
 
 .aiba-app__sub {
@@ -451,20 +452,20 @@ body,
     transform: none;
 }
 
-/* Primary — Android emphasis action */
+/* Primary — bold gold-to-amber (match admin panel) */
 .btn--primary {
-    background: linear-gradient(180deg, #ffd54f 0%, #f5a623 50%, #e89b0f 100%);
-    color: #1a0f00;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(245, 166, 35, 0.25);
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
+    color: #0d0a07;
+    box-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);
 }
 
 .btn--primary:hover:not(:disabled) {
-    filter: brightness(1.08);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35), 0 6px 20px rgba(255, 204, 0, 0.3);
+    filter: brightness(1.06);
+    box-shadow: 0 4px 16px rgba(255, 204, 0, 0.4);
 }
 
 .btn--primary:active:not(:disabled) {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 1px 4px rgba(255, 204, 0, 0.35);
 }
 
 /* Secondary — outlined Android action */
@@ -737,8 +738,8 @@ body,
     letter-spacing: 0.15em;
     white-space: nowrap;
     text-transform: uppercase;
-    color: #1a0f00;
-    background: linear-gradient(180deg, #ffd54f 0%, #f5a623 50%, #e89b0f 100%);
+    color: #0d0a07;
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -1457,7 +1458,7 @@ body,
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #ffd54f, #f5a623);
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
     color: var(--bg-deep);
     font-size: 0.75rem;
     font-weight: 700;
@@ -2640,6 +2641,102 @@ body { scroll-padding-top: 80px; }
     height: 18px;
     accent-color: var(--accent-gold);
     cursor: pointer;
+}
+
+/* ─── Legal consent popup (first open) ──────────────────────────────────────── */
+.legal-consent-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+}
+
+.legal-consent-card {
+    max-width: 400px;
+    width: 100%;
+    padding: 24px;
+    background: var(--bg-card);
+    border: 2px solid var(--accent-gold);
+    border-radius: var(--radius-md);
+    box-shadow: 0 0 32px rgba(255, 204, 0, 0.15);
+}
+
+.legal-consent-title {
+    font-size: 1.2rem;
+    margin: 0 0 12px;
+    color: var(--text-primary);
+}
+
+.legal-consent-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    margin: 0 0 14px;
+}
+
+.legal-consent-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.legal-consent-link {
+    color: var(--accent-gold);
+    text-decoration: underline;
+    font-size: 0.9rem;
+}
+
+.legal-consent-link:hover {
+    color: var(--accent-cyan);
+}
+
+.legal-consent-sep {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.legal-consent-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0 0 20px;
+}
+
+.legal-consent-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* ─── App footer (Privacy · Terms on every page) ────────────────────────────── */
+.app-footer {
+    padding: 12px 16px 24px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    text-align: center;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+}
+
+.app-footer__link {
+    color: var(--accent-gold);
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.app-footer__link:hover {
+    text-decoration: underline;
+}
+
+.app-footer__sep {
+    margin: 0 8px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
 }
 
 /* ─── Legal pages (Privacy, Terms) ────────────────────────────────────────── */
