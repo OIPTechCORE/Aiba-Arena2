@@ -8,6 +8,11 @@ const nextConfig = {
       { protocol: 'http', hostname: 'localhost', pathname: '/**' },
     ],
   },
+  async redirects() {
+    return [
+      { source: '/favicon.ico', destination: '/icon.svg', permanent: false },
+    ];
+  },
   async headers() {
     return [
       {
