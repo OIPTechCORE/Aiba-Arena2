@@ -18,6 +18,17 @@ const TrainerSchema = new mongoose.Schema(
         rewardsEarnedAiba: { type: Number, default: 0 },
         rewardsEarnedNeur: { type: Number, default: 0 },
         lastRewardClaimedAt: { type: Date, default: null },
+        // Viral / deepest: share tracking + milestones
+        shareCount: { type: Number, default: 0 },
+        lastSharedAt: { type: Date, default: null },
+        milestonesUnlocked: { type: [String], default: [] },
+        // Seasonal: running period counters (reset when period rolls)
+        periodWeekStart: { type: Date, default: null },
+        periodWeekReferred: { type: Number, default: 0 },
+        periodWeekRecruited: { type: Number, default: 0 },
+        periodMonthStart: { type: Date, default: null },
+        periodMonthReferred: { type: Number, default: 0 },
+        periodMonthRecruited: { type: Number, default: 0 },
     },
     { timestamps: true },
 );
@@ -26,5 +37,8 @@ TrainerSchema.index({ code: 1 });
 TrainerSchema.index({ status: 1 });
 TrainerSchema.index({ totalImpactScore: -1 });
 TrainerSchema.index({ referredUserCount: -1 });
+TrainerSchema.index({ status: 1, totalImpactScore: -1 });
+TrainerSchema.index({ status: 1, referredUserCount: -1 });
+TrainerSchema.index({ status: 1, recruitedTrainerCount: -1 });
 
 module.exports = mongoose.model('Trainer', TrainerSchema);

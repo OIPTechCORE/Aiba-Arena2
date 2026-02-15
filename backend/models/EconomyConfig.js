@@ -42,6 +42,9 @@ const EconomyConfigSchema = new mongoose.Schema(
         // Governance / mentor access
         governanceStakeMinAiba: { type: Number, default: 1000 },
         mentorTierStakeAiba: { type: Map, of: Number, default: {} }, // tier -> stake requirement
+        // DAO: min staked AIBA and days to create proposals (per Advisory: 1T AIBA, 20% staking)
+        daoProposalMinStakedAiba: { type: Number, default: 10_000 },
+        daoProposalMinStakeDays: { type: Number, default: 30 },
 
         // Referrals (off-chain rewards)
         referralRewardNeurReferrer: { type: Number, default: 250 },
@@ -70,6 +73,7 @@ const EconomyConfigSchema = new mongoose.Schema(
         giftCostTonNano: { type: Number, default: 1_000_000_000 },
 
         // Groups (guilds): pay TON to create or boost. 1–10 TON = 1e9–10e9 nano. Wallets: env LEADER_BOARD_WALLET, BOOST_GROUP_WALLET
+        guildCreatorShareBps: { type: Number, default: 100 }, // INNOVATIONS: guild leader earns 1% of guild war earnings from members
         createGroupCostTonNano: { type: Number, default: 1_000_000_000 }, // 1 TON default
         boostGroupCostTonNano: { type: Number, default: 1_000_000_000 },  // 1 TON default
         leaderboardTopFreeCreate: { type: Number, default: 50 },          // top N by score can create group for free
@@ -92,8 +96,20 @@ const EconomyConfigSchema = new mongoose.Schema(
         boostDurationHours: { type: Number, default: 24 },
         boostMultiplier: { type: Number, default: 1.2 },
 
-        // Staking (off-chain: lock AIBA, earn APY)
+        // Staking (off-chain: lock AIBA, earn APY). Advisory: 1T AIBA, 20% staking allocation.
+        stakingMinAiba: { type: Number, default: 100 }, // Min AIBA to stake (flexible + locked). Ecosystem-aligned: broker mint cost (100), 1T AIBA supply.
         stakingApyPercent: { type: Number, default: 15 },
+        // Period-based staking: [{ days: 30, apyPercent: 10 }, { days: 90, apyPercent: 12 }, { days: 180, apyPercent: 15 }, { days: 365, apyPercent: 18 }]
+        stakingPeriods: {
+            type: Array,
+            default: [
+                { days: 30, apyPercent: 10 },
+                { days: 90, apyPercent: 12 },
+                { days: 180, apyPercent: 15 },
+                { days: 365, apyPercent: 18 },
+            ],
+        },
+        stakingCancelEarlyFeeBps: { type: Number, default: 500 }, // 5% fee for early cancel
 
         // Battle hardening knobs (server-enforced)
         battleMaxEnergy: { type: Number, default: 100 },
@@ -170,6 +186,11 @@ const EconomyConfigSchema = new mongoose.Schema(
         // Trainers: rewards from ecosystem
         trainerRewardAibaPerUser: { type: Number, default: 5 }, // AIBA per referred user with 3+ battles
         trainerRewardAibaPerRecruitedTrainer: { type: Number, default: 20 }, // AIBA per trainer you recruited (when approved)
+        // Trainer tier multipliers (bps): at least N referred users → reward multiplier. e.g. 10 refs = 110 bps = 1.1x
+        trainerTierBpsByReferred: { type: Map, of: Number, default: { '0': 100, '10': 110, '50': 150, '100': 200, '500': 250 } },
+        // Milestone definitions: referred [5,10,25,50,100,250,500], recruited [1,3,5,10] (for badges/unlocks)
+        trainerMilestonesReferred: { type: [Number], default: [5, 10, 25, 50, 100, 250, 500] },
+        trainerMilestonesRecruited: { type: [Number], default: [1, 3, 5, 10] },
         // Invite-3 unlock: BPS bonus on battle rewards when user has 3+ referrals (default 100 = 1%)
         referralUnlock3BonusBps: { type: Number, default: 100 },
         // AIBA self-automation (dynamic caps)
@@ -194,6 +215,10 @@ const EconomyConfigSchema = new mongoose.Schema(
         donateCarFeeTonNano: { type: Number, default: 500_000_000 },
         donateBikeFeeTonNano: { type: Number, default: 500_000_000 },
         donateGiftsFeeTonNano: { type: Number, default: 100_000_000 }, // 0.1 TON
+
+        // Unified Comms Phase 4: support link (Telegram group/channel) and optional contact
+        supportLink: { type: String, default: '', trim: true },       // e.g. https://t.me/aibaarena_support
+        supportTelegramGroup: { type: String, default: '', trim: true }, // e.g. aibaarena_support (for tg://resolve?domain=X)
     },
     { timestamps: true },
 );
