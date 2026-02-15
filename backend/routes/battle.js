@@ -30,7 +30,7 @@ const { metrics } = require('../metrics');
 const { clampInt, applyEnergyRegen } = require('../engine/battleEnergy');
 const { buildBattleSeedMessage } = require('../engine/battleSeed');
 const { getBattleCooldownKey } = require('../engine/battleCooldown');
-const { getRewardMultiplier, updateBattleWinStreak, resetBattleWinStreak } = require('../engine/innovations');
+const { getRewardMultiplier, updateBattleWinStreak, resetBattleWinStreak, getCreatorReferrerAndBps } = require('../engine/innovations');
 const { recordBossDamageFromBattle } = require('./globalBoss');
 
 function safeVaultClaimSeqno(user) {
@@ -420,13 +420,27 @@ router.post(
                     rewardNeur = proposedNeur;
 
                     // Guild wars reward splitting (off-chain NEUR):
-                    // 20% to guild treasury, 80% to the player.
+                    // 20% to guild (1% to leader = creator revenue, 19% to vault), 80% to the player.
                     if (requiresGuild && guild?._id) {
                         guildShareNeur = Math.floor(rewardNeur * 0.2);
+                        const creatorBps = Math.min(10000, Math.max(0, Number(cfg?.guildCreatorShareBps ?? 100)));
+                        const creatorShareNeur = Math.floor((guildShareNeur * creatorBps) / 10000);
+                        const vaultShareNeur = guildShareNeur - creatorShareNeur;
                         const userShare = rewardNeur - guildShareNeur;
 
-                        if (guildShareNeur > 0) {
-                            await Guild.updateOne({ _id: guild._id }, { $inc: { vaultNeur: guildShareNeur } });
+                        if (vaultShareNeur > 0) {
+                            await Guild.updateOne({ _id: guild._id }, { $inc: { vaultNeur: vaultShareNeur } });
+                        }
+                        if (creatorShareNeur > 0 && guild.ownerTelegramId) {
+                            await creditNeurNoCap(creatorShareNeur, {
+                                telegramId: guild.ownerTelegramId,
+                                reason: 'guild_creator_earnings',
+                                arena,
+                                league,
+                                sourceType: 'guild_war_member_earnings',
+                                sourceId: requestId,
+                                meta: { guildId: String(guild._id), memberTelegramId: telegramId, amountNeur: creatorShareNeur },
+                            });
                         }
 
                         if (userShare > 0) {
@@ -483,6 +497,39 @@ router.post(
                 recordBossDamageFromBattle(telegramId, score, null).catch(() => {});
             } else {
                 resetBattleWinStreak(telegramId).catch(() => {});
+            }
+
+            // Creator Economy: credit referrer with % of referee's battle earnings (tier-based)
+            if ((rewardAiba > 0 || rewardNeur > 0) && cfg) {
+                getCreatorReferrerAndBps(telegramId, cfg)
+                    .then(async (creator) => {
+                        if (!creator?.referrerTelegramId) return;
+                        const creatorAiba = Math.floor((rewardAiba * creator.bps) / 10000);
+                        const creatorNeur = Math.floor((rewardNeur * creator.bps) / 10000);
+                        if (creatorAiba > 0) {
+                            await creditAibaNoCap(creatorAiba, {
+                                telegramId: creator.referrerTelegramId,
+                                reason: 'creator_earnings',
+                                arena,
+                                league,
+                                sourceType: 'creator_referee_battle',
+                                sourceId: requestId,
+                                meta: { refereeTelegramId: telegramId, bps: creator.bps, amountAiba: creatorAiba },
+                            });
+                        }
+                        if (creatorNeur > 0) {
+                            await creditNeurNoCap(creatorNeur, {
+                                telegramId: creator.referrerTelegramId,
+                                reason: 'creator_earnings',
+                                arena,
+                                league,
+                                sourceType: 'creator_referee_battle',
+                                sourceId: requestId,
+                                meta: { refereeTelegramId: telegramId, bps: creator.bps, amountNeur: creatorNeur },
+                            });
+                        }
+                    })
+                    .catch((err) => console.error('Creator economy credit error:', err));
             }
             // Stars: per battle *win* only (Telegram Stars–style); ledger for audit
             const starReward = score > 0 ? Math.max(0, Math.floor(Number(cfg.starRewardPerBattle ?? 0))) : 0;

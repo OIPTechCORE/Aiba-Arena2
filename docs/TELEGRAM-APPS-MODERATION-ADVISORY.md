@@ -82,13 +82,33 @@ Recommendation: **Primary category “Games”**, optionally tag **Play to Earn*
 - [ ] App icon (square, high resolution)
 - [ ] Screenshots (e.g., Home, Brokers, Battle result, Referrals)
 - [ ] Category selection (Games, Play to Earn, NFT as applicable)
-- [ ] Privacy policy link (if required)
-- [ ] No misleading or scam-like claims
+- [x] **Privacy policy link** — Implemented: [`docs/PRIVACY-POLICY.md`](./PRIVACY-POLICY.md), in-app at `/privacy` and linked from Settings → Privacy & data
+- [x] **Terms of service** — Implemented: [`docs/TERMS-OF-SERVICE.md`](./TERMS-OF-SERVICE.md), in-app at `/terms` and linked from Settings
+- [x] **No misleading or scam-like claims** — Implemented: earnings disclaimer in Wallet tab and FAQs; Terms §3 ("No Guaranteed Profits") explicitly disclaims guaranteed rewards
 - [ ] Test thoroughly before submitting
+
+---
+
+## Implementation Status (Moderation Advisory Compliance)
+
+| Requirement | Status | Implementation |
+|-------------|--------|----------------|
+| Clear disclosure (no false promises) | ✓ Done | Terms §3, Wallet disclaimer banner, FAQs "Earnings disclaimer?" |
+| No misleading "guaranteed profit" language | ✓ Done | Terms §3, Wallet & FAQ disclaimers |
+| Privacy policy ready | ✓ Done | `docs/PRIVACY-POLICY.md`, `/privacy` page, Settings link |
+| Terms of service ready | ✓ Done | `docs/TERMS-OF-SERVICE.md`, `/terms` page, Settings link |
+| Referral rewards transparent | ✓ Done | Creator tiers (2–7%) shown in UI and FAQs |
+
+**In-app links for submission form:**
+
+- Privacy Policy: `https://<your-miniapp-domain>/privacy`
+- Terms of Service: `https://<your-miniapp-domain>/terms`
 
 ---
 
 ## Related docs
 
+- [PRIVACY-POLICY.md](./PRIVACY-POLICY.md) — Privacy policy
+- [TERMS-OF-SERVICE.md](./TERMS-OF-SERVICE.md) — Terms of service (includes earnings disclaimer)
 - [GAME-FUNCTIONALITY.md](./GAME-FUNCTIONALITY.md) — Game mechanics and architecture
 - [ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md](./ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md) — Tokenomics and viral design

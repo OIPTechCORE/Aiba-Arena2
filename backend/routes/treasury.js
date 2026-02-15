@@ -10,6 +10,7 @@ router.get('/summary', async (_req, res) => {
         res.json({
             balanceAiba: t?.balanceAiba ?? 0,
             balanceNeur: t?.balanceNeur ?? 0,
+            cancelledStakesAiba: t?.cancelledStakesAiba ?? 0,
             totalPaidOutAiba: t?.totalPaidOutAiba ?? 0,
             totalPaidOutNeur: t?.totalPaidOutNeur ?? 0,
         });

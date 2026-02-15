@@ -61,6 +61,27 @@ Single doc for day-to-day ops: key management, incident response, monitoring, an
 
 **Setup:** Log drain to a log platform; uptime checks for `GET /health`; Prometheus scraping for `GET /metrics`; TON provider error monitoring.
 
+**Scripts:**
+
+| Script | Purpose |
+|--------|---------|
+| `node scripts/health-check.js` | Basic health + metrics; exit 0/1 for CI/cron |
+| `node scripts/health-check.js --vault` | Adds vault TON balance check |
+| `node scripts/monitoring-check.js` | Full monitoring: health, expected metrics, optional vault |
+| `node scripts/monitoring-check.js --vault --json` | JSON output for alerting pipelines |
+
+**Cron example (every 5 min):**
+```bash
+*/5 * * * * cd /path/to/project && BACKEND_URL=https://api.example.com node scripts/monitoring-check.js --vault || echo "Monitoring check failed"
+```
+
+**Cron example (health-check, lighter weight):**
+```bash
+*/2 * * * * cd /path/to/project && BACKEND_URL=https://api.example.com node scripts/health-check.js || echo "Health check failed"
+```
+
+**Docs:** [BACKUP-RUNBOOK.md](BACKUP-RUNBOOK.md) — Backup and restore. [KEY-ROTATION.md](KEY-ROTATION.md) — Key rotation procedures.
+
 **Metrics endpoint:** `GET /metrics` (Prometheus). Includes: `aiba_http_request_duration_seconds`, `aiba_battle_runs_total`, `aiba_battle_anomalies_total`, `aiba_auto_bans_total`, `aiba_economy_emissions_total`, `aiba_economy_sinks_total`, `aiba_economy_withdrawals_total`. Treasury: `GET /api/treasury/ops`.
 
 **Suggested alerts:** Battle anomaly/auto-ban spikes; economy ledger anomalies; vault low TON/jettons; Mongo reconnects; API/battle error rate > threshold; rate limit 429 spikes.
@@ -74,8 +95,11 @@ Single doc for day-to-day ops: key management, incident response, monitoring, an
 - [ ] Keys separated by purpose; no secrets in repo
 - [ ] All prod env set; `APP_ENV=prod`; backend starts without PROD_READINESS_FAILED
 - [ ] CORS set to production frontend URLs only
-- [ ] Monitoring and backups configured; restore tested
+- [ ] Monitoring configured (scripts/health-check.js or scripts/monitoring-check.js via cron; see §4)
+- [ ] Backups configured; restore tested (BACKUP-RUNBOOK.md)
 - [ ] Runbook and security playbooks read and agreed
 - [ ] `ENABLE_LEGACY_PENDING_AIBA_DISPATCH` not true in production
+
+**Runbooks:** [BACKUP-RUNBOOK.md](BACKUP-RUNBOOK.md) (MongoDB, secrets, TON, code). [KEY-ROTATION.md](KEY-ROTATION.md) (Oracle, Admin JWT, Bot token, Battle seed).
 
 **Data migrations:** Prefer additive schema changes; add indexes for new lookups; backfill idempotent and batched.

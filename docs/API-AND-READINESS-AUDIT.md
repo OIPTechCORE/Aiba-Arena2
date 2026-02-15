@@ -104,7 +104,7 @@
 | `/api/guilds/list` | guilds `/list` | GET | ✅ |
 | `/api/guilds/mine` | guilds `/mine` | GET | ✅ |
 | `/api/guilds/create` | guilds `/create` | POST | ✅ |
-| `/api/guilds/:id/boost` | guilds `/:guildId/boost` | POST | ✅ |
+| `/api/guilds/:guildId/boost` | guilds `/:guildId/boost` | POST | ✅ |
 | `/api/guilds/join` | guilds `/join` | POST | ✅ |
 | `/api/guilds/deposit-broker` | guilds `/deposit-broker` | POST | ✅ |
 | `/api/guilds/withdraw-broker` | guilds `/withdraw-broker` | POST | ✅ |

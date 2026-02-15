@@ -23,7 +23,7 @@ router.get(
 // Admin seed/upsert (optional)
 router.post(
     '/seed',
-    requireAdmin,
+    requireAdmin(),
     validateBody({
         realms: { type: 'array', itemType: 'object', required: true },
     }),

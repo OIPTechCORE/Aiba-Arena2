@@ -51,6 +51,7 @@ function createApp() {
     app.use('/api/admin/mod', require('./routes/adminModeration'));
     app.use('/api/admin/treasury', require('./routes/adminTreasury'));
     app.use('/api/admin/governance', require('./routes/adminGovernance'));
+    app.use('/api/admin/dao', require('./routes/adminDao'));
     app.use('/api/admin/realms', require('./routes/adminRealms'));
     app.use('/api/admin/marketplace', require('./routes/adminMarketplace'));
     app.use('/api/admin/treasury-ops', require('./routes/adminTreasuryOps'));
@@ -77,6 +78,9 @@ function createApp() {
     app.use('/api/admin/charity', require('./routes/adminCharity'));
     app.use('/api/announcements', require('./routes/announcements'));
     app.use('/api/admin/announcements', require('./routes/adminAnnouncements'));
+    app.use('/api/comms', require('./routes/comms'));
+    app.use('/api/support', require('./routes/support'));
+    app.use('/api/admin/support', require('./routes/adminSupport'));
     app.use('/api/admin/referrals', require('./routes/adminReferrals'));
     app.use('/api/university', require('./routes/university'));
     app.use('/api/admin/university', require('./routes/adminUniversity'));
@@ -94,9 +98,10 @@ function createApp() {
     app.use('/api/admin/trainers', require('./routes/adminTrainers'));
     app.use('/api/p2p-aiba', require('./routes/p2pAiba'));
     app.use('/api/donate', require('./routes/donate'));
+    app.use('/api/predict', require('./routes/predict'));
+    app.use('/api/admin/predict', require('./routes/adminPredict'));
 
-    app.get('/api/comms/status', (_req, res) =>
-        res.json({ status: 'operational', updatedAt: new Date().toISOString() }));
+    // Comms status moved to /api/comms router
 
     // Prometheus metrics endpoint (for monitoring/alerting)
     app.get('/metrics', metricsHandler);

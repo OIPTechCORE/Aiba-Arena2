@@ -52,6 +52,9 @@ const UserSchema = new mongoose.Schema(
 
         // Profile boost (pay TON): visibility/recognition until this date
         profileBoostedUntil: { type: Date, default: null },
+
+        // Unified Comms Phase 3: last seen announcement ID for read/unread
+        lastSeenAnnouncementId: { type: mongoose.Schema.Types.ObjectId, ref: 'Announcement', default: null },
     },
     { timestamps: true },
 );

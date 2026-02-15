@@ -5,20 +5,21 @@
  */
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'http://localhost:5000';
 
-export async function POST(request, { params }) {
+async function proxy(request, { params }, method) {
   const resolved = await params;
   const path = Array.isArray(resolved?.path) ? resolved.path.join('/') : (resolved?.path || '');
-  const url = `${BACKEND.replace(/\/+$/, '')}/api/brokers/${path}`;
+  const base = `${BACKEND.replace(/\/+$/, '')}/api/brokers/${path}`;
+  const url = method === 'GET' && request.url?.includes('?') ? `${base}${request.url.slice(request.url.indexOf('?'))}` : base;
   try {
     const initData = request.headers.get('x-telegram-init-data') || '';
     const telegramId = request.headers.get('x-telegram-id') || '';
-    const body = await request.text();
+    const body = method === 'GET' ? '' : await request.text();
     const reqHeaders = { 'Content-Type': 'application/json' };
     if (initData) reqHeaders['x-telegram-init-data'] = initData;
     else if (telegramId) reqHeaders['x-telegram-id'] = telegramId;
 
     const res = await fetch(url, {
-      method: 'POST',
+      method,
       headers: reqHeaders,
       body: body || undefined,
     });
@@ -31,4 +32,12 @@ export async function POST(request, { params }) {
     console.error('Broker proxy error:', err);
     return Response.json({ error: 'proxy_failed', message: err?.message || 'Proxy request failed' }, { status: 502 });
   }
+}
+
+export async function GET(request, context) {
+  return proxy(request, context, 'GET');
+}
+
+export async function POST(request, context) {
+  return proxy(request, context, 'POST');
 }

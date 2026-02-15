@@ -243,6 +243,19 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)
 | `boostGroupCostTonNano` | 1e9 | BOOST_GROUP_WALLET |
 | `leaderboardTopFreeCreate` | 50 | Top N create guild free |
 
+### 6.6a Staking & DAO
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `stakingMinAiba` | 100 | Min AIBA to stake (flexible + locked). Ecosystem-aligned: broker mint cost, 1T AIBA supply. |
+| `stakingApyPercent` | 15 | APY for flexible staking |
+| `stakingPeriods` | [{ days: 30, apyPercent: 10 }, ...] | Period-based locks: 30/90/180/365 days with tiered APY |
+| `stakingCancelEarlyFeeBps` | 500 | 5% fee when cancelling lock early → Treasury (CANCELLED_STAKES_WALLET) |
+| `daoProposalMinStakedAiba` | 10_000 | Min AIBA staked to create proposals |
+| `daoProposalMinStakeDays` | 30 | Min days staked (flexible or lock) to create proposals |
+
+Wallet tab: Overview | Staking flow; period selection, preview, countdown; cancel-early with fee. Yield Vault tab: hero shows min (ecosystem-aligned); locked + flexible staking both show min and enforce it. Wallet tab staking flow: same min displayed and enforced. `stakingMinAiba` configurable via Admin → Economy (PATCH).
+
 ### 6.6 Stars, Diamonds, Referrals
 
 | Field | Default |
@@ -429,7 +442,7 @@ Create car/bike (AIBA or TON) → Enter race (AIBA entry fee)
 | `/api/guilds/mine` | GET | User guilds |
 | `/api/guilds/create` | POST | Create guild |
 | `/api/guilds/join` | POST | Join guild |
-| `/api/guilds/:id/boost` | POST | Boost guild (TON) |
+| `/api/guilds/:guildId/boost` | POST | Boost guild (TON) |
 | `/api/guilds/deposit-broker` | POST | Deposit broker |
 | `/api/guilds/withdraw-broker` | POST | Withdraw broker |
 
@@ -467,6 +480,6 @@ Create car/bike (AIBA or TON) → Enter race (AIBA entry fee)
 
 ## See Also
 
-- [GAME-EXPLAINED](print/GAME-EXPLAINED.html) — High-level game explanation
+- [This document §1](GAME-FUNCTIONALITY.md#1-core-loop) — Core loop & high-level game explanation
 - [API-CONTRACT.md](API-CONTRACT.md) — Full API specification
 - [DEPLOYMENT-AND-ENV.md](DEPLOYMENT-AND-ENV.md) — Environment configuration

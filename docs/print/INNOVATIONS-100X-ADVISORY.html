@@ -600,6 +600,57 @@
 </tr>
 </tbody></table>
 <hr/>
+<h2>10a. Implementation Status (Codebase)</h2>
+<table>
+<thead><tr>
+<th>Innovation</th>
+<th>Status</th>
+<th>Location</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Streaks &amp; Daily Combo</strong></td>
+<td>✅ Implemented</td>
+<td><code>innovations.js</code>, <code>daily.js</code>, <code>battle.js</code> — login/battle streaks, daily combo spend → bonus</td>
+</tr>
+<tr>
+<td><strong>Tournaments</strong></td>
+<td>✅ Implemented</td>
+<td><code>Tournament.js</code>, <code>tournaments.js</code>, <code>adminTournaments.js</code> — brackets, entry AIBA/TON, 20% treasury</td>
+</tr>
+<tr>
+<td><strong>Subscription / Premium</strong></td>
+<td>✅ Implemented</td>
+<td><code>premium.js</code> — 5 TON/month, 2× rewards</td>
+</tr>
+<tr>
+<td><strong>Creator Economy</strong></td>
+<td>✅ Implemented</td>
+<td><code>getCreatorReferrerAndBps</code> in <code>innovations.js</code> — 2% base; 100 refs=3%, 1k=5%, 10k=7%. Credits referrer on: battle, car/bike racing, tournaments, global boss rewards</td>
+</tr>
+<tr>
+<td><strong>Global Boss / Raid</strong></td>
+<td>✅ Implemented</td>
+<td><code>GlobalBoss.js</code>, <code>globalBoss.js</code> — damage from battles, top 1000 share pool</td>
+</tr>
+<tr>
+<td><strong>Broker Rental</strong></td>
+<td>✅ Implemented</td>
+<td><code>BrokerRental.js</code>, <code>brokerRental.js</code> — rent broker for AIBA</td>
+</tr>
+<tr>
+<td><strong>Predict / Bet</strong></td>
+<td>✅ Implemented</td>
+<td><code>PredictEvent.js</code>, <code>PredictBet.js</code>, <code>predict.js</code>, <code>adminPredict.js</code> — bet on broker A vs B, vig → treasury</td>
+</tr>
+<tr>
+<td><strong>NFT Breeding</strong></td>
+<td>✅ Implemented</td>
+<td><code>breeding.js</code> — breed 2 brokers → 1, burn both + AIBA cost</td>
+</tr>
+</tbody></table>
+<p><strong>Config (Admin → Economy):</strong> <code>creatorPercentBps</code>, <code>creatorTier100RefsBps</code>, <code>creatorTier1000RefsBps</code>, <code>creatorTier10000RefsBps</code>, <code>predictVigBps</code>, <code>predictMaxBetAiba</code>, <code>streakMultiplierAt7Days</code>, <code>dailyComboRequirementAiba</code>, etc.</p>
+<hr/>
 <h2>11. Disclaimer</h2>
 <p>This document is advisory. Innovations involve product, legal, and regulatory risks. Prediction/betting may be restricted in some jurisdictions. Token economics and revenue projections are illustrative. Seek qualified advice before implementation.</p>
   </div>

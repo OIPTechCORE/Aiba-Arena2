@@ -11,14 +11,14 @@
  */
 export const HOME_GRID_IDS = [
     'brokers', 'arenas', 'market', 'tasks',
-    'leaderboard', 'tournaments', 'globalBoss', 'referrals',
+    'leaderboard', 'tournaments', 'globalBoss', 'predict', 'referrals',
     'carRacing', 'bikeRacing', 'guilds', 'trainers',
-    'multiverse', 'university', 'wallet', 'profile',
-    'charity', 'realms', 'assets', 'governance', 'updates', 'settings',
+    'multiverse', 'nftGallery', 'coe', 'university', 'staking', 'wallet', 'profile',
+    'charity', 'realms', 'assets', 'dao', 'governance', 'updates', 'settings',
 ];
 export const TAB_IDS = [
     'home', 'brokers', 'arenas', 'market', 'tasks', 'leaderboard',
-    'tournaments', 'globalBoss', 'carRacing', 'bikeRacing',
-    'referrals', 'trainers', 'guilds', 'multiverse', 'university', 'wallet',
-    'profile', 'charity', 'realms', 'assets', 'governance', 'updates', 'settings',
+    'tournaments', 'globalBoss', 'predict', 'carRacing', 'bikeRacing',
+    'referrals', 'trainers', 'guilds', 'multiverse', 'nftGallery', 'coe', 'university', 'staking', 'wallet',
+    'profile', 'charity', 'realms', 'assets', 'dao', 'governance', 'updates', 'settings',
 ];

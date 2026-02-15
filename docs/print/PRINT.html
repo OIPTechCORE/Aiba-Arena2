@@ -25,6 +25,7 @@
 <ul>
 <li><strong><code>docs/print.css</code></strong> — Shared styles: readable on screen and optimized for print (margins, page breaks, visible URLs when printing).</li>
 </ul>
+<p><strong>Note:</strong> Some older HTML files in <code>docs/print/</code> may have no corresponding <code>.md</code> source (e.g. orphan files from deleted/renamed docs). The build script only generates HTML from <em>current</em> <code>.md</code> files; it does not delete orphan HTML. See <a href="DOCS-STRUCTURE.md">DOCS-STRUCTURE.md</a>.</p>
 <h2>Regenerating</h2>
 <p>After editing any <code>docs/*.md</code> file, run again:</p>
 <pre><code>npm run build:print-docs</code></pre>

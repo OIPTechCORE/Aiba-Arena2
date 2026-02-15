@@ -5,9 +5,68 @@ const Proposal = require('../models/Proposal');
 const Vote = require('../models/Vote');
 const Treasury = require('../models/Treasury');
 const User = require('../models/User');
+const Staking = require('../models/Staking');
+const StakingLock = require('../models/StakingLock');
 const { getLimit } = require('../util/pagination');
-const { creditAibaNoCap, creditNeurNoCap } = require('../engine/economy');
+const { creditAibaNoCap, creditNeurNoCap, getConfig } = require('../engine/economy');
 const { validateBody, validateQuery, validateParams } = require('../middleware/validate');
+
+const ADVISORY_TOTAL_AIBA_SUPPLY = 1_000_000_000_000;
+const ADVISORY_PROPOSAL_MIN_BPS = 1; // 0.01% of 1T = 100,000,000 AIBA
+const ADVISORY_PROPOSAL_MIN_DAYS = 90;
+
+function getDaoProposalThresholds(cfg) {
+    const advisoryFloorAiba = Math.floor((ADVISORY_TOTAL_AIBA_SUPPLY * ADVISORY_PROPOSAL_MIN_BPS) / 10000);
+    const configuredMinAiba = Math.max(0, Number(cfg?.daoProposalMinStakedAiba ?? 0));
+    const configuredMinDays = Math.max(1, Number(cfg?.daoProposalMinStakeDays ?? 1));
+    return {
+        minAiba: Math.max(advisoryFloorAiba, configuredMinAiba || 10_000),
+        minDays: Math.max(ADVISORY_PROPOSAL_MIN_DAYS, configuredMinDays || 30),
+    };
+}
+
+async function getQualifyingStake(telegramId, minDays) {
+    const now = new Date();
+    const minLockedAt = new Date(now.getTime() - minDays * 24 * 60 * 60 * 1000);
+    let qualifyingStake = 0;
+
+    const flexibleStake = await Staking.findOne({ telegramId }).lean();
+    if (flexibleStake && flexibleStake.lockedAt && new Date(flexibleStake.lockedAt) <= minLockedAt) {
+        qualifyingStake += Number(flexibleStake.amount ?? 0);
+    }
+
+    const lockedStakes = await StakingLock.find({
+        telegramId,
+        status: 'active',
+        lockedAt: { $lte: minLockedAt },
+    }).lean();
+    for (const s of lockedStakes) qualifyingStake += Number(s.amount ?? 0);
+    return qualifyingStake;
+}
+
+// GET /api/dao/config — staking requirements to create proposals (Advisory: 1T AIBA, ecosystem-aligned)
+router.get('/config', requireTelegram, async (req, res) => {
+    try {
+        const cfg = await getConfig();
+        const { minAiba, minDays } = getDaoProposalThresholds(cfg);
+        let qualifyingStake = 0;
+
+        const telegramId = req.telegramId ? String(req.telegramId) : '';
+        if (telegramId) {
+            qualifyingStake = await getQualifyingStake(telegramId, minDays);
+        }
+
+        res.json({
+            daoProposalMinStakedAiba: minAiba,
+            daoProposalMinStakeDays: minDays,
+            yourQualifyingStake: qualifyingStake,
+            canPropose: qualifyingStake >= minAiba,
+        });
+    } catch (err) {
+        console.error('DAO config error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
 
 // GET /api/dao/proposals — list proposals (active first, then closed)
 router.get(
@@ -135,6 +194,23 @@ router.post(
     try {
         const telegramId = req.telegramId ? String(req.telegramId) : '';
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+
+        const cfg = await getConfig();
+        const { minAiba, minDays } = getDaoProposalThresholds(cfg);
+
+        if (minAiba > 0 || minDays > 0) {
+            const qualifyingStake = await getQualifyingStake(telegramId, minDays);
+
+            if (qualifyingStake < minAiba) {
+                return res.status(403).json({
+                    error: 'staking_required',
+                    message: `Stake at least ${minAiba.toLocaleString()} AIBA for ${minDays} days to create proposals. You have ${qualifyingStake.toLocaleString()} qualifying.`,
+                    minStakedAiba: minAiba,
+                    minStakeDays: minDays,
+                    yourQualifyingStake: qualifyingStake,
+                });
+            }
+        }
 
         const title = String(req.validatedBody?.title ?? '').trim();
         const description = String(req.validatedBody?.description ?? '').trim();

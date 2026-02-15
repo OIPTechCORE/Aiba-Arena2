@@ -4,6 +4,7 @@ const Tournament = require('../models/Tournament');
 const TournamentEntry = require('../models/TournamentEntry');
 const Broker = require('../models/Broker');
 const { getConfig, tryEmitAiba, creditAibaNoCap, debitAibaFromUser } = require('../engine/economy');
+const { getCreatorReferrerAndBps } = require('../engine/innovations');
 const { simulateBattle } = require('../engine/battleEngine');
 const { hmacSha256Hex } = require('../engine/deterministicRandom');
 const { validateBody, validateParams } = require('../middleware/validate');
@@ -130,8 +131,9 @@ async function runTournamentBracket(tournamentId) {
         if (share > 0) {
             const emit = await tryEmitAiba(share, { arena: 'tournament', league: tournament.league });
             if (emit.ok) {
+                const winnerId = sorted[p].telegramId;
                 await creditAibaNoCap(share, {
-                    telegramId: sorted[p].telegramId,
+                    telegramId: winnerId,
                     reason: 'tournament_prize',
                     arena: 'tournament',
                     league: tournament.league,
@@ -140,9 +142,26 @@ async function runTournamentBracket(tournamentId) {
                     meta: { position: p + 1, tournamentId: String(tournamentId) },
                 });
                 await TournamentEntry.updateOne(
-                    { tournamentId, telegramId: sorted[p].telegramId },
+                    { tournamentId, telegramId: winnerId },
                     { position: p + 1, aibaReward: share },
                 );
+                getConfig().then((cfg) =>
+                    getCreatorReferrerAndBps(winnerId, cfg).then(async (creator) => {
+                        if (!creator?.referrerTelegramId) return;
+                        const creatorAiba = Math.floor((share * creator.bps) / 10000);
+                        if (creatorAiba > 0) {
+                            await creditAibaNoCap(creatorAiba, {
+                                telegramId: creator.referrerTelegramId,
+                                reason: 'creator_earnings',
+                                arena: 'tournament',
+                                league: tournament.league,
+                                sourceType: 'creator_referee_tournament',
+                                sourceId: String(tournamentId),
+                                meta: { refereeTelegramId: winnerId, bps: creator.bps, amountAiba: creatorAiba },
+                            });
+                        }
+                    })
+                ).catch(() => {});
             }
         }
     }

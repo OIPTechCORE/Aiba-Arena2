@@ -26,18 +26,34 @@ Use this phase table first, then open the detailed docs below.
 | **ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md** | Advisory: 1T AIBA mint, viral growth strategies, founder revenue calculations. |
 | **AIBA-SELF-AUTOMATION.md** | Dynamic caps, allocation config, mint constraints, anti-inflation, referralUnlock3BonusBps. |
 | **REPORTS-MONITORING.md** | Cross-validation of advisory/audit reports vs codebase; invite-3, K-factor, trainers. |
-| **TELEGRAM-APPS-MODERATION-ADVISORY.md** | Telegram Apps Moderation Center: approval probability, position in Apps Center, submission checklist. |
+| **TELEGRAM-APPS-MODERATION-ADVISORY.md** | Telegram Apps Moderation Center: approval probability, position in Apps Center, submission checklist, implementation status. |
+| **PRIVACY-POLICY.md** | Privacy policy: data collection, use, storage, rights. In-app at `/privacy`. |
+| **TERMS-OF-SERVICE.md** | Terms of service: acceptance, no guaranteed profits, eligibility, conduct. In-app at `/terms`. |
 | **INNOVATIONS-100X-ADVISORY.md** | Innovations to strike the game: tournaments, streaks, creator economy, predict/bet, subscription, rental, raid, breeding. 100× calculations for users, AIBA, founders. |
-| **API-CONTRACT.md** | API contract: Realms, Missions, Mentors, Assets, Governance, Treasury, Trainers, Oracle, P2P AIBA, Gifts, Donate. |
+| **API-CONTRACT.md** | API contract: Core (Economy, Vault, Wallet, Battle), Realms, Missions, Mentors, Assets, DAO (staking requirement), Staking, Treasury, Trainers, Oracle, P2P AIBA, Gifts, Donate, Announcements, Support. |
+| **SUPER-ADMIN-WALLETS.md** | Complete reference: all Super Admin wallets (P2P AIBA send, AIBA in gifts, Buy AIBA with TON, Donate broker/car/bike/gifts, **CANCELLED_STAKES_WALLET** for early stake cancel fee), env vars, config keys, APIs. |
 | **ORACLE-AIBA-TON.md** | Holistic automated AIBA/TON oracle: formula, config, cron, admin API. |
 | **CONTRACT-DEPLOYMENT-ORDER.md** | Contract deployment order. |
 | **UNIVERSAL-SPEC.md** | Universal spec (if present). |
 | **CONNECT-WALLET-TON-SCAN.md** | Connect wallet, TON Scan. |
 | **MIGRATIONS.md** | Data migrations. |
 | **TELEGRAM-MINI-APP-UI-UX-AUDIT.md** | Telegram miniapp UI/UX audit. |
+| **DOCS-STRUCTURE.md** | Why `.html` vs `.md`; source of truth, build process, orphan HTML files. |
+| **UNIFIED-COMMS-ECOSYSTEM.md** | Unified comms: announcements, status, support; Phases 1–4 (read/unread, support form) done. |
 | **PRINT.md** | Print/export. |
 | **VISION-3D-ARENAS-STATUS.md** | 3D arenas: what exists vs vision. Can you see them? Roadmap. |
 | **TRAINERS-MANUAL.md** | Exhaustive trainer guide: product, journeys, scripts, influencer angles. |
 | **marketing/** | Marketing materials: influencer kit, ad templates, post bank, customizable HTML banners. |
 
-**Print folder:** `print/` contains HTML exports of some docs (may reference old filenames).
+**Print folder:** `print/` contains HTML exports of docs. Run `npm run build:print-docs` to regenerate from `.md` sources. See [DOCS-STRUCTURE.md](DOCS-STRUCTURE.md).
+
+---
+
+## Recent documentation updates
+
+- **Unified Comms (Phases 3–4):** Read/unread announcements (`lastSeenAnnouncementId`, `POST /api/announcements/seen`); in-app support form (`POST /api/support/request` with subject: question, bug, feature, account, other). See [UNIFIED-COMMS-ECOSYSTEM.md](UNIFIED-COMMS-ECOSYSTEM.md).
+- **DAO:** Added to Home grid; create-proposal staking requirement (e.g. ≥ 10,000 AIBA for ≥ 30 days). See [API-CONTRACT.md](API-CONTRACT.md) §4.
+- **Staking:** Full locked staking UI (periods 30/90/180/365 days, APY, reward preview, countdown). Cancel early with 5% fee → CANCELLED_STAKES_WALLET / Treasury. See [API-CONTRACT.md](API-CONTRACT.md) §5d, [SUPER-ADMIN-WALLETS.md](SUPER-ADMIN-WALLETS.md).
+- **Charity:** Max NEUR/AIBA, presets, optional message, anonymous toggle. See [FEATURE-PLANS.md](FEATURE-PLANS.md) §3, [USER-GUIDE.md](USER-GUIDE.md) §16.
+- **Trainer button:** Coloured styling on Home grid. See `miniapp/src/config/navigation.js` (`gridStyle: 'trainers'`).
+- **API-CONTRACT audit:** §0 Core (Economy, Vault, Wallet, Battle) added; duplicate §5e fixed (Predict → 5e.2); Trainers claim-rewards requestId documented.

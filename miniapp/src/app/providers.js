@@ -9,7 +9,7 @@ export function Providers({ children }) {
     const manifestUrl = useMemo(() => {
         const env = String(process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL || '').trim();
         const origin = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/+$/, '');
-        if (!env) return origin ? `${origin}/api/tonconnect-manifest` : 'https://aiba-arena2.vercel.app/api/tonconnect-manifest';
+        if (!env) return origin ? `${origin}/api/tonconnect-manifest` : '';
 
         // Accept absolute URLs as-is.
         if (/^https?:\/\//i.test(env)) return env;

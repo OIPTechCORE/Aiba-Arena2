@@ -1,7 +1,7 @@
 'use client';
 
 import axios from 'axios';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
@@ -19,11 +19,14 @@ function getAdminErrorMessage(error, fallback = 'Request failed.') {
 
 export default function AdminHome() {
     const [token, setToken] = useState('');
-    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod | stats | treasury | realms | marketplace | treasuryOps | governance | charity | comms | university | referrals | brokers
+    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod | stats | treasury | realms | marketplace | treasuryOps | governance | dao | charity | comms | university | referrals | brokers | tournaments | globalBoss | predict | trainers | support | oracle | audit | economyAutomation | multiverse
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [authError, setAuthError] = useState('');
+    const [globalError, setGlobalError] = useState('');
+    const [tabLoading, setTabLoading] = useState(false);
     const [realms, setRealms] = useState([]);
     const [realmKey, setRealmKey] = useState('');
     const [realmName, setRealmName] = useState('');
@@ -31,6 +34,20 @@ export default function AdminHome() {
     const [marketMetrics, setMarketMetrics] = useState(null);
     const [treasuryOpsSummary, setTreasuryOpsSummary] = useState(null);
     const [govProposals, setGovProposals] = useState([]);
+
+    const logout = useCallback(() => {
+        setToken('');
+        setAuthError('');
+        try {
+            localStorage.removeItem('aiba_admin_token');
+        } catch {
+            // ignore
+        }
+    }, []);
+
+    const handleApiError = (error, fallback = 'Request failed.') => {
+        setGlobalError(getAdminErrorMessage(error, fallback));
+    };
 
     const api = useMemo(() => {
         const a = axios.create({ baseURL: BACKEND_URL });
@@ -53,10 +70,17 @@ export default function AdminHome() {
                 }
                 return response;
             },
-            (error) => Promise.reject(error),
+            (error) => {
+                const status = Number(error?.response?.status || 0);
+                if (status === 401 || status === 403) {
+                    logout();
+                    setAuthError('Session expired or unauthorized. Please sign in again.');
+                }
+                return Promise.reject(error);
+            },
         );
         return a;
-    }, [token]);
+    }, [token, logout]);
 
     useEffect(() => {
         try {
@@ -80,22 +104,14 @@ export default function AdminHome() {
         }
     };
 
-    const logout = () => {
-        setToken('');
-        try {
-            localStorage.removeItem('aiba_admin_token');
-        } catch {
-            // ignore
-        }
-    };
-
     // ----- Realms -----
     const fetchRealms = async () => {
         try {
             const res = await api.get('/api/admin/realms');
             setRealms(Array.isArray(res.data?.realms) ? res.data.realms : []);
-        } catch {
+        } catch (e) {
             setRealms([]);
+            handleApiError(e, 'Failed to load realms.');
         }
     };
     const upsertRealm = async () => {
@@ -116,8 +132,9 @@ export default function AdminHome() {
         try {
             const res = await api.get('/api/admin/marketplace/metrics');
             setMarketMetrics(res.data || null);
-        } catch {
+        } catch (e) {
             setMarketMetrics(null);
+            handleApiError(e, 'Failed to load marketplace metrics.');
         }
     };
 
@@ -126,8 +143,9 @@ export default function AdminHome() {
         try {
             const res = await api.get('/api/admin/treasury-ops/metrics');
             setTreasuryOpsSummary(res.data?.summary || null);
-        } catch {
+        } catch (e) {
             setTreasuryOpsSummary(null);
+            handleApiError(e, 'Failed to load treasury ops metrics.');
         }
     };
 
@@ -136,13 +154,116 @@ export default function AdminHome() {
         try {
             const res = await api.get('/api/admin/governance/proposals');
             setGovProposals(Array.isArray(res.data?.proposals) ? res.data.proposals : []);
-        } catch {
+        } catch (e) {
             setGovProposals([]);
+            handleApiError(e, 'Failed to load governance proposals.');
         }
     };
     const executeProposal = async (proposalId) => {
         await api.post('/api/admin/governance/execute', { proposalId });
         await fetchGovProposals();
+    };
+
+    // ----- DAO (community proposals: close, execute) -----
+    const [daoProposals, setDaoProposals] = useState([]);
+    const [daoMsg, setDaoMsg] = useState('');
+    const fetchDaoProposals = async () => {
+        try {
+            const res = await api.get('/api/admin/dao/proposals', { params: { limit: 50 } });
+            setDaoProposals(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setDaoProposals([]);
+        }
+        setDaoMsg('');
+    };
+    const closeDaoProposal = async (id) => {
+        try {
+            await api.patch(`/api/dao/proposals/${id}/close`);
+            setDaoMsg('Proposal closed.');
+            await fetchDaoProposals();
+        } catch (e) {
+            setDaoMsg(getAdminErrorMessage(e, 'Close failed.'));
+        }
+    };
+    const executeDaoProposal = async (id) => {
+        try {
+            await api.post(`/api/dao/proposals/${id}/execute`);
+            setDaoMsg('Proposal executed.');
+            await fetchDaoProposals();
+        } catch (e) {
+            setDaoMsg(getAdminErrorMessage(e, 'Execute failed.'));
+        }
+    };
+
+    // ----- Oracle -----
+    const [oracleStatus, setOracleStatus] = useState(null);
+    const [oracleMsg, setOracleMsg] = useState('');
+    const fetchOracleStatus = async () => {
+        try {
+            const res = await api.get('/api/admin/oracle/status');
+            setOracleStatus(res.data || null);
+        } catch {
+            setOracleStatus(null);
+        }
+        setOracleMsg('');
+    };
+    const runOracleUpdate = async () => {
+        setOracleMsg('Running…');
+        try {
+            const res = await api.post('/api/admin/oracle/update');
+            setOracleMsg(res.data?.ok ? `Updated. AIBA/TON: ${res.data.oracleAibaPerTon ?? '—'}` : (res.data?.error || 'Update failed.'));
+            await fetchOracleStatus();
+        } catch (e) {
+            setOracleMsg(getAdminErrorMessage(e, 'Update failed.'));
+        }
+    };
+
+    // ----- Audit -----
+    const [auditItems, setAuditItems] = useState([]);
+    const [auditTotal, setAuditTotal] = useState(0);
+    const fetchAudit = async () => {
+        try {
+            const res = await api.get('/api/admin/audit', { params: { limit: 100 } });
+            setAuditItems(res.data?.items || []);
+            setAuditTotal(res.data?.total ?? 0);
+        } catch {
+            setAuditItems([]);
+            setAuditTotal(0);
+        }
+    };
+
+    // ----- Economy Automation -----
+    const [economyAllocation, setEconomyAllocation] = useState(null);
+    const [economyAutoMsg, setEconomyAutoMsg] = useState('');
+    const fetchEconomyAutomation = async () => {
+        try {
+            const res = await api.get('/api/admin/economy-automation/allocation');
+            setEconomyAllocation(res.data || null);
+        } catch {
+            setEconomyAllocation(null);
+        }
+        setEconomyAutoMsg('');
+    };
+    const runEconomyAutomation = async () => {
+        setEconomyAutoMsg('Running…');
+        try {
+            const res = await api.post('/api/admin/economy-automation/run');
+            setEconomyAutoMsg(res.data?.adjusted ? `Cap adjusted: ${res.data.cap ?? res.data.dailyCapAiba ?? '—'} AIBA` : (res.data?.message || 'No change.'));
+            await fetchEconomyAutomation();
+        } catch (e) {
+            setEconomyAutoMsg(getAdminErrorMessage(e, 'Run failed.'));
+        }
+    };
+
+    // ----- Multiverse -----
+    const [multiverseUniverses, setMultiverseUniverses] = useState([]);
+    const fetchMultiverseUniverses = async () => {
+        try {
+            const res = await api.get('/api/admin/multiverse/universes');
+            setMultiverseUniverses(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setMultiverseUniverses([]);
+        }
     };
 
     // ----- Tasks -----
@@ -491,6 +612,22 @@ export default function AdminHome() {
     const [mintJobNftCollection, setMintJobNftCollection] = useState('');
     const [mintJobNftItem, setMintJobNftItem] = useState('');
     const [mintJobMsg, setMintJobMsg] = useState('');
+    const [tournamentMsg, setTournamentMsg] = useState('');
+    const [tournamentName, setTournamentName] = useState('');
+    const [tournamentArena, setTournamentArena] = useState('prediction');
+    const [tournamentMaxEntries, setTournamentMaxEntries] = useState(16);
+    const [tournamentEntryCost, setTournamentEntryCost] = useState(100);
+    const [globalBossMsg, setGlobalBossMsg] = useState('');
+    const [bossName, setBossName] = useState('');
+    const [bossHp, setBossHp] = useState('10000');
+    const [bossRewardPool, setBossRewardPool] = useState('1000');
+    const [predictEvents, setPredictEvents] = useState([]);
+    const [predictBrokerA, setPredictBrokerA] = useState('');
+    const [predictBrokerB, setPredictBrokerB] = useState('');
+    const [predictMsg, setPredictMsg] = useState('');
+    const [trainers, setTrainers] = useState([]);
+    const [supportRequests, setSupportRequests] = useState([]);
+    const [supportMsg, setSupportMsg] = useState('');
     const [adminStats, setAdminStats] = useState(null);
     const [charityCampaigns, setCharityCampaigns] = useState([]);
     const [charityStats, setCharityStats] = useState(null);
@@ -518,34 +655,38 @@ export default function AdminHome() {
             setUniversityStats(statsRes.data || null);
             setUniversityCourses(Array.isArray(coursesRes.data?.courses) ? coursesRes.data.courses : []);
             setUniversityGraduates(Array.isArray(graduatesRes.data) ? graduatesRes.data : []);
-        } catch {
+        } catch (e) {
             setUniversityStats(null);
             setUniversityCourses([]);
             setUniversityGraduates([]);
+            handleApiError(e, 'Failed to load university data.');
         }
     };
     const fetchReferralStats = async () => {
         try {
             const res = await api.get('/api/admin/referrals/stats');
             setReferralStats(res.data || null);
-        } catch {
+        } catch (e) {
             setReferralStats(null);
+            handleApiError(e, 'Failed to load referral stats.');
         }
     };
     const fetchReferralList = async () => {
         try {
             const res = await api.get('/api/admin/referrals', { params: { limit: 100 } });
             setReferralList(Array.isArray(res.data) ? res.data : []);
-        } catch {
+        } catch (e) {
             setReferralList([]);
+            handleApiError(e, 'Failed to load referral list.');
         }
     };
     const fetchReferralUses = async () => {
         try {
             const res = await api.get('/api/admin/referrals/uses', { params: { limit: 50 } });
             setReferralUses(Array.isArray(res.data) ? res.data : []);
-        } catch {
+        } catch (e) {
             setReferralUses([]);
+            handleApiError(e, 'Failed to load referral uses.');
         }
     };
     const deactivateReferral = async (id) => {
@@ -553,16 +694,17 @@ export default function AdminHome() {
             await api.patch(`/api/admin/referrals/${id}`, { active: false });
             await fetchReferralList();
             await fetchReferralStats();
-        } catch {
-            // ignore
+        } catch (e) {
+            handleApiError(e, 'Failed to deactivate referral.');
         }
     };
     const fetchMintJobs = async () => {
         try {
             const res = await api.get('/api/admin/brokers/mint-jobs', { params: { status: 'pending' } });
             setMintJobs(Array.isArray(res.data) ? res.data : []);
-        } catch {
+        } catch (e) {
             setMintJobs([]);
+            handleApiError(e, 'Failed to load mint jobs.');
         }
     };
     const completeMintJob = async (jobId) => {
@@ -587,12 +729,93 @@ export default function AdminHome() {
             setMintJobMsg(getAdminErrorMessage(e, 'Complete failed.'));
         }
     };
+    const createTournament = async () => {
+        setTournamentMsg('');
+        if (!tournamentName.trim()) { setTournamentMsg('Name required.'); return; }
+        try {
+            await api.post('/api/admin/tournaments', { name: tournamentName.trim(), arena: tournamentArena, maxEntries: Number(tournamentMaxEntries) || 16, entryCostAiba: Number(tournamentEntryCost) || 0 });
+            setTournamentMsg('Tournament created.');
+            setTournamentName('');
+        } catch (e) { setTournamentMsg(getAdminErrorMessage(e, 'Create failed.')); }
+    };
+    const createGlobalBoss = async () => {
+        setGlobalBossMsg('');
+        if (!bossName.trim() || !bossHp) { setGlobalBossMsg('Name and HP required.'); return; }
+        try {
+            await api.post('/api/admin/global-boss', { name: bossName.trim(), totalHp: Number(bossHp) || 10000, rewardPoolAiba: Number(bossRewardPool) || 0 });
+            setGlobalBossMsg('Boss created.');
+            setBossName('');
+            setBossHp('10000');
+            setBossRewardPool('1000');
+        } catch (e) { setGlobalBossMsg(getAdminErrorMessage(e, 'Create failed.')); }
+    };
+    const fetchPredictEvents = async () => {
+        try {
+            const res = await api.get('/api/predict/events', { params: { status: 'all' } });
+            setPredictEvents(Array.isArray(res.data) ? res.data : []);
+        } catch (e) {
+            setPredictEvents([]);
+            handleApiError(e, 'Failed to load predict events.');
+        }
+    };
+    const createPredictEvent = async () => {
+        setPredictMsg('');
+        if (!predictBrokerA.trim() || !predictBrokerB.trim()) { setPredictMsg('Broker A and B IDs required.'); return; }
+        try {
+            await api.post('/api/admin/predict/events', { brokerAId: predictBrokerA.trim(), brokerBId: predictBrokerB.trim() });
+            setPredictMsg('Event created.');
+            setPredictBrokerA('');
+            setPredictBrokerB('');
+            await fetchPredictEvents();
+        } catch (e) { setPredictMsg(getAdminErrorMessage(e, 'Create failed.')); }
+    };
+    const resolvePredictEvent = async (id) => {
+        setPredictMsg('');
+        try {
+            await api.post(`/api/admin/predict/events/${id}/resolve`);
+            setPredictMsg('Event resolved.');
+            await fetchPredictEvents();
+        } catch (e) { setPredictMsg(getAdminErrorMessage(e, 'Resolve failed.')); }
+    };
+    const fetchTrainers = async () => {
+        try {
+            const res = await api.get('/api/admin/trainers');
+            setTrainers(Array.isArray(res.data) ? res.data : []);
+        } catch (e) {
+            setTrainers([]);
+            handleApiError(e, 'Failed to load trainers.');
+        }
+    };
+    const updateTrainerStatus = async (id, status) => {
+        try {
+            await api.patch(`/api/admin/trainers/${id}`, { status });
+            await fetchTrainers();
+        } catch (e) {
+            handleApiError(e, 'Failed to update trainer status.');
+        }
+    };
+    const fetchSupportRequests = async () => {
+        try {
+            const res = await api.get('/api/admin/support', { params: { limit: 100 } });
+            setSupportRequests(Array.isArray(res.data) ? res.data : []);
+        } catch (e) {
+            setSupportRequests([]);
+            handleApiError(e, 'Failed to load support requests.');
+        }
+    };
+    const updateSupportStatus = async (id, status) => {
+        try {
+            await api.patch(`/api/admin/support/${id}`, { status });
+            await fetchSupportRequests();
+        } catch (e) { setSupportMsg(getAdminErrorMessage(e, 'Update failed.')); }
+    };
     const fetchAdminStats = async () => {
         try {
             const res = await api.get('/api/admin/stats');
             setAdminStats(res.data);
-        } catch {
+        } catch (e) {
             setAdminStats(null);
+            handleApiError(e, 'Failed to load admin stats.');
         }
     };
     const fetchTreasury = async () => {
@@ -605,18 +828,19 @@ export default function AdminHome() {
             setTreasuryData(t.data);
             setReserveData(r.data);
             setBuybackData(b.data);
-        } catch {
+        } catch (e) {
             setTreasuryData(null);
             setReserveData(null);
             setBuybackData(null);
+            handleApiError(e, 'Failed to load treasury data.');
         }
     };
     const fundTreasury = async (aibaDelta, neurDelta) => {
         try {
             await api.post('/api/admin/treasury/fund', { aibaDelta: aibaDelta || 0, neurDelta: neurDelta || 0 });
             await fetchTreasury();
-        } catch {
-            // ignore
+        } catch (e) {
+            handleApiError(e, 'Failed to fund treasury.');
         }
     };
 
@@ -624,24 +848,27 @@ export default function AdminHome() {
         try {
             const res = await api.get('/api/admin/charity/campaigns');
             setCharityCampaigns(Array.isArray(res.data) ? res.data : []);
-        } catch {
+        } catch (e) {
             setCharityCampaigns([]);
+            handleApiError(e, 'Failed to load charity campaigns.');
         }
     };
     const fetchCharityStats = async () => {
         try {
             const res = await api.get('/api/admin/charity/stats');
             setCharityStats(res.data || null);
-        } catch {
+        } catch (e) {
             setCharityStats(null);
+            handleApiError(e, 'Failed to load charity stats.');
         }
     };
     const fetchCharityDonations = async () => {
         try {
             const res = await api.get('/api/admin/charity/donations', { params: { limit: 200 } });
             setCharityDonations(Array.isArray(res.data) ? res.data : []);
-        } catch {
+        } catch (e) {
             setCharityDonations([]);
+            handleApiError(e, 'Failed to load charity donations.');
         }
     };
     const createCharityCampaign = async () => {
@@ -702,130 +929,166 @@ export default function AdminHome() {
 
     useEffect(() => {
         if (!token) return;
-        if (tab === 'tasks') fetchTasks();
-        if (tab === 'ads') fetchAds();
-        if (tab === 'modes') fetchModes();
-        if (tab === 'economy') {
-            fetchEconomy();
-            fetchEconomyDay();
-        }
-        if (tab === 'mod') {
-            fetchFlaggedBrokers();
-            fetchAnomalies();
-        }
-        if (tab === 'stats') fetchAdminStats();
-        if (tab === 'treasury') fetchTreasury();
-        if (tab === 'realms') fetchRealms();
-        if (tab === 'marketplace') fetchMarketMetrics();
-        if (tab === 'treasuryOps') fetchTreasuryOpsMetrics();
-        if (tab === 'governance') fetchGovProposals();
-        if (tab === 'charity') {
-            fetchCharityCampaigns();
-            fetchCharityStats();
-        }
-        if (tab === 'comms') fetchAnnouncements();
-        if (tab === 'referrals') {
-            fetchReferralStats();
-            fetchReferralList();
-            fetchReferralUses();
-        }
-        if (tab === 'university') fetchUniversityAll();
-        if (tab === 'brokers') fetchMintJobs();
+        setGlobalError('');
+        setTabLoading(true);
+        const run = async () => {
+            try {
+                if (tab === 'tasks') await fetchTasks();
+                if (tab === 'ads') await fetchAds();
+                if (tab === 'modes') await fetchModes();
+                if (tab === 'economy') await Promise.all([fetchEconomy(), fetchEconomyDay()]);
+                if (tab === 'mod') await Promise.all([fetchFlaggedBrokers(), fetchAnomalies()]);
+                if (tab === 'stats') await fetchAdminStats();
+                if (tab === 'treasury') await fetchTreasury();
+                if (tab === 'realms') await fetchRealms();
+                if (tab === 'marketplace') await fetchMarketMetrics();
+                if (tab === 'treasuryOps') await fetchTreasuryOpsMetrics();
+                if (tab === 'governance') await fetchGovProposals();
+                if (tab === 'charity') await Promise.all([fetchCharityCampaigns(), fetchCharityStats()]);
+                if (tab === 'comms') await fetchAnnouncements();
+                if (tab === 'referrals') await Promise.all([fetchReferralStats(), fetchReferralList(), fetchReferralUses()]);
+                if (tab === 'university') await fetchUniversityAll();
+                if (tab === 'brokers') await fetchMintJobs();
+                if (tab === 'tournaments') setTournamentMsg('');
+                if (tab === 'globalBoss') setGlobalBossMsg('');
+                if (tab === 'predict') await fetchPredictEvents();
+                if (tab === 'trainers') await fetchTrainers();
+                if (tab === 'support') await fetchSupportRequests();
+                if (tab === 'dao') await fetchDaoProposals();
+                if (tab === 'oracle') await fetchOracleStatus();
+                if (tab === 'audit') await fetchAudit();
+                if (tab === 'economyAutomation') await fetchEconomyAutomation();
+                if (tab === 'multiverse') await fetchMultiverseUniverses();
+            } finally {
+                setTabLoading(false);
+            }
+        };
+        run();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, tab]);
 
     return (
-        <div style={{ padding: 16 }}>
-            <h1 style={{ marginTop: 0 }}>Admin Panel</h1>
-            <div style={{ color: '#666', marginBottom: 12 }}>Backend: {BACKEND_URL}</div>
+        <div className="admin-app">
+            <header className="admin-header">
+                <h1 className="admin-header__title">Admin Panel</h1>
+                <p className="admin-header__sub">AIBA Arena · Backend: {BACKEND_URL}</p>
+                {token && tabLoading ? <p className="admin-header__sub">Loading {tab}...</p> : null}
+                {globalError ? <p className="admin-auth-error">{globalError}</p> : null}
+            </header>
 
             {!token ? (
-                <div style={{ maxWidth: 420, border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
-                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Admin login</div>
-                    <p style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
-                        Backend must be running at {BACKEND_URL}. Use ADMIN_EMAIL and ADMIN_PASSWORD (or ADMIN_PASSWORD_HASH) from backend/.env.
-                    </p>
-                    <div style={{ display: 'grid', gap: 8 }}>
+                <div className="admin-login-section">
+                    <div className="admin-login-hero">
+                        <h1 className="admin-login-hero__title">AIBA Admin</h1>
+                        <p className="admin-login-hero__sub">Secure access to the Arena control panel</p>
+                    </div>
+                    <div className="admin-login-card">
+                        <div className="admin-login-card__title">Sign in</div>
+                        <p className="admin-login-card__hint">
+                            Backend must be running. Use ADMIN_EMAIL and ADMIN_PASSWORD from backend/.env.
+                        </p>
+                        <div className="admin-login-form">
+                        <label className="admin-label">Email</label>
                         <input
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email"
-                            style={{ padding: 10 }}
+                            placeholder="admin@example.com"
+                            type="email"
+                            className="admin-input"
+                            autoComplete="email"
                         />
-                        <input
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Password"
-                            type="password"
-                            style={{ padding: 10 }}
-                        />
-                        <button onClick={login} style={{ padding: '10px 12px' }}>
-                            Login
+                        <label className="admin-label">Password</label>
+                        <div className="admin-password-wrap">
+                            <input
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Enter password"
+                                type={showPassword ? 'text' : 'password'}
+                                className="admin-input"
+                                autoComplete="current-password"
+                            />
+                            <button
+                                type="button"
+                                className={`admin-password-toggle${showPassword ? ' is-visible' : ''}`}
+                                onClick={() => setShowPassword((s) => !s)}
+                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                title={showPassword ? 'Hide password' : 'Show password'}
+                            >
+                                {showPassword ? (
+                                    <><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg><span className="admin-password-toggle__label">Hide</span></>
+                                ) : (
+                                    <><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg><span className="admin-password-toggle__label">Show</span></>
+                                )}
+                            </button>
+                        </div>
+                        <p className="admin-password-hint">Click <strong>Show</strong> / <strong>Hide</strong> to reveal or mask your password</p>
+                        <button onClick={login} className="admin-btn admin-btn--primary admin-login-btn">
+                            Sign in
                         </button>
-                        {authError ? <div style={{ color: 'crimson', whiteSpace: 'pre-wrap' }}>{authError}</div> : null}
+                        {authError ? <div className="admin-auth-error">{authError}</div> : null}
+                        </div>
                     </div>
                 </div>
             ) : (
                 <>
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                        <button onClick={() => setTab('tasks')} style={{ padding: '8px 12px' }}>
-                            Tasks
-                        </button>
-                        <button onClick={() => setTab('ads')} style={{ padding: '8px 12px' }}>
-                            Ads
-                        </button>
-                        <button onClick={() => setTab('modes')} style={{ padding: '8px 12px' }}>
-                            Game modes
-                        </button>
-                        <button onClick={() => setTab('economy')} style={{ padding: '8px 12px' }}>
-                            Economy
-                        </button>
-                        <button onClick={() => setTab('mod')} style={{ padding: '8px 12px' }}>
-                            Moderation
-                        </button>
-                        <button onClick={() => setTab('stats')} style={{ padding: '8px 12px' }}>
-                            Stats
-                        </button>
-                        <button onClick={() => setTab('treasury')} style={{ padding: '8px 12px' }}>
-                            Treasury
-                        </button>
-                        <button onClick={() => setTab('realms')} style={{ padding: '8px 12px' }}>
-                            Realms
-                        </button>
-                        <button onClick={() => setTab('marketplace')} style={{ padding: '8px 12px' }}>
-                            Marketplace
-                        </button>
-                        <button onClick={() => setTab('treasuryOps')} style={{ padding: '8px 12px' }}>
-                            Treasury Ops
-                        </button>
-                        <button onClick={() => setTab('governance')} style={{ padding: '8px 12px' }}>
-                            Governance
-                        </button>
-                        <button onClick={() => setTab('charity')} style={{ padding: '8px 12px' }}>
-                            Charity
-                        </button>
-                        <button onClick={() => setTab('comms')} style={{ padding: '8px 12px' }}>
-                            Comms
-                        </button>
-                        <button onClick={() => setTab('university')} style={{ padding: '8px 12px' }}>
-                            University
-                        </button>
-                        <button onClick={() => setTab('referrals')} style={{ padding: '8px 12px' }}>
-                            Referrals
-                        </button>
-                        <button onClick={() => setTab('brokers')} style={{ padding: '8px 12px' }}>
-                            Mint jobs
-                        </button>
-                        <div style={{ flex: 1 }} />
-                        <button onClick={logout} style={{ padding: '8px 12px' }}>
-                            Logout
-                        </button>
-                    </div>
+                    <nav className="admin-tabs" role="tablist">
+                        <div className="admin-tabs-group">
+                            <span className="admin-tabs-group__label">Core</span>
+                            <button onClick={() => setTab('tasks')} className={`admin-tab ${tab === 'tasks' ? 'is-active' : ''}`}>Tasks</button>
+                            <button onClick={() => setTab('ads')} className={`admin-tab ${tab === 'ads' ? 'is-active' : ''}`}>Ads</button>
+                            <button onClick={() => setTab('modes')} className={`admin-tab ${tab === 'modes' ? 'is-active' : ''}`}>Modes</button>
+                            <button onClick={() => setTab('economy')} className={`admin-tab ${tab === 'economy' ? 'is-active' : ''}`}>Economy</button>
+                            <button onClick={() => setTab('mod')} className={`admin-tab ${tab === 'mod' ? 'is-active' : ''}`}>Mod</button>
+                            <button onClick={() => setTab('stats')} className={`admin-tab ${tab === 'stats' ? 'is-active' : ''}`}>Stats</button>
+                        </div>
+                        <div className="admin-tabs-group">
+                            <span className="admin-tabs-group__label">Treasury</span>
+                            <button onClick={() => setTab('treasury')} className={`admin-tab ${tab === 'treasury' ? 'is-active' : ''}`}>Treasury</button>
+                            <button onClick={() => setTab('treasuryOps')} className={`admin-tab ${tab === 'treasuryOps' ? 'is-active' : ''}`}>Treasury Ops</button>
+                            <button onClick={() => setTab('realms')} className={`admin-tab ${tab === 'realms' ? 'is-active' : ''}`}>Realms</button>
+                            <button onClick={() => setTab('marketplace')} className={`admin-tab ${tab === 'marketplace' ? 'is-active' : ''}`}>Marketplace</button>
+                        </div>
+                        <div className="admin-tabs-group">
+                            <span className="admin-tabs-group__label">Governance</span>
+                            <button onClick={() => setTab('governance')} className={`admin-tab ${tab === 'governance' ? 'is-active' : ''}`}>Governance</button>
+                            <button onClick={() => setTab('dao')} className={`admin-tab ${tab === 'dao' ? 'is-active' : ''}`}>DAO</button>
+                        </div>
+                        <div className="admin-tabs-group">
+                            <span className="admin-tabs-group__label">Community</span>
+                            <button onClick={() => setTab('charity')} className={`admin-tab ${tab === 'charity' ? 'is-active' : ''}`}>Charity</button>
+                            <button onClick={() => setTab('comms')} className={`admin-tab ${tab === 'comms' ? 'is-active' : ''}`}>Comms</button>
+                            <button onClick={() => setTab('university')} className={`admin-tab ${tab === 'university' ? 'is-active' : ''}`}>University</button>
+                            <button onClick={() => setTab('referrals')} className={`admin-tab ${tab === 'referrals' ? 'is-active' : ''}`}>Referrals</button>
+                        </div>
+                        <div className="admin-tabs-group">
+                            <span className="admin-tabs-group__label">Events</span>
+                            <button onClick={() => setTab('tournaments')} className={`admin-tab ${tab === 'tournaments' ? 'is-active' : ''}`}>Tournaments</button>
+                            <button onClick={() => setTab('globalBoss')} className={`admin-tab ${tab === 'globalBoss' ? 'is-active' : ''}`}>Global Boss</button>
+                            <button onClick={() => setTab('predict')} className={`admin-tab ${tab === 'predict' ? 'is-active' : ''}`}>Predict</button>
+                            <button onClick={() => setTab('trainers')} className={`admin-tab ${tab === 'trainers' ? 'is-active' : ''}`}>Trainers</button>
+                        </div>
+                        <div className="admin-tabs-group">
+                            <span className="admin-tabs-group__label">Ops</span>
+                            <button onClick={() => setTab('support')} className={`admin-tab ${tab === 'support' ? 'is-active' : ''}`}>Support</button>
+                            <button onClick={() => setTab('brokers')} className={`admin-tab ${tab === 'brokers' ? 'is-active' : ''}`}>Mint jobs</button>
+                        </div>
+                        <div className="admin-tabs-group">
+                            <span className="admin-tabs-group__label">System</span>
+                            <button onClick={() => setTab('oracle')} className={`admin-tab ${tab === 'oracle' ? 'is-active' : ''}`}>Oracle</button>
+                            <button onClick={() => setTab('audit')} className={`admin-tab ${tab === 'audit' ? 'is-active' : ''}`}>Audit</button>
+                            <button onClick={() => setTab('economyAutomation')} className={`admin-tab ${tab === 'economyAutomation' ? 'is-active' : ''}`}>Econ Auto</button>
+                            <button onClick={() => setTab('multiverse')} className={`admin-tab ${tab === 'multiverse' ? 'is-active' : ''}`}>Multiverse</button>
+                        </div>
+                        <div className="admin-tabs__spacer" />
+                        <button onClick={logout} className="admin-tab admin-tab--logout">Logout</button>
+                    </nav>
 
-                    <div style={{ marginTop: 12 }}>
+                    <main className="admin-content">
                         {tab === 'tasks' ? (
-                            <>
-                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <div className="admin-card">
+                                <h2 className="admin-card__title">Tasks</h2>
+                                <p className="admin-card__hint">Create and toggle tasks for the miniapp.</p>
+                                <div className="admin-action-row">
                                     <button
                                         onClick={fetchTasks}
                                         disabled={loadingTasks}
@@ -880,13 +1143,15 @@ export default function AdminHome() {
                                         </div>
                                     ))}
                                 </div>
-                            </>
+                            </div>
                         ) : null}
 
                         {tab === 'ads' ? (
-                            <>
-                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                    <button onClick={fetchAds} disabled={loadingAds} style={{ padding: '8px 12px' }}>
+                            <div className="admin-card">
+                                <h2 className="admin-card__title">Ads</h2>
+                                <p className="admin-card__hint">Manage between-battles ads. Image URL and optional link.</p>
+                                <div className="admin-action-row">
+                                    <button onClick={fetchAds} disabled={loadingAds} className="admin-btn">
                                         {loadingAds ? 'Loading…' : 'Refresh'}
                                     </button>
                                     <input
@@ -945,7 +1210,7 @@ export default function AdminHome() {
                                         </div>
                                     ))}
                                 </div>
-                            </>
+                            </div>
                         ) : null}
 
                         {tab === 'modes' ? (
@@ -1414,6 +1679,14 @@ export default function AdminHome() {
                                     <div>Treasury: {treasuryOpsSummary?.treasury ?? 0}</div>
                                     <div>Rewards: {treasuryOpsSummary?.rewards ?? 0}</div>
                                     <div>Staking: {treasuryOpsSummary?.staking ?? 0}</div>
+                                    <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #eee', color: 'var(--accent-gold)' }}>
+                                        <strong>Cancelled Stakes (Super Admin)</strong>: {treasuryOpsSummary?.staking_cancel_early_fee ?? 0} AIBA
+                                    </div>
+                                    {treasuryOpsSummary && Object.keys(treasuryOpsSummary).filter((k) => !['burn', 'treasury', 'rewards', 'staking', 'staking_cancel_early_fee'].includes(k)).length > 0 ? (
+                                        <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #eee', fontSize: 12, color: '#666' }}>
+                                            Other: {Object.entries(treasuryOpsSummary).filter(([k]) => !['burn', 'treasury', 'rewards', 'staking', 'staking_cancel_early_fee'].includes(k)).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+                                        </div>
+                                    ) : null}
                                 </div>
                             </>
                         ) : null}
@@ -1678,7 +1951,133 @@ export default function AdminHome() {
                                 </div>
                             </>
                         ) : null}
-                    </div>
+
+                        {tab === 'dao' ? (
+                            <div className="admin-card">
+                                <h3 className="admin-card__title">DAO proposals</h3>
+                                <p className="admin-card__hint">Close active proposals or execute treasury_payout proposals. Close is required before execute.</p>
+                                <div className="admin-action-row">
+                                    <button onClick={fetchDaoProposals}>Refresh</button>
+                                    {daoMsg ? <span style={{ color: daoMsg.startsWith('Proposal') ? 'var(--accent-green)' : 'var(--accent-red)' }}>{daoMsg}</span> : null}
+                                </div>
+                                {daoProposals.length === 0 ? (
+                                    <div style={{ color: 'var(--text-muted)' }}>No proposals.</div>
+                                ) : (
+                                    <div style={{ display: 'grid', gap: 12 }}>
+                                        {daoProposals.map((p) => (
+                                            <div key={p._id} className="admin-card" style={{ marginBottom: 0, padding: 16 }}>
+                                                <div style={{ fontWeight: 600, marginBottom: 4 }}>{p.title || '(Untitled)'}</div>
+                                                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>{p.description?.slice(0, 200)}{(p.description?.length || 0) > 200 ? '…' : ''}</div>
+                                                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                                                    status: <strong>{p.status}</strong> · type: {p.type || '—'} · votes: {p.votesFor ?? 0} for / {p.votesAgainst ?? 0} against (total {p.totalVotes ?? 0})
+                                                    {p.recipientTelegramId ? ` · recipient: ${p.recipientTelegramId}` : ''}
+                                                    {p.amountAiba ? ` · amount: ${p.amountAiba} AIBA` : ''}
+                                                </div>
+                                                <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                                    {p.status === 'active' ? (
+                                                        <>
+                                                            <button onClick={() => closeDaoProposal(p._id)}>Close proposal</button>
+                                                            {p.type === 'treasury_payout' ? (
+                                                                <button onClick={() => executeDaoProposal(p._id)} style={{ background: 'rgba(34, 197, 94, 0.2)', borderColor: 'var(--accent-green)' }}>Execute</button>
+                                                            ) : null}
+                                                        </>
+                                                    ) : p.status === 'closed' && p.type === 'treasury_payout' ? (
+                                                        <button onClick={() => executeDaoProposal(p._id)} style={{ background: 'rgba(34, 197, 94, 0.2)', borderColor: 'var(--accent-green)' }}>Execute</button>
+                                                    ) : null}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ) : null}
+
+                        {tab === 'oracle' ? (
+                            <div className="admin-card">
+                                <h3 className="admin-card__title">Oracle</h3>
+                                <p className="admin-card__hint">AIBA/TON exchange rate. Run update to fetch latest from external source.</p>
+                                <div className="admin-action-row">
+                                    <button onClick={fetchOracleStatus}>Refresh status</button>
+                                    <button onClick={runOracleUpdate}>Run update</button>
+                                    {oracleMsg ? <span style={{ marginLeft: 8, color: 'var(--accent-gold)' }}>{oracleMsg}</span> : null}
+                                </div>
+                                {oracleStatus ? (
+                                    <div style={{ padding: 16, background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-sm)', marginTop: 12 }}>
+                                        <div><strong>AIBA per TON:</strong> {oracleStatus.oracleAibaPerTon ?? oracleStatus.aibaPerTon ?? '—'}</div>
+                                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                                            Last updated: {(oracleStatus.oracleLastUpdatedAt ?? oracleStatus.updatedAt) ? new Date(oracleStatus.oracleLastUpdatedAt ?? oracleStatus.updatedAt).toISOString() : '—'}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div style={{ color: 'var(--text-muted)' }}>No status yet. Run update to fetch.</div>
+                                )}
+                            </div>
+                        ) : null}
+
+                        {tab === 'audit' ? (
+                            <div className="admin-card">
+                                <h3 className="admin-card__title">Audit log</h3>
+                                <p className="admin-card__hint">Admin actions (last 100). Total: {auditTotal}</p>
+                                <div className="admin-action-row">
+                                    <button onClick={fetchAudit}>Refresh</button>
+                                </div>
+                                {auditItems.length === 0 ? (
+                                    <div style={{ color: 'var(--text-muted)' }}>No audit entries.</div>
+                                ) : (
+                                    <div style={{ display: 'grid', gap: 8, maxHeight: 400, overflowY: 'auto', marginTop: 12 }}>
+                                        {auditItems.map((a) => (
+                                            <div key={a._id} style={{ padding: 10, background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-sm)', fontSize: 13 }}>
+                                                <div><strong>{a.action}</strong> · {a.adminEmail ?? a.adminId ?? '—'}</div>
+                                                <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>{a.details ? JSON.stringify(a.details).slice(0, 120) : ''} · {a.createdAt ? new Date(a.createdAt).toISOString().slice(0, 19) : ''}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ) : null}
+
+                        {tab === 'economyAutomation' ? (
+                            <div className="admin-card">
+                                <h3 className="admin-card__title">Economy automation</h3>
+                                <p className="admin-card__hint">Adjusts daily AIBA cap based on treasury balance. Run manually or wait for scheduled job.</p>
+                                <div className="admin-action-row">
+                                    <button onClick={fetchEconomyAutomation}>Refresh</button>
+                                    <button onClick={runEconomyAutomation}>Run now</button>
+                                    {economyAutoMsg ? <span style={{ marginLeft: 8, color: 'var(--accent-gold)' }}>{economyAutoMsg}</span> : null}
+                                </div>
+                                {economyAllocation ? (
+                                    <div style={{ padding: 16, background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-sm)', marginTop: 12 }}>
+                                        <div><strong>Daily cap (AIBA):</strong> {economyAllocation.dailyCapAiba ?? economyAllocation.dailyCap ?? '—'}</div>
+                                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Treasury / allocation info may appear here.</div>
+                                    </div>
+                                ) : (
+                                    <div style={{ color: 'var(--text-muted)' }}>No allocation data. Run to refresh.</div>
+                                )}
+                            </div>
+                        ) : null}
+
+                        {tab === 'multiverse' ? (
+                            <div className="admin-card">
+                                <h3 className="admin-card__title">Multiverse</h3>
+                                <p className="admin-card__hint">Universes (realms/worlds) in the multiverse.</p>
+                                <div className="admin-action-row">
+                                    <button onClick={fetchMultiverseUniverses}>Refresh</button>
+                                </div>
+                                {multiverseUniverses.length === 0 ? (
+                                    <div style={{ color: 'var(--text-muted)' }}>No universes.</div>
+                                ) : (
+                                    <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
+                                        {multiverseUniverses.map((u) => (
+                                            <div key={u._id || u.key} style={{ padding: 14, background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-sm)' }}>
+                                                <div style={{ fontWeight: 600 }}>{u.name ?? u.key ?? u._id}</div>
+                                                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>key: {u.key ?? u._id} · level: {u.level ?? '—'} · active: {String(u.active ?? true)}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ) : null}
+                    </main>
                 </>
             )}
         </div>

@@ -1,13 +1,489 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   AIBA Arena Admin Panel — matches miniapp design system
+   Warm chocolate brown, rich gold/amber, glass-and-glow
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
 :root {
-    color-scheme: light;
+    color-scheme: dark;
+    --bg-deep: #0d0a07;
+    --bg-space: #1a140e;
+    --bg-panel: rgba(45, 32, 22, 0.96);
+    --bg-glass: rgba(38, 28, 20, 0.94);
+    --accent-gold: #ffcc00;
+    --accent-amber: #f5a623;
+    --accent-green: #22c55e;
+    --accent-red: #ef4444;
+    --text-primary: #fef3e2;
+    --text-secondary: #e8d4b8;
+    --text-muted: #b8a078;
+    --border-subtle: rgba(255, 204, 0, 0.15);
+    --border-gold: rgba(255, 204, 0, 0.35);
+    --glow-gold: 0 0 20px rgba(255, 204, 0, 0.25);
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --font-body: 'Nunito', system-ui, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    font-family:
-        system-ui,
-        -apple-system,
-        Segoe UI,
-        Roboto,
-        sans-serif;
+    min-height: 100vh;
+    font-family: var(--font-body);
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    background-image:
+        radial-gradient(ellipse 100% 60% at 50% -10%, rgba(245, 166, 35, 0.1) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 40% at 80% 100%, rgba(255, 204, 0, 0.05) 0%, transparent 50%),
+        linear-gradient(180deg, var(--bg-deep) 0%, #151008 25%, var(--bg-space) 60%, #1e170f 100%);
+}
+
+/* ─── Admin app shell ────────────────────────────────────────────────────── */
+.admin-app {
+    min-height: 100vh;
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ─── Admin header (miniapp-style) ──────────────────────────────────────── */
+.admin-header {
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--accent-gold);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.admin-header__title {
+    margin: 0 0 4px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent-gold);
+    letter-spacing: 0.02em;
+}
+
+.admin-header__sub {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ─── Admin login section (centered, miniapp-style) ─────────────────────── */
+.admin-login-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 120px);
+    padding: 32px 24px;
+}
+
+.admin-login-hero {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.admin-login-hero__title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--accent-gold);
+    margin: 0 0 8px;
+    letter-spacing: 0.03em;
+    text-shadow: 0 0 24px rgba(255, 204, 0, 0.3);
+}
+
+.admin-login-hero__sub {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.admin-login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 28px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-gold);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glow-gold), 0 8px 32px rgba(0, 0, 0, 0.4);
+    border-left: 4px solid var(--accent-gold);
+}
+
+.admin-login-card__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 6px;
+}
+
+.admin-login-card__hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0 0 20px;
+    line-height: 1.5;
+}
+
+.admin-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.admin-label-hint {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.admin-login-btn {
+    margin-top: 4px;
+    padding: 14px 24px;
+    font-size: 0.95rem;
+}
+
+/* ─── Admin inputs & password ───────────────────────────────────────────── */
+.admin-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-input:focus {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.15);
+}
+
+.admin-input::placeholder {
+    color: var(--text-muted);
+}
+
+.admin-password-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.admin-password-wrap .admin-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-password-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 14px;
+    min-width: 88px;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-gold);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: color 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.admin-password-toggle:hover,
+.admin-password-toggle.is-visible {
+    color: var(--accent-gold);
+    border-color: var(--border-gold);
+    background: rgba(255, 204, 0, 0.12);
+}
+
+.admin-password-toggle.is-visible {
+    box-shadow: 0 0 10px rgba(255, 204, 0, 0.2);
+}
+
+.admin-password-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin: 0 0 4px;
+    line-height: 1.4;
+}
+
+.admin-password-hint strong {
+    color: var(--text-secondary);
+}
+
+.admin-password-toggle svg {
+    flex-shrink: 0;
+}
+
+.admin-password-toggle__label {
+    white-space: nowrap;
+}
+
+/* ─── Admin buttons ─────────────────────────────────────────────────────── */
+.admin-btn {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    border: none;
+}
+
+.admin-btn:active {
+    transform: scale(0.98);
+}
+
+.admin-btn--primary {
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
+    color: #0d0a07;
+    box-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);
+}
+
+.admin-btn--primary:hover {
+    box-shadow: 0 4px 16px rgba(255, 204, 0, 0.4);
+}
+
+.admin-auth-error {
+    color: var(--accent-red);
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    margin-top: 4px;
+}
+
+/* ─── Admin tabs (miniapp-style nav) ────────────────────────────────────── */
+.admin-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 16px rgba(255, 204, 0, 0.05);
+    border-left: 4px solid var(--accent-gold);
+}
+
+.admin-tabs-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+}
+
+.admin-tabs-group__label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-right: 6px;
+    margin-right: 4px;
+    border-right: 1px solid var(--border-subtle);
+}
+
+.admin-tab {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--text-muted);
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.admin-tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 204, 0, 0.1);
+    border-color: var(--border-subtle);
+}
+
+.admin-tab.is-active {
+    color: var(--accent-gold);
+    background: rgba(255, 204, 0, 0.15);
+    border-color: var(--border-gold);
+    box-shadow: 0 0 12px rgba(255, 204, 0, 0.15);
+}
+
+.admin-tab--logout {
+    margin-left: auto;
+    color: var(--text-muted);
+}
+
+.admin-tab--logout:hover {
+    color: var(--accent-red);
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.admin-tabs__spacer {
+    flex: 1;
+    min-width: 16px;
+}
+
+/* ─── Admin content area (card-style sections) ─────────────────────────── */
+.admin-content {
+    padding: 8px 0;
+}
+
+.admin-content .admin-card {
+    padding: 24px;
+    margin-bottom: 24px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--accent-gold);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 16px rgba(255, 204, 0, 0.06);
+}
+
+.admin-card__title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin: 0 0 6px;
+}
+
+.admin-card__hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0 0 16px;
+    line-height: 1.5;
+}
+
+.admin-action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.admin-content input,
+.admin-content select,
+.admin-content textarea,
+.admin-content button {
+    font-family: inherit;
+}
+
+.admin-content input[type="text"],
+.admin-content input[type="number"],
+.admin-content input[type="email"],
+.admin-content input[type="password"],
+.admin-content textarea {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+}
+
+.admin-content input:focus,
+.admin-content textarea:focus,
+.admin-content select:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+}
+
+.admin-content button {
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: rgba(255, 204, 0, 0.15);
+    border: 1px solid var(--border-gold);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.admin-content button:hover:not(:disabled) {
+    background: rgba(255, 204, 0, 0.25);
+}
+
+.admin-content button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.admin-content select {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+}
+
+/* Cards and sections inside admin content */
+.admin-content > div {
+    margin-bottom: 16px;
+}
+
+.admin-content [style*="border: 1px solid #eee"],
+.admin-content [style*="border:1px solid #eee"] {
+    border-color: var(--border-subtle) !important;
+    background: var(--bg-glass) !important;
+    border-radius: var(--radius-md);
+}
+
+.admin-content [style*="background: #fafafa"],
+.admin-content [style*="background:#fafafa"] {
+    background: var(--bg-glass) !important;
+}
+
+.admin-content [style*="color: #666"],
+.admin-content [style*="color:#666"] {
+    color: var(--text-muted) !important;
+}
+
+.admin-content [style*="color: #444"],
+.admin-content [style*="color:#444"] {
+    color: var(--text-secondary) !important;
+}
+
+.admin-content [style*="color: crimson"],
+.admin-content [style*="color:crimson"] {
+    color: var(--accent-red) !important;
+}
+
+/* Admin list items (miniapp-style cards) */
+.admin-content .admin-list-item {
+    padding: 14px 16px;
+    margin-top: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.2s;
+}
+
+.admin-content .admin-list-item:hover {
+    border-color: var(--border-gold);
 }

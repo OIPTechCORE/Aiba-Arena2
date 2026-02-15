@@ -1,10 +1,11 @@
 /**
- * Innovations: Streaks, Daily Combo, Premium multiplier, Invite-3 unlock bonus
+ * Innovations: Streaks, Daily Combo, Premium multiplier, Invite-3 unlock bonus, Creator Economy
  * Used by battle, daily, economy routes.
  */
 const User = require('../models/User');
 const EconomyConfig = require('../models/EconomyConfig');
 const Referral = require('../models/Referral');
+const ReferralUse = require('../models/ReferralUse');
 
 function utcDayKey(date = new Date()) {
     const y = date.getUTCFullYear();
@@ -111,6 +112,23 @@ async function getRewardMultiplier(telegramId, cfg = {}) {
     return mul;
 }
 
+/** Creator Economy: get referrer and tier-based bps for a referee. Returns { referrerTelegramId, bps } or null. */
+async function getCreatorReferrerAndBps(refereeTelegramId, cfg = {}) {
+    const use = await ReferralUse.findOne({ refereeTelegramId: refereeTelegramId }).lean();
+    if (!use?.referrerTelegramId) return null;
+    if (use.referrerTelegramId === refereeTelegramId) return null;
+    const ref = await Referral.findOne({ ownerTelegramId: use.referrerTelegramId, active: true }).lean();
+    if (!ref) return null;
+    const uses = ref.uses ?? 0;
+    let bps = Number(cfg?.creatorPercentBps ?? 200);
+    if (uses >= 10000) bps = Number(cfg?.creatorTier10000RefsBps ?? 700);
+    else if (uses >= 1000) bps = Number(cfg?.creatorTier1000RefsBps ?? 500);
+    else if (uses >= 100) bps = Number(cfg?.creatorTier100RefsBps ?? 300);
+    bps = Math.max(0, Math.min(10000, bps));
+    if (bps <= 0) return null;
+    return { referrerTelegramId: use.referrerTelegramId, bps };
+}
+
 /** Record AIBA spend for daily combo (call from debitAibaFromUser) */
 async function recordAibaSpendForDailyCombo(telegramId, amount) {
     if (!telegramId || !amount || amount <= 0) return;
@@ -133,5 +151,6 @@ module.exports = {
     resetBattleWinStreak,
     hasPremium,
     getRewardMultiplier,
+    getCreatorReferrerAndBps,
     recordAibaSpendForDailyCombo,
 };

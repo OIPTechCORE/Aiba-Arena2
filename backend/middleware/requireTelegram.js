@@ -15,13 +15,18 @@ function normalizeTelegramUser(raw) {
 
 async function requireTelegram(req, res, next) {
     try {
-        // Dev escape hatch: allow plain telegramId in dev mode
+        // Dev/test escape hatch: allow plain telegramId header.
+        // In test, require explicit x-telegram-id so unauthenticated requests return 401 deterministically.
         if (process.env.APP_ENV === 'dev' || process.env.APP_ENV === 'test') {
-            const id = (req.headers['x-telegram-id'] && String(req.headers['x-telegram-id'])) || 'local-dev';
+            const id = (req.headers['x-telegram-id'] && String(req.headers['x-telegram-id'])) || '';
+            if (process.env.APP_ENV === 'test' && !id) {
+                return res.status(401).json({ error: 'telegram auth required' });
+            }
+            const effectiveId = id || 'local-dev';
             const username =
                 (req.headers['x-telegram-username'] && String(req.headers['x-telegram-username'])) || 'local';
 
-            req.telegramUser = normalizeTelegramUser({ id, username });
+            req.telegramUser = normalizeTelegramUser({ id: effectiveId, username });
             req.telegramId = req.telegramUser.id;
 
             // Normalize identity into DB even in dev mode (helps local flows).

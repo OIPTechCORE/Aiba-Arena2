@@ -516,6 +516,12 @@ export default function AdminHome() {
     const [bossHp, setBossHp] = useState('10000');
     const [bossRewardPool, setBossRewardPool] = useState('1000');
     const [bossMsg, setBossMsg] = useState('');
+    const [predictEvents, setPredictEvents] = useState([]);
+    const [predictBrokerAId, setPredictBrokerAId] = useState('');
+    const [predictBrokerBId, setPredictBrokerBId] = useState('');
+    const [predictArena, setPredictArena] = useState('prediction');
+    const [predictLeague, setPredictLeague] = useState('rookie');
+    const [predictMsg, setPredictMsg] = useState('');
     const [trainers, setTrainers] = useState([]);
     const [universityStats, setUniversityStats] = useState(null);
     const [universityCourses, setUniversityCourses] = useState([]);
@@ -671,6 +677,47 @@ export default function AdminHome() {
             setBossMsg(getAdminErrorMessage(e, 'Create failed.'));
         }
     };
+    const fetchPredictEvents = async () => {
+        try {
+            const res = await api.get('/api/predict/events', { params: { status: 'all' } });
+            setPredictEvents(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setPredictEvents([]);
+        }
+    };
+    const createPredictEvent = async () => {
+        setPredictMsg('');
+        const a = predictBrokerAId.trim();
+        const b = predictBrokerBId.trim();
+        if (!a || !b || a === b) {
+            setPredictMsg('Enter two different broker IDs.');
+            return;
+        }
+        try {
+            await api.post('/api/admin/predict/events', {
+                brokerAId: a,
+                brokerBId: b,
+                arena: predictArena,
+                league: predictLeague,
+            });
+            setPredictMsg('Predict event created.');
+            setPredictBrokerAId('');
+            setPredictBrokerBId('');
+            await fetchPredictEvents();
+        } catch (e) {
+            setPredictMsg(getAdminErrorMessage(e, 'Create failed.'));
+        }
+    };
+    const resolvePredictEvent = async (eventId) => {
+        setPredictMsg('');
+        try {
+            await api.post(`/api/admin/predict/events/${eventId}/resolve`);
+            setPredictMsg('Event resolved. Winners paid, vig to treasury.');
+            await fetchPredictEvents();
+        } catch (e) {
+            setPredictMsg(getAdminErrorMessage(e, 'Resolve failed.'));
+        }
+    };
 
     const fetchTrainers = async () => {
         try {
@@ -800,6 +847,7 @@ export default function AdminHome() {
         }
         if (tab === 'university') fetchUniversityAll();
         if (tab === 'brokers') fetchMintJobs();
+        if (tab === 'predict') fetchPredictEvents();
         if (tab === 'trainers') fetchTrainers();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, tab]);
@@ -895,6 +943,9 @@ export default function AdminHome() {
                         </button>
                         <button onClick={() => setTab('globalBoss')} style={{ padding: '8px 12px' }}>
                             Global Boss
+                        </button>
+                        <button onClick={() => setTab('predict')} style={{ padding: '8px 12px' }}>
+                            Predict
                         </button>
                         <button onClick={() => setTab('trainers')} style={{ padding: '8px 12px' }}>
                             Trainers
@@ -1803,6 +1854,46 @@ export default function AdminHome() {
                                         <button onClick={createGlobalBoss} style={{ padding: '8px 12px' }}>Create boss</button>
                                     </div>
                                     {bossMsg ? <p style={{ marginTop: 8, color: bossMsg.includes('created') ? '#066' : 'crimson' }}>{bossMsg}</p> : null}
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === 'predict' ? (
+                            <>
+                                <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Create predict event (Battle of the hour)</div>
+                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>Broker A vs Broker B. Users bet AIBA on winner. Vig (default 3%) → treasury. Config: Economy → predictVigBps, predictMaxBetAiba.</p>
+                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                        <input value={predictBrokerAId} onChange={(e) => setPredictBrokerAId(e.target.value)} placeholder="Broker A ID" style={{ padding: 8, minWidth: 200 }} />
+                                        <input value={predictBrokerBId} onChange={(e) => setPredictBrokerBId(e.target.value)} placeholder="Broker B ID" style={{ padding: 8, minWidth: 200 }} />
+                                        <select value={predictArena} onChange={(e) => setPredictArena(e.target.value)} style={{ padding: 8 }}>
+                                            <option value="prediction">prediction</option>
+                                            <option value="simulation">simulation</option>
+                                            <option value="arbitrage">arbitrage</option>
+                                        </select>
+                                        <select value={predictLeague} onChange={(e) => setPredictLeague(e.target.value)} style={{ padding: 8 }}>
+                                            <option value="rookie">rookie</option>
+                                            <option value="pro">pro</option>
+                                            <option value="elite">elite</option>
+                                        </select>
+                                        <button onClick={createPredictEvent} style={{ padding: '8px 12px' }}>Create event</button>
+                                    </div>
+                                    {predictMsg ? <p style={{ marginTop: 8, color: predictMsg.includes('created') || predictMsg.includes('resolved') ? '#066' : 'crimson' }}>{predictMsg}</p> : null}
+                                </div>
+                                <div style={{ marginTop: 12 }}>
+                                    <button onClick={fetchPredictEvents} style={{ padding: '8px 12px' }}>Refresh</button>
+                                    <div style={{ fontWeight: 700, marginTop: 12, marginBottom: 8 }}>Predict events</div>
+                                    {predictEvents.length === 0 ? <div style={{ color: '#666' }}>No events.</div> : (
+                                        <div style={{ display: 'grid', gap: 8 }}>
+                                            {predictEvents.map((ev) => (
+                                                <div key={ev._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                                    <div><strong>{ev.brokerAId?.intelligence ?? '?'}/{(ev.brokerAId?.speed ?? 0) + (ev.brokerAId?.risk ?? 0)}</strong> vs <strong>{ev.brokerBId?.intelligence ?? '?'}/{(ev.brokerBId?.speed ?? 0) + (ev.brokerBId?.risk ?? 0)}</strong> · {ev.arena} · {ev.league} · {ev.status}</div>
+                                                    <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>Pool A: {ev.poolAiba ?? 0} · Pool B: {ev.poolBiba ?? 0} · Max bet: {ev.maxBetAiba ?? 0} AIBA</div>
+                                                    {ev.status === 'open' ? <button onClick={() => resolvePredictEvent(ev._id)} style={{ padding: '6px 10px', marginTop: 8 }}>Resolve (run battle, pay winners, vig → treasury)</button> : null}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </>
                         ) : null}

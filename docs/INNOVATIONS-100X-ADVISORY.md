@@ -289,6 +289,23 @@ From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
 ---
 
+## 10a. Implementation Status (Codebase)
+
+| Innovation | Status | Location |
+|------------|--------|----------|
+| **Streaks & Daily Combo** | ✅ Implemented | `innovations.js`, `daily.js`, `battle.js` — login/battle streaks, daily combo spend → bonus |
+| **Tournaments** | ✅ Implemented | `Tournament.js`, `tournaments.js`, `adminTournaments.js` — brackets, entry AIBA/TON, 20% treasury |
+| **Subscription / Premium** | ✅ Implemented | `premium.js` — 5 TON/month, 2× rewards |
+| **Creator Economy** | ✅ Implemented | `getCreatorReferrerAndBps` in `innovations.js` — 2% base; 100 refs=3%, 1k=5%, 10k=7%. Credits referrer on: battle, car/bike racing, tournaments, global boss rewards |
+| **Global Boss / Raid** | ✅ Implemented | `GlobalBoss.js`, `globalBoss.js` — damage from battles, top 1000 share pool |
+| **Broker Rental** | ✅ Implemented | `BrokerRental.js`, `brokerRental.js` — rent broker for AIBA |
+| **Predict / Bet** | ✅ Implemented | `PredictEvent.js`, `PredictBet.js`, `predict.js`, `adminPredict.js` — bet on broker A vs B, vig → treasury |
+| **NFT Breeding** | ✅ Implemented | `breeding.js` — breed 2 brokers → 1, burn both + AIBA cost |
+
+**Config (Admin → Economy):** `creatorPercentBps`, `creatorTier100RefsBps`, `creatorTier1000RefsBps`, `creatorTier10000RefsBps`, `predictVigBps`, `predictMaxBetAiba`, `streakMultiplierAt7Days`, `dailyComboRequirementAiba`, etc.
+
+---
+
 ## 11. Disclaimer
 
 This document is advisory. Innovations involve product, legal, and regulatory risks. Prediction/betting may be restricted in some jurisdictions. Token economics and revenue projections are illustrative. Seek qualified advice before implementation.

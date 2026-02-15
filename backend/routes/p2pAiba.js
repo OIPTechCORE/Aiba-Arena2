@@ -162,13 +162,14 @@ router.post(
     },
 );
 
-// GET /api/p2p-aiba/config — Fee, wallet info for UI
+// GET /api/p2p-aiba/config — Fee, wallet info for UI (all tx charges → Super Admin wallets)
 router.get('/config', async (req, res) => {
     try {
         const cfg = await getConfig();
         res.json({
             p2pSendFeeTonNano: cfg.p2pAibaSendFeeTonNano ?? 100_000_000,
             buyFeeBps: cfg.buyAibaWithTonFeeBps ?? 500,
+            aibaInGiftsFeeTonNano: cfg.aibaInGiftsFeeTonNano ?? 100_000_000,
             oracleAibaPerTon: cfg.oracleAibaPerTon ?? 0,
             p2pWallet: !!process.env.P2P_AIBA_SEND_WALLET,
             buyWallet: !!process.env.BUY_AIBA_WITH_TON_WALLET,

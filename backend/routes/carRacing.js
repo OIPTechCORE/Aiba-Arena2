@@ -9,6 +9,7 @@ const CarRaceEntry = require('../models/CarRaceEntry');
 const CarListing = require('../models/CarListing');
 const UsedTonTxHash = require('../models/UsedTonTxHash');
 const { getConfig, debitAibaFromUser, creditAibaNoCap } = require('../engine/economy');
+const { getCreatorReferrerAndBps } = require('../engine/innovations');
 const { getIdempotencyKey } = require('../engine/idempotencyKey');
 const { verifyTonPayment } = require('../util/tonVerify');
 const { simulateRace } = require('../engine/raceEngine');
@@ -246,6 +247,23 @@ async function runCarRaceIfFull(raceId) {
                 requestId: String(race._id),
                 meta: { position: r.position, raceId: String(race._id) },
             });
+            getConfig().then((cfg) =>
+                getCreatorReferrerAndBps(entry.telegramId, cfg).then(async (creator) => {
+                    if (!creator?.referrerTelegramId) return;
+                    const creatorAiba = Math.floor((aibaReward * creator.bps) / 10000);
+                    if (creatorAiba > 0) {
+                        await creditAibaNoCap(creatorAiba, {
+                            telegramId: creator.referrerTelegramId,
+                            reason: 'creator_earnings',
+                            arena: 'car_racing',
+                            league: race.league,
+                            sourceType: 'creator_referee_racing',
+                            sourceId: String(race._id),
+                            meta: { refereeTelegramId: entry.telegramId, bps: creator.bps, amountAiba: creatorAiba },
+                        });
+                    }
+                })
+            ).catch(() => {});
         }
     }
     race.status = 'completed';

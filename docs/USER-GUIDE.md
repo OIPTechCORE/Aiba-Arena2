@@ -31,7 +31,7 @@ Use this phase table first, then continue with the full user guide below.
 6. Balances (NEUR, AIBA, Stars, Diamonds)  
 7. Guilds (Groups)  
 8. Withdrawing AIBA to Your Wallet (On-Chain Claim)  
-9. Marketplace (Create Broker, List, Buy, Boosts)  
+9. Super Futuristic Unified Marketplace (Create Broker, List, Buy, Boosts)  
 10. Boost your profile  
 11. Gifts  
 12. Referrals  
@@ -53,7 +53,7 @@ Use this phase table first, then continue with the full user guide below.
 
 - **Where:** AIBA Arena runs as a **Telegram Mini App**. Open it from a link or bot inside Telegram (e.g. from the project’s bot or a shared link).
 - **Requirements:** Telegram account; optionally a TON wallet (TonConnect) if you want to withdraw AIBA on-chain.
-- **First time:** You may see a **cinematic intro** (skip or watch) and a **tutorial** (steps for brokers, arena, battle). The app has a **tab bar** at the bottom: **Home**, **Brokers**, **Market**, **Car Racing**, **Bike Racing**, **Multiverse**, **Arenas**, **Guilds**, **Charity**, **University**, **Updates**, **Wallet** (12 tabs). Tap a tab to switch. A **balance strip** at the top shows NEUR, AIBA credits, Stars, Diamonds, and a verified badge if you have one.
+- **First time:** You may see a **cinematic intro** (skip or watch) and a **tutorial** (steps for brokers, arena, battle). The app has a **Home** grid and tab bar: **Brokers**, **Market**, **Car Racing**, **Bike Racing**, **Multiverse**, **Arenas**, **Guilds**, **Charity**, **University**, **Updates**, **Wallet**, **DAO**, **Governance**, **Trainers**, etc. Tap a grid item or tab to switch. A **balance strip** at the top shows NEUR, AIBA credits, Stars, Diamonds, and a verified badge if you have one.
 
 ---
 
@@ -63,16 +63,17 @@ Use this phase table first, then continue with the full user guide below.
 |-----|--------------|
 | **Home** | TonConnect, Vault info, Arena & battle (pick broker, arena, Run battle), Battle result, Referrals, Leaderboard. |
 | **Brokers** | My brokers (select, combine two for NEUR, mint one as NFT for AIBA). |
-| **Market** | Create your broker (pay TON), Marketplace (list/buy brokers with AIBA), Boosts (buy reward multiplier with NEUR). |
-| **Car Racing** | Autonomous car racing: tracks, races, my cars, create car (AIBA or TON), enter race, leaderboard, marketplace (list/buy cars). |
-| **Bike Racing** | Autonomous bike racing: tracks, races, my bikes, create bike (AIBA or TON), enter race, leaderboard, marketplace (list/buy bikes). |
+| **Super Futuristic Unified Marketplace** | Brokers, assets, rentals, system shop, boosts. Create broker with TON; list/buy with AIBA. |
+| **Car Racing** | Autonomous car racing: tracks, races, my cars, create car (AIBA or TON), **list car for sale** or **buy** from players/system, enter race, leaderboard. |
+| **Bike Racing** | Autonomous bike racing: tracks, races, my bikes, create bike (AIBA or TON), **list bike for sale** or **buy** from players/system, enter race, leaderboard. |
 | **Multiverse** | NFT universes, **My NFTs** (Broker NFTs you own), **stake** to earn AIBA daily, **claim** staking rewards. Mint Broker NFTs from the Brokers tab (pay AIBA). |
 | **Arenas** | Arena selector, Run battle, Battle result (score, rewards, Stars/Diamond). |
 | **Guilds** | Groups (leaderboard rank, create or join, pay TON to create if not top N, boost group with TON), My groups, deposit/withdraw broker. |
 | **Charity** | Unite for Good: campaigns, donate NEUR or AIBA, your impact, charity leaderboard. |
 | **University** | Courses and modules, progress, graduate badge, mint course badge / full certificate (pay TON). |
-| **Updates** | Announcements, status, support. |
-| **Wallet** | Profile & badges, Boost your profile (TON), Gifts (TON), Daily reward (NEUR), Vault, Staking (AIBA), DAO (proposals, vote), on-chain claim, Stars & Diamonds. |
+| **Updates** | Announcements (read/unread), system status, in-app support form (subject + message). |
+| **Wallet** | Profile & badges, Boost your profile (TON), Gifts (TON), Daily reward (NEUR), Vault, Staking (flexible + locked periods, min stake from config, cancel-early with fee), DAO (proposals, vote; create requires staked AIBA), on-chain claim, Stars & Diamonds. |
+| **Yield Vault** | Dedicated staking tab: hero shows **minimum stake** (e.g. 100 AIBA, ecosystem-aligned); locked + flexible staking both show and enforce min; periods (30/90/180/365d), reward preview, countdown, cancel-early (5% fee). Wallet tab staking flow shows the same minimum. |
 
 ---
 
@@ -164,7 +165,7 @@ To turn **AIBA credits** into **real AIBA jettons** in your TON wallet:
 5. Your wallet opens: confirm sending the transaction to the **vault** (you pay a small TON fee for gas; the vault sends AIBA to you).
 6. Wait for confirmation; the app may poll and show “Claim confirmed on-chain.”
 
-### 7.2 Create claim manually, then claim on-chain
+### 8.2 Create claim manually, then claim on-chain
 
 1. After one or more battles you have **AIBA credits** (see Balances).
 2. In **On-chain claim**, in the “Create a claim” section:
@@ -182,11 +183,11 @@ To turn **AIBA credits** into **real AIBA jettons** in your TON wallet:
 
 ---
 
-## 8. Marketplace (Create Broker, List, Buy)
+## 9. Super Futuristic Unified Marketplace (Create Broker, List, Buy, Boosts)
 
-The **Market** tab is the unified marketplace. All payments here are in **TON** (to create a broker) or **AIBA** (to list and buy brokers). See [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md) for the full plan.
+The **Market** tab is the **Super Futuristic Unified Marketplace**: one hub for brokers, assets, rentals, system shop, and boosts. All payments are **TON** (to create a broker) or **AIBA** (to list and buy). See [MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md) for the full plan.
 
-### 8.1 Create your broker with TON
+### 9.1 Create your broker with TON
 
 - **What:** Pay TON once to create a **new broker** that is **automatically listed** on the global marketplace. You get **global recognition** as the seller.
 - **Where:** Market tab → **Create your broker (pay TON)** card (shown only when the feature is configured).
@@ -198,22 +199,27 @@ The **Market** tab is the unified marketplace. All payments here are in **TON** 
 - **Result:** A new broker is created and listed on the marketplace at the default AIBA price. Everyone can see it; you appear as the seller.
 - **Tip:** If you see “txHash already used,” that payment was already applied. Use a new TON payment for another broker.
 
-### 8.2 Stars Store (buy Stars with AIBA or TON)
+### 9.2 Stars Store (buy Stars with AIBA or TON)
 
 - **What:** **Stars** are in-app recognition currency (you also earn them from battles). You can **buy** a pack of Stars with **AIBA** or **TON**.
 - **Where:** **Market** tab and **Wallet** tab → **Stars Store** card.
 - **Buy with AIBA:** Tap **Buy with AIBA** to buy one pack (size and price set by admins).
 - **Buy with TON:** Send the required TON to the Stars Store wallet, paste the **transaction hash**, tap **Buy with TON**. TON goes to Super Admin STARS_STORE_WALLET.
 
-### 8.3 List and buy brokers (AIBA)
+### 9.3 List and buy brokers (AIBA)
 
 - **List:** Select one of **your** brokers (not in a guild pool), enter a **price in AIBA**, and tap **List**. Your broker appears globally. Withdraw it from a guild first if it’s deposited there.
 - **Buy:** Browse **listings** and tap **Buy** on a listing. You pay in **AIBA**; the broker is transferred to you. Your AIBA balance is debited.
 - **Refresh:** Tap **Refresh** to load the latest listings.
 
+### 9.4 Cars and bikes for sale
+
+- **Cars:** Car Racing tab → **Market** flow. **List** a car from your garage (select car, enter price AIBA, tap List). **Buy** from other players or from the System.
+- **Bikes:** Bike Racing tab → **Market** flow. **List** a bike from your garage (select bike, enter price AIBA, tap List). **Buy** from other players or from the System.
+
 ---
 
-## 9. Boost your profile
+## 10. Boost your profile
 
 - **What:** Pay TON to **boost your profile** so you get higher visibility (e.g. “Boosted” badge, better placement).
 - **Where:** Wallet tab → **Boost your profile** card (shown when the feature is configured).
@@ -273,7 +279,7 @@ The **Market** tab is the unified marketplace. All payments here are in **TON** 
 ## 16. Charity (Unite for Good)
 
 - **Where:** **Charity** tab.
-- **What:** **Active campaigns** (e.g. education, health, community). Each campaign has a name, description, cause, and progress (NEUR + AIBA raised, donor count). You can **donate** NEUR and/or AIBA from your balance to a campaign; optional message and anonymous option.
+- **What:** **Active campaigns** (e.g. education, health, community). Each campaign has a name, description, cause, and progress (NEUR + AIBA raised, donor count). **Donate** NEUR and/or AIBA: use **Max NEUR** / **Max AIBA** to fill amounts, or presets (+10, +50, +100, +500, +1000); optional message (max 500 chars) and **anonymous** toggle.
 - **Your impact:** The tab shows how much you’ve donated (NEUR, AIBA, impact score) and per-campaign breakdown.
 - **Charity leaderboard:** Optional leaderboard of donors by impact.
 
@@ -290,7 +296,7 @@ The **Market** tab is the unified marketplace. All payments here are in **TON** 
 ## 18. Updates (Announcements)
 
 - **Where:** **Updates** tab.
-- **What:** **Announcements** from the project (title, body, type). Stay informed about news, status, and support. No action required; read and dismiss.
+- **What:** **Announcements** from the project (title, body, type). Unread count badge; tap to mark as read. **System status** (operational/maintenance). **Support form**: choose subject (question, bug, feature, account, other) and message; submit to contact support. Admins view requests in Admin → Support.
 
 ---
 
@@ -303,8 +309,8 @@ The **Wallet** tab contains:
 - **Gifts:** See section 11. Send/received/sent.
 - **Daily reward:** **Claim daily** to receive **NEUR** once per day (amount set by the project). If you already claimed today, the button shows “Claimed.”
 - **Vault:** Vault address and TON/jetton balance (for debugging or checking claim capacity).
-- **Staking:** **Stake** AIBA (lock in the pool), **Unstake**, or **Claim** staking reward. APY and pending reward are shown. Staking is off-chain; rewards are in AIBA.
-- **DAO:** **Create** a proposal (title, description) or **vote** on active proposals (Vote For / Vote Against). Proposals can be closed and executed (treasury payout) by the project.
+- **Staking:** **Stake** AIBA (flexible or locked). **Minimum stake** is shown (e.g. 100 AIBA, ecosystem-aligned; configurable in Admin). Locked: choose period (30/90/180/365 days), see APY and reward preview; view active locks with countdown. **Cancel early** before maturity (5% fee → Treasury). **Claim** when lock matures or for flexible rewards. Staking is off-chain; rewards in AIBA.
+- **DAO:** **Create** a proposal (title, description) or **vote** on active proposals (Vote For / Vote Against). Creating a proposal requires staking ≥ config min (e.g. 10,000 AIBA) for ≥ min days (e.g. 30). Proposals can be closed and executed (treasury payout) by the project.
 - **On-chain claim:** When you have a battle with a claim (or you created one manually), this card shows vault, amount, seqno, validUntil and **Claim on-chain (TonConnect)** / **Check claim status**. See section 8.
 - **Stars and Diamonds:** Display of your Stars and Diamonds balances (earned from battles).
 
@@ -346,7 +352,7 @@ The **Wallet** tab contains:
 | “Gifts not configured” / “Create broker with TON not configured” | The project hasn’t set the wallet and cost in the backend; the feature is disabled. |
 | “Combine failed” / “insufficient NEUR” | Ensure you have enough NEUR (battles, daily claim, referrals); select two different brokers (base and sacrifice). |
 | “Mint failed” / “insufficient AIBA” | You need enough AIBA credits (battles, marketplace sell); one broker at a time for mint. |
-| “Stake failed” / “Unstake failed” | Check AIBA balance for stake; for unstake, amount must be ≤ staked amount. |
+| “Stake failed” / “Unstake failed” | Check AIBA balance; **minimum stake** applies (e.g. 100 AIBA; shown in Yield Vault / Wallet staking). For unstake, amount must be ≤ staked amount. |
 | “Daily claim failed” / “Already claimed today” | You can claim daily NEUR only once per day (UTC). Wait until the next day. |
 | “Vote failed” / “Create failed” (DAO) | Proposal may be closed; check you’re voting on an active proposal or that title is non-empty for create. |
 | “Donate failed” (charity) | Check campaign is active; ensure you have enough NEUR/AIBA and selected a campaign. |
@@ -368,4 +374,4 @@ The **Wallet** tab contains:
 11. (Optional) **Wallet:** Boost your profile (TON), send a gift (TON), stake AIBA, or vote in DAO.
 12. (Optional) **Charity:** Donate NEUR or AIBA to a campaign. **University:** Complete modules, mint badge/certificate (TON). **Updates:** Read announcements.
 
-For **how the game works** (brokers, arenas, economy, claims), see **GAME-EXPLAINED.md**. For **marketplace and all payments** (TON + AIBA, Super Admin wallets), see **MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md**. For **leaderboard and groups** (top N, pay TON), see **LEADERBOARD-AND-GROUPS-CHECK.md**.
+For **how the game works** (brokers, arenas, economy, claims), see **GAME-EXPLAINED.md**. For **marketplace and all payments** (TON + AIBA, Super Admin wallets), see **MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md**. For **leaderboard and groups** (top N, pay TON), see **AUDIT-AND-STATUS.md** §2.

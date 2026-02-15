@@ -55,6 +55,7 @@ router.patch(
         boostDurationHours: { type: 'number', min: 0 },
         boostMultiplier: { type: 'number', min: 0 },
         stakingApyPercent: { type: 'number', min: 0 },
+        stakingMinAiba: { type: 'number', min: 1 },
         combineNeurCost: { type: 'number', min: 0 },
         referralRewardAibaReferrer: { type: 'number', min: 0 },
         referralRewardAibaReferee: { type: 'number', min: 0 },
@@ -100,6 +101,8 @@ router.patch(
         dailyCapAibaByArena: { type: 'object' },
         dailyCapNeurByArena: { type: 'object' },
         emissionWindowsUtc: { type: 'object' },
+        supportLink: { type: 'string', trim: true, maxLength: 500 },
+        supportTelegramGroup: { type: 'string', trim: true, maxLength: 100 },
     }),
     async (req, res) => {
     const update = {};
@@ -137,6 +140,7 @@ router.patch(
         'boostDurationHours',
         'boostMultiplier',
         'stakingApyPercent',
+        'stakingMinAiba',
         'combineNeurCost',
         'referralRewardAibaReferrer',
         'referralRewardAibaReferee',
@@ -192,6 +196,14 @@ router.patch(
         'donateCarFeeTonNano',
         'donateBikeFeeTonNano',
         'donateGiftsFeeTonNano',
+        'creatorPercentBps',
+        'creatorTier100RefsBps',
+        'creatorTier1000RefsBps',
+        'creatorTier10000RefsBps',
+        'predictVigBps',
+        'predictMaxBetAiba',
+        'supportLink',
+        'supportTelegramGroup',
     ]);
     const bodyKeys = req.body && typeof req.body === 'object' ? Object.keys(req.body) : [];
     const unknown = bodyKeys.filter((k) => !allowedTopLevel.has(k));
@@ -226,6 +238,7 @@ router.patch(
     maybeNum('boostDurationHours');
     maybeNum('boostMultiplier');
     maybeNum('stakingApyPercent');
+    maybeNum('stakingMinAiba');
     maybeNum('combineNeurCost');
     maybeNum('referralRewardAibaReferrer');
     maybeNum('referralRewardAibaReferee');
@@ -310,6 +323,14 @@ router.patch(
     maybeNum('donateCarFeeTonNano');
     maybeNum('donateBikeFeeTonNano');
     maybeNum('donateGiftsFeeTonNano');
+    maybeNum('creatorPercentBps');
+    maybeNum('creatorTier100RefsBps');
+    maybeNum('creatorTier1000RefsBps');
+    maybeNum('creatorTier10000RefsBps');
+    maybeNum('predictVigBps');
+    maybeNum('predictMaxBetAiba');
+    if (req.body?.supportLink !== undefined) update.supportLink = String(req.body.supportLink || '').trim();
+    if (req.body?.supportTelegramGroup !== undefined) update.supportTelegramGroup = String(req.body.supportTelegramGroup || '').trim();
     if (req.body?.createBikeCostTonNano !== undefined) {
         const v = Number(req.body.createBikeCostTonNano);
         if (Number.isFinite(v) && v >= 0)

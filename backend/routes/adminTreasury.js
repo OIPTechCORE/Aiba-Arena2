@@ -15,7 +15,7 @@ async function getTreasury() {
         await Treasury.create({});
         t = await Treasury.findOne().lean();
     }
-    return t || { balanceAiba: 0, balanceNeur: 0, totalPaidOutAiba: 0, totalPaidOutNeur: 0 };
+    return t || { balanceAiba: 0, balanceNeur: 0, cancelledStakesAiba: 0, totalPaidOutAiba: 0, totalPaidOutNeur: 0 };
 }
 
 // GET /api/admin/treasury

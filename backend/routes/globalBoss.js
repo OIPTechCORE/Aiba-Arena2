@@ -3,6 +3,7 @@ const { requireTelegram } = require('../middleware/requireTelegram');
 const GlobalBoss = require('../models/GlobalBoss');
 const BossDamage = require('../models/BossDamage');
 const { getConfig, tryEmitAiba, creditAibaNoCap } = require('../engine/economy');
+const { getCreatorReferrerAndBps } = require('../engine/innovations');
 
 // GET /api/global-boss — current active boss
 router.get('/', async (req, res) => {
@@ -59,6 +60,7 @@ router.post('/record-damage', requireTelegram, async (req, res) => {
 async function distributeBossRewards(bossId) {
     const boss = await GlobalBoss.findById(bossId).lean();
     if (!boss || (boss.rewardPoolAiba || 0) <= 0) return;
+    const cfg = await getConfig();
     const top = await BossDamage.aggregate([
         { $match: { bossId } },
         { $group: { _id: '$telegramId', totalDamage: { $sum: '$damage' } } },
@@ -82,6 +84,21 @@ async function distributeBossRewards(bossId) {
                     sourceId: String(bossId),
                     meta: { position: i + 1, damage: top[i].totalDamage },
                 });
+                getCreatorReferrerAndBps(top[i]._id, cfg).then(async (creator) => {
+                    if (!creator?.referrerTelegramId) return;
+                    const creatorAiba = Math.floor((share * creator.bps) / 10000);
+                    if (creatorAiba > 0) {
+                        await creditAibaNoCap(creatorAiba, {
+                            telegramId: creator.referrerTelegramId,
+                            reason: 'creator_earnings',
+                            arena: 'global_boss',
+                            league: 'raid',
+                            sourceType: 'creator_referee_boss',
+                            sourceId: String(bossId),
+                            meta: { refereeTelegramId: top[i]._id, bps: creator.bps, amountAiba: creatorAiba },
+                        });
+                    }
+                }).catch(() => {});
             }
         }
     }

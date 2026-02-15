@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>BACKUP RUNBOOK — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>BACKUP RUNBOOK</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Backup Runbook — AIBA Arena</h1>
+<p>Procedures for backing up and restoring AIBA Arena data. Run these regularly and before major changes.</p>
+<hr/>
+<h2>1. MongoDB</h2>
+<p><strong>Scope:</strong> User data, brokers, battles, economy, guilds, referrals, trainers, staking, marketplace, etc.</p>
+<h3>Backup (mongodump)</h3>
+<pre><code># Full dump to timestamped archive
+mongodump \
+  --uri=&quot;$MONGODB_URI&quot; \
+  --out=backups/mongodb-$(date +%Y%m%d-%H%M) \
+  --gzip
+# Or via env file
+source .env
+mongodump --uri=&quot;$MONGODB_URI&quot; --out=backups/mongodb-$(date +%Y%m%d) --gzip</code></pre>
+<p><strong>Suggested schedule:</strong> Daily (cron) or before deploys.</p>
+<p><strong>Cron example (daily at 2:00 AM):</strong></p>
+<pre><code>0 2 * * * cd /path/to/aiba-arena &amp;&amp; source .env 2&gt;/dev/null; mongodump --uri=&quot;$MONGODB_URI&quot; --out=backups/mongodb-$(date +\%Y\%m\%d) --gzip 2&gt;/dev/null || true</code></pre>
+<h3>Restore</h3>
+<pre><code># Restore from specific dump
+mongorestore \
+  --uri=&quot;$MONGODB_URI&quot; \
+  --drop \
+  --gzip \
+  backups/mongodb-20250115-1200</code></pre>
+<p><strong>Note:</strong> <code>--drop</code> drops existing collections first. Use without <code>--drop</code> for additive restore if needed.</p>
+<hr/>
+<h2>2. Secrets &amp; Keys</h2>
+<p><strong>Never commit secrets.</strong> Store backups in a secure, encrypted location.</p>
+<table>
+<thead><tr>
+<th>Asset</th>
+<th>Location</th>
+<th>Backup</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>ORACLE_PRIVATE_KEY_HEX</code></td>
+<td>Secret manager / env</td>
+<td>Export to encrypted vault; rotate if exposed</td>
+</tr>
+<tr>
+<td><code>ADMIN_JWT_SECRET</code></td>
+<td>Secret manager / env</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><code>ADMIN_PASSWORD_HASH</code></td>
+<td>Secret manager / env</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><code>TELEGRAM_BOT_TOKEN</code></td>
+<td>Secret manager / env</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><code>BATTLE_SEED_SECRET</code></td>
+<td>Secret manager / env</td>
+<td>Same</td>
+</tr>
+<tr>
+<td>TON wallet mnemonics</td>
+<td>Secure storage</td>
+<td>Encrypted backup; separate from runtime</td>
+</tr>
+</tbody></table>
+<p><strong>Procedure:</strong></p>
+<ol>
+<li>Store in encrypted archive (e.g. <code>gpg -c secrets-backup.env</code>).</li>
+<li>Store archive in secure, off-site location.</li>
+<li>Document restore process and key rotation (see KEY-ROTATION.md).</li>
+</ol>
+<hr/>
+<h2>3. TON Contracts &amp; Addresses</h2>
+<p><strong>Scope:</strong> Deployed contract addresses, operator keys, vault config.</p>
+<p><strong>What to back up:</strong></p>
+<ul>
+<li>Blueprint/deploy scripts output (addresses)</li>
+<li>Oracle/operator public keys</li>
+</ul>
+<p><strong>Procedure:</strong></p>
+<ol>
+<li>Version in private repo or secure doc.</li>
+<li>After any redeploy, update and re-backup.</li>
+</ol>
+<hr/>
+<h2>4. Application Code &amp; Config</h2>
+<p><strong>Scope:</strong> Backend, miniapp, admin, contracts source.</p>
+<p><strong>Procedure:</strong></p>
+<ul>
+<li>Backup private repos to secondary provider or archive.</li>
+<li>Keep <code>package-lock.json</code> / <code>yarn.lock</code> / <code>pnpm-lock.yaml</code> in repo for reproducible installs.</li>
+</ul>
+<hr/>
+<h2>5. Restore Priority</h2>
+<p>If disaster recovery is needed:</p>
+<ol>
+<li><strong>Secrets restore</strong> — Restore from encrypted backup; update secret manager.</li>
+<li><strong>Code deploy</strong> — Deploy from tagged release.</li>
+<li><strong>Contracts</strong> — If contracts unchanged, skip. If redeployed, update env and re-run migrations if any.</li>
+</ol>
+<hr/>
+<h2>6. Verification</h2>
+<p>After restore:</p>
+<ul>
+<li><code>GET /metrics</code> returns Prometheus output</li>
+<li>Admin login works</li>
+<li>One battle run succeeds</li>
+<li>One claim/inventory check succeeds</li>
+</ul>
+<p>Run: <code>node scripts/monitoring-check.js --vault</code> to validate.</p>
+<hr/>
+<h2>7. References</h2>
+<ul>
+<li><a href="KEY-ROTATION.md">KEY-ROTATION.md</a> — Key rotation procedures</li>
+<li><a href="DEPLOYMENT-AND-ENV.md">DEPLOYMENT-AND-ENV.md</a> — Env and deployment</li>
+</ul>
+  </div>
+</body>
+</html>

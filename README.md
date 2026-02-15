@@ -4,6 +4,7 @@
 - **Game functionality (expanded):** [docs/GAME-FUNCTIONALITY.md](docs/GAME-FUNCTIONALITY.md) — battle engine formulas, EconomyConfig, security, API mapping, data flows.
 - **User guide:** [docs/USER-GUIDE.md](docs/USER-GUIDE.md) — how to play: connect wallet, create broker, run battles, earn NEUR/AIBA, withdraw AIBA on-chain, guilds, marketplace (create broker with TON, list/buy with AIBA), boost profile, gifts, referrals, troubleshooting.
 - **Marketplace & payments (360° plan):** [docs/MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md](docs/MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md) — TON + AIBA only, Super Admin wallets per product, create broker, boost profile, gifts.
+- **Super Admin wallets (complete reference):** [docs/SUPER-ADMIN-WALLETS.md](docs/SUPER-ADMIN-WALLETS.md) — P2P AIBA send, AIBA in gifts, Buy AIBA with TON, Donate broker/car/bike/gifts; env vars, config keys, APIs.
 - **Vision vs codebase:** [docs/VISION-VS-CODEBASE-CHECK.md](docs/VISION-VS-CODEBASE-CHECK.md) — deep check of the AI Broker Battle Arena vision/spec against the repo (implemented, partial, not implemented, misalignments).
 - **Printable docs:** Run `npm run build:print-docs`, then open **docs/print/index.html** in a browser to print or save as PDF — [docs/PRINT.md](docs/PRINT.md).
 - **Deep inspection:** [docs/DEEP-INSPECTION-REPORT.md](docs/DEEP-INSPECTION-REPORT.md) — full project structure, backend, frontends, contracts, docs, security, and consistency check.

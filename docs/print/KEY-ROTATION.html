@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>KEY ROTATION — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>KEY ROTATION</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Key Rotation Runbook — AIBA Arena</h1>
+<p>Step-by-step procedures for rotating secrets when compromised or as part of regular security practice.</p>
+<p><strong>General rule:</strong> Rotate immediately if a key is exposed. For routine rotation, schedule during low-traffic windows and coordinate with on-chain updates.</p>
+<hr/>
+<h2>1. Oracle Key (<code>ORACLE_PRIVATE_KEY_HEX</code>)</h2>
+<p><strong>Purpose:</strong> Signs reward-claim messages for on-chain vault.</p>
+<p><strong>Rotation steps:</strong></p>
+<ol>
+<li><strong>Update on-chain vault:</strong> Call vault contract <code>set_oracle</code> with new public key. Requires contract owner/admin.</li>
+<li><strong>Update backend:</strong> Set new <code>ORACLE_PRIVATE_KEY_HEX</code> in secret manager / env.</li>
+<li><strong>Restart backend</strong> to pick up new key.</li>
+<li><strong>Verify:</strong> <code>GET /api/vault/last-seqno?to=&lt;vault_addr&gt;</code> succeeds; run a test claim.</li>
+</ol>
+<p><strong>Rollback:</strong> Revert to previous oracle via <code>set_oracle</code> if new key has issues.</p>
+<hr/>
+<h2>2. Admin JWT Secret (<code>ADMIN_JWT_SECRET</code>)</h2>
+<p><strong>Purpose:</strong> Signs admin session tokens.</p>
+<p><strong>Rotation steps:</strong></p>
+<ol>
+<li><strong>Update backend:</strong> Set new <code>ADMIN_JWT_SECRET</code> in secret manager / env.</li>
+<li><strong>Restart backend.</strong></li>
+<li><strong>Effect:</strong> All existing admin sessions invalidated. Admins must log in again.</li>
+</ol>
+<p><strong>Rollback:</strong> Restore previous secret and restart; old sessions will work again.</p>
+<hr/>
+<h2>3. Admin Password (<code>ADMIN_PASSWORD_HASH</code>)</h2>
+<p><strong>Purpose:</strong> Admin login. Stored as bcrypt hash, not plaintext.</p>
+<p><strong>Rotation steps:</strong></p>
+<ol>
+</ol>
+<pre><code>   node -e &quot;const bcrypt=require('bcrypt'); bcrypt.hash('NEW_STRONG_PASSWORD', 10).then(h=&gt;console.log(h));&quot;</code></pre>
+<ol>
+<li><strong>Restart backend</strong> (or wait for next deploy).</li>
+<li><strong>Effect:</strong> Old admin password no longer works. Use new password for login.</li>
+</ol>
+<p><strong>Rollback:</strong> Restore previous hash.</p>
+<hr/>
+<h2>4. Telegram Bot Token (<code>TELEGRAM_BOT_TOKEN</code>)</h2>
+<p><strong>Purpose:</strong> Telegram Mini App bot authentication.</p>
+<p><strong>Rotation steps:</strong></p>
+<ol>
+<li><strong>Update backend:</strong> Set new <code>TELEGRAM_BOT_TOKEN</code> in secret manager / env.</li>
+<li><strong>Restart backend.</strong></li>
+<li><strong>Update miniapp</strong> if bot username/URL changed (e.g. new bot link).</li>
+</ol>
+<p><strong>Rollback:</strong> Re-issue token from BotFather; update env and restart.</p>
+<hr/>
+<h2>5. Battle Seed Secret (<code>BATTLE_SEED_SECRET</code>)</h2>
+<p><strong>Purpose:</strong> Deterministic battle RNG. Changing alters battle outcomes.</p>
+<p><strong>Rotation steps:</strong></p>
+<ol>
+<li><strong>Update backend:</strong> Set new <code>BATTLE_SEED_SECRET</code> in secret manager / env.</li>
+<li><strong>Restart backend.</strong></li>
+<li><strong>Effect:</strong> Battle randomness changes. No on-chain impact.</li>
+</ol>
+<p><strong>Note:</strong> Rotate only when necessary (e.g. compromise). Routine rotation not recommended due to determinism implications.</p>
+<hr/>
+<h2>6. Checklist Before Rotation</h2>
+<ul>
+<li>[ ] Backup of current values (encrypted) in case rollback needed</li>
+<li>[ ] Maintenance window or low-traffic period scheduled</li>
+<li>[ ] For oracle: contract <code>set_oracle</code> call prepared</li>
+</ul>
+<hr/>
+<h2>7. Post-Rotation Verification</h2>
+<ul>
+<li>[ ] Admin login works (if JWT/password rotated)</li>
+<li>[ ] Test claim succeeds (if oracle rotated)</li>
+<li>[ ] Telegram initData validates (if bot token rotated)</li>
+</ul>
+<p>Run: <code>node scripts/monitoring-check.js</code> and <code>node scripts/health-check.js</code>.</p>
+<hr/>
+<h2>8. References</h2>
+<ul>
+<li><a href="BACKUP-RUNBOOK.md">BACKUP-RUNBOOK.md</a> — Backup and restore procedures</li>
+<li><a href="DEPLOYMENT-AND-ENV.md">DEPLOYMENT-AND-ENV.md</a> — Env variables</li>
+</ul>
+  </div>
+</body>
+</html>

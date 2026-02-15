@@ -552,6 +552,46 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)</code></pre>
 <td>Top N create guild free</td>
 </tr>
 </tbody></table>
+<h3>6.6a Staking &amp; DAO</h3>
+<table>
+<thead><tr>
+<th>Field</th>
+<th>Default</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>stakingMinAiba</code></td>
+<td>100</td>
+<td>Min AIBA to stake (flexible + locked). Ecosystem-aligned: broker mint cost, 1T AIBA supply.</td>
+</tr>
+<tr>
+<td><code>stakingApyPercent</code></td>
+<td>15</td>
+<td>APY for flexible staking</td>
+</tr>
+<tr>
+<td><code>stakingPeriods</code></td>
+<td>[{ days: 30, apyPercent: 10 }, ...]</td>
+<td>Period-based locks: 30/90/180/365 days with tiered APY</td>
+</tr>
+<tr>
+<td><code>stakingCancelEarlyFeeBps</code></td>
+<td>500</td>
+<td>5% fee when cancelling lock early → Treasury (CANCELLED_STAKES_WALLET)</td>
+</tr>
+<tr>
+<td><code>daoProposalMinStakedAiba</code></td>
+<td>10_000</td>
+<td>Min AIBA staked to create proposals</td>
+</tr>
+<tr>
+<td><code>daoProposalMinStakeDays</code></td>
+<td>30</td>
+<td>Min days staked (flexible or lock) to create proposals</td>
+</tr>
+</tbody></table>
+<p>Wallet tab: Overview | Staking flow; period selection, preview, countdown; cancel-early with fee. Yield Vault tab: hero shows min (ecosystem-aligned); locked + flexible staking both show min and enforce it. Wallet tab staking flow: same min displayed and enforced. <code>stakingMinAiba</code> configurable via Admin → Economy (PATCH).</p>
 <h3>6.6 Stars, Diamonds, Referrals</h3>
 <table>
 <thead><tr>

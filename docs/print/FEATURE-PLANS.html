@@ -22,21 +22,60 @@
 <hr/>
 <h2>2. Autonomous racing (car &amp; motorcycle)</h2>
 <p><strong>Vision:</strong> Two verticals — Autonomous Car Racing and Motorcycle Racing. AI-driven vehicles; server-authoritative deterministic races; rewards in AIBA. TON for creation/entry/premium; AIBA for rewards, fees, marketplace.</p>
-<p><strong>Core:</strong> Vehicles (RacingCar / RacingMotorcycle) with stats (top speed, acceleration, handling, durability). Races: N vehicles on a track; server simulates → finish order and times. Entry: pay AIBA (and/or TON). Leagues: Rookie, Pro, Elite. System shop: buy cars/bikes for AIBA. Backend: <code>carRacing</code>, <code>bikeRacing</code> routes; system catalogs and buy endpoints.</p>
+<p><strong>Core:</strong> Vehicles (RacingCar / RacingMotorcycle) with stats (top speed, acceleration, handling, durability). Races: N vehicles on a track; server simulates → finish order and times. Entry: pay AIBA (and/or TON). Leagues: Rookie, Pro, Elite. <strong>Cars for sale / Bikes for sale:</strong> Car Racing tab → Market flow (list your car, buy from players or system). Bike Racing tab → Market flow (list your bike, buy from players or system). System shop: buy cars/bikes for AIBA. Backend: <code>carRacing</code>, <code>bikeRacing</code> routes; <code>listings</code>, <code>list</code>, <code>buy-car</code>/<code>buy-bike</code>, <code>system-cars</code>/<code>system-bikes</code>, <code>buy-system-car</code>/<code>buy-system-bike</code>.</p>
 <hr/>
 <h2>3. Charity ecosystem</h2>
 <p><strong>Vision:</strong> Unified charity layer: one Charity tab and admin surface. Donate NEUR or AIBA to campaigns; optional TON. Transparency: donation ledger, campaign totals, donor count. Integrates with Treasury, DAO (e.g. charity_payout proposals), guilds (guild charity pool), marketplace (optional % to campaign).</p>
 <p><strong>Campaign lifecycle:</strong> Draft → Active → Ended → Funded → Disbursed. UI: glass cards, progress, cause tags. Backend: <code>charity</code> routes; campaigns, donations, leaderboard.</p>
+<p><strong>User customization (donation form):</strong> Max NEUR / Max AIBA buttons; balance line (Balance: X NEUR · Y AIBA); presets (+10, +50, +100, +500, +1000); optional message (max 500 chars); anonymous toggle.</p>
 <hr/>
-<h2>4. Marketplace &amp; payments</h2>
-<p><strong>Vision:</strong> TON + AIBA only. TON = on-ramp (create broker, boost profile, gifts, groups, Stars Store, car/bike creation). AIBA = in-app value (marketplace, rewards, staking, governance). Super Admin: one env wallet per product (CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET, etc.); costs in Economy config (1–10 TON clamped).</p>
-<p><strong>Marketplace:</strong> Global listings (brokers, system shop); sell/buy for AIBA; optional “donate % to charity” at list. Backend: <code>marketplace</code>, <code>starsStore</code>; system brokers/cars/bikes catalogs.</p>
+<h2>4. Super Futuristic Unified Marketplace &amp; payments</h2>
+<p><strong>Vision:</strong> The <strong>Super Futuristic Unified Marketplace</strong> is one place for all trading: brokers, assets, rentals, system shop, and boosts. TON + AIBA only. TON = on-ramp (create broker, boost profile, gifts, groups, Stars Store, car/bike creation). AIBA = in-app value (marketplace, rewards, staking, governance). Super Admin: one env wallet per product (CREATED_BROKERS_WALLET, BOOST_PROFILE_WALLET, GIFTS_WALLET, etc.); costs in Economy config (1–10 TON clamped).</p>
+<p><strong>Marketplace:</strong> Global listings (brokers, system shop); sell/buy for AIBA; optional “donate % to charity” at list. Backend: <code>marketplace</code>, <code>starsStore</code>, <code>asset-marketplace</code>; system brokers/cars/bikes catalogs.</p>
+<p><strong>Implemented — three core categories for sale:</strong></p>
+<table>
+<thead><tr>
+<th>Category</th>
+<th>Where</th>
+<th>List (sell)</th>
+<th>Buy from players</th>
+<th>Buy from system</th>
+<th>Backend</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>1. Brokers for sale</strong></td>
+<td>Market tab → Trade</td>
+<td><code>POST /api/marketplace/list</code></td>
+<td><code>POST /api/marketplace/buy</code></td>
+<td><code>POST /api/marketplace/buy-system-broker</code></td>
+<td><code>marketplace</code> + <code>systemShop</code></td>
+</tr>
+<tr>
+<td><strong>2. Cars for sale</strong></td>
+<td>Car Racing tab → Market flow</td>
+<td><code>POST /api/car-racing/list</code></td>
+<td><code>POST /api/car-racing/buy-car</code></td>
+<td><code>POST /api/car-racing/buy-system-car</code></td>
+<td><code>carRacing</code> + <code>systemShop</code></td>
+</tr>
+<tr>
+<td><strong>3. Bikes for sale</strong></td>
+<td>Bike Racing tab → Market flow</td>
+<td><code>POST /api/bike-racing/list</code></td>
+<td><code>POST /api/bike-racing/buy-bike</code></td>
+<td><code>POST /api/bike-racing/buy-system-bike</code></td>
+<td><code>bikeRacing</code> + <code>systemShop</code></td>
+</tr>
+</tbody></table>
+<p>System catalogs: <code>GET /api/marketplace/system-brokers</code>, <code>GET /api/car-racing/system-cars</code>, <code>GET /api/bike-racing/system-bikes</code>. Listings: <code>GET /api/marketplace/listings</code>, <code>GET /api/car-racing/listings</code>, <code>GET /api/bike-racing/listings</code>.</p>
 <hr/>
 <h2>5. NFT Multiverse</h2>
 <p><strong>Vision:</strong> Multiple universes (Broker, Arena Legend, Course Badge, Full Certificate, future Land/Art). Broker: mint with AIBA; on-chain NFT. Arena Legend: unlock (e.g. 100 wins), mint AIBA, stakable. Course/Full Certificate: TON mints. Benefits: users (ownership, staking, trading); AIBA (burns, fees); Super Admin (TON + fees). Backend: <code>multiverse</code>, mint jobs, staking.</p>
 <hr/>
-<h2>6. Unified comms (announcements, status, FAQ)</h2>
-<p><strong>Vision:</strong> One comms layer: in-app feed (announcements), Telegram push (battle win, optional broadcast), system status, in-app FAQ/support. Updates tab: announcements (<code>GET /api/announcements</code>), status (<code>GET /api/comms/status</code>), FAQ block. Backend: <code>announcements</code>, <code>comms/status</code>; optional support link.</p>
+<h2>6. Unified comms (announcements, status, FAQ) — Phases 1–4 done</h2>
+<p><strong>Vision:</strong> One comms layer: in-app feed (announcements), Telegram push (battle win, optional broadcast), system status, in-app FAQ/support.</p>
+<p><strong>Implemented:</strong> Updates tab: announcements (<code>GET /api/announcements</code>, <code>POST /api/announcements/seen</code> for read/unread), status (<code>GET /api/comms/status</code>, <code>GET /api/comms/config</code>), FAQ block. <strong>Phase 3:</strong> read/unread via <code>lastSeenAnnouncementId</code>. <strong>Phase 4:</strong> in-app support form (<code>POST /api/support/request</code>); <code>supportLink</code>, <code>supportTelegramGroup</code> config. See <a href="UNIFIED-COMMS-ECOSYSTEM.md">UNIFIED-COMMS-ECOSYSTEM.md</a>.</p>
 <hr/>
 <h2>7. AI learning multiverse / economy (token flow)</h2>
 <p><strong>Vision:</strong> AIBA flows: users acquire (rewards, missions, asset sales) → spend (realms, mentors, assets) → split to burn, treasury, reward pools, staking. Micro loops: asset economy (mint → list → buy → fee → upgrade); arena (entry fee → prize pool → winners). Balancing: caps, fee %, burn %. Aligns with governance, mentors, leagues. See backend economy engine and ledger.</p>

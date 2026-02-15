@@ -230,29 +230,7 @@ router.post(
     },
 );
 
-// GET /api/guilds/:guildId/pool
-router.get(
-    '/:guildId/pool',
-    validateParams({ guildId: { type: 'objectId', required: true } }),
-    async (req, res) => {
-    try {
-        const telegramId = String(req.telegramId || '');
-        const guildId = String(req.validatedParams.guildId || '').trim();
-        const guild = await Guild.findById(guildId).lean();
-        if (!guild) return res.status(404).json({ error: 'not found' });
-        if (!isMember(guild, telegramId)) return res.status(403).json({ error: 'not a member' });
-
-        const brokerIds = (guild.pooledBrokers || []).map((p) => p.brokerId);
-        const brokers = await Broker.find({ _id: { $in: brokerIds } }).lean();
-        res.json({ guildId, brokers });
-    } catch (err) {
-        console.error('Error loading guild pool:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
-    },
-);
-
-// GET /api/guilds/list — All groups globally (all users can see). Sorted by boost count then created.
+// GET /api/guilds/list — All groups globally. Must be before /:guildId so "list" is not matched as guildId.
 router.get(
     '/list',
     validateQuery({ limit: { type: 'integer', min: 1, max: 300 } }),
@@ -281,6 +259,28 @@ router.get('/top', async (_req, res) => {
     const guilds = await Guild.find({ active: true }).sort({ boostCount: -1, createdAt: -1 }).limit(50).lean();
     res.json(guilds);
 });
+
+// GET /api/guilds/:guildId/pool — Auth. Guild's pooled brokers. Must be after static /list, /mine, /top.
+router.get(
+    '/:guildId/pool',
+    validateParams({ guildId: { type: 'objectId', required: true } }),
+    async (req, res) => {
+    try {
+        const telegramId = String(req.telegramId || '');
+        const guildId = String(req.validatedParams.guildId || '').trim();
+        const guild = await Guild.findById(guildId).lean();
+        if (!guild) return res.status(404).json({ error: 'not found' });
+        if (!isMember(guild, telegramId)) return res.status(403).json({ error: 'not a member' });
+
+        const brokerIds = (guild.pooledBrokers || []).map((p) => p.brokerId);
+        const brokers = await Broker.find({ _id: { $in: brokerIds } }).lean();
+        res.json({ guildId, brokers });
+    } catch (err) {
+        console.error('Error loading guild pool:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+    },
+);
 
 // POST /api/guilds/:guildId/boost — Any user can pay TON to boost a group. Paid TON → BOOST_GROUP_WALLET. Cost 1–10 TON (Super Admin config).
 router.post(

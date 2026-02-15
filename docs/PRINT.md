@@ -16,6 +16,8 @@ All project docs (including `docs/marketing/`) are available as **print-friendly
 - **`docs/print/`** — One HTML file per Markdown doc (`docs/*.md` and `docs/marketing/*.md`), plus **`index.html`** (list of all docs).
 - **`docs/print.css`** — Shared styles: readable on screen and optimized for print (margins, page breaks, visible URLs when printing).
 
+**Note:** The build script generates HTML from *current* `.md` files only; it does not delete orphan HTML from previously removed docs. As of the latest build, all HTML have corresponding `.md` sources. See [DOCS-STRUCTURE.md](DOCS-STRUCTURE.md).
+
 ## Regenerating
 
 After editing any `docs/*.md` file, run again:

@@ -57,7 +57,7 @@
 <li>Balances (NEUR, AIBA, Stars, Diamonds)</li>
 <li>Guilds (Groups)</li>
 <li>Withdrawing AIBA to Your Wallet (On-Chain Claim)</li>
-<li>Marketplace (Create Broker, List, Buy, Boosts)</li>
+<li>Super Futuristic Unified Marketplace (Create Broker, List, Buy, Boosts)</li>
 <li>Boost your profile</li>
 <li>Gifts</li>
 <li>Referrals</li>
@@ -77,7 +77,7 @@
 <h2>1. Opening the Game</h2>
 <ul>
 <li><strong>Requirements:</strong> Telegram account; optionally a TON wallet (TonConnect) if you want to withdraw AIBA on-chain.</li>
-<li><strong>First time:</strong> You may see a <strong>cinematic intro</strong> (skip or watch) and a <strong>tutorial</strong> (steps for brokers, arena, battle). The app has a <strong>tab bar</strong> at the bottom: <strong>Home</strong>, <strong>Brokers</strong>, <strong>Market</strong>, <strong>Car Racing</strong>, <strong>Bike Racing</strong>, <strong>Multiverse</strong>, <strong>Arenas</strong>, <strong>Guilds</strong>, <strong>Charity</strong>, <strong>University</strong>, <strong>Updates</strong>, <strong>Wallet</strong> (12 tabs). Tap a tab to switch. A <strong>balance strip</strong> at the top shows NEUR, AIBA credits, Stars, Diamonds, and a verified badge if you have one.</li>
+<li><strong>First time:</strong> You may see a <strong>cinematic intro</strong> (skip or watch) and a <strong>tutorial</strong> (steps for brokers, arena, battle). The app has a <strong>Home</strong> grid and tab bar: <strong>Brokers</strong>, <strong>Market</strong>, <strong>Car Racing</strong>, <strong>Bike Racing</strong>, <strong>Multiverse</strong>, <strong>Arenas</strong>, <strong>Guilds</strong>, <strong>Charity</strong>, <strong>University</strong>, <strong>Updates</strong>, <strong>Wallet</strong>, <strong>DAO</strong>, <strong>Governance</strong>, <strong>Trainers</strong>, etc. Tap a grid item or tab to switch. A <strong>balance strip</strong> at the top shows NEUR, AIBA credits, Stars, Diamonds, and a verified badge if you have one.</li>
 </ul>
 <hr/>
 <h2>2. How the App Is Organized (Tabs)</h2>
@@ -96,16 +96,16 @@
 <td>My brokers (select, combine two for NEUR, mint one as NFT for AIBA).</td>
 </tr>
 <tr>
-<td><strong>Market</strong></td>
-<td>Create your broker (pay TON), Marketplace (list/buy brokers with AIBA), Boosts (buy reward multiplier with NEUR).</td>
+<td><strong>Super Futuristic Unified Marketplace</strong></td>
+<td>Brokers, assets, rentals, system shop, boosts. Create broker with TON; list/buy with AIBA.</td>
 </tr>
 <tr>
 <td><strong>Car Racing</strong></td>
-<td>Autonomous car racing: tracks, races, my cars, create car (AIBA or TON), enter race, leaderboard, marketplace (list/buy cars).</td>
+<td>Autonomous car racing: tracks, races, my cars, create car (AIBA or TON), <strong>list car for sale</strong> or <strong>buy</strong> from players/system, enter race, leaderboard.</td>
 </tr>
 <tr>
 <td><strong>Bike Racing</strong></td>
-<td>Autonomous bike racing: tracks, races, my bikes, create bike (AIBA or TON), enter race, leaderboard, marketplace (list/buy bikes).</td>
+<td>Autonomous bike racing: tracks, races, my bikes, create bike (AIBA or TON), <strong>list bike for sale</strong> or <strong>buy</strong> from players/system, enter race, leaderboard.</td>
 </tr>
 <tr>
 <td><strong>Multiverse</strong></td>
@@ -129,11 +129,15 @@
 </tr>
 <tr>
 <td><strong>Updates</strong></td>
-<td>Announcements, status, support.</td>
+<td>Announcements (read/unread), system status, in-app support form (subject + message).</td>
 </tr>
 <tr>
 <td><strong>Wallet</strong></td>
-<td>Profile &amp; badges, Boost your profile (TON), Gifts (TON), Daily reward (NEUR), Vault, Staking (AIBA), DAO (proposals, vote), on-chain claim, Stars &amp; Diamonds.</td>
+<td>Profile &amp; badges, Boost your profile (TON), Gifts (TON), Daily reward (NEUR), Vault, Staking (flexible + locked periods, min stake from config, cancel-early with fee), DAO (proposals, vote; create requires staked AIBA), on-chain claim, Stars &amp; Diamonds.</td>
+</tr>
+<tr>
+<td><strong>Yield Vault</strong></td>
+<td>Dedicated staking tab: hero shows <strong>minimum stake</strong> (e.g. 100 AIBA, ecosystem-aligned); locked + flexible staking both show and enforce min; periods (30/90/180/365d), reward preview, countdown, cancel-early (5% fee). Wallet tab staking flow shows the same minimum.</td>
 </tr>
 </tbody></table>
 <hr/>
@@ -212,7 +216,7 @@
 <li>Your wallet opens: confirm sending the transaction to the <strong>vault</strong> (you pay a small TON fee for gas; the vault sends AIBA to you).</li>
 <li>Wait for confirmation; the app may poll and show “Claim confirmed on-chain.”</li>
 </ol>
-<h3>7.2 Create claim manually, then claim on-chain</h3>
+<h3>8.2 Create claim manually, then claim on-chain</h3>
 <ol>
 <li>In <strong>On-chain claim</strong>, in the “Create a claim” section:</li>
 <li>- Optionally enter an <strong>Amount</strong> (blank = all your AIBA credits).</li>
@@ -228,9 +232,9 @@
 <li>- If you see “Vault inventory too low” or “Vault has insufficient TON,” the project needs to top up the vault; you can try again later.</li>
 </ul>
 <hr/>
-<h2>8. Marketplace (Create Broker, List, Buy)</h2>
-<p>The <strong>Market</strong> tab is the unified marketplace. All payments here are in <strong>TON</strong> (to create a broker) or <strong>AIBA</strong> (to list and buy brokers). See <a href="MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md">MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</a> for the full plan.</p>
-<h3>8.1 Create your broker with TON</h3>
+<h2>9. Super Futuristic Unified Marketplace (Create Broker, List, Buy, Boosts)</h2>
+<p>The <strong>Market</strong> tab is the <strong>Super Futuristic Unified Marketplace</strong>: one hub for brokers, assets, rentals, system shop, and boosts. All payments are <strong>TON</strong> (to create a broker) or <strong>AIBA</strong> (to list and buy). See <a href="MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md">MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</a> for the full plan.</p>
+<h3>9.1 Create your broker with TON</h3>
 <ul>
 <li><strong>Where:</strong> Market tab → <strong>Create your broker (pay TON)</strong> card (shown only when the feature is configured).</li>
 <li><strong>Steps:</strong></li>
@@ -241,19 +245,23 @@
 <li><strong>Result:</strong> A new broker is created and listed on the marketplace at the default AIBA price. Everyone can see it; you appear as the seller.</li>
 <li><strong>Tip:</strong> If you see “txHash already used,” that payment was already applied. Use a new TON payment for another broker.</li>
 </ul>
-<h3>8.2 Stars Store (buy Stars with AIBA or TON)</h3>
+<h3>9.2 Stars Store (buy Stars with AIBA or TON)</h3>
 <ul>
 <li><strong>Where:</strong> <strong>Market</strong> tab and <strong>Wallet</strong> tab → <strong>Stars Store</strong> card.</li>
 <li><strong>Buy with AIBA:</strong> Tap <strong>Buy with AIBA</strong> to buy one pack (size and price set by admins).</li>
 <li><strong>Buy with TON:</strong> Send the required TON to the Stars Store wallet, paste the <strong>transaction hash</strong>, tap <strong>Buy with TON</strong>. TON goes to Super Admin STARS_STORE_WALLET.</li>
 </ul>
-<h3>8.3 List and buy brokers (AIBA)</h3>
+<h3>9.3 List and buy brokers (AIBA)</h3>
 <ul>
 <li><strong>Buy:</strong> Browse <strong>listings</strong> and tap <strong>Buy</strong> on a listing. You pay in <strong>AIBA</strong>; the broker is transferred to you. Your AIBA balance is debited.</li>
 <li><strong>Refresh:</strong> Tap <strong>Refresh</strong> to load the latest listings.</li>
 </ul>
+<h3>9.4 Cars and bikes for sale</h3>
+<ul>
+<li><strong>Bikes:</strong> Bike Racing tab → <strong>Market</strong> flow. <strong>List</strong> a bike from your garage (select bike, enter price AIBA, tap List). <strong>Buy</strong> from other players or from the System.</li>
+</ul>
 <hr/>
-<h2>9. Boost your profile</h2>
+<h2>10. Boost your profile</h2>
 <ul>
 <li><strong>Where:</strong> Wallet tab → <strong>Boost your profile</strong> card (shown when the feature is configured).</li>
 <li><strong>Steps:</strong></li>
@@ -300,7 +308,7 @@
 <hr/>
 <h2>16. Charity (Unite for Good)</h2>
 <ul>
-<li><strong>What:</strong> <strong>Active campaigns</strong> (e.g. education, health, community). Each campaign has a name, description, cause, and progress (NEUR + AIBA raised, donor count). You can <strong>donate</strong> NEUR and/or AIBA from your balance to a campaign; optional message and anonymous option.</li>
+<li><strong>What:</strong> <strong>Active campaigns</strong> (e.g. education, health, community). Each campaign has a name, description, cause, and progress (NEUR + AIBA raised, donor count). <strong>Donate</strong> NEUR and/or AIBA: use <strong>Max NEUR</strong> / <strong>Max AIBA</strong> to fill amounts, or presets (+10, +50, +100, +500, +1000); optional message (max 500 chars) and <strong>anonymous</strong> toggle.</li>
 <li><strong>Your impact:</strong> The tab shows how much you’ve donated (NEUR, AIBA, impact score) and per-campaign breakdown.</li>
 <li><strong>Charity leaderboard:</strong> Optional leaderboard of donors by impact.</li>
 </ul>
@@ -313,7 +321,7 @@
 <hr/>
 <h2>18. Updates (Announcements)</h2>
 <ul>
-<li><strong>What:</strong> <strong>Announcements</strong> from the project (title, body, type). Stay informed about news, status, and support. No action required; read and dismiss.</li>
+<li><strong>What:</strong> <strong>Announcements</strong> from the project (title, body, type). Unread count badge; tap to mark as read. <strong>System status</strong> (operational/maintenance). <strong>Support form</strong>: choose subject (question, bug, feature, account, other) and message; submit to contact support. Admins view requests in Admin → Support.</li>
 </ul>
 <hr/>
 <h2>19. Wallet Tab (Full Picture)</h2>
@@ -323,8 +331,8 @@
 <li><strong>Gifts:</strong> See section 11. Send/received/sent.</li>
 <li><strong>Daily reward:</strong> <strong>Claim daily</strong> to receive <strong>NEUR</strong> once per day (amount set by the project). If you already claimed today, the button shows “Claimed.”</li>
 <li><strong>Vault:</strong> Vault address and TON/jetton balance (for debugging or checking claim capacity).</li>
-<li><strong>Staking:</strong> <strong>Stake</strong> AIBA (lock in the pool), <strong>Unstake</strong>, or <strong>Claim</strong> staking reward. APY and pending reward are shown. Staking is off-chain; rewards are in AIBA.</li>
-<li><strong>DAO:</strong> <strong>Create</strong> a proposal (title, description) or <strong>vote</strong> on active proposals (Vote For / Vote Against). Proposals can be closed and executed (treasury payout) by the project.</li>
+<li><strong>Staking:</strong> <strong>Stake</strong> AIBA (flexible or locked). <strong>Minimum stake</strong> is shown (e.g. 100 AIBA, ecosystem-aligned; configurable in Admin). Locked: choose period (30/90/180/365 days), see APY and reward preview; view active locks with countdown. <strong>Cancel early</strong> before maturity (5% fee → Treasury). <strong>Claim</strong> when lock matures or for flexible rewards. Staking is off-chain; rewards in AIBA.</li>
+<li><strong>DAO:</strong> <strong>Create</strong> a proposal (title, description) or <strong>vote</strong> on active proposals (Vote For / Vote Against). Creating a proposal requires staking ≥ config min (e.g. 10,000 AIBA) for ≥ min days (e.g. 30). Proposals can be closed and executed (treasury payout) by the project.</li>
 <li><strong>On-chain claim:</strong> When you have a battle with a claim (or you created one manually), this card shows vault, amount, seqno, validUntil and <strong>Claim on-chain (TonConnect)</strong> / <strong>Check claim status</strong>. See section 8.</li>
 <li><strong>Stars and Diamonds:</strong> Display of your Stars and Diamonds balances (earned from battles).</li>
 </ul>
@@ -420,7 +428,7 @@
 </tr>
 <tr>
 <td>“Stake failed” / “Unstake failed”</td>
-<td>Check AIBA balance for stake; for unstake, amount must be ≤ staked amount.</td>
+<td>Check AIBA balance; <strong>minimum stake</strong> applies (e.g. 100 AIBA; shown in Yield Vault / Wallet staking). For unstake, amount must be ≤ staked amount.</td>
 </tr>
 <tr>
 <td>“Daily claim failed” / “Already claimed today”</td>

@@ -145,13 +145,55 @@
 <li>[ ] App icon (square, high resolution)</li>
 <li>[ ] Screenshots (e.g., Home, Brokers, Battle result, Referrals)</li>
 <li>[ ] Category selection (Games, Play to Earn, NFT as applicable)</li>
-<li>[ ] Privacy policy link (if required)</li>
-<li>[ ] No misleading or scam-like claims</li>
+<li>[x] <strong>Privacy policy link</strong> — Implemented: <a href="./PRIVACY-POLICY.md"><code>docs/PRIVACY-POLICY.md</code></a>, in-app at <code>/privacy</code> and linked from Settings → Privacy &amp; data</li>
+<li>[x] <strong>Terms of service</strong> — Implemented: <a href="./TERMS-OF-SERVICE.md"><code>docs/TERMS-OF-SERVICE.md</code></a>, in-app at <code>/terms</code> and linked from Settings</li>
+<li>[x] <strong>No misleading or scam-like claims</strong> — Implemented: earnings disclaimer in Wallet tab and FAQs; Terms §3 (&quot;No Guaranteed Profits&quot;) explicitly disclaims guaranteed rewards</li>
 <li>[ ] Test thoroughly before submitting</li>
+</ul>
+<hr/>
+<h2>Implementation Status (Moderation Advisory Compliance)</h2>
+<table>
+<thead><tr>
+<th>Requirement</th>
+<th>Status</th>
+<th>Implementation</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Clear disclosure (no false promises)</td>
+<td>✓ Done</td>
+<td>Terms §3, Wallet disclaimer banner, FAQs &quot;Earnings disclaimer?&quot;</td>
+</tr>
+<tr>
+<td>No misleading &quot;guaranteed profit&quot; language</td>
+<td>✓ Done</td>
+<td>Terms §3, Wallet &amp; FAQ disclaimers</td>
+</tr>
+<tr>
+<td>Privacy policy ready</td>
+<td>✓ Done</td>
+<td><code>docs/PRIVACY-POLICY.md</code>, <code>/privacy</code> page, Settings link</td>
+</tr>
+<tr>
+<td>Terms of service ready</td>
+<td>✓ Done</td>
+<td><code>docs/TERMS-OF-SERVICE.md</code>, <code>/terms</code> page, Settings link</td>
+</tr>
+<tr>
+<td>Referral rewards transparent</td>
+<td>✓ Done</td>
+<td>Creator tiers (2–7%) shown in UI and FAQs</td>
+</tr>
+</tbody></table>
+<p><strong>In-app links for submission form:</strong></p>
+<ul>
+<li>Terms of Service: <code>https://&lt;your-miniapp-domain&gt;/terms</code></li>
 </ul>
 <hr/>
 <h2>Related docs</h2>
 <ul>
+<li><a href="./TERMS-OF-SERVICE.md">TERMS-OF-SERVICE.md</a> — Terms of service (includes earnings disclaimer)</li>
+<li><a href="./GAME-FUNCTIONALITY.md">GAME-FUNCTIONALITY.md</a> — Game mechanics and architecture</li>
 <li><a href="./ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md">ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md</a> — Tokenomics and viral design</li>
 </ul>
   </div>

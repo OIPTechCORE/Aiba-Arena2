@@ -20,7 +20,7 @@ router.post(
         mentorId: { type: 'objectId', required: true },
     }),
     async (req, res) => {
-    const mentorId = String(req.body?.mentorId || '').trim();
+    const mentorId = String(req.validatedBody?.mentorId || req.body?.mentorId || '').trim();
     const mentor = await Mentor.findById(mentorId).lean();
     if (!mentor) return res.status(404).json({ error: 'Mentor not found' });
 
@@ -40,7 +40,7 @@ router.post(
         mentorId: { type: 'objectId', required: true },
     }),
     async (req, res) => {
-    const mentorId = String(req.body?.mentorId || '').trim();
+    const mentorId = String(req.validatedBody?.mentorId || req.body?.mentorId || '').trim();
     const mentor = await Mentor.findById(mentorId);
     if (!mentor) return res.status(404).json({ error: 'Mentor not found' });
 

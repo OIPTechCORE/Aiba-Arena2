@@ -119,6 +119,12 @@ const IconUniversity = () => (
         <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
     </svg>
 );
+const IconCoe = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+        <path d="M12 16v-4" /><path d="M10 14h4" />
+    </svg>
+);
 const IconMultiverse = () => (
     <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <circle cx="12" cy="12" r="3" /><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
@@ -147,6 +153,11 @@ const IconTrophy = () => (
 const IconBoss = () => (
     <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <circle cx="12" cy="12" r="10" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /><path d="M2 12h20" />
+    </svg>
+);
+const IconBet = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
     </svg>
 );
 const IconPremium = () => (
@@ -216,17 +227,17 @@ const IconDiamond = () => (
 
 /* X-style profile badges: id → { label, color, title (tooltip) } */
 const BADGE_LABELS = {
-    verified: { label: 'Verified', color: 'var(--accent-cyan)', title: 'Verified identity' },
+    verified: { label: 'Verified', color: 'var(--accent-gold)', title: 'Verified identity' },
     early_adopter: { label: 'Early Adopter', color: 'var(--accent-gold)', title: 'Joined in early phase' },
     top_donor: { label: 'Top Donor', color: 'var(--accent-magenta)', title: 'Top charity donor' },
     guild_leader: { label: 'Guild Leader', color: 'var(--accent-green)', title: 'Leads a guild' },
     top_leader: { label: 'Top Leader', color: 'var(--accent-gold)', title: 'Top by total score' },
     champion: { label: 'Champion', color: 'var(--accent-magenta)', title: 'Champion status' },
-    diamond_holder: { label: 'Diamond Holder', color: 'var(--accent-cyan)', title: 'Holds TON ecosystem Diamonds' },
-    university_graduate: { label: 'University Graduate', color: 'var(--accent-cyan)', title: 'Completed all University modules' },
+    diamond_holder: { label: 'Diamond Holder', color: 'var(--accent-amber)', title: 'Holds TON ecosystem Diamonds' },
+    university_graduate: { label: 'University Graduate', color: 'var(--accent-gold)', title: 'Completed all University modules' },
     course_completion: { label: 'Course Completion', color: 'var(--accent-green)', title: 'Minted after completing at least one course' },
     full_course_completion_certificate: { label: 'Full Course Certificate', color: 'var(--accent-gold)', title: 'Minted after completing all courses' },
-    top_referrer: { label: 'Top Referrer', color: 'var(--accent-cyan)', title: 'Top 3 on referral leaderboard' },
+    top_referrer: { label: 'Top Referrer', color: 'var(--accent-gold)', title: 'Top 3 on referral leaderboard' },
 };
 
 /* Short explanations for tabs (what brokers, arenas, guilds are) */
@@ -252,7 +263,7 @@ const HERO_BY_TAB = {
     referrals: { title: 'REFERRALS', sub: 'Earn NEUR & AIBA when friends join.', hint: 'Share your link or apply a friend\'s code.', buttonLabel: 'View', buttonAction: 'scroll' },
     arenas: { title: 'ARENAS', sub: ARENAS_EXPLANATION, hint: 'Choose arena and run battle. Guild Wars needs a guild.', buttonLabel: 'View', buttonAction: 'scroll' },
     guilds: { title: 'GUILDS', sub: GUILDS_EXPLANATION, hint: 'Create or join a group; deposit brokers to the pool.', buttonLabel: 'View', buttonAction: 'scroll' },
-    market: { title: 'MARKET', sub: 'Sell a broker for AIBA or buy one.', hint: 'Withdraw from guild first to list.', buttonLabel: 'View', buttonAction: 'scroll' },
+    market: { title: 'SUPER FUTURISTIC UNIFIED MARKETPLACE', sub: 'Brokers, system shop, assets, rentals, boosts — one place to trade, list, and buy. TON + AIBA.', hint: 'Overview · Trade · Rental · System · Boosts.', buttonLabel: 'View', buttonAction: 'scroll' },
     tournaments: { title: 'TOURNAMENTS', sub: 'Enter AIBA tournaments. Compete, win prizes from the pool.', hint: 'Pay AIBA to enter; top 4 share the prize pool.', buttonLabel: 'View', buttonAction: 'scroll' },
     globalBoss: { title: 'GLOBAL BOSS', sub: 'Fight the community boss. Damage from battles counts. Share reward pool.', hint: 'Run battles to deal damage. When boss falls, top damagers earn AIBA.', buttonLabel: 'View', buttonAction: 'scroll' },
     carRacing: { title: 'CAR RACING', sub: 'Autonomous car racing. Create or buy a car, enter open races.', hint: 'Earn AIBA by finish position. System shop sells cars for AIBA.', buttonLabel: 'View', buttonAction: 'scroll' },
@@ -260,14 +271,17 @@ const HERO_BY_TAB = {
     multiverse: { title: 'NFT MULTIVERSE', sub: 'Own Broker NFTs, stake them to earn AIBA daily.', hint: 'Mint from Brokers tab (pay AIBA).', buttonLabel: 'View', buttonAction: 'scroll' },
     charity: { title: 'COMMUNITY IMPACT', sub: 'Unite for Good. Donate NEUR or AIBA to causes.', hint: 'Every contribution counts.', buttonLabel: 'View', buttonAction: 'scroll' },
     university: { title: 'AIBA ARENA UNIVERSITY', sub: 'Complete systematic guide. Learn brokers, arenas, economy, guilds.', hint: 'Expand courses below. Complete all to earn the University Graduate badge.', buttonLabel: 'View', buttonAction: 'scroll' },
+    coe: { title: 'CENTER OF EXCELLENCE', sub: 'Learn · Train · Earn. Hub for University, Trainers & Creator Economy.', hint: 'Master the game, join the trainer network, grow your referrals.', buttonLabel: 'View', buttonAction: 'scroll' },
     realms: { title: 'AI REALMS', sub: 'Select a realm and complete missions to earn rewards.', hint: 'Explore AI Realms and complete missions.', buttonLabel: 'View', buttonAction: 'scroll' },
     assets: { title: 'AI ASSETS', sub: 'Mint, upgrade, list, buy, and rent AI assets.', hint: 'AI Agent, AI Brain, AI Creator, AI Workflow, AI System.', buttonLabel: 'View', buttonAction: 'scroll' },
     trainers: { title: 'TRAINERS & COACHES', sub: 'Global network of AIBA Arena trainers. Apply to earn AIBA when you help players learn. Recruit trainers, claim rewards.', hint: 'Network, leaderboard, dashboard. Apply with a trainer code or open the full portal.', buttonLabel: 'Open portal', buttonAction: 'trainers' },
+    dao: { title: 'DAO', sub: 'Create proposals and vote. Stake AIBA for 30+ days to propose.', hint: 'Community-driven decisions. Governance tab.', buttonLabel: 'View', buttonAction: 'scroll' },
     governance: { title: 'GOVERNANCE', sub: 'Create proposals and vote. Community-driven decisions.', hint: 'Propose and vote on ecosystem changes.', buttonLabel: 'View', buttonAction: 'scroll' },
     updates: { title: 'UPDATES & FAQs', sub: 'Announcements, status & support.', hint: 'Stay informed. News, maintenance and answers to common questions.', buttonLabel: 'View', buttonAction: 'scroll' },
     profile: { title: 'PROFILE', sub: 'Your profile, balances, badges, and account details.', hint: 'Wallet & more.', buttonLabel: 'View', buttonAction: 'scroll' },
     settings: { title: 'SETTINGS', sub: 'App preferences, notifications, and account options.', hint: 'Theme, sound, privacy, and more.', buttonLabel: 'View', buttonAction: 'scroll' },
     wallet: { title: 'WALLET', sub: 'Claim AIBA on-chain. Stake, DAO, Stars, Diamonds.', hint: 'Connect wallet, create claim, sign tx. Daily NEUR, stake AIBA.', buttonLabel: 'View', buttonAction: 'scroll' },
+    staking: { title: 'YIELD VAULT', sub: 'Lock AIBA, earn APY. Flexible or locked periods. Higher APY for longer locks.', hint: 'Stake, claim rewards, manage locks. Cancel early = 5% fee to Treasury.', buttonLabel: 'View', buttonAction: 'scroll' },
 };
 
 /* Tab bar (footer): core play flow first — Home → Brokers → Arenas → Market → Tasks … */
@@ -280,18 +294,23 @@ const TAB_LIST = [
     { id: 'leaderboard', label: 'Leaderboard', Icon: IconLeaderboard },
     { id: 'tournaments', label: 'Tournaments', Icon: IconTrophy, badge: 'NEW' },
     { id: 'globalBoss', label: 'Global Boss', Icon: IconBoss, badge: 'NEW' },
+    { id: 'predict', label: 'Predict', Icon: IconBet, badge: 'NEW' },
     { id: 'carRacing', label: 'Car Racing', Icon: IconCar },
     { id: 'bikeRacing', label: 'Bike Racing', Icon: IconBike },
     { id: 'referrals', label: 'Referrals', Icon: IconShare },
-    { id: 'trainers', label: 'Trainers', Icon: IconTrainer },
+    { id: 'trainers', label: 'Trainers', Icon: IconTrainer, gridStyle: 'trainers' },
     { id: 'guilds', label: 'Guilds', Icon: IconGuilds },
     { id: 'multiverse', label: 'Multiverse', Icon: IconMultiverse },
+    { id: 'nftGallery', label: 'NFT Gallery', Icon: IconMultiverse, badge: 'NEW' },
+    { id: 'coe', label: 'CoE', Icon: IconCoe, badge: 'NEW' },
     { id: 'university', label: 'University', Icon: IconUniversity },
+    { id: 'staking', label: 'Yield Vault', Icon: IconStake, badge: 'NEW' },
     { id: 'wallet', label: 'Wallet', Icon: IconWallet },
     { id: 'profile', label: 'Profile', Icon: IconProfile },
     { id: 'charity', label: 'Charity', Icon: IconHeart },
     { id: 'realms', label: 'Realms', Icon: IconWorld },
     { id: 'assets', label: 'Assets', Icon: IconAsset },
+    { id: 'dao', label: 'DAO', Icon: IconGov, badge: 'NEW', gridStyle: 'dao' },
     { id: 'governance', label: 'Governance', Icon: IconGov },
     { id: 'updates', label: 'Updates', Icon: IconUpdates },
     { id: 'settings', label: 'Settings', Icon: IconSettings },
@@ -334,6 +353,7 @@ export default function HomePage() {
     const [tutorialStep, setTutorialStep] = useState(0);
     const [tab, setTab] = useState('home');
     const scrollToFaqRef = useRef(false);
+    const nftGalleryDefaultAppliedRef = useRef(false);
     const [dailyStatus, setDailyStatus] = useState(null);
     const [showCinematicIntro, setShowCinematicIntro] = useState(false);
     const [mintNftMsg, setMintNftMsg] = useState('');
@@ -361,11 +381,17 @@ export default function HomePage() {
     const [carFlow, setCarFlow] = useState('garage'); // garage | system | market | race | leaderboard
     const [bikeFlow, setBikeFlow] = useState('garage'); // garage | system | market | race | leaderboard
     const [tournaments, setTournaments] = useState([]);
+    const [tournamentDetail, setTournamentDetail] = useState(null);
     const [selectedTournament, setSelectedTournament] = useState(null);
     const [tournamentBrokerId, setTournamentBrokerId] = useState('');
     const [tournamentsMsg, setTournamentsMsg] = useState('');
     const [globalBoss, setGlobalBoss] = useState(null);
     const [globalBossMsg, setGlobalBossMsg] = useState('');
+    const [predictEvents, setPredictEvents] = useState([]);
+    const [predictBetEventId, setPredictBetEventId] = useState('');
+    const [predictBetBrokerId, setPredictBetBrokerId] = useState('');
+    const [predictBetAmount, setPredictBetAmount] = useState('');
+    const [predictMsg, setPredictMsg] = useState('');
     const [premiumStatus, setPremiumStatus] = useState(null);
     const [premiumTxHash, setPremiumTxHash] = useState('');
     const [premiumMsg, setPremiumMsg] = useState('');
@@ -377,6 +403,14 @@ export default function HomePage() {
     const [breedBrokerB, setBreedBrokerB] = useState('');
     const [breedingMsg, setBreedingMsg] = useState('');
     const [comboClaimMsg, setComboClaimMsg] = useState('');
+    const [walletFlow, setWalletFlow] = useState('overview');
+    const [stakingPeriods, setStakingPeriods] = useState([]);
+    const [stakingMinAiba, setStakingMinAiba] = useState(100);
+    const [stakingLocks, setStakingLocks] = useState([]);
+    const [stakingCountdownTick, setStakingCountdownTick] = useState(0);
+    const [stakeLockAmount, setStakeLockAmount] = useState('');
+    const [stakeLockPeriodDays, setStakeLockPeriodDays] = useState(30);
+    const [stakingLockMsg, setStakingLockMsg] = useState('');
     const [gameModes, setGameModes] = useState([]);
     const [league, setLeague] = useState('rookie');
     const [treasurySummary, setTreasurySummary] = useState(null);
@@ -556,6 +590,14 @@ export default function HomePage() {
             setTournaments([]);
         }
     }
+    async function fetchTournamentDetail(tId) {
+        try {
+            const res = await api.get(`/api/tournaments/${tId}`);
+            setTournamentDetail(res.data || null);
+        } catch {
+            setTournamentDetail(null);
+        }
+    }
     async function enterTournament(tId, brokerId) {
         if (!brokerId) return;
         setBusy(true);
@@ -579,6 +621,32 @@ export default function HomePage() {
             setGlobalBoss(res.data || null);
         } catch {
             setGlobalBoss(null);
+        }
+    }
+    async function refreshPredictEvents() {
+        try {
+            const res = await api.get('/api/predict/events', { params: { status: 'open' } });
+            setPredictEvents(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setPredictEvents([]);
+        }
+    }
+    async function placePredictBet(eventId, brokerId, amountAiba) {
+        if (!eventId || !brokerId || !amountAiba || parseInt(amountAiba, 10) < 1) return;
+        setBusy(true);
+        setPredictMsg('');
+        try {
+            await api.post(`/api/predict/events/${eventId}/bet`, { brokerId, amountAiba: parseInt(amountAiba, 10) });
+            setPredictMsg('Bet placed!');
+            setPredictBetEventId('');
+            setPredictBetBrokerId('');
+            setPredictBetAmount('');
+            await refreshPredictEvents();
+            await refreshEconomy();
+        } catch (e) {
+            setPredictMsg(getErrorMessage(e, 'Bet failed.'));
+        } finally {
+            setBusy(false);
         }
     }
 
@@ -980,6 +1048,10 @@ export default function HomePage() {
     const [multiverseMyNfts, setMultiverseMyNfts] = useState([]);
     const [multiverseStakingRewards, setMultiverseStakingRewards] = useState(null);
     const [multiverseMsg, setMultiverseMsg] = useState('');
+    const [multiverseFlow, setMultiverseFlow] = useState('list'); // 'list' | 'gallery'
+    const [nftGalleryFlow, setNftGalleryFlow] = useState('grid'); // 'grid' | 'list' — dedicated NFT Gallery view
+    const [nftGalleryFilter, setNftGalleryFilter] = useState('all'); // 'all' | 'staked' | 'available'
+    const [nftGalleryLoading, setNftGalleryLoading] = useState(false); // loading state for dedicated gallery
     const [nftStakingRewardPerDay, setNftStakingRewardPerDay] = useState(5);
     async function refreshMultiverse() {
         try {
@@ -1051,6 +1123,8 @@ export default function HomePage() {
     const [carCreateTxHash, setCarCreateTxHash] = useState('');
     const [carEnterRaceId, setCarEnterRaceId] = useState('');
     const [carEnterCarId, setCarEnterCarId] = useState('');
+    const [listCarId, setListCarId] = useState('');
+    const [listCarPriceAIBA, setListCarPriceAIBA] = useState('');
     async function refreshCarRacing() {
         try {
             const results = await Promise.allSettled([
@@ -1135,6 +1209,22 @@ export default function HomePage() {
             setBusy(false);
         }
     }
+    async function listCar() {
+        if (!listCarId || !listCarPriceAIBA.trim()) return;
+        setBusy(true);
+        setCarMsg('');
+        try {
+            await api.post('/api/car-racing/list', { carId: listCarId, priceAIBA: Number(listCarPriceAIBA) });
+            setCarMsg('Car listed for sale.');
+            setListCarId('');
+            setListCarPriceAIBA('');
+            await refreshCarRacing();
+        } catch (e) {
+            setCarMsg(getErrorMessage(e, 'List failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
 
     // Bike Racing
     const [bikeRacingConfig, setBikeRacingConfig] = useState(null);
@@ -1148,6 +1238,8 @@ export default function HomePage() {
     const [bikeCreateTxHash, setBikeCreateTxHash] = useState('');
     const [bikeEnterRaceId, setBikeEnterRaceId] = useState('');
     const [bikeEnterBikeId, setBikeEnterBikeId] = useState('');
+    const [listBikeId, setListBikeId] = useState('');
+    const [listBikePriceAIBA, setListBikePriceAIBA] = useState('');
     async function refreshBikeRacing() {
         try {
             const results = await Promise.allSettled([
@@ -1218,6 +1310,22 @@ export default function HomePage() {
             setBusy(false);
         }
     }
+    async function listBike() {
+        if (!listBikeId || !listBikePriceAIBA.trim()) return;
+        setBusy(true);
+        setBikeMsg('');
+        try {
+            await api.post('/api/bike-racing/list', { bikeId: listBikeId, priceAIBA: Number(listBikePriceAIBA) });
+            setBikeMsg('Bike listed for sale.');
+            setListBikeId('');
+            setListBikePriceAIBA('');
+            await refreshBikeRacing();
+        } catch (e) {
+            setBikeMsg(getErrorMessage(e, 'List failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
     async function buySystemBike(catalogId) {
         setBusy(true);
         setBikeMsg('');
@@ -1272,6 +1380,74 @@ export default function HomePage() {
             setStakingSummary(null);
         }
     }
+    async function refreshStakingPeriods() {
+        try {
+            const res = await api.get('/api/staking/periods');
+            setStakingPeriods(Array.isArray(res.data?.periods) ? res.data.periods : []);
+            setStakingMinAiba(Math.max(1, Number(res.data?.minAiba ?? 100) || 100));
+        } catch {
+            setStakingPeriods([]);
+            setStakingMinAiba(100);
+        }
+    }
+    async function refreshStakingLocks() {
+        try {
+            const res = await api.get('/api/staking/locks');
+            setStakingLocks(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setStakingLocks([]);
+        }
+    }
+    async function stakeLocked() {
+        const amt = Math.floor(Number(stakeLockAmount));
+        if (!Number.isFinite(amt) || amt <= 0 || !stakeLockPeriodDays) return;
+        setBusy(true);
+        setStakingLockMsg('');
+        try {
+            const res = await api.post('/api/staking/stake-locked', {
+                amount: amt,
+                periodDays: stakeLockPeriodDays,
+                requestId: uuid(),
+            });
+            setStakingLockMsg(`Locked ${amt} AIBA for ${stakeLockPeriodDays} days. Expected reward: ${res.data?.expectedRewardAiba ?? 0} AIBA.`);
+            setStakeLockAmount('');
+            await refreshStakingLocks();
+            await refreshEconomy();
+        } catch (err) {
+            const d = err?.response?.data;
+            setStakingLockMsg(d?.error === 'min_stake_required' ? (d.message || `Minimum ${(d.minAiba ?? 100).toLocaleString()} AIBA.`) : getErrorMessage(err, 'Lock failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function cancelStakeEarly(lockId) {
+        setBusy(true);
+        setStakingLockMsg('');
+        try {
+            const res = await api.post('/api/staking/cancel-early', { lockId, requestId: uuid() });
+            setStakingLockMsg(res.data?.message || `Returned ${res.data?.returnedAiba ?? 0} AIBA. Fee ${res.data?.feeAiba ?? 0} → Super Admin.`);
+            await refreshStakingLocks();
+            await refreshEconomy();
+        } catch (e) {
+            setStakingLockMsg(getErrorMessage(e, 'Cancel failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function claimLock(lockId) {
+        setBusy(true);
+        setStakingLockMsg('');
+        try {
+            const res = await api.post('/api/staking/claim-lock', { lockId, requestId: uuid() });
+            setStakingLockMsg(`Claimed ${res.data?.total ?? 0} AIBA (principal + reward).`);
+            await refreshStakingLocks();
+            await refreshEconomy();
+        } catch (e) {
+            setStakingLockMsg(getErrorMessage(e, 'Claim failed.'));
+        } finally {
+            setBusy(false);
+        }
+    }
     async function stake() {
         const amt = Number(stakeAmount);
         if (!Number.isFinite(amt) || amt <= 0) return;
@@ -1283,8 +1459,9 @@ export default function HomePage() {
             setStakeAmount('');
             await refreshStaking();
             await refreshEconomy();
-        } catch {
-            setStakeMsg('Stake failed (insufficient AIBA?).');
+        } catch (err) {
+            const d = err?.response?.data;
+            setStakeMsg(d?.error === 'min_stake_required' ? (d.message || `Minimum ${(d.minAiba ?? 100).toLocaleString()} AIBA.`) : 'Stake failed (insufficient AIBA?).');
         } finally {
             setBusy(false);
         }
@@ -1324,9 +1501,19 @@ export default function HomePage() {
     // DAO
     const [proposals, setProposals] = useState([]);
     const [daoMsg, setDaoMsg] = useState('');
+    const [daoConfig, setDaoConfig] = useState(null);
     const [newProposalTitle, setNewProposalTitle] = useState('');
     const [newProposalDesc, setNewProposalDesc] = useState('');
-    async function refreshProposals() {
+    const [daoProposalDetail, setDaoProposalDetail] = useState(null);
+    async function refreshDaoConfig() {
+        try {
+            const res = await api.get('/api/dao/config');
+            setDaoConfig(res.data || null);
+        } catch {
+            setDaoConfig(null);
+        }
+    }
+    async function refreshDaoProposals() {
         setBusy(true);
         try {
             const res = await api.get('/api/dao/proposals');
@@ -1337,12 +1524,21 @@ export default function HomePage() {
             setBusy(false);
         }
     }
+    async function fetchDaoProposalDetail(proposalId) {
+        try {
+            const res = await api.get(`/api/dao/proposals/${proposalId}`);
+            setDaoProposalDetail(res.data || null);
+        } catch {
+            setDaoProposalDetail(null);
+        }
+    }
     async function voteProposal(proposalId, support) {
         setDaoMsg('');
         try {
             await api.post('/api/dao/vote', { proposalId, support });
             setDaoMsg('Vote recorded.');
-            await refreshProposals();
+            await refreshDaoProposals();
+            if (daoProposalDetail?._id === proposalId) fetchDaoProposalDetail(proposalId);
         } catch {
             setDaoMsg('Vote failed.');
         }
@@ -1356,9 +1552,14 @@ export default function HomePage() {
             setDaoMsg('Proposal created.');
             setNewProposalTitle('');
             setNewProposalDesc('');
-            await refreshProposals();
-        } catch {
-            setDaoMsg('Create failed.');
+            await refreshDaoProposals();
+        } catch (e) {
+            const data = e?.response?.data;
+            if (data?.error === 'staking_required') {
+                setDaoMsg(data.message || `Stake ${(data.minStakedAiba || 10000).toLocaleString()} AIBA for ${data.minStakeDays || 30} days to create proposals.`);
+            } else {
+                setDaoMsg(getErrorMessage(e, 'Create failed.'));
+            }
         } finally {
             setBusy(false);
         }
@@ -1455,6 +1656,15 @@ export default function HomePage() {
             } else if (!localStorage.getItem('aiba_tutorial_done')) {
                 setTutorialStep(1);
             }
+            const savedCharityView = localStorage.getItem('aiba_charity_view_mode');
+            if (savedCharityView === 'compact' || savedCharityView === 'detailed') setCharityViewMode(savedCharityView);
+            const savedFavoritesOnly = localStorage.getItem('aiba_charity_favorites_only');
+            if (savedFavoritesOnly === '1') setCharityFavoritesOnly(true);
+            const savedFavoriteIds = localStorage.getItem('aiba_charity_favorite_ids');
+            if (savedFavoriteIds) {
+                const parsed = JSON.parse(savedFavoriteIds);
+                if (Array.isArray(parsed)) setCharityFavoriteIds(parsed.map((x) => String(x)));
+            }
         } catch {
             // ignore
         }
@@ -1471,28 +1681,50 @@ export default function HomePage() {
     }, []);
 
     useEffect(() => {
+        try {
+            localStorage.setItem('aiba_charity_view_mode', charityViewMode);
+            localStorage.setItem('aiba_charity_favorites_only', charityFavoritesOnly ? '1' : '0');
+            localStorage.setItem('aiba_charity_favorite_ids', JSON.stringify(charityFavoriteIds));
+        } catch {
+            // ignore
+        }
+    }, [charityViewMode, charityFavoritesOnly, charityFavoriteIds]);
+
+    useEffect(() => {
         if (tab === 'brokers') { refreshBrokers().catch(() => {}); refreshGameModes().catch(() => {}); }
         if (tab === 'leaderboard') refreshLeaderboard().catch(() => {});
         if (tab === 'tasks') refreshTasks().catch(() => {});
         if (tab === 'guilds') refreshMyRank().catch(() => {});
         if (tab === 'arenas') refreshGameModes().catch(() => {});
         if (tab === 'wallet') { refreshTreasuryOracle().catch(() => {}); }
-        if (tab === 'charity') refreshCharityAll();
-        if (tab === 'university') refreshUniversity();
-        if (tab === 'updates') refreshUpdatesAll();
+        if (tab === 'charity') refreshCharityAll().catch(() => setStatus('Failed to load charity data.'));
+        if (tab === 'university') refreshUniversity().catch(() => setStatus('Failed to load university data.'));
+        if (tab === 'coe') {
+            refreshReferralMe().catch(() => {});
+            refreshReferralCreatorStats().catch(() => {});
+            refreshTopReferrers().catch(() => {});
+            refreshUniversity().catch(() => setStatus('Failed to load university data.'));
+            refreshTrainerMe().catch(() => {});
+            refreshTrainersLeaderboard().catch(() => {});
+        }
+        if (tab === 'updates') refreshUpdatesAll().catch(() => setStatus('Failed to load updates.'));
         if (tab === 'home' || tab === 'referrals') { refreshReferralMe().catch(() => {}); refreshTopReferrers().catch(() => {}); }
         if (tab === 'trainers') { refreshTrainerMe().catch(() => {}); refreshTrainersNetwork().catch(() => {}); refreshTrainersLeaderboard().catch(() => {}); }
         if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshReferralMe().catch(() => {}); refreshBrokerRentals().catch(() => {}); }
         if (tab === 'carRacing') refreshCarRacing().catch(() => {});
         if (tab === 'bikeRacing') refreshBikeRacing().catch(() => {});
         if (tab === 'multiverse') refreshMultiverse().catch(() => {});
+        if (tab === 'nftGallery') { setMultiverseFlow('gallery'); setNftGalleryLoading(true); refreshMultiverse().finally(() => setNftGalleryLoading(false)); }
         if (tab === 'realms') { refreshRealms().catch(() => {}); refreshMissions(selectedRealmKey).catch(() => {}); refreshMentors().catch(() => {}); }
         if (tab === 'assets') { refreshAssets().catch(() => {}); refreshMarketListings().catch(() => {}); }
+        if (tab === 'dao') { refreshDaoConfig().catch(() => {}); refreshDaoProposals().catch(() => {}); refreshTreasuryOracle().catch(() => {}); refreshTreasuryOps().catch(() => {}); }
         if (tab === 'governance') { refreshProposals().catch(() => {}); refreshTreasuryOracle().catch(() => {}); refreshTreasuryOps().catch(() => {}); }
-        if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshDailyStatus().catch(() => {}); refreshPremiumStatus().catch(() => {}); refreshP2pConfig().catch(() => {}); refreshOracle().catch(() => {}); }
-        if (tab === 'guilds') { refreshTopGuilds().catch(() => {}); }
+        if (tab === 'wallet') { refreshGifts().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshDailyStatus().catch(() => {}); refreshPremiumStatus().catch(() => {}); refreshP2pConfig().catch(() => {}); refreshTreasuryOracle().catch(() => {}); refreshStaking(); refreshStakingPeriods(); refreshStakingLocks(); }
+        if (tab === 'staking') { refreshStaking(); refreshStakingPeriods(); refreshStakingLocks(); refreshEconomy().catch(() => {}); }
+        if (tab === 'guilds') { refreshGuilds().catch(() => {}); refreshAllGroups().catch(() => {}); }
         if (tab === 'tournaments') { refreshTournaments().catch(() => {}); refreshBrokers().catch(() => {}); }
         if (tab === 'globalBoss') { refreshGlobalBoss().catch(() => {}); }
+        if (tab === 'predict') { refreshPredictEvents().catch(() => {}); }
         // Keep header visible: scroll to top so header is never hidden on tab change
         setBalanceStripVisible(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1505,6 +1737,13 @@ export default function HomePage() {
     }, [tab]);
 
     useEffect(() => {
+        if (multiverseMyNfts.length > 0 && !nftGalleryDefaultAppliedRef.current) {
+            setMultiverseFlow('gallery');
+            nftGalleryDefaultAppliedRef.current = true;
+        }
+    }, [multiverseMyNfts]);
+
+    useEffect(() => {
         const onScroll = () => {
             const y = typeof window !== 'undefined' ? (window.scrollY ?? document.documentElement?.scrollTop ?? 0) : 0;
             const delta = y - lastScrollYRef.current;
@@ -1515,6 +1754,13 @@ export default function HomePage() {
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
+
+    useEffect(() => {
+        const hasActiveLocks = stakingLocks.some((l) => l.status === 'active');
+        if (!hasActiveLocks) return;
+        const interval = setInterval(() => setStakingCountdownTick((t) => t + 1), 1000);
+        return () => clearInterval(interval);
+    }, [stakingLocks]);
 
     useEffect(() => {
         if (!battle) return;
@@ -1532,6 +1778,15 @@ export default function HomePage() {
             .then(() => setStatus('Wallet connected.'))
             .catch(() => setStatus('Failed to save wallet (backend not running?).'));
     }, [wallet, api]);
+
+    // Live countdown for staking locks (updates every second when viewing staking)
+    useEffect(() => {
+        const showStaking = (tab === 'staking' || (tab === 'wallet' && walletFlow === 'staking'));
+        const hasActiveLocks = stakingLocks.some((l) => l.status === 'active');
+        if (!showStaking || !hasActiveLocks) return;
+        const iv = setInterval(() => setStakingCountdownTick((t) => t + 1), 1000);
+        return () => clearInterval(iv);
+    }, [tab, walletFlow, stakingLocks]);
 
     async function createStarterBroker() {
         setBusy(true);
@@ -1619,6 +1874,7 @@ export default function HomePage() {
     const [boostGuildId, setBoostGuildId] = useState('');
     const [boostTxHash, setBoostTxHash] = useState('');
     const [boostGroupMsg, setBoostGroupMsg] = useState('');
+    const [guildPoolBrokers, setGuildPoolBrokers] = useState([]);
 
     async function refreshMyRank() {
         try {
@@ -1652,6 +1908,15 @@ export default function HomePage() {
             setGuilds([]);
         } finally {
             setBusy(false);
+        }
+    }
+    async function refreshGuildPool(guildId) {
+        if (!guildId) { setGuildPoolBrokers([]); return; }
+        try {
+            const res = await api.get(`/api/guilds/${guildId}/pool`);
+            setGuildPoolBrokers(Array.isArray(res.data?.brokers) ? res.data.brokers : []);
+        } catch {
+            setGuildPoolBrokers([]);
         }
     }
 
@@ -1708,6 +1973,22 @@ export default function HomePage() {
         }
     }
 
+    async function leaveGuild() {
+        if (!selectedGuildId) return;
+        setBusy(true);
+        setGuildMsg('');
+        try {
+            await api.post('/api/guilds/leave', { guildId: selectedGuildId });
+            setGuildMsg('Left guild.');
+            setSelectedGuildId('');
+            await refreshGuilds();
+        } catch {
+            setGuildMsg('Leave failed.');
+        } finally {
+            setBusy(false);
+        }
+    }
+
     async function depositBrokerToGuild() {
         if (!selectedGuildId || !selectedBrokerId) return;
         setBusy(true);
@@ -1750,6 +2031,25 @@ export default function HomePage() {
     const [donateMessage, setDonateMessage] = useState('');
     const [donateAnonymous, setDonateAnonymous] = useState(false);
     const [charityMsg, setCharityMsg] = useState('');
+    const [charityCampaignDetail, setCharityCampaignDetail] = useState(null);
+    const [charityCampaignSearch, setCharityCampaignSearch] = useState('');
+    const [charityCauseFilter, setCharityCauseFilter] = useState('');
+    const [charitySortBy, setCharitySortBy] = useState('name');
+    const [charityViewMode, setCharityViewMode] = useState('detailed');
+    const [charityFavoritesOnly, setCharityFavoritesOnly] = useState(false);
+    const [charityFavoriteIds, setCharityFavoriteIds] = useState([]);
+    async function refreshCharityCampaignDetail(campaignId) {
+        if (!campaignId) { setCharityCampaignDetail(null); return; }
+        setBusy(true);
+        try {
+            const res = await api.get(`/api/charity/campaigns/${campaignId}`, { params: { recentDonations: 20 } });
+            setCharityCampaignDetail(res.data || null);
+        } catch {
+            setCharityCampaignDetail(null);
+        } finally {
+            setBusy(false);
+        }
+    }
     async function refreshCharityCampaigns() {
         try {
             const res = await api.get('/api/charity/campaigns', { params: { limit: 50 } });
@@ -1785,35 +2085,103 @@ export default function HomePage() {
             setBusy(false);
         }
     }
-    function refreshCharityAll() {
-        refreshCharityCampaigns();
-        refreshCharityStats();
-        refreshCharityMyImpact();
-        refreshCharityLeaderboard();
+    async function refreshCharityAll() {
+        await Promise.all([
+            refreshCharityCampaigns(),
+            refreshCharityStats(),
+            refreshCharityMyImpact(),
+            refreshCharityLeaderboard(),
+        ]);
+    }
+    function toggleCharityFavorite(campaignId) {
+        const id = String(campaignId || '');
+        if (!id) return;
+        setCharityFavoriteIds((prev) => {
+            const has = prev.includes(id);
+            return has ? prev.filter((x) => x !== id) : [...prev, id];
+        });
     }
 
     // ----- Updates (Unified Comms) -----
     const [announcements, setAnnouncements] = useState([]);
+    const [announcementsUnreadCount, setAnnouncementsUnreadCount] = useState(0);
     const [commsStatus, setCommsStatus] = useState(null);
+    const [commsConfig, setCommsConfig] = useState(null);
+    const [supportSubject, setSupportSubject] = useState('question');
+    const [supportMessage, setSupportMessage] = useState('');
+    const [supportMsg, setSupportMsg] = useState('');
+    const [supportRequests, setSupportRequests] = useState([]);
     async function refreshAnnouncements() {
         try {
             const res = await api.get('/api/announcements', { params: { limit: 20 } });
-            setAnnouncements(Array.isArray(res.data) ? res.data : []);
+            const data = res.data?.data ?? res.data;
+            const list = Array.isArray(data?.items) ? data.items : (Array.isArray(data) ? data : []);
+            setAnnouncements(list);
+            setAnnouncementsUnreadCount(Number(data?.unreadCount ?? 0));
         } catch {
             setAnnouncements([]);
+            setAnnouncementsUnreadCount(0);
+        }
+    }
+    async function markAnnouncementsSeen(announcementId) {
+        if (!announcementId) return;
+        try {
+            await api.post('/api/announcements/seen', { announcementId });
+            setAnnouncementsUnreadCount(0);
+        } catch {
+            /* ignore */
         }
     }
     async function refreshCommsStatus() {
         try {
             const res = await api.get('/api/comms/status');
-            setCommsStatus(res.data || null);
+            setCommsStatus(res.data?.data ?? res.data ?? null);
         } catch {
             setCommsStatus(null);
         }
     }
-    function refreshUpdatesAll() {
-        refreshAnnouncements();
-        refreshCommsStatus();
+    async function refreshCommsConfig() {
+        try {
+            const res = await api.get('/api/comms/config');
+            setCommsConfig(res.data?.data ?? res.data ?? null);
+        } catch {
+            setCommsConfig(null);
+        }
+    }
+    async function refreshMySupportRequests() {
+        try {
+            const res = await api.get('/api/support/my');
+            setSupportRequests(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setSupportRequests([]);
+        }
+    }
+    async function refreshUpdatesAll() {
+        await Promise.all([refreshAnnouncements(), refreshCommsStatus(), refreshCommsConfig(), refreshMySupportRequests()]);
+    }
+    async function markAllAnnouncementsSeen() {
+        try {
+            await api.post('/api/announcements/seen-all', { requestId: uuid() });
+            await refreshAnnouncements();
+        } catch (e) {
+            setSupportMsg(getErrorMessage(e, 'Failed to mark announcements as read.'));
+        }
+    }
+    async function submitSupportRequest() {
+        if (!supportMessage.trim()) { setSupportMsg('Enter a message.'); return; }
+        setSupportMsg('');
+        setBusy(true);
+        try {
+            await api.post('/api/support/request', { subject: supportSubject, message: supportMessage.trim() });
+            setSupportMsg('Support request submitted. We will respond via the channel or link in announcements.');
+            setSupportMessage('');
+            setSupportSubject('question');
+            await refreshMySupportRequests();
+        } catch (e) {
+            setSupportMsg(getErrorMessage(e, 'Submission failed.'));
+        } finally {
+            setBusy(false);
+        }
     }
 
     const [universityCourses, setUniversityCourses] = useState([]);
@@ -1990,34 +2358,6 @@ export default function HomePage() {
             await refreshEconomy();
         } catch (e) {
             setStatus(getErrorMessage(e, 'Mentor upgrade failed.'));
-        } finally {
-            setBusy(false);
-        }
-    }
-    async function stakeMentorOffchain() {
-        if (!mentorStakeMentorId || !mentorStakeAmount) return;
-        setBusy(true);
-        try {
-            await api.post('/api/mentors/stake', { mentorId: mentorStakeMentorId, amountAiba: mentorStakeAmount });
-            setMentorStakeAmount('');
-            setStatus('Mentor staked.');
-            await refreshMentorStakes();
-            await refreshEconomy();
-        } catch (e) {
-            setStatus(getErrorMessage(e, 'Stake failed.'));
-        } finally {
-            setBusy(false);
-        }
-    }
-    async function unstakeMentor(stakeId) {
-        setBusy(true);
-        try {
-            await api.post('/api/mentors/unstake', { stakeId });
-            setStatus('Unstaked.');
-            await refreshMentorStakes();
-            await refreshEconomy();
-        } catch (e) {
-            setStatus(getErrorMessage(e, 'Unstake failed.'));
         } finally {
             setBusy(false);
         }
@@ -2339,6 +2679,7 @@ export default function HomePage() {
     const [refCodeInput, setRefCodeInput] = useState('');
     const [refMsg, setRefMsg] = useState('');
     const [topReferrers, setTopReferrers] = useState([]);
+    const [creatorStats, setCreatorStats] = useState(null);
 
     async function refreshReferralMe() {
         try {
@@ -2385,6 +2726,15 @@ export default function HomePage() {
             setTopReferrers(Array.isArray(res?.data) ? res.data : []);
         } catch {
             setTopReferrers([]);
+        }
+    }
+
+    async function refreshReferralCreatorStats() {
+        try {
+            const res = await api.get('/api/referrals/me/stats');
+            setCreatorStats(res?.data ?? null);
+        } catch {
+            setCreatorStats(null);
         }
     }
 
@@ -2767,20 +3117,26 @@ export default function HomePage() {
                  tab === 'brokers' ? 'New broker, tasks, run battle, vault. Combine or mint NFT.' :
                  tab === 'arenas' ? 'Choose arena and run battle. Guild Wars needs a guild.' :
                  tab === 'guilds' ? 'Create or join a group; deposit brokers to the pool.' :
-                 tab === 'market' ? 'Sell a broker for AIBA or buy one. Withdraw from guild first to list.' :
+                 tab === 'market' ? 'Super Futuristic Unified Marketplace. Brokers, assets, rentals, system shop, boosts.' :
                  tab === 'carRacing' ? 'Autonomous car racing. Create a car (AIBA or TON), enter races, earn AIBA by position.' :
                  tab === 'bikeRacing' ? 'Autonomous bike racing. Create a bike (AIBA or TON), enter races, earn AIBA.' :
                  tab === 'multiverse' ? 'Own, stake & earn. Mint Broker NFTs with AIBA; stake to earn AIBA daily.' :
+                 tab === 'nftGallery' ? 'My NFT collection. View, stake, unstake Broker NFTs. Earn AIBA daily when staked.' :
                  tab === 'charity' ? 'Unite for Good. Donate NEUR or AIBA to active campaigns.' :
                  tab === 'university' ? 'Learn the game. Courses and modules right here.' :
+                 tab === 'coe' ? 'Center of Excellence: University, Trainers & Creator Economy in one hub.' :
                  tab === 'realms' ? 'Explore AI Realms and complete missions to earn rewards.' :
                  tab === 'assets' ? 'Mint, upgrade, list, buy, and rent AI assets.' :
-                 tab === 'governance' ? 'Propose and vote on ecosystem changes.' :
+                 tab === 'dao' || tab === 'governance' ? 'Propose and vote on ecosystem changes. Stake AIBA 30+ days to create proposals.' :
                  tab === 'updates' ? 'Stay informed. Announcements, status & support here.' :
                  tab === 'referrals' ? 'Share your link, earn NEUR & AIBA when friends join. Apply a friend\'s code for bonuses.' :
+                 tab === 'tournaments' ? 'Enter tournaments with a broker. Prize pool split among top 4.' :
+                 tab === 'globalBoss' ? 'Run battles to deal damage. Top damagers share reward pool when boss is defeated.' :
+                 tab === 'predict' ? 'Bet AIBA on which broker scores higher. Battle of the hour—3% vig to treasury.' :
                  tab === 'trainers' ? 'Global trainers network. Apply to earn AIBA, recruit trainers, claim rewards.' :
                  tab === 'profile' ? 'Your profile, balances, badges, and account details.' :
                  tab === 'settings' ? 'App preferences, notifications, theme, and more.' :
+                 tab === 'staking' ? 'Yield Vault: lock AIBA, earn APY. Flexible or locked periods. Higher APY for longer.' :
                  'Daily NEUR, stake AIBA, or claim on-chain after a battle.'}
             </p>
 
@@ -2837,7 +3193,7 @@ export default function HomePage() {
                                 ) : null}
                                 {marketMatch ? (
                                     <div className="home-search-results__group">
-                                        <button type="button" className="home-search-results__item" onClick={() => { setTab('market'); setDashboardSearch(''); }}>Go to Market</button>
+                                        <button type="button" className="home-search-results__item" onClick={() => { setTab('market'); setDashboardSearch(''); }}>Go to Super Futuristic Unified Marketplace</button>
                                     </div>
                                 ) : null}
                                 {gridMatches.length > 0 ? (
@@ -2853,11 +3209,11 @@ export default function HomePage() {
                     })() : null}
                     {/* 4×4 icon grid */}
                     <div className="home-grid" aria-label="Quick access to features">
-                        {HOME_GRID_ITEMS.map(({ id, label, Icon, badge }) => (
+                        {HOME_GRID_ITEMS.map(({ id, label, Icon, badge, gridStyle }) => (
                             <button
                                 key={id}
                                 type="button"
-                                className="home-grid__item"
+                                className={`home-grid__item ${gridStyle ? `home-grid__item--${gridStyle}` : ''}`}
                                 onClick={() => setTab(id)}
                                 aria-label={badge ? `${label} ${badge}` : label}
                             >
@@ -2869,7 +3225,19 @@ export default function HomePage() {
                             </button>
                         ))}
                     </div>
-                    <div className="card card--elevated home-overview major-tab__hero" style={{ borderLeft: '4px solid var(--accent-cyan)', marginTop: 16 }}>
+                    {/* Quick-access strip: CoE · NFT Gallery · Yield Vault · DAO */}
+                    <div className="home-featured-strip" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
+                        <button type="button" className="btn btn--secondary" onClick={() => setTab('coe')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconCoe /> CoE</button>
+                        <button type="button" className="btn btn--secondary" onClick={() => setTab('nftGallery')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconMultiverse /> NFT Gallery</button>
+                        <button type="button" className="btn btn--primary" onClick={() => setTab('staking')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconStake /> Yield Vault</button>
+                        <button type="button" className="btn btn--secondary" onClick={() => setTab('dao')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconGov /> DAO</button>
+                    </div>
+                    <div className="card card--elevated home-overview__yield-vault" style={{ marginTop: 16 }}>
+                        <div className="card__title"><IconStake /> Yield Vault — stake AIBA, earn APY</div>
+                        <p className="card__hint">Lock AIBA for flexible or locked periods. Higher APY for longer locks.</p>
+                        <button type="button" className="btn btn--primary" style={{ marginTop: 10 }} onClick={() => setTab('staking')}><IconStake /> Open Yield Vault</button>
+                    </div>
+                    <div className="card card--elevated home-overview major-tab__hero" style={{ borderLeft: '4px solid var(--accent-gold)', marginTop: 12 }}>
                         <div className="card__title">Home Command Center</div>
                         <p className="card__hint">Your dashboard. Go to Brokers for New broker, Tasks, Run battle, and Vault.</p>
                         <div className="home-overview__stats">
@@ -2878,6 +3246,7 @@ export default function HomePage() {
                             <span className="home-stat-pill">Stars {Number(economyMe?.starsBalance ?? 0)}</span>
                             <span className="home-stat-pill">Brokers {brokers.length}</span>
                         </div>
+                        <button type="button" className="btn btn--secondary" style={{ marginTop: 12 }} onClick={() => setTab('staking')}><IconStake /> Yield Vault</button>
                     </div>
                     <div className="card" style={{ marginTop: 12, borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title">Seasonal events <span className="badge-new">NEW</span></div>
@@ -2887,7 +3256,7 @@ export default function HomePage() {
 
                 {/* ─── Trainers ───────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'trainers' ? 'is-active' : ''}`} aria-hidden={tab !== 'trainers'}>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)', marginBottom: 16 }}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)', marginBottom: 16 }}>
                         <div className="card__title"><IconTrainer /> Global Trainers &amp; Coaches</div>
                         <p className="card__hint">Earn AIBA when you help players learn. Apply to become a trainer, recruit others, and claim rewards.</p>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
@@ -2945,7 +3314,7 @@ export default function HomePage() {
 
                 {/* ─── Tasks (Personalized for all user kinds) ─────────────────── */}
                 <section className={`tab-panel ${tab === 'tasks' ? 'is-active' : ''}`} aria-hidden={tab !== 'tasks'}>
-                    <div className="card card--elevated tasks-hero" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                    <div className="card card--elevated tasks-hero" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title">Task Center</div>
                         <p className="card__hint">Personalized mission queue for every player profile: newcomer, fighter, trader, racer, social, scholar, and investor.</p>
                         <div className="action-row action-row--android">
@@ -3008,22 +3377,29 @@ export default function HomePage() {
                             <p className="card__hint">You invited 3+ friends! Premium arena perks are unlocked. Keep sharing for 10× and 100× referral bonuses.</p>
                         </div>
                     )}
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
-                        <div className="card__title"><IconShare /> Referrals</div>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title"><IconShare /> Referrals &amp; Creator Economy</div>
                         <p className="card__hint">Share your code or enter someone else&apos;s. You both earn NEUR and AIBA (wallet required to apply).</p>
+                        <p className="card__hint" style={{ marginTop: 8, padding: 8, background: 'rgba(255, 204, 0, 0.12)', borderRadius: 8, borderLeft: '3px solid var(--accent-gold)' }}>
+                            <strong>Creator Economy:</strong> Earn 2–7% of your referrals&apos; battle, race, tournament, and boss rewards.
+                            {myReferral ? (
+                                <span> Your tier: <strong>{(myReferral.uses ?? 0) >= 10000 ? '7%' : (myReferral.uses ?? 0) >= 1000 ? '5%' : (myReferral.uses ?? 0) >= 100 ? '3%' : '2%'}</strong>
+                                    {(myReferral.uses ?? 0) < 100 ? ' · Reach 100 refs for 3%' : (myReferral.uses ?? 0) < 1000 ? ' · Reach 1k for 5%' : (myReferral.uses ?? 0) < 10000 ? ' · Reach 10k for 7%' : ' (max tier)'}</span>
+                            ) : null}
+                        </p>
                         <div className="action-row">
                             <button type="button" className="btn btn--secondary" onClick={createReferral} disabled={busy}><IconShare /> My code</button>
                         </div>
                         {myReferral?.code ? (
                             <>
-                                <p className="card__hint" style={{ marginTop: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent-cyan)' }}>Your referral link</p>
+                                <p className="card__hint" style={{ marginTop: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent-gold)' }}>Your referral link</p>
                                 <p className="card__hint" style={{ marginTop: 4 }}>Share this link — when friends open it and apply your code, you both get bonuses.</p>
                                 {(() => {
                                     const base = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://aiba-arena2-miniapp.vercel.app').replace(/\/+$/, '');
                                     const refLink = `${base}/?ref=${encodeURIComponent(String(myReferral.code).toUpperCase())}`;
                                     return (
                                         <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                            <a href={refLink} target="_blank" rel="noopener noreferrer" className="card__hint" style={{ wordBreak: 'break-all', color: 'var(--accent-cyan)', textDecoration: 'underline', fontSize: '0.85rem' }}>{refLink}</a>
+                                            <a href={refLink} target="_blank" rel="noopener noreferrer" className="card__hint" style={{ wordBreak: 'break-all', color: 'var(--accent-gold)', textDecoration: 'underline', fontSize: '0.85rem' }}>{refLink}</a>
                                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                                 <button type="button" className="btn btn--primary" onClick={() => { if (shareViaTelegram({ text: `Join me on AIBA Arena! Use my referral code: ${String(myReferral.code).toUpperCase()}`, url: refLink })) setRefMsg('Share opened!'); else { if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(refLink).then(() => setRefMsg('Link copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(refLink); } } }}><IconShare /> Share via Telegram</button>
                                                 <button type="button" className="btn btn--secondary" onClick={() => { if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { navigator.clipboard.writeText(refLink).then(() => setRefMsg('Link copied!')).catch(() => setRefMsg('Copy failed.')); } else { setRefMsg(refLink); } }}>Copy link</button>
@@ -3059,12 +3435,12 @@ export default function HomePage() {
                                         <span className="list-item__name">
                                             {r.username || r.telegramId || 'Anonymous'}
                                             {i < 3 ? (
-                                                <span className="badge-pill badge-pill--inline" style={{ marginLeft: 8, borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)' }} title="Top referrer">
+                                                <span className="badge-pill badge-pill--inline" style={{ marginLeft: 8, borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }} title="Top referrer">
                                                     {i === 0 ? '1st' : i === 1 ? '2nd' : '3rd'}
                                                 </span>
                                             ) : null}
                                         </span>
-                                        <span style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>{r.uses ?? 0} referrals</span>
+                                        <span style={{ color: 'var(--accent-gold)', fontWeight: 600 }}>{r.uses ?? 0} referrals</span>
                                     </div>
                                 ))}
                             </div>
@@ -3076,7 +3452,7 @@ export default function HomePage() {
                         <div className="card__title">Viral K-factor <span className="badge-new">NEW</span></div>
                         <p className="card__hint">K = invites × conversion. Target K &gt; 0.3 for viral growth. You have {myReferral?.uses ?? 0} referrals. Invite 3 at 15% convert → K=0.45.</p>
                     </div>
-                    <div className="card" style={{ marginTop: 12, borderLeft: '4px solid var(--accent-cyan)' }}>
+                    <div className="card" style={{ marginTop: 12, borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title">Become a trainer</div>
                         <p className="card__hint">Train players, recruit trainers, earn AIBA. Exclusive digital portal.</p>
                         <a href="/trainer" className="btn btn--secondary" style={{ marginTop: 8, display: 'inline-block' }}>Open trainer portal</a>
@@ -3095,23 +3471,41 @@ export default function HomePage() {
                         <p className="guide-tip" style={{ marginTop: 12 }}>No tournaments yet. Admins create them.</p>
                     ) : (
                         <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
-                            {tournaments.map((t) => (
-                                <div key={t._id} className="card">
-                                    <div className="card__title">{t.name || t.league || 'Tournament'}</div>
-                                    <p className="card__hint">Pool: {t.prizePoolAiba ?? 0} AIBA · Entry: {t.entryCostAiba ?? 0} AIBA · Status: {t.status} · Max entries: {t.maxEntries ?? 0}</p>
-                                    {t.status === 'open' && (t.entries?.length ?? 0) < (t.maxEntries ?? 0) ? (
-                                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                            <select className="select" value={selectedTournament === t._id ? tournamentBrokerId : ''} onChange={(e) => { setSelectedTournament(t._id); setTournamentBrokerId(e.target.value); }}>
-                                                <option value="">Select broker</option>
-                                                {brokers.filter((b) => !b.guildId).map((b) => (
-                                                    <option key={b._id} value={b._id}>{b.specialty || 'Broker'} #{String(b._id).slice(-6)}</option>
-                                                ))}
-                                            </select>
-                                            <button type="button" className="btn btn--primary" onClick={() => enterTournament(t._id, selectedTournament === t._id ? tournamentBrokerId : null)} disabled={busy || !(selectedTournament === t._id && tournamentBrokerId)}>Enter</button>
+                            {tournaments.map((t) => {
+                                const detail = tournamentDetail?._id === t._id ? tournamentDetail : null;
+                                const entryCount = detail?.entries?.length ?? t.entries?.length ?? 0;
+                                return (
+                                    <div key={t._id} className="card">
+                                        <div className="card__title">{t.name || t.league || 'Tournament'}</div>
+                                        <p className="card__hint">Pool: {t.prizePoolAiba ?? 0} AIBA · Entry: {t.entryCostAiba ?? 0} AIBA · Status: {t.status} · Entries: {detail ? `${detail.entries?.length ?? 0}/${t.maxEntries ?? 0}` : `${t.maxEntries ?? 0} max`}</p>
+                                        <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                            <button type="button" className="btn btn--ghost" onClick={() => tournamentDetail?._id === t._id ? setTournamentDetail(null) : fetchTournamentDetail(t._id)} disabled={busy}>{tournamentDetail?._id === t._id ? 'Hide details' : 'View details'}</button>
+                                            {t.status === 'open' && entryCount < (t.maxEntries ?? 0) ? (
+                                                <>
+                                                    <select className="select" value={selectedTournament === t._id ? tournamentBrokerId : ''} onChange={(e) => { setSelectedTournament(t._id); setTournamentBrokerId(e.target.value); }}>
+                                                        <option value="">Select broker</option>
+                                                        {brokers.filter((b) => !b.guildId).map((b) => (
+                                                            <option key={b._id} value={b._id}>{b.specialty || 'Broker'} #{String(b._id).slice(-6)}</option>
+                                                        ))}
+                                                    </select>
+                                                    <button type="button" className="btn btn--primary" onClick={() => enterTournament(t._id, selectedTournament === t._id ? tournamentBrokerId : null)} disabled={busy || !(selectedTournament === t._id && tournamentBrokerId)}>Enter</button>
+                                                </>
+                                            ) : null}
                                         </div>
-                                    ) : null}
-                                </div>
-                            ))}
+                                        {detail?.entries?.length > 0 ? (
+                                            <div style={{ marginTop: 12, padding: 10, background: 'rgba(0,0,0,0.2)', borderRadius: 8 }}>
+                                                <p className="card__hint" style={{ marginBottom: 8 }}>Entered brokers:</p>
+                                                <ol style={{ margin: 0, paddingLeft: 20, fontSize: '0.85rem' }}>
+                                                    {detail.entries.slice(0, 20).map((e, i) => (
+                                                        <li key={e._id || i}>#{e.brokerId?._id ? String(e.brokerId._id).slice(-6) : '—'} · {e.brokerId?.specialty || 'Broker'}</li>
+                                                    ))}
+                                                </ol>
+                                                {detail.entries.length > 20 ? <p className="card__hint" style={{ marginTop: 6 }}>… and {detail.entries.length - 20} more</p> : null}
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </section>
@@ -3121,7 +3515,12 @@ export default function HomePage() {
                     <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-magenta)' }}>
                         <div className="card__title"><IconBoss /> Global Boss <span className="badge-new badge-new--magenta">NEW</span></div>
                         <p className="card__hint">Run battles to deal damage. When the boss is defeated, top damagers share the reward pool.</p>
-                        <button type="button" className="btn btn--secondary" onClick={refreshGlobalBoss} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                            <button type="button" className="btn btn--secondary" onClick={refreshGlobalBoss} disabled={busy}><IconRefresh /> Refresh</button>
+                            {globalBoss?.active ? (
+                                <button type="button" className="btn btn--primary" onClick={() => setTab('arenas')}><IconRun /> Run battle to deal damage</button>
+                            ) : null}
+                        </div>
                     </div>
                     {!globalBoss?.active ? (
                         <p className="guide-tip" style={{ marginTop: 12 }}>No active boss. Admins spawn bosses. Run battles when one is active—your score counts as damage.</p>
@@ -3130,6 +3529,11 @@ export default function HomePage() {
                             <div className="card">
                                 <div className="card__title">Boss: {globalBoss.name || 'Raid Boss'}</div>
                                 <p className="card__hint">HP: {globalBoss.currentHp ?? 0} / {globalBoss.totalHp ?? 0} · Reward pool: {globalBoss.rewardPoolAiba ?? 0} AIBA</p>
+                                {(() => {
+                                    const myTgId = tgUser?.id ? String(tgUser.id) : '';
+                                    const myDmg = Array.isArray(globalBoss.topDamagers) && myTgId ? globalBoss.topDamagers.find((d) => String(d._id) === myTgId) : null;
+                                    return myDmg ? <p className="card__hint" style={{ marginTop: 6, color: 'var(--accent-magenta)', fontWeight: 600 }}>Your damage: {myDmg.totalDamage ?? 0}</p> : null;
+                                })()}
                                 <div style={{ marginTop: 8, height: 12, background: 'var(--border)', borderRadius: 6, overflow: 'hidden' }}>
                                     <div style={{ width: `${Math.max(0, Math.min(100, 100 * (globalBoss.currentHp ?? 0) / (globalBoss.totalHp || 1)))}%`, height: '100%', background: 'var(--accent-magenta)', borderRadius: 6 }} />
                                 </div>
@@ -3137,15 +3541,53 @@ export default function HomePage() {
                             {Array.isArray(globalBoss.topDamagers) && globalBoss.topDamagers.length > 0 ? (
                                 <div className="card" style={{ marginTop: 12 }}>
                                     <div className="card__title">Top damagers</div>
-                                    {globalBoss.topDamagers.slice(0, 10).map((d, i) => (
-                                        <div key={d._id || i} className="list-item">
-                                            <span className="list-item__rank">#{i + 1}</span>
-                                            <span className="list-item__name">User {String(d._id || '').slice(-8) || '—'}</span>
-                                            <span style={{ color: 'var(--accent-magenta)', fontWeight: 600 }}>{d.totalDamage ?? 0} dmg</span>
-                                        </div>
-                                    ))}
+                                    {globalBoss.topDamagers.slice(0, 10).map((d, i) => {
+                                        const myTgId = tgUser?.id ? String(tgUser.id) : '';
+                                        const isYou = myTgId && String(d._id) === myTgId;
+                                        return (
+                                            <div key={d._id || i} className="list-item">
+                                                <span className="list-item__rank">#{i + 1}</span>
+                                                <span className="list-item__name">{isYou ? <strong style={{ color: 'var(--accent-magenta)' }}>You</strong> : `User ${String(d._id || '').slice(-8) || '—'}`}</span>
+                                                <span style={{ color: 'var(--accent-magenta)', fontWeight: 600 }}>{d.totalDamage ?? 0} dmg</span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             ) : null}
+                        </div>
+                    )}
+                </section>
+
+                {/* ─── Predict (Bet on battles) ──────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'predict' ? 'is-active' : ''}`} aria-hidden={tab !== 'predict'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title"><IconBet /> Predict <span className="badge-new badge-new--cyan">NEW</span></div>
+                        <p className="card__hint">Battle of the hour: bet AIBA on which broker scores higher. Admins create events; 3% vig goes to treasury. Max bet per event in Admin → Economy.</p>
+                        <button type="button" className="btn btn--secondary" onClick={refreshPredictEvents} disabled={busy} style={{ marginTop: 8 }}><IconRefresh /> Refresh</button>
+                        {predictMsg ? <p className={`status-msg ${predictMsg.includes('placed') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{predictMsg}</p> : null}
+                    </div>
+                    {predictEvents.length === 0 ? (
+                        <p className="guide-tip" style={{ marginTop: 12 }}>No open events. Admins create predict events in Admin → Predict.</p>
+                    ) : (
+                        <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
+                            {predictEvents.map((ev) => (
+                                <div key={ev._id} className="card">
+                                    <div className="card__title">Broker A vs Broker B</div>
+                                    <p className="card__hint">
+                                        A: #{ev.brokerAId?._id ? String(ev.brokerAId._id).slice(-6) : '—'} (INT{ev.brokerAId?.intelligence ?? '?'} SPD{ev.brokerAId?.speed ?? '?'}) · B: #{ev.brokerBId?._id ? String(ev.brokerBId._id).slice(-6) : '—'} (INT{ev.brokerBId?.intelligence ?? '?'} SPD{ev.brokerBId?.speed ?? '?'})
+                                        {ev.maxBetAiba ? ` · Max bet: ${ev.maxBetAiba} AIBA` : ''}
+                                    </p>
+                                    <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                        <select className="select" value={predictBetEventId === ev._id ? predictBetBrokerId : ''} onChange={(e) => { setPredictBetEventId(ev._id); setPredictBetBrokerId(e.target.value); }}>
+                                            <option value="">Pick winner</option>
+                                            <option value={ev.brokerAId?._id}>Broker A</option>
+                                            <option value={ev.brokerBId?._id}>Broker B</option>
+                                        </select>
+                                        <input className="input" type="number" min={1} value={predictBetEventId === ev._id ? predictBetAmount : ''} onChange={(e) => setPredictBetAmount(e.target.value)} placeholder="Amount AIBA" style={{ width: 100 }} />
+                                        <button type="button" className="btn btn--primary" onClick={() => placePredictBet(ev._id, predictBetBrokerId, predictBetAmount)} disabled={busy || !predictBetBrokerId || !predictBetAmount || parseInt(predictBetAmount, 10) < 1}>Place bet</button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </section>
@@ -3185,7 +3627,7 @@ export default function HomePage() {
 
                 {/* ─── Brokers ────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'brokers' ? 'is-active' : ''}`} aria-hidden={tab !== 'brokers'}>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title">What are brokers?</div>
                         <p className="card__hint">{BROKERS_EXPLANATION}</p>
                     </div>
@@ -3292,7 +3734,7 @@ export default function HomePage() {
                     <div className="arena-visual" role="img" aria-label="Futuristic arena stage">
                         <span className="arena-visual__label">3D Super Power Arena</span>
                     </div>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title">What are arenas?</div>
                         <p className="card__hint">{ARENAS_EXPLANATION}</p>
                     </div>
@@ -3332,7 +3774,7 @@ export default function HomePage() {
 
                 {/* ─── Guilds (Groups) — global leaderboard, pay-to-create, boost ────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'guilds' ? 'is-active' : ''}`} aria-hidden={tab !== 'guilds'}>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title">What are guilds?</div>
                         <p className="card__hint">{GUILDS_EXPLANATION}</p>
                     </div>
@@ -3371,6 +3813,12 @@ export default function HomePage() {
                         <p className="card__hint" style={{ marginTop: 12 }}>Join group (paste Guild ID)</p>
                         <input className="input" value={joinGuildId} onChange={(e) => setJoinGuildId(e.target.value)} placeholder="Guild ID" style={{ marginTop: 4 }} />
                         <button type="button" className="btn btn--secondary" onClick={joinGuild} disabled={busy || !joinGuildId.trim()} style={{ marginTop: 8 }}>Join</button>
+                        {selectedGuildId ? (
+                            <>
+                                <p className="card__hint" style={{ marginTop: 12 }}>Leave group</p>
+                                <button type="button" className="btn btn--ghost" onClick={leaveGuild} disabled={busy} style={{ marginTop: 4, color: 'var(--text-muted)' }}>Leave selected group</button>
+                            </>
+                        ) : null}
                     </div>
                     {allGroups.length > 0 ? (
                         <div className="card">
@@ -3395,11 +3843,11 @@ export default function HomePage() {
                     ) : null}
                 </section>
 
-                {/* ─── Market ─────────────────────────────────────────────────── */}
+                {/* ─── Super Futuristic Unified Marketplace ───────────────────────────────── */}
                 <section className={`tab-panel major-tab major-tab--market ${tab === 'market' ? 'is-active' : ''}`} aria-hidden={tab !== 'market'}>
-                    <div className="card card--elevated major-tab__hero" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
-                        <div className="card__title">What are brokers?</div>
-                        <p className="card__hint">{BROKERS_EXPLANATION}</p>
+                    <div className="card card--elevated major-tab__hero" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title">Super Futuristic Unified Marketplace</div>
+                        <p className="card__hint">One place for brokers, assets, rentals, system shop, and boosts. Trade with TON + AIBA. List, buy, create — all in one hub.</p>
                     </div>
                     <div className="flow-switch" role="group" aria-label="Market flow">
                         {['overview', 'trade', 'rental', 'system', 'boosts'].map((f) => (
@@ -3409,7 +3857,7 @@ export default function HomePage() {
                     {marketFlow === 'overview' && (
                         <>
                             {Number(economyMe?.economy?.createBrokerCostTonNano) > 0 ? (
-                                <div className="card card--elevated sheet-card" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                                <div className="card card--elevated sheet-card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                                     <div className="card__title">Create your broker (pay TON)</div>
                                     <p className="card__hint">Pay TON to create a new broker. It is automatically listed on the marketplace so everyone can see it — you get global recognition.</p>
                                     <p className="card__hint" style={{ marginTop: 6 }}>Cost: <strong>{(economyMe.economy.createBrokerCostTonNano / 1e9).toFixed(1)} TON</strong>. Send exact amount to the wallet shown in the app, then paste the transaction hash below.</p>
@@ -3444,8 +3892,8 @@ export default function HomePage() {
                     )}
                     {marketFlow === 'trade' && (
                         <div className="card card--elevated sheet-card">
-                            <div className="card__title">Marketplace</div>
-                            <p className="card__hint">Sell brokers for AIBA or buy from others.</p>
+                            <div className="card__title">Super Futuristic Unified Marketplace — Trade</div>
+                            <p className="card__hint">Sell brokers for AIBA or buy from others. One unified hub for all trading.</p>
                             <div className="action-row">
                                 <button type="button" className="btn btn--secondary" onClick={refreshListings} disabled={busy}><IconRefresh /> Refresh</button>
                             </div>
@@ -3554,7 +4002,7 @@ export default function HomePage() {
 
                 {/* ─── Car Racing (Autonomous) ───────────────────────────────────── */}
                 <section className={`tab-panel major-tab major-tab--car ${tab === 'carRacing' ? 'is-active' : ''}`} aria-hidden={tab !== 'carRacing'}>
-                    <div className="card card--elevated major-tab__hero" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                    <div className="card card--elevated major-tab__hero" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title">Car Racing</div>
                         <p className="card__hint">Autonomous car racing. Create or buy a car, enter open races, earn AIBA by finish position.</p>
                         <p className="major-tab__subcopy">Inspired by the most powerful racing cars: Formula 1, Le Mans, Can-Am, IndyCar, Group B, GT1, Electric, Drag, Touring/DTM, Hillclimb, NASCAR, Historic, Hypercar, Extreme prototypes.</p>
@@ -3625,6 +4073,27 @@ export default function HomePage() {
                     </div>
                     )}
                     {carFlow === 'market' && (
+                    <>
+                    <div className="card sheet-card">
+                        <div className="card__title">1. List your car for sale</div>
+                        <p className="card__hint">Sell a car from your garage for AIBA. Others can buy it here.</p>
+                        {myCars.length === 0 ? (
+                            <p className="guide-tip">No cars to list. Create or buy one in Garage or System first.</p>
+                        ) : (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end', marginTop: 10 }}>
+                                <select className="select" value={listCarId} onChange={(e) => setListCarId(e.target.value)} style={{ minWidth: 140 }}>
+                                    <option value="">Select car</option>
+                                    {myCars.map((c) => {
+                                        const classLabel = c.carClass && carRacingConfig?.carClasses?.find((x) => x.id === c.carClass)?.label ? carRacingConfig.carClasses.find((x) => x.id === c.carClass).label : (c.carClass || 'Car');
+                                        return <option key={c._id} value={c._id}>#{String(c._id).slice(-6)} — {classLabel}</option>;
+                                    })}
+                                </select>
+                                <input className="input" type="number" min="0" value={listCarPriceAIBA} onChange={(e) => setListCarPriceAIBA(e.target.value)} placeholder="Price AIBA" style={{ width: 100 }} />
+                                <button type="button" className="btn btn--primary" onClick={listCar} disabled={busy || !listCarId || !listCarPriceAIBA.trim()}><IconList /> List</button>
+                            </div>
+                        )}
+                        {carMsg ? <p className={`status-banner ${carMsg.includes('listed') ? 'status-banner--success' : carMsg.includes('failed') || carMsg.includes('Failed') ? 'status-banner--error' : 'status-banner--info'}`} style={{ marginTop: 8 }}>{carMsg}</p> : null}
+                    </div>
                     <div className="card sheet-card">
                         <div className="card__title">2. Buy a racing car</div>
                         <p className="card__hint">Purchase a car from other players with AIBA.</p>
@@ -3645,6 +4114,7 @@ export default function HomePage() {
                             </ul>
                         )}
                     </div>
+                    </>
                     )}
                     {carFlow === 'race' && (
                         <div className="card sheet-card">
@@ -3749,6 +4219,27 @@ export default function HomePage() {
                         </div>
                     )}
                     {bikeFlow === 'market' && (
+                        <>
+                        <div className="card sheet-card">
+                            <div className="card__title">1. List your bike for sale</div>
+                            <p className="card__hint">Sell a bike from your garage for AIBA. Others can buy it here.</p>
+                            {myBikes.length === 0 ? (
+                                <p className="guide-tip">No bikes to list. Create or buy one in Garage or System first.</p>
+                            ) : (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end', marginTop: 10 }}>
+                                    <select className="select" value={listBikeId} onChange={(e) => setListBikeId(e.target.value)} style={{ minWidth: 140 }}>
+                                        <option value="">Select bike</option>
+                                        {myBikes.map((b) => {
+                                            const classLabel = b.bikeClass && bikeRacingConfig?.bikeClasses?.find((x) => x.id === b.bikeClass)?.label ? bikeRacingConfig.bikeClasses.find((x) => x.id === b.bikeClass).label : (b.bikeClass || 'Bike');
+                                            return <option key={b._id} value={b._id}>#{String(b._id).slice(-6)} — {classLabel}</option>;
+                                        })}
+                                    </select>
+                                    <input className="input" type="number" min="0" value={listBikePriceAIBA} onChange={(e) => setListBikePriceAIBA(e.target.value)} placeholder="Price AIBA" style={{ width: 100 }} />
+                                    <button type="button" className="btn btn--primary" onClick={listBike} disabled={busy || !listBikeId || !listBikePriceAIBA.trim()}><IconList /> List</button>
+                                </div>
+                            )}
+                            {bikeMsg ? <p className={`status-banner ${bikeMsg.includes('listed') ? 'status-banner--success' : bikeMsg.includes('failed') || bikeMsg.includes('Failed') ? 'status-banner--error' : 'status-banner--info'}`} style={{ marginTop: 8 }}>{bikeMsg}</p> : null}
+                        </div>
                         <div className="card sheet-card">
                             <div className="card__title">2. Buy a racing bike</div>
                             <p className="card__hint">Purchase a bike from other players with AIBA.</p>
@@ -3769,6 +4260,7 @@ export default function HomePage() {
                                 </ul>
                             )}
                         </div>
+                        </>
                     )}
                     {bikeFlow === 'race' && (
                         <div className="card sheet-card">
@@ -3800,9 +4292,87 @@ export default function HomePage() {
                     )}
                 </section>
 
+                {/* ─── Dedicated NFT Gallery (My NFTs in gallery view) ───────────── */}
+                <section className={`tab-panel ${tab === 'nftGallery' ? 'is-active' : ''}`} aria-hidden={tab !== 'nftGallery'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title">My NFT Gallery</div>
+                        <p className="card__hint">Your Broker NFT collection. Stake to earn {nftStakingRewardPerDay} AIBA per NFT per day. View, manage, and grow your collection.</p>
+                        <div className="action-row">
+                            <button type="button" className="btn btn--secondary" onClick={refreshMultiverse} disabled={busy}><IconRefresh /> Refresh</button>
+                            <button type="button" className="btn btn--ghost" onClick={() => setTab('multiverse')}>Full Multiverse →</button>
+                        </div>
+                        {multiverseMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{multiverseMsg}</p> : null}
+                    </div>
+                    {multiverseStakingRewards != null && (multiverseStakingRewards.stakedCount > 0 || (multiverseStakingRewards.pendingRewardAiba ?? 0) > 0) ? (
+                        <div className="card card--elevated">
+                            <div className="card__title">NFT staking rewards</div>
+                            <p className="card__hint">Staked: {multiverseStakingRewards.stakedCount ?? 0}. Pending: <strong>{multiverseStakingRewards.pendingRewardAiba ?? 0} AIBA</strong></p>
+                            <button type="button" className="btn btn--primary" onClick={claimNftStaking} disabled={busy || (multiverseStakingRewards.pendingRewardAiba ?? 0) <= 0}><IconClaim /> Claim rewards</button>
+                        </div>
+                    ) : null}
+                    <div className="card nft-gallery-dedicated">
+                        <div className="card__title">Collection</div>
+                        {multiverseMyNfts.length > 0 ? (
+                            <>
+                                <div className="flow-switch" role="group" aria-label="NFT view" style={{ marginBottom: 12 }}>
+                                    {['grid', 'list'].map((f) => (
+                                        <button key={f} type="button" className={`flow-switch__btn ${nftGalleryFlow === f ? 'is-active' : ''}`} onClick={() => setNftGalleryFlow(f)}>{f === 'grid' ? 'Gallery' : 'List'}</button>
+                                    ))}
+                                </div>
+                                <div className="flow-switch" role="group" aria-label="Filter NFTs" style={{ marginBottom: 12 }}>
+                                    {['all', 'staked', 'available'].map((f) => (
+                                        <button key={f} type="button" className={`flow-switch__btn ${nftGalleryFilter === f ? 'is-active' : ''}`} onClick={() => setNftGalleryFilter(f)}>{f === 'all' ? 'All' : f === 'staked' ? 'Staked' : 'Available'}</button>
+                                    ))}
+                                </div>
+                                {(() => {
+                                    const filtered = nftGalleryFilter === 'all' ? multiverseMyNfts : nftGalleryFilter === 'staked' ? multiverseMyNfts.filter((n) => n.staked) : multiverseMyNfts.filter((n) => !n.staked);
+                                    if (filtered.length === 0) return <p className="guide-tip">No NFTs match the filter.</p>;
+                                    return nftGalleryFlow === 'grid' ? (
+                                        <div className="nft-gallery" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 16 }}>
+                                            {filtered.map((nft) => (
+                                                <div key={nft.brokerId} className="nft-gallery-card nft-gallery-card--large" style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--card-bg)', boxShadow: 'var(--shadow-3d-card)' }}>
+                                                    <div style={{ aspectRatio: '1', background: 'var(--bg)', position: 'relative' }}>
+                                                        <img src={`${BACKEND_URL}/api/metadata/brokers/${nft.brokerId}/image.svg`} alt={`Broker #${String(nft.brokerId).slice(-6)}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
+                                                    </div>
+                                                    <div style={{ padding: 12 }}>
+                                                        <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem' }}>Broker #{String(nft.brokerId).slice(-6)}</p>
+                                                        <p className="card__hint" style={{ margin: '6px 0 0', fontSize: '0.8rem' }}>Level {nft.level} · INT{nft.intelligence} SPD{nft.speed} RISK{nft.risk}</p>
+                                                        {nft.staked ? <span className="badge-pill badge-pill--inline" style={{ marginTop: 8, display: 'inline-block', borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)', fontSize: '0.7rem' }}>Staked · {nftStakingRewardPerDay} AIBA/day</span> : null}
+                                                        <div style={{ marginTop: 10 }}>
+                                                            {nft.staked ? (
+                                                                <button type="button" className="btn btn--secondary" onClick={() => unstakeNft(nft.brokerId)} disabled={busy} style={{ width: '100%' }}>Unstake</button>
+                                                            ) : (
+                                                                <button type="button" className="btn btn--primary" onClick={() => stakeNft(nft.brokerId)} disabled={busy} style={{ width: '100%' }}><IconStake /> Stake</button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        filtered.map((nft) => (
+                                            <div key={nft.brokerId} className="list-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, marginTop: 10, padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                                                    <span>Broker #{String(nft.brokerId).slice(-6)} · Lv{nft.level} INT{nft.intelligence} SPD{nft.speed} RISK{nft.risk}</span>
+                                                    {nft.staked ? (
+                                                        <button type="button" className="btn btn--secondary" onClick={() => unstakeNft(nft.brokerId)} disabled={busy}>Unstake</button>
+                                                    ) : (
+                                                        <button type="button" className="btn btn--primary" onClick={() => stakeNft(nft.brokerId)} disabled={busy}><IconStake /> Stake</button>
+                                                    )}
+                                                </div>
+                                                {nft.staked ? <span className="card__hint">Staked · earning {nftStakingRewardPerDay} AIBA/day</span> : null}
+                                            </div>
+                                        ))
+                                    );
+                                })()}
+                            </>
+                        ) : <p className="guide-tip">No Broker NFTs yet. Mint one from the Brokers tab (pay AIBA) or buy from the Market.</p>}
+                    </div>
+                </section>
+
                 {/* ─── Multiverse (NFT: own, stake, earn) ────────────────────────── */}
                 <section className={`tab-panel ${tab === 'multiverse' ? 'is-active' : ''}`} aria-hidden={tab !== 'multiverse'}>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title">NFT Multiverse</div>
                         <p className="card__hint">Own Broker NFTs, stake them to earn AIBA daily. Mint from Brokers tab (pay AIBA).</p>
                         <div className="action-row">
@@ -3835,21 +4405,52 @@ export default function HomePage() {
                     <div className="card">
                         <div className="card__title">My NFTs</div>
                         <p className="card__hint">Broker NFTs you own. Stake to earn AIBA daily; unstake anytime.</p>
-                        {multiverseMyNfts.length === 0 ? <p className="guide-tip">No Broker NFTs. Mint one from the Brokers tab (pay AIBA for mint).</p> : (
-                            multiverseMyNfts.map((nft) => (
-                                <div key={nft.brokerId} className="list-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, marginTop: 10, padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                                        <span>Broker #{String(nft.brokerId).slice(-6)} · Lv{nft.level} INT{nft.intelligence} SPD{nft.speed} RISK{nft.risk}</span>
-                                        {nft.staked ? (
-                                            <button type="button" className="btn btn--secondary" onClick={() => unstakeNft(nft.brokerId)} disabled={busy}>Unstake</button>
-                                        ) : (
-                                            <button type="button" className="btn btn--primary" onClick={() => stakeNft(nft.brokerId)} disabled={busy}><IconStake /> Stake</button>
-                                        )}
-                                    </div>
-                                    {nft.staked ? <span className="card__hint">Staked · earning {nftStakingRewardPerDay} AIBA/day</span> : null}
+                        {multiverseMyNfts.length > 0 ? (
+                            <>
+                                <div className="flow-switch" role="group" aria-label="NFT view" style={{ marginBottom: 12 }}>
+                                    {['list', 'gallery'].map((f) => (
+                                        <button key={f} type="button" className={`flow-switch__btn ${multiverseFlow === f ? 'is-active' : ''}`} onClick={() => setMultiverseFlow(f)}>{f === 'gallery' ? 'Gallery' : 'List'}</button>
+                                    ))}
                                 </div>
-                            ))
-                        )}
+                                {multiverseFlow === 'gallery' ? (
+                                    <div className="nft-gallery" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+                                        {multiverseMyNfts.map((nft) => (
+                                            <div key={nft.brokerId} className="nft-gallery-card" style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--card-bg)' }}>
+                                                <div style={{ aspectRatio: '1', background: 'var(--bg)', position: 'relative' }}>
+                                                    <img src={`${BACKEND_URL}/api/metadata/brokers/${nft.brokerId}/image.svg`} alt={`Broker #${String(nft.brokerId).slice(-6)}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
+                                                </div>
+                                                <div style={{ padding: 10 }}>
+                                                    <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>#{String(nft.brokerId).slice(-6)}</p>
+                                                    <p className="card__hint" style={{ margin: '4px 0 0', fontSize: '0.75rem' }}>Lv{nft.level} · INT{nft.intelligence} SPD{nft.speed} RISK{nft.risk}</p>
+                                                    {nft.staked ? <span className="card__hint" style={{ fontSize: '0.7rem', color: 'var(--accent-gold)' }}>Staked · {nftStakingRewardPerDay} AIBA/day</span> : null}
+                                                    <div style={{ marginTop: 8 }}>
+                                                        {nft.staked ? (
+                                                            <button type="button" className="btn btn--secondary" onClick={() => unstakeNft(nft.brokerId)} disabled={busy} style={{ width: '100%', fontSize: 11 }}>Unstake</button>
+                                                        ) : (
+                                                            <button type="button" className="btn btn--primary" onClick={() => stakeNft(nft.brokerId)} disabled={busy} style={{ width: '100%', fontSize: 11 }}><IconStake /> Stake</button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    multiverseMyNfts.map((nft) => (
+                                        <div key={nft.brokerId} className="list-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, marginTop: 10, padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                                                <span>Broker #{String(nft.brokerId).slice(-6)} · Lv{nft.level} INT{nft.intelligence} SPD{nft.speed} RISK{nft.risk}</span>
+                                                {nft.staked ? (
+                                                    <button type="button" className="btn btn--secondary" onClick={() => unstakeNft(nft.brokerId)} disabled={busy}>Unstake</button>
+                                                ) : (
+                                                    <button type="button" className="btn btn--primary" onClick={() => stakeNft(nft.brokerId)} disabled={busy}><IconStake /> Stake</button>
+                                                )}
+                                            </div>
+                                            {nft.staked ? <span className="card__hint">Staked · earning {nftStakingRewardPerDay} AIBA/day</span> : null}
+                                        </div>
+                                    ))
+                                )}
+                            </>
+                        ) : <p className="guide-tip">No Broker NFTs. Mint one from the Brokers tab (pay AIBA for mint).</p>}
                     </div>
                 </section>
 
@@ -3875,37 +4476,139 @@ export default function HomePage() {
                             <div className="card card--elevated">
                                 <div className="card__title">Active campaigns</div>
                                 <p className="card__hint">Donate from your balance. Progress is transparent.</p>
-                                {charityCampaigns.filter((c) => c.status === 'active').map((c) => {
-                                    const goalN = (c.goalNeur || 0) + (c.goalAiba || 0) * 10;
-                                    const raisedN = (c.raisedNeur || 0) + (c.raisedAiba || 0) * 10;
-                                    const pct = goalN > 0 ? Math.min(100, Math.round((raisedN / goalN) * 100)) : 0;
+                                <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <input className="input" value={charityCampaignSearch || ''} onChange={(e) => setCharityCampaignSearch(e.target.value)} placeholder="Search campaigns…" style={{ flex: '1 1 180px', minWidth: 0 }} />
+                                    <select className="select" value={charityCauseFilter || ''} onChange={(e) => setCharityCauseFilter(e.target.value)} style={{ flex: '0 0 auto' }}>
+                                        <option value="">All causes</option>
+                                        <option value="education">Education</option>
+                                        <option value="environment">Environment</option>
+                                        <option value="health">Health</option>
+                                        <option value="emergency">Emergency</option>
+                                        <option value="community">Community</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <select className="select" value={charitySortBy || 'name'} onChange={(e) => setCharitySortBy(e.target.value)} style={{ flex: '0 0 auto' }} title="Sort campaigns">
+                                        <option value="name">Sort: Name</option>
+                                        <option value="progress">Sort: Progress %</option>
+                                        <option value="raised">Sort: Raised</option>
+                                        <option value="goal">Sort: Goal</option>
+                                        <option value="donors">Sort: Donors</option>
+                                    </select>
+                                    <select className="select" value={charityViewMode} onChange={(e) => setCharityViewMode(e.target.value)} style={{ flex: '0 0 auto' }} title="View mode">
+                                        <option value="detailed">View: Detailed</option>
+                                        <option value="compact">View: Compact</option>
+                                    </select>
+                                    <label className="check-wrap" style={{ marginTop: 0 }}>
+                                        <input type="checkbox" checked={charityFavoritesOnly} onChange={(e) => setCharityFavoritesOnly(e.target.checked)} />
+                                        Favorites only
+                                    </label>
+                                </div>
+                                {(() => {
+                                    const filtered = charityCampaigns.filter((c) => c.status === 'active').filter((c) => {
+                                    const q = (charityCampaignSearch || '').toLowerCase();
+                                    const cause = (charityCauseFilter || '').toLowerCase();
+                                    if (q && !(c.name || '').toLowerCase().includes(q) && !(c.cause || '').toLowerCase().includes(q) && !(c.description || '').toLowerCase().includes(q)) return false;
+                                    if (cause && (c.cause || '').toLowerCase() !== cause) return false;
+                                    if (charityFavoritesOnly && !charityFavoriteIds.includes(String(c._id))) return false;
+                                    return true;
+                                });
+                                    const goalN = (c) => (c.goalNeur || 0) + (c.goalAiba || 0) * 10;
+                                    const raisedN = (c) => (c.raisedNeur || 0) + (c.raisedAiba || 0) * 10;
+                                    const pct = (c) => goalN(c) > 0 ? Math.min(100, Math.round((raisedN(c) / goalN(c)) * 100)) : 0;
+                                    const sorted = [...filtered].sort((a, b) => {
+                                        if (charitySortBy === 'progress') return pct(b) - pct(a);
+                                        if (charitySortBy === 'raised') return raisedN(b) - raisedN(a);
+                                        if (charitySortBy === 'goal') return goalN(b) - goalN(a);
+                                        if (charitySortBy === 'donors') return (b.donorCount ?? 0) - (a.donorCount ?? 0);
+                                        return (a.name || '').localeCompare(b.name || '');
+                                    });
+                                    return sorted.map((c) => {
+                                    const goalNVal = goalN(c);
+                                    const raisedNVal = raisedN(c);
+                                    const pctVal = goalNVal > 0 ? Math.min(100, Math.round((raisedNVal / goalNVal) * 100)) : 0;
                                     return (
                                         <div key={c._id} className="card" style={{ marginTop: 10, padding: 12, borderLeft: `4px solid var(--accent-${c.cause === 'education' ? 'cyan' : c.cause === 'health' ? 'green' : 'magenta'})` }}>
-                                            <div className="card__title" style={{ marginBottom: 4 }}>{c.name}</div>
-                                            {c.description ? <p className="card__hint" style={{ marginTop: 4 }}>{c.description.slice(0, 120)}{c.description.length > 120 ? '…' : ''}</p> : null}
+                                            <div className="card__title" style={{ marginBottom: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                                                <span>{c.name}</span>
+                                                <button type="button" className="btn btn--ghost" style={{ padding: '2px 8px', minHeight: 'unset', fontSize: 12 }} onClick={() => toggleCharityFavorite(c._id)}>
+                                                    {charityFavoriteIds.includes(String(c._id)) ? '★ Favorite' : '☆ Favorite'}
+                                                </button>
+                                            </div>
+                                            {charityViewMode === 'detailed' && c.description ? <p className="card__hint" style={{ marginTop: 4 }}>{c.description.slice(0, 120)}{c.description.length > 120 ? '…' : ''}</p> : null}
                                             <p className="card__hint" style={{ marginTop: 6 }}>
                                                 <span className="cause-pill" style={{ background: 'var(--bg-glass)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', fontSize: '0.8rem' }}>{c.cause}</span>
                                                 {' '}Raised: {c.raisedNeur ?? 0} NEUR, {c.raisedAiba ?? 0} AIBA · {c.donorCount ?? 0} donors
                                             </p>
-                                            {goalN > 0 ? <div style={{ marginTop: 8, height: 8, background: 'var(--bg-deep)', borderRadius: 'var(--radius-pill)', overflow: 'hidden' }}><div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta))', borderRadius: 'var(--radius-pill)' }} /></div> : null}
-                                            <button type="button" className="btn btn--primary" style={{ marginTop: 10 }} onClick={() => setDonateCampaignId(c._id)}><IconHeart /> Donate</button>
+                                            {goalNVal > 0 ? <div style={{ marginTop: 8, height: 8, background: 'var(--bg-deep)', borderRadius: 'var(--radius-pill)', overflow: 'hidden' }}><div style={{ width: `${pctVal}%`, height: '100%', background: 'linear-gradient(90deg, var(--accent-gold), var(--accent-amber))', borderRadius: 'var(--radius-pill)' }} /></div> : null}
+                                            <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                                <button type="button" className="btn btn--primary" onClick={() => setDonateCampaignId(c._id)}><IconHeart /> Donate</button>
+                                                <button type="button" className="btn btn--ghost" onClick={() => refreshCharityCampaignDetail(charityCampaignDetail?._id === c._id ? null : c._id)} disabled={busy}>View details</button>
+                                            </div>
+                                            {charityViewMode === 'detailed' && charityCampaignDetail?._id === c._id && charityCampaignDetail?.recentDonations?.length > 0 ? (
+                                                <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border-subtle)' }}>
+                                                    <p className="card__hint" style={{ marginBottom: 6 }}><strong>Recent donations</strong></p>
+                                                    {charityCampaignDetail.recentDonations.slice(0, 10).map((d, i) => (
+                                                        <p key={i} className="card__hint" style={{ margin: '2px 0', fontSize: '0.8rem' }}>
+                                                            {d.amountNeur ? `${d.amountNeur} NEUR` : ''}{d.amountNeur && d.amountAiba ? ', ' : ''}{d.amountAiba ? `${d.amountAiba} AIBA` : ''}{d.donor ? ` · ${d.donor}` : ''} · {d.donatedAt ? new Date(d.donatedAt).toLocaleDateString() : ''}
+                                                        </p>
+                                                    ))}
+                                                    <button type="button" className="btn btn--ghost" style={{ marginTop: 6, fontSize: 11 }} onClick={() => setCharityCampaignDetail(null)}>Close</button>
+                                                </div>
+                                            ) : charityViewMode === 'detailed' && charityCampaignDetail?._id === c._id ? (
+                                                <p className="card__hint" style={{ marginTop: 12 }}>No recent donations yet.</p>
+                                            ) : null}
                                         </div>
                                     );
-                                })}
-                                {charityCampaigns.filter((c) => c.status === 'active').length === 0 ? <p className="guide-tip">No active campaigns. Check back soon.</p> : null}
+                                });
+                                })()}
+                                {(() => {
+                                    const q = (charityCampaignSearch || '').toLowerCase();
+                                    const cause = (charityCauseFilter || '').toLowerCase();
+                                    const count = charityCampaigns.filter((c) => c.status === 'active').filter((c) => {
+                                        if (q && !(c.name || '').toLowerCase().includes(q) && !(c.cause || '').toLowerCase().includes(q) && !(c.description || '').toLowerCase().includes(q)) return false;
+                                        if (cause && (c.cause || '').toLowerCase() !== cause) return false;
+                                        if (charityFavoritesOnly && !charityFavoriteIds.includes(String(c._id))) return false;
+                                        return true;
+                                    }).length;
+                                    return count === 0 ? <p className="guide-tip">No campaigns match your filters yet.</p> : null;
+                                })()}
                             </div>
                             <div className="card">
                                 <div className="card__title">Donate</div>
                                 <p className="card__hint">Choose a campaign and amount (NEUR and/or AIBA from your balance).</p>
                                 <select className="select" value={donateCampaignId} onChange={(e) => setDonateCampaignId(e.target.value)} style={{ marginTop: 8, minWidth: '100%' }}>
                                     <option value="">Select campaign</option>
-                                    {charityCampaigns.filter((c) => c.status === 'active').map((c) => <option key={c._id} value={c._id}>{c.name} ({c.cause})</option>)}
+                                    {charityCampaigns.filter((c) => c.status === 'active').filter((c) => {
+                                        const q = (charityCampaignSearch || '').toLowerCase();
+                                        const cause = (charityCauseFilter || '').toLowerCase();
+                                        if (q && !(c.name || '').toLowerCase().includes(q) && !(c.cause || '').toLowerCase().includes(q) && !(c.description || '').toLowerCase().includes(q)) return false;
+                                        if (cause && (c.cause || '').toLowerCase() !== cause) return false;
+                                        return true;
+                                    }).map((c) => <option key={c._id} value={c._id}>{c.name} ({c.cause})</option>)}
                                 </select>
+                                <p className="card__hint" style={{ marginTop: 8, marginBottom: 8, padding: 10, background: 'rgba(138,180,248,0.15)', borderRadius: 8, borderLeft: '4px solid var(--accent-cyan)', fontSize: '0.95rem' }}>
+                                    <strong>Your balance (max donate):</strong> <span style={{ color: 'var(--accent-cyan)' }}>{Number(economyMe?.neurBalance ?? 0).toLocaleString()} NEUR</span> · <span style={{ color: 'var(--accent-gold)' }}>{Number(economyMe?.aibaBalance ?? 0).toLocaleString()} AIBA</span>
+                                </p>
                                 <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                    <span className="card__hint" style={{ margin: 0 }}>NEUR:</span>
+                                    {[10, 25, 50, 75, 100, 250, 500, 1000, 2000, 2500, 5000, 10000].map((n) => (
+                                        <button key={`n${n}`} type="button" className="btn btn--ghost" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setDonateNeur(String(Math.min(Number(economyMe?.neurBalance ?? 0), Number(donateNeur || 0) + n)))} title={`+${n} (capped at balance)`}>+{n}</button>
+                                    ))}
                                     <input className="input" value={donateNeur} onChange={(e) => setDonateNeur(e.target.value)} placeholder="NEUR" style={{ width: 100 }} />
+                                    <button type="button" className="btn btn--ghost" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setDonateNeur(String(Number(economyMe?.neurBalance ?? 0)))} title="Use full NEUR balance">Max</button>
+                                    <span className="card__hint" style={{ margin: 0, marginLeft: 12 }}>AIBA:</span>
+                                    {[10, 25, 50, 75, 100, 250, 500, 1000, 2000, 2500, 5000, 10000].map((a) => (
+                                        <button key={`a${a}`} type="button" className="btn btn--ghost" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setDonateAiba(String(Math.min(Number(economyMe?.aibaBalance ?? 0), Number(donateAiba || 0) + a)))} title={`+${a} (capped at balance)`}>+{a}</button>
+                                    ))}
                                     <input className="input" value={donateAiba} onChange={(e) => setDonateAiba(e.target.value)} placeholder="AIBA" style={{ width: 100 }} />
+                                    <button type="button" className="btn btn--ghost" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setDonateAiba(String(Number(economyMe?.aibaBalance ?? 0)))} title="Use full AIBA balance">Max</button>
                                 </div>
-                                <input className="input" value={donateMessage} onChange={(e) => setDonateMessage(e.target.value)} placeholder="Message (optional)" style={{ marginTop: 8, width: '100%' }} />
+                                {(donateNeur || donateAiba) && (Number(donateNeur || 0) > 0 || Number(donateAiba || 0) > 0) ? (
+                                    <p className="card__hint" style={{ marginTop: 8, padding: 8, background: 'rgba(138,180,248,0.12)', borderRadius: 8, borderLeft: '3px solid var(--accent-cyan)' }}>
+                                        <strong>Impact preview:</strong> This donation adds ~{Number(donateNeur || 0) + Number(donateAiba || 0) * 10} to your impact score (NEUR + AIBA×10).
+                                    </p>
+                                ) : null}
+                                <input className="input" value={donateMessage} onChange={(e) => setDonateMessage(e.target.value)} placeholder="Message (optional, e.g. dedication)" style={{ marginTop: 8, width: '100%' }} maxLength={500} />
                                 <label className="check-wrap" style={{ marginTop: 8, display: 'flex', alignItems: 'center' }}>
                                     <input type="checkbox" checked={donateAnonymous} onChange={(e) => setDonateAnonymous(e.target.checked)} />
                                     Donate anonymously
@@ -3958,6 +4661,83 @@ export default function HomePage() {
                     </div>
                 </section>
 
+                {/* ─── Center of Excellence ( branded: University + Trainers + Creator Economy ) ─ */}
+                <section className={`tab-panel ${tab === 'coe' ? 'is-active' : ''}`} aria-hidden={tab !== 'coe'}>
+                    <div className="card card--elevated coe-hero" style={{ borderLeft: '4px solid var(--accent-gold)', background: 'linear-gradient(135deg, rgba(212,175,55,0.08) 0%, transparent 50%)' }}>
+                        <div className="card__title">AIBA Arena — Center of Excellence</div>
+                        <p className="card__hint" style={{ fontWeight: 500 }}>Learn · Train · Earn. Master the game, join the trainer network, grow your Creator Economy.</p>
+                        {/* Branded stats bar: University · Trainers · Creator at a glance */}
+                        <div className="coe-stats-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 12, padding: '12px 0', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <IconUniversity />
+                                <span className="card__hint" style={{ margin: 0 }}><strong style={{ color: 'var(--accent-gold)' }}>{universityProgress?.completedCount ?? 0}</strong>/{universityTotalModules || universityCourses.reduce((n, c) => n + (c.modules?.length || 0), 0)} modules</span>
+                                {universityProgress?.graduate ? <span className="badge-pill badge-pill--inline" style={{ borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)', fontSize: 10 }}>Graduate</span> : null}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <IconTrainer />
+                                <span className="card__hint" style={{ margin: 0 }}>{trainerMe?.status === 'approved' ? <strong style={{ color: 'var(--accent-green)' }}>Trainer</strong> : trainerMe?.status || 'Apply'}</span>
+                                {trainerMe?.status === 'approved' && (trainerMe?.rewardsEarnedAiba ?? 0) > 0 ? <span className="card__hint" style={{ margin: 0, fontSize: '0.75rem' }}>· {trainerMe.rewardsEarnedAiba} AIBA</span> : null}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <IconShare />
+                                <span className="card__hint" style={{ margin: 0 }}>Creator: <strong style={{ color: 'var(--accent-gold)' }}>{myReferral?.uses ?? 0}</strong> refs</span>
+                                {creatorStats && ((creatorStats.earnedNeur ?? 0) + (creatorStats.earnedAiba ?? 0)) > 0 ? <span className="card__hint" style={{ margin: 0, fontSize: '0.75rem' }}>· {creatorStats.earnedNeur ?? 0} NEUR · {creatorStats.earnedAiba ?? 0} AIBA</span> : null}
+                            </div>
+                        </div>
+                        <div className="action-row" style={{ marginTop: 10 }}>
+                            <button type="button" className="btn btn--secondary" onClick={() => { refreshReferralMe(); refreshReferralCreatorStats(); refreshTrainerMe(); refreshUniversity(); }} disabled={busy}><IconRefresh /> Refresh</button>
+                        </div>
+                    </div>
+                    <div className="coe-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginTop: 16 }}>
+                        <button type="button" className="card card--elevated coe-card" style={{ textAlign: 'left', border: 'none', cursor: 'pointer', padding: 16 }} onClick={() => setTab('university')}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <IconUniversity /><strong>University</strong>
+                                {universityProgress?.graduate ? <span className="badge-pill badge-pill--inline" style={{ marginLeft: 6, borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>Graduate</span> : null}
+                            </span>
+                            <p className="card__hint" style={{ marginTop: 8 }}>Complete courses and earn the University Graduate badge.</p>
+                            <span className="card__hint" style={{ fontSize: '0.8rem' }}>Progress: <strong>{universityProgress?.completedCount ?? 0}</strong> / {universityTotalModules || universityCourses.reduce((n, c) => n + (c.modules?.length || 0), 0)} modules</span>
+                        </button>
+                        <button type="button" className="card card--elevated coe-card" style={{ textAlign: 'left', border: 'none', cursor: 'pointer', padding: 16 }} onClick={() => typeof window !== 'undefined' && (window.location.href = '/trainer')}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                <IconTrainer /><strong>Trainers</strong>
+                                {trainerMe?.status === 'approved' ? <span className="badge-pill badge-pill--inline" style={{ marginLeft: 6, borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>Approved</span> : trainerMe?.status ? <span className="badge-pill badge-pill--inline" style={{ marginLeft: 6 }}>{trainerMe.status}</span> : null}
+                            </span>
+                            <p className="card__hint" style={{ marginTop: 8 }}>Apply to the global trainer network. Earn AIBA when you help players learn.</p>
+                            <span className="card__hint" style={{ fontSize: '0.8rem' }}>Recruit trainers for 20 AIBA each.</span>
+                            {trainerMe?.status === 'approved' && (trainerMe?.rewardsEarnedAiba ?? 0) > 0 ? (
+                                <p className="card__hint" style={{ marginTop: 6, color: 'var(--accent-gold)' }}>Earned: <strong>{trainerMe.rewardsEarnedAiba} AIBA</strong> — claim from Trainers tab</p>
+                            ) : null}
+                        </button>
+                        <div className="card card--elevated coe-card" style={{ padding: 16 }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                <IconShare /><strong>Creator Economy</strong>
+                                {myReferral && (myReferral.uses ?? 0) >= 1000 ? <span className="badge-pill badge-pill--inline" style={{ marginLeft: 6, borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>Platinum</span> : myReferral && (myReferral.uses ?? 0) >= 100 ? <span className="badge-pill badge-pill--inline" style={{ marginLeft: 6, borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)' }}>Gold</span> : myReferral && (myReferral.uses ?? 0) >= 10 ? <span className="badge-pill badge-pill--inline" style={{ marginLeft: 6 }}>Silver</span> : null}
+                            </span>
+                            <p className="card__hint" style={{ marginTop: 8 }}>Share your link. Earn NEUR & AIBA when friends join. Tier: 10 refs=Silver, 100=Gold, 1000=Platinum.</p>
+                            {myReferral ? (
+                                <div style={{ marginTop: 10 }}>
+                                    <p className="card__hint" style={{ fontSize: '0.85rem' }}>Your code: <strong>{myReferral.code || '—'}</strong></p>
+                                    <p className="card__hint" style={{ fontSize: '0.85rem' }}>Uses: <strong>{myReferral.uses ?? 0}</strong></p>
+                                    {creatorStats && ((creatorStats.earnedNeur ?? 0) > 0 || (creatorStats.earnedAiba ?? 0) > 0) ? (
+                                        <p className="card__hint" style={{ marginTop: 6, color: 'var(--accent-gold)', fontSize: '0.85rem' }}>Earned: <strong>{creatorStats.earnedNeur ?? 0} NEUR</strong> · <strong>{creatorStats.earnedAiba ?? 0} AIBA</strong></p>
+                                    ) : null}
+                                    <button type="button" className="btn btn--secondary" style={{ marginTop: 8 }} onClick={() => setTab('referrals')}>Manage referrals →</button>
+                                </div>
+                            ) : (
+                                <div style={{ marginTop: 10 }}>
+                                    <p className="card__hint" style={{ fontSize: '0.85rem' }}>Create a referral code to start earning.</p>
+                                    <button type="button" className="btn btn--primary" style={{ marginTop: 8 }} onClick={() => setTab('referrals')}>Get your link →</button>
+                                </div>
+                            )}
+                            {topReferrers.length > 0 ? (
+                                <div style={{ marginTop: 12 }}>
+                                    <span className="card__hint" style={{ fontSize: '0.75rem' }}>Top referrers: {topReferrers.slice(0, 3).map((r) => r.code || r.telegramId).join(', ')}</span>
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+                </section>
+
                 {/* ─── University (User Guide / AIBA ARENA UNIVERSITY) ─────────── */}
                 <section className={`tab-panel ${tab === 'university' ? 'is-active' : ''}`} aria-hidden={tab !== 'university'}>
                     <div className="card card--elevated card--university university-hero">
@@ -3970,7 +4750,7 @@ export default function HomePage() {
                         <button type="button" className="btn btn--ghost" style={{ marginTop: 10 }} onClick={refreshUniversity} disabled={busy}><IconRefresh /> Refresh</button>
                     </div>
                     {universityCourses.length === 0 ? (
-                        <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                             <div className="card__title">No courses loaded</div>
                             <p className="card__hint">Courses are loaded from the server. Tap Refresh below to load them. If you run locally, ensure the backend is running (e.g. <code style={{ fontSize: '0.75rem' }}>cd backend &amp;&amp; npm start</code>).</p>
                             <button type="button" className="btn btn--primary" onClick={refreshUniversity} disabled={busy} style={{ marginTop: 12 }}><IconRefresh /> Refresh courses</button>
@@ -4196,12 +4976,12 @@ export default function HomePage() {
                     </div>
                 </section>
 
-                {/* ─── Governance ───────────────────────────────────────────── */}
-                <section className={`tab-panel ${tab === 'governance' ? 'is-active' : ''}`} aria-hidden={tab !== 'governance'}>
+                {/* ─── Governance / DAO ──────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'governance' || tab === 'dao' ? 'is-active' : ''}`} aria-hidden={tab !== 'governance' && tab !== 'dao'}>
                     {treasurySummary ? (
-                        <div className="card" style={{ borderLeft: '4px solid var(--accent-cyan)', marginBottom: 12 }}>
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)', marginBottom: 12 }}>
                             <div className="card__title">Treasury</div>
-                            <p className="card__hint">{Number(treasurySummary.balanceAiba ?? 0).toLocaleString()} AIBA · {Number(treasurySummary.balanceNeur ?? 0).toLocaleString()} NEUR · Paid out: {Number(treasurySummary.totalPaidOutAiba ?? 0).toLocaleString()} AIBA</p>
+                            <p className="card__hint">{Number(treasurySummary.balanceAiba ?? 0).toLocaleString()} AIBA · {Number(treasurySummary.balanceNeur ?? 0).toLocaleString()} NEUR · Cancelled-stakes wallet: {Number(treasurySummary.cancelledStakesAiba ?? 0).toLocaleString()} AIBA · Paid out: {Number(treasurySummary.totalPaidOutAiba ?? 0).toLocaleString()} AIBA</p>
                             <button type="button" className="btn btn--ghost" onClick={() => refreshTreasuryOps()} style={{ marginTop: 6, fontSize: 12 }}><IconRefresh /> Refresh ops</button>
                         </div>
                     ) : null}
@@ -4218,25 +4998,33 @@ export default function HomePage() {
                             </div>
                         </div>
                     ) : null}
-                    <div className="card card--elevated">
-                        <div className="card__title">Create Proposal</div>
-                        <input
-                            type="text"
-                            placeholder="Proposal title"
-                            value={proposalTitle}
-                            onChange={(e) => setProposalTitle(e.target.value)}
-                            style={{ padding: 8, width: '100%' }}
-                        />
-                        <textarea
-                            placeholder="Proposal description"
-                            value={proposalDescription}
-                            onChange={(e) => setProposalDescription(e.target.value)}
-                            style={{ padding: 8, width: '100%', minHeight: 80, marginTop: 8 }}
-                        />
-                        <button type="button" className="btn btn--primary" onClick={propose} disabled={busy || !proposalTitle.trim()}>Propose</button>
-                    </div>
+                    {tab === 'dao' ? (
+                        <div className="card card--elevated">
+                            <div className="card__title">DAO — Create Proposal</div>
+                            {daoConfig ? (
+                                <p className="card__hint">Stake at least <strong>{daoConfig.daoProposalMinStakedAiba?.toLocaleString() ?? '100,000,000'}</strong> AIBA for <strong>{daoConfig.daoProposalMinStakeDays ?? 90}</strong> days to create proposals (see Yield Vault). Your qualifying stake: <strong>{daoConfig.yourQualifyingStake?.toLocaleString() ?? 0}</strong> AIBA.</p>
+                            ) : (
+                                <p className="card__hint">Stake AIBA for 90+ days to create proposals (see Yield Vault).</p>
+                            )}
+                            <input type="text" placeholder="Proposal title" value={newProposalTitle} onChange={(e) => setNewProposalTitle(e.target.value)} style={{ padding: 8, width: '100%' }} />
+                            <textarea placeholder="Proposal description" value={newProposalDesc} onChange={(e) => setNewProposalDesc(e.target.value)} style={{ padding: 8, width: '100%', minHeight: 80, marginTop: 8 }} />
+                            <button type="button" className="btn btn--primary" onClick={createProposal} disabled={busy || !newProposalTitle.trim() || (daoConfig && !daoConfig.canPropose)}>Create</button>
+                            {daoConfig && !daoConfig.canPropose ? (
+                                <p className="card__hint" style={{ marginTop: 8, padding: 8, background: 'rgba(255,100,100,0.15)', borderRadius: 8 }}>Staking required: stake {daoConfig.daoProposalMinStakedAiba?.toLocaleString()} AIBA for {daoConfig.daoProposalMinStakeDays} days to propose.</p>
+                            ) : null}
+                            {daoMsg ? <p className={`status-msg ${daoMsg.includes('created') || daoMsg.includes('recorded') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{daoMsg}</p> : null}
+                        </div>
+                    ) : (
+                        <div className="card card--elevated">
+                            <div className="card__title">Governance — Create Proposal</div>
+                            <input type="text" placeholder="Proposal title" value={proposalTitle} onChange={(e) => setProposalTitle(e.target.value)} style={{ padding: 8, width: '100%' }} />
+                            <textarea placeholder="Proposal description" value={proposalDescription} onChange={(e) => setProposalDescription(e.target.value)} style={{ padding: 8, width: '100%', minHeight: 80, marginTop: 8 }} />
+                            <button type="button" className="btn btn--primary" onClick={propose} disabled={busy || !proposalTitle.trim()}>Propose</button>
+                        </div>
+                    )}
                     <div className="card card--elevated" style={{ marginTop: 12 }}>
-                        <div className="card__title">Active Proposals</div>
+                        <div className="card__title">{tab === 'dao' ? 'DAO' : 'Governance'} Proposals</div>
+                        <button type="button" className="btn btn--ghost" style={{ marginBottom: 8 }} onClick={() => tab === 'dao' ? refreshDaoProposals() : refreshProposals()} disabled={busy}><IconRefresh /> Refresh</button>
                         {proposals.length === 0 ? (
                             <p className="card__hint">No proposals yet.</p>
                         ) : (
@@ -4245,11 +5033,31 @@ export default function HomePage() {
                                     <div key={p._id} className="list-item">
                                         <div className="list-item__main">
                                             <div className="list-item__title">{p.title}</div>
-                                            <div className="list-item__desc">{p.description}</div>
+                                            <div className="list-item__desc">{(daoProposalDetail?._id === p._id ? daoProposalDetail.description : p.description) || '—'}</div>
+                                            {tab === 'dao' && (p.votesFor !== undefined || p.votesAgainst !== undefined || daoProposalDetail?._id === p._id) ? (
+                                                <p className="card__hint" style={{ marginTop: 4 }}>
+                                                    For: {(daoProposalDetail?._id === p._id ? daoProposalDetail.votesFor : p.votesFor) ?? 0} · Against: {(daoProposalDetail?._id === p._id ? daoProposalDetail.votesAgainst : p.votesAgainst) ?? 0}
+                                                    {daoProposalDetail?._id === p._id && daoProposalDetail.myVote ? ` · Your vote: ${daoProposalDetail.myVote}` : ''} · {p.status}
+                                                </p>
+                                            ) : null}
                                         </div>
-                                        <div style={{ display: 'flex', gap: 8 }}>
-                                            <button type="button" className="btn btn--success" onClick={() => voteOnProposal(p._id, 'for')} disabled={busy}>Vote For</button>
-                                            <button type="button" className="btn btn--ghost" onClick={() => voteOnProposal(p._id, 'against')} disabled={busy}>Vote Against</button>
+                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                            {tab === 'dao' ? (
+                                                <>
+                                                    <button type="button" className="btn btn--ghost" onClick={() => daoProposalDetail?._id === p._id ? setDaoProposalDetail(null) : fetchDaoProposalDetail(p._id)} disabled={busy}>{daoProposalDetail?._id === p._id ? 'Collapse' : 'View'}</button>
+                                                    {p.status === 'active' ? (
+                                                        <>
+                                                            <button type="button" className="btn btn--success" onClick={() => voteProposal(p._id, true)} disabled={busy}>Vote For</button>
+                                                            <button type="button" className="btn btn--ghost" onClick={() => voteProposal(p._id, false)} disabled={busy}>Vote Against</button>
+                                                        </>
+                                                    ) : null}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button type="button" className="btn btn--success" onClick={() => voteOnProposal(p._id, 'for')} disabled={busy}>Vote For</button>
+                                                    <button type="button" className="btn btn--ghost" onClick={() => voteOnProposal(p._id, 'against')} disabled={busy}>Vote Against</button>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -4260,15 +5068,15 @@ export default function HomePage() {
 
                 {/* ─── Updates (Unified Comms) ────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'updates' ? 'is-active' : ''}`} aria-hidden={tab !== 'updates'}>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title">App sections overview</div>
                         <p className="card__hint">Quick reference to all sections. Use the tab bar or Home grid to navigate.</p>
                         <div style={{ overflowX: 'auto', marginTop: 12 }}>
                             <table className="sections-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid var(--border-subtle)' }}>
-                                        <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600, color: 'var(--accent-cyan)' }}>Section</th>
-                                        <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600, color: 'var(--accent-cyan)' }}>Description</th>
+                                        <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600, color: 'var(--accent-gold)' }}>Section</th>
+                                        <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600, color: 'var(--accent-gold)' }}>Description</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -4278,11 +5086,12 @@ export default function HomePage() {
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Leaderboard</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Global ranks by score, AIBA, NEUR, or battles. Run battles to climb the ranks.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Tournaments</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Seasonal events, brackets, and competitive battles. Earn rewards by ranking.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Global Boss</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Community boss battles. Join forces to defeat the boss and earn shared rewards.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Predict</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Bet AIBA on which broker scores higher. Battle of the hour — 3% vig to treasury.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Trainers</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Global trainers network. Apply as trainer, recruit others, claim AIBA rewards.</td></tr>
-                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Referrals</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Earn NEUR &amp; AIBA when friends join. Share your link or apply a friend&apos;s code.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Referrals &amp; Creator Economy</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Earn NEUR &amp; AIBA when friends join. Creator tier: earn 2–7% of referees&apos; battle, race, tournament, and boss rewards (100 refs=3%, 1k=5%, 10k=7%).</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Arenas</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Battle modes: prediction, simulation, strategyWars, arbitrage, guildWars. Choose arena and run battle.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Guilds</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Create or join a group, deposit brokers into the shared pool. Guild Wars arena sends rewards to the guild.</td></tr>
-                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Market</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Sell a broker for AIBA or buy one. Withdraw from guild first to list.</td></tr>
+                                    <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Super Futuristic Unified Marketplace</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Brokers, assets, rentals, system shop, boosts. Trade with TON + AIBA.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Car Racing</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Autonomous car racing. Create or buy a car, enter open races, earn AIBA by finish position.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>Bike Racing</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Autonomous motorcycle racing. Create or buy a bike, enter races, earn AIBA.</td></tr>
                                     <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ padding: '10px 12px', fontWeight: 600 }}>NFT Multiverse</td><td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>Own Broker NFTs, stake them to earn AIBA daily. Mint from Brokers tab (pay AIBA).</td></tr>
@@ -4308,14 +5117,29 @@ export default function HomePage() {
                     </div>
                     <div className="card card--elevated">
                         <div className="card__title">Announcements</div>
-                        <p className="card__hint">News, maintenance and updates from the team.</p>
+                        <p className="card__hint">News, maintenance and updates from the team. Unread: <strong>{announcementsUnreadCount}</strong></p>
+                        <div className="action-row" style={{ marginTop: 6 }}>
+                            <button type="button" className="btn btn--ghost" onClick={refreshAnnouncements} disabled={busy}><IconRefresh /> Refresh feed</button>
+                            <button type="button" className="btn btn--secondary" onClick={markAllAnnouncementsSeen} disabled={busy || announcementsUnreadCount <= 0}>Mark all read</button>
+                        </div>
                         {announcements.length === 0 ? (
                             <p className="guide-tip">No announcements yet.</p>
                         ) : (
                             <div className="comms-feed">
                                 {announcements.map((a) => (
-                                    <div key={a._id} className="comms-feed__item">
-                                        <div className="comms-feed__item-title">{a.title}</div>
+                                    <div
+                                        key={a._id}
+                                        className="comms-feed__item"
+                                        style={!a.isRead ? { borderColor: 'var(--accent-gold)', boxShadow: '0 0 12px rgba(255,204,0,0.12)' } : undefined}
+                                        onClick={() => markAnnouncementsSeen(a._id)}
+                                        role="button"
+                                        tabIndex={0}
+                                        onKeyDown={(e) => e.key === 'Enter' && markAnnouncementsSeen(a._id)}
+                                    >
+                                        <div className="comms-feed__item-title">
+                                            {a.title}
+                                            {!a.isRead ? <span className="badge-new badge-new--cyan" style={{ marginLeft: 8 }}>Unread</span> : null}
+                                        </div>
                                         <div className="comms-feed__item-meta">
                                             {a.type} · {a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : new Date(a.createdAt).toLocaleDateString()}
                                         </div>
@@ -4330,23 +5154,126 @@ export default function HomePage() {
                     </div>
                     <div className="card card--elevated" id="faq-support">
                         <div className="card__title">FAQs</div>
-                        <p className="card__hint" style={{ marginBottom: 12 }}>Systematic answers to common questions. For the full learning path, use <strong>Guide</strong> (University) from the header.</p>
+                        <p className="card__hint" style={{ marginBottom: 12 }}>Systematic answers to common questions. Tap to expand. For the full learning path, use <strong>Guide</strong> (University) from the header.</p>
                         <div className="comms-faq">
-                            <p className="card__hint"><strong>What is AI Broker Battle Arena?</strong> AI Broker Battle Arena (AIBA) is a Telegram Mini App where you own AI brokers, enter battle arenas, run fights, and earn NEUR and AIBA. It combines trading-sim AI agents (brokers) with competitive arenas and an economy you can withdraw on-chain.</p>
-                            <p className="card__hint"><strong>What is AI Broker?</strong> An AI Broker is your AI agent with stats (INT, SPD, RISK) and energy. You create, own, combine, trade, or mint brokers. They compete in arenas, earn AIBA and NEUR from battles, and can be listed on the Market.</p>
-                            <p className="card__hint"><strong>What is Battle Arena?</strong> A Battle Arena is a game mode where your broker competes—prediction, simulation, strategyWars, arbitrage, or guildWars. Run a battle, get a score, and earn AIBA, Stars, and sometimes Diamonds.</p>
-                            <p className="card__hint"><strong>How do I start?</strong> Go to Brokers → create a broker (New broker) if you have none → pick an arena → Run battle. Earn NEUR and AIBA. See Guide for step-by-step.</p>
-                            <p className="card__hint"><strong>How do I get a broker?</strong> Brokers: New broker (free starter). Or Market: buy from system (AIBA) or from other players. Brokers tab: combine two brokers.</p>
-                            <p className="card__hint"><strong>How do I earn NEUR / AIBA?</strong> Run battles (Home or Arenas). NEUR is off-chain; AIBA can be claimed on-chain via Wallet → Vault (connect wallet, create claim, sign tx).</p>
-                            <p className="card__hint"><strong>How do I earn Stars?</strong> Win battles. Each win grants Stars (Telegram Stars–style currency).</p>
-                            <p className="card__hint"><strong>Where is my AIBA?</strong> Balance shows off-chain credits. To receive on-chain: connect wallet, then after a battle use Create claim or enable Auto-claim. Wallet tab → Vault.</p>
-                            <p className="card__hint"><strong>What are Diamonds?</strong> Rare TON ecosystem asset. You get Diamonds on your first battle win.</p>
-                            <p className="card__hint"><strong>Badges?</strong> Profile badges (verified, top leader, etc.) are assigned by the team or earned (e.g. top leaderboard).</p>
-                            <p className="card__hint"><strong>Referrals?</strong> Referrals tab: create your code (My code), share it. When someone applies your code, you both get bonuses (NEUR/AIBA if configured).</p>
-                            <p className="card__hint"><strong>Car / Bike racing?</strong> Create or buy a car or bike (AIBA or TON), enter open races, earn AIBA by finish position. System shop sells cars/bikes for AIBA.</p>
-                            <p className="card__hint"><strong>Market?</strong> Sell a broker for AIBA or buy one (from players or from the system). Withdraw from guild first if your broker is in a guild pool.</p>
-                            <p className="card__hint"><strong>Guilds?</strong> Guilds tab: create or join a group. Guild Wars arena sends part of rewards to the guild. Deposit brokers into the guild pool for guild wars.</p>
-                            <p className="card__hint"><strong>Support?</strong> Check announcements above. For bugs or requests, contact the team via the channel or link provided in announcements.</p>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">What is AI Broker Battle Arena?</summary>
+                                <p className="card__hint">AI Broker Battle Arena (AIBA) is a Telegram Mini App where you own AI brokers, enter battle arenas, run fights, and earn NEUR and AIBA. It combines trading-sim AI agents (brokers) with competitive arenas and an economy you can withdraw on-chain.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">What is AI Broker?</summary>
+                                <p className="card__hint">An AI Broker is your AI agent with stats (INT, SPD, RISK) and energy. You create, own, combine, trade, or mint brokers. They compete in arenas, earn AIBA and NEUR from battles, and can be listed on the Market.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">What is Battle Arena?</summary>
+                                <p className="card__hint">A Battle Arena is a game mode where your broker competes—prediction, simulation, strategyWars, arbitrage, or guildWars. Run a battle, get a score, and earn AIBA, Stars, and sometimes Diamonds.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">How do I start?</summary>
+                                <p className="card__hint">Go to Brokers → create a broker (New broker) if you have none → pick an arena → Run battle. Earn NEUR and AIBA. See Guide for step-by-step.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">How do I get a broker?</summary>
+                                <p className="card__hint">Brokers: New broker (free starter). Or Market: buy from system (AIBA) or from other players. Brokers tab: combine two brokers.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">How do I earn NEUR / AIBA?</summary>
+                                <p className="card__hint">Run battles (Home or Arenas). NEUR is off-chain; AIBA can be claimed on-chain via Wallet → Vault (connect wallet, create claim, sign tx).</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">How do I earn Stars?</summary>
+                                <p className="card__hint">Win battles. Each win grants Stars (Telegram Stars–style currency).</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">Where is my AIBA?</summary>
+                                <p className="card__hint">Balance shows off-chain credits. To receive on-chain: connect wallet, then after a battle use Create claim or enable Auto-claim. Wallet tab → Vault.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">What are Diamonds?</summary>
+                                <p className="card__hint">Rare TON ecosystem asset. You get Diamonds on your first battle win.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">Badges?</summary>
+                                <p className="card__hint">Profile badges (verified, top leader, etc.) are assigned by the team or earned (e.g. top leaderboard).</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">Referrals?</summary>
+                                <p className="card__hint">Referrals tab: create your code (My code), share it. When someone applies your code, you both get bonuses (NEUR/AIBA if configured).</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">Creator Economy?</summary>
+                                <p className="card__hint">As a referrer, you earn 2–7% of your referrals&apos; battle, race, tournament, and Global Boss rewards. Tier: 100 refs = 3%, 1k = 5%, 10k = 7%. Passive income from every referee who plays.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">Predict?</summary>
+                                <p className="card__hint">Bet AIBA on which broker scores higher (Battle of the hour). Admins create events; you pick a side and amount. Winners split the pool minus 3% vig (to treasury). Max bet configurable in Admin → Economy.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">Car / Bike racing?</summary>
+                                <p className="card__hint">Create or buy a car or bike (AIBA or TON), enter open races, earn AIBA by finish position. System shop sells cars/bikes for AIBA.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">Super Futuristic Unified Marketplace?</summary>
+                                <p className="card__hint">One place for brokers, assets, rentals, system shop, and boosts. Sell or buy with AIBA. Create brokers with TON. Withdraw from guild first to list your broker.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">Guilds?</summary>
+                                <p className="card__hint">Guilds tab: create or join a group. Guild Wars arena sends part of rewards to the guild. Deposit brokers into the guild pool for guild wars.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">Super Admin wallets?</summary>
+                                <p className="card__hint">Transaction charges (P2P AIBA send, AIBA in gifts, Buy AIBA with TON, Donate broker/car/bike/gifts) go to configured env wallets. See <code>docs/SUPER-ADMIN-WALLETS.md</code> in the repo for full reference.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">Earnings disclaimer?</summary>
+                                <p className="card__hint">Rewards (AIBA, NEUR, Stars) are not guaranteed. They depend on gameplay and participation. No financial advice. See <Link href="/terms">Terms of Service</Link> and <Link href="/privacy">Privacy Policy</Link>.</p>
+                            </details>
+                            <details className="comms-faq__item">
+                                <summary className="comms-faq__summary">Support?</summary>
+                                <p className="card__hint">Check announcements above. For bugs or requests, contact the team via the channel or link provided in announcements.</p>
+                            </details>
+                        </div>
+                    </div>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title">Contact support</div>
+                        <p className="card__hint">Submit a support request. We will respond via the channel or link in announcements.</p>
+                        {(commsConfig?.supportLink || commsConfig?.supportTelegramGroup) ? (
+                            <p className="card__hint" style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                                <span>Direct contact:</span>
+                                {commsConfig?.supportLink ? (
+                                    <a href={commsConfig.supportLink} target="_blank" rel="noopener noreferrer" className="comms-feed__item-link">Open support channel</a>
+                                ) : null}
+                                {commsConfig?.supportTelegramGroup ? (
+                                    <a href={`https://t.me/${commsConfig.supportTelegramGroup.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" className="comms-feed__item-link">@{commsConfig.supportTelegramGroup.replace(/^@/, '')}</a>
+                                ) : null}
+                            </p>
+                        ) : null}
+                        <select className="select" value={supportSubject} onChange={(e) => setSupportSubject(e.target.value)} style={{ marginTop: 8, minWidth: 160 }}>
+                            <option value="question">Question</option>
+                            <option value="bug">Bug report</option>
+                            <option value="feature">Feature request</option>
+                            <option value="account">Account</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <textarea className="input" value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} placeholder="Your message..." rows={4} style={{ marginTop: 8, width: '100%', resize: 'vertical' }} />
+                        <button type="button" className="btn btn--primary" onClick={submitSupportRequest} disabled={busy || !supportMessage.trim()} style={{ marginTop: 8 }}>Submit</button>
+                        {supportMsg ? <p className={`status-msg ${supportMsg.includes('submitted') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{supportMsg}</p> : null}
+                        <div style={{ marginTop: 14 }}>
+                            <div className="card__title" style={{ fontSize: '0.9rem' }}>My support requests</div>
+                            {supportRequests.length === 0 ? (
+                                <p className="card__hint">No support requests yet.</p>
+                            ) : (
+                                <div className="comms-feed">
+                                    {supportRequests.slice(0, 10).map((r) => (
+                                        <div key={r._id} className="comms-feed__item">
+                                            <div className="comms-feed__item-title">{String(r.subject || 'other').toUpperCase()}</div>
+                                            <div className="comms-feed__item-meta">Status: {r.status || 'open'} · {r.createdAt ? new Date(r.createdAt).toLocaleString() : 'now'}</div>
+                                            <p className="comms-feed__item-body">{String(r.message || '').slice(0, 300)}{String(r.message || '').length > 300 ? '…' : ''}</p>
+                                            {r.adminNote ? <p className="card__hint"><strong>Admin note:</strong> {r.adminNote}</p> : null}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -4379,7 +5306,7 @@ export default function HomePage() {
                             )}
                         </div>
                         {economyMe?.profileBoostedUntil && new Date(economyMe.profileBoostedUntil) > new Date() ? (
-                            <p className="card__hint" style={{ marginTop: 8, color: 'var(--accent-cyan)' }}>Profile boosted until {new Date(economyMe.profileBoostedUntil).toLocaleString()}</p>
+                            <p className="card__hint" style={{ marginTop: 8, color: 'var(--accent-gold)' }}>Profile boosted until {new Date(economyMe.profileBoostedUntil).toLocaleString()}</p>
                         ) : null}
                         <div className="profile-balances" style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
                             <span className="home-stat-pill">NEUR {Number(economyMe?.neurBalance ?? 0)}</span>
@@ -4394,7 +5321,7 @@ export default function HomePage() {
 
                 {/* ─── Settings ────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'settings' ? 'is-active' : ''}`} aria-hidden={tab !== 'settings'}>
-                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title"><IconSettings /> Settings</div>
                         <p className="card__hint">App preferences, notifications, and account options.</p>
                     </div>
@@ -4434,6 +5361,10 @@ export default function HomePage() {
                         <p className="card__hint">Data handling and visibility.</p>
                         <p className="card__hint" style={{ marginTop: 8 }}>Profile visible on leaderboard: <strong>Yes</strong></p>
                         <p className="card__hint">Data is used for gameplay, rewards, and support.</p>
+                        <div className="legal-page__links" style={{ marginTop: 12 }}>
+                            <Link href="/privacy">Privacy Policy</Link>
+                            <Link href="/terms">Terms of Service</Link>
+                        </div>
                     </div>
                     <div className="card">
                         <div className="card__title">About</div>
@@ -4448,16 +5379,238 @@ export default function HomePage() {
                     </div>
                 </section>
 
+                {/* ─── Yield Vault (Staking) ─────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'staking' ? 'is-active' : ''}`} aria-hidden={tab !== 'staking'}>
+                    <div className="card card--elevated major-tab__hero yield-vault-hero" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title"><IconStake /> Yield Vault</div>
+                        <p className="card__hint">Lock AIBA for flexible or fixed periods. Higher APY for longer locks. Early cancel = 5% fee to Treasury.</p>
+                        <p className="card__hint" style={{ marginTop: 6, padding: '6px 10px', background: 'rgba(255,200,100,0.12)', borderRadius: 6, display: 'inline-block' }}><strong>Minimum stake:</strong> {stakingMinAiba.toLocaleString()} AIBA (ecosystem-aligned: 1T AIBA, broker mint cost)</p>
+                        {(() => {
+                            const activeLocks = stakingLocks.filter((l) => l.status === 'active');
+                            const totalLocked = activeLocks.reduce((s, l) => s + (Number(l.amount) || 0), 0);
+                            if (activeLocks.length > 0) {
+                                return (
+                                    <div className="coe-stats-bar yield-vault-stats" style={{ marginTop: 12, padding: '10px 0', borderTop: '1px solid var(--border-subtle)' }}>
+                                        <span className="home-stat-pill">Active: {activeLocks.length} lock{activeLocks.length !== 1 ? 's' : ''}</span>
+                                        <span className="home-stat-pill">Locked: {totalLocked.toLocaleString()} AIBA</span>
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })()}
+                        <button type="button" className="btn btn--secondary" onClick={() => { refreshStaking(); refreshStakingPeriods(); refreshStakingLocks(); refreshEconomy(); }} disabled={busy} style={{ marginTop: 12 }}><IconRefresh /> Refresh</button>
+                    </div>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)', marginTop: 12 }}>
+                        <div className="card__title"><IconStake /> Locked staking</div>
+                        <p className="card__hint">Lock AIBA for a period. Higher APY for longer locks. Early cancel = fee to Super Admin (Cancelled Stakes).</p>
+                        <p className="card__hint" style={{ marginTop: 8 }}><strong>All available balances:</strong></p>
+                        <p className="card__hint" style={{ marginTop: 4 }}>AIBA: <strong>{Number(economyMe?.aibaBalance ?? 0).toLocaleString()}</strong> · NEUR: <strong>{Number(economyMe?.neurBalance ?? 0).toLocaleString()}</strong> (staking uses AIBA only)</p>
+                        <p className="card__hint" style={{ marginTop: 4 }}><strong>Minimum stake:</strong> {stakingMinAiba.toLocaleString()} AIBA</p>
+                        <div style={{ marginTop: 12 }}>
+                            <label className="card__hint" style={{ display: 'block', marginBottom: 4 }}>Amount to stake (min {stakingMinAiba.toLocaleString()} AIBA)</label>
+                            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                                <input className="input" type="number" min={stakingMinAiba} value={stakeLockAmount} onChange={(e) => setStakeLockAmount(e.target.value)} placeholder={`Min ${stakingMinAiba} AIBA`} style={{ width: 140 }} />
+                                <button type="button" className="btn btn--ghost" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setStakeLockAmount(String(Math.floor(Number(economyMe?.aibaBalance ?? 0))))} title="Use full AIBA balance">Max</button>
+                            </div>
+                        </div>
+                        <div style={{ marginTop: 12 }}>
+                            <label className="card__hint" style={{ display: 'block', marginBottom: 4 }}>Period</label>
+                            <select className="select" value={stakeLockPeriodDays} onChange={(e) => setStakeLockPeriodDays(Number(e.target.value))}>
+                                {stakingPeriods.length > 0 ? stakingPeriods.map((p) => (
+                                    <option key={p.days} value={p.days}>{p.days} days — {p.apyPercent}% APY</option>
+                                )) : (
+                                    <>
+                                        <option value={30}>30 days — 10% APY</option>
+                                        <option value={90}>90 days — 12% APY</option>
+                                        <option value={180}>180 days — 15% APY</option>
+                                        <option value={365}>365 days — 18% APY</option>
+                                    </>
+                                )}
+                            </select>
+                            <p className="card__hint" style={{ marginTop: 8 }}>
+                                Available periods: {(stakingPeriods.length > 0 ? stakingPeriods : [{ days: 30, apyPercent: 10 }, { days: 90, apyPercent: 12 }, { days: 180, apyPercent: 15 }, { days: 365, apyPercent: 18 }])
+                                    .map((p) => `${p.days}d (${p.apyPercent}% APY)`)
+                                    .join(' · ')}
+                            </p>
+                        </div>
+{stakeLockAmount && Number(stakeLockAmount) > 0 && stakeLockPeriodDays ? (
+                                <p className="card__hint" style={{ marginTop: 12, padding: 10, background: 'rgba(255,200,100,0.15)', borderRadius: 8 }}>
+                                    <strong>Preview:</strong> Lock {Number(stakeLockAmount).toLocaleString()} AIBA for {stakeLockPeriodDays} days at {(() => { const p = stakingPeriods.find((x) => Number(x.days) === Number(stakeLockPeriodDays)); const apy = Number(p?.apyPercent ?? ({ 30: 10, 90: 12, 180: 15, 365: 18 }[stakeLockPeriodDays] ?? 15)); return apy; })()}% APY → earn ~{(() => { const p = stakingPeriods.find((x) => Number(x.days) === Number(stakeLockPeriodDays)); const apy = Number(p?.apyPercent ?? ({ 30: 10, 90: 12, 180: 15, 365: 18 }[stakeLockPeriodDays] ?? 15)); return Math.floor(Number(stakeLockAmount) * (apy / 100) * Number(stakeLockPeriodDays) / 365).toLocaleString(); })()} AIBA reward.
+                                    {' '}Total on maturity ≈ {(() => {
+                                        const p = stakingPeriods.find((x) => Number(x.days) === Number(stakeLockPeriodDays));
+                                        const apy = Number(p?.apyPercent ?? ({ 30: 10, 90: 12, 180: 15, 365: 18 }[stakeLockPeriodDays] ?? 15));
+                                        const principal = Math.floor(Number(stakeLockAmount) || 0);
+                                        const reward = Math.floor(principal * (apy / 100) * Number(stakeLockPeriodDays) / 365);
+                                        return (principal + reward).toLocaleString();
+                                    })()} AIBA.
+                                </p>
+                            ) : null}
+                        <button type="button" className="btn btn--primary" onClick={stakeLocked} disabled={busy || !stakeLockAmount || Number(stakeLockAmount) < stakingMinAiba} style={{ marginTop: 12 }}><IconStake /> Confirm stake</button>
+                        {stakingLockMsg ? <p className={`status-msg ${stakingLockMsg.includes('Locked') || stakingLockMsg.includes('Claimed') || stakingLockMsg.includes('Returned') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{stakingLockMsg}</p> : null}
+                        <div style={{ marginTop: 20 }}>
+                            <div className="card__title">Active locks (live countdown)</div>
+                            {stakingLocks.filter((l) => l.status === 'active').length === 0 ? (
+                                <p className="guide-tip">No active locks.</p>
+                            ) : (
+                                stakingLocks.filter((l) => l.status === 'active').map((lock) => {
+                                    const now = Date.now();
+                                    const unlocksAt = new Date(lock.unlocksAt).getTime();
+                                    const canClaim = unlocksAt <= now;
+                                    const msLeft = Math.max(0, unlocksAt - now);
+                                    const days = Math.floor(msLeft / (24 * 60 * 60 * 1000));
+                                    const hrs = Math.floor((msLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                                    const min = Math.floor((msLeft % (60 * 60 * 1000)) / (60 * 1000));
+                                    const sec = Math.floor((msLeft % (60 * 1000)) / 1000);
+                                    return (
+                                        <div key={lock._id} className="card" style={{ marginTop: 10, padding: 12 }}>
+                                            <p className="card__hint">{lock.amount?.toLocaleString()} AIBA · {lock.periodDays}d · {lock.apyPercent}% APY</p>
+                                            <p className="card__hint" style={{ marginTop: 6 }}>
+                                                {canClaim ? (
+                                                    <strong style={{ color: 'var(--accent-green)' }}>Ready to claim!</strong>
+                                                ) : (
+                                                    <>Live countdown: <strong>{days}d {hrs}h {min}m {sec}s</strong></>
+                                                )}
+                                            </p>
+                                            {canClaim ? (
+                                                <button type="button" className="btn btn--success" onClick={() => claimLock(lock._id)} disabled={busy}>Claim</button>
+                                            ) : (
+                                                <button type="button" className="btn btn--secondary" onClick={() => cancelStakeEarly(lock._id)} disabled={busy}>Cancel early (5% fee)</button>
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+                    <div className="card" style={{ marginTop: 12 }}>
+                        <div className="card__title">Flexible staking</div>
+                        <p className="card__hint">Stake or unstake anytime. Claim rewards when ready.</p>
+                        <p className="card__hint" style={{ marginTop: 4 }}><strong>Minimum:</strong> {stakingMinAiba.toLocaleString()} AIBA</p>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginTop: 10 }}>
+                            <button type="button" className="btn btn--secondary" onClick={refreshStaking} disabled={busy}><IconRefresh /> Refresh</button>
+                        </div>
+                        {stakingSummary ? (
+                            <p className="card__hint" style={{ marginTop: 8 }}>Staked: {stakingSummary.stakedAmount} AIBA · APY: {stakingSummary.apyPercent}% · Pending: {stakingSummary.pendingReward} AIBA</p>
+                        ) : null}
+                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <input className="input" value={stakeAmount} onChange={(e) => setStakeAmount(e.target.value)} placeholder={`Min ${stakingMinAiba} AIBA`} style={{ width: 120 }} />
+                            <button type="button" className="btn btn--ghost" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setStakeAmount(String(Math.floor(Number(economyMe?.aibaBalance ?? 0))))} title="Use full AIBA balance">Max</button>
+                            <button type="button" className="btn btn--primary" onClick={stake} disabled={busy || !stakeAmount.trim() || Number(stakeAmount) < stakingMinAiba}><IconStake /> Stake</button>
+                            <input className="input" value={unstakeAmount} onChange={(e) => setUnstakeAmount(e.target.value)} placeholder="Unstake (AIBA)" style={{ width: 120 }} />
+                            <button type="button" className="btn btn--secondary" onClick={unstake} disabled={busy || !unstakeAmount.trim()}>Unstake</button>
+                            <button type="button" className="btn btn--success" onClick={claimStaking} disabled={busy}><IconClaim /> Claim reward</button>
+                        </div>
+                        {stakeMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{stakeMsg}</p> : null}
+                    </div>
+                    <div style={{ marginTop: 16 }}>
+                        <button type="button" className="btn btn--ghost" onClick={() => setTab('wallet')}><IconWallet /> Wallet &amp; more</button>
+                    </div>
+                </section>
+
                 {/* ─── Wallet ─────────────────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'wallet' ? 'is-active' : ''}`} aria-hidden={tab !== 'wallet'}>
+                    <div className="flow-switch" role="group" aria-label="Wallet flow" style={{ marginBottom: 12 }}>
+                        {['overview', 'staking'].map((f) => (
+                            <button key={f} type="button" className={`flow-switch__btn ${walletFlow === f ? 'is-active' : ''}`} onClick={() => setWalletFlow(f)}>{f === 'staking' ? 'Staking' : 'Overview'}{f === 'staking' ? <span className="badge-new badge-new--gold" style={{ marginLeft: 6 }}>NEW</span> : ''}</button>
+                        ))}
+                    </div>
+                    {walletFlow === 'staking' ? (
+                        <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                            <div className="card__title"><IconStake /> Locked staking</div>
+                            <p className="card__hint">Lock AIBA for a period. Higher APY for longer locks. Early cancel = fee to Super Admin (Cancelled Stakes).</p>
+                            <p className="card__hint" style={{ marginTop: 8 }}><strong>All available balances:</strong></p>
+                            <p className="card__hint" style={{ marginTop: 4 }}>AIBA: <strong>{Number(economyMe?.aibaBalance ?? 0).toLocaleString()}</strong> · NEUR: <strong>{Number(economyMe?.neurBalance ?? 0).toLocaleString()}</strong> (staking uses AIBA only)</p>
+                            <p className="card__hint" style={{ marginTop: 4 }}><strong>Minimum stake:</strong> {stakingMinAiba.toLocaleString()} AIBA</p>
+                            <div style={{ marginTop: 12 }}>
+                                <label className="card__hint" style={{ display: 'block', marginBottom: 4 }}>Amount to stake (min {stakingMinAiba.toLocaleString()} AIBA)</label>
+                                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                                    <input className="input" type="number" min={stakingMinAiba} value={stakeLockAmount} onChange={(e) => setStakeLockAmount(e.target.value)} placeholder={`Min ${stakingMinAiba} AIBA`} style={{ width: 140 }} />
+                                    <button type="button" className="btn btn--ghost" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setStakeLockAmount(String(Math.floor(Number(economyMe?.aibaBalance ?? 0))))} title="Use full AIBA balance">Max</button>
+                                </div>
+                            </div>
+                            <div style={{ marginTop: 12 }}>
+                                <label className="card__hint" style={{ display: 'block', marginBottom: 4 }}>Period</label>
+                                <select className="select" value={stakeLockPeriodDays} onChange={(e) => setStakeLockPeriodDays(Number(e.target.value))}>
+                                    {stakingPeriods.length > 0 ? stakingPeriods.map((p) => (
+                                        <option key={p.days} value={p.days}>{p.days} days — {p.apyPercent}% APY</option>
+                                    )) : (
+                                        <>
+                                            <option value={30}>30 days — 10% APY</option>
+                                            <option value={90}>90 days — 12% APY</option>
+                                            <option value={180}>180 days — 15% APY</option>
+                                            <option value={365}>365 days — 18% APY</option>
+                                        </>
+                                    )}
+                                </select>
+                                <p className="card__hint" style={{ marginTop: 8 }}>
+                                    Available periods: {(stakingPeriods.length > 0 ? stakingPeriods : [{ days: 30, apyPercent: 10 }, { days: 90, apyPercent: 12 }, { days: 180, apyPercent: 15 }, { days: 365, apyPercent: 18 }])
+                                        .map((p) => `${p.days}d (${p.apyPercent}% APY)`)
+                                        .join(' · ')}
+                                </p>
+                            </div>
+                            {stakeLockAmount && Number(stakeLockAmount) > 0 && stakeLockPeriodDays ? (
+                                <p className="card__hint" style={{ marginTop: 12, padding: 10, background: 'rgba(255,200,100,0.15)', borderRadius: 8 }}>
+                                    <strong>Preview:</strong> Lock {Number(stakeLockAmount).toLocaleString()} AIBA for {stakeLockPeriodDays} days at {(() => { const p = stakingPeriods.find((x) => Number(x.days) === Number(stakeLockPeriodDays)); const apy = Number(p?.apyPercent ?? ({ 30: 10, 90: 12, 180: 15, 365: 18 }[stakeLockPeriodDays] ?? 15)); return apy; })()}% APY → earn ~{(() => { const p = stakingPeriods.find((x) => Number(x.days) === Number(stakeLockPeriodDays)); const apy = Number(p?.apyPercent ?? ({ 30: 10, 90: 12, 180: 15, 365: 18 }[stakeLockPeriodDays] ?? 15)); return Math.floor(Number(stakeLockAmount) * (apy / 100) * Number(stakeLockPeriodDays) / 365).toLocaleString(); })()} AIBA reward.
+                                    {' '}Total on maturity ≈ {(() => {
+                                        const p = stakingPeriods.find((x) => Number(x.days) === Number(stakeLockPeriodDays));
+                                        const apy = Number(p?.apyPercent ?? ({ 30: 10, 90: 12, 180: 15, 365: 18 }[stakeLockPeriodDays] ?? 15));
+                                        const principal = Math.floor(Number(stakeLockAmount) || 0);
+                                        const reward = Math.floor(principal * (apy / 100) * Number(stakeLockPeriodDays) / 365);
+                                        return (principal + reward).toLocaleString();
+                                    })()} AIBA.
+                                </p>
+                            ) : null}
+                            <button type="button" className="btn btn--primary" onClick={stakeLocked} disabled={busy || !stakeLockAmount || Number(stakeLockAmount) < stakingMinAiba} style={{ marginTop: 12 }}><IconStake /> Confirm stake</button>
+                            {stakingLockMsg ? <p className={`status-msg ${stakingLockMsg.includes('Locked') || stakingLockMsg.includes('Claimed') || stakingLockMsg.includes('Returned') ? 'status-msg--success' : ''}`} style={{ marginTop: 8 }}>{stakingLockMsg}</p> : null}
+                            <div style={{ marginTop: 20 }}>
+                                <div className="card__title">Active locks (live countdown)</div>
+                                {stakingLocks.filter((l) => l.status === 'active').length === 0 ? (
+                                    <p className="guide-tip">No active locks.</p>
+                                ) : (
+                                    stakingLocks.filter((l) => l.status === 'active').map((lock) => {
+                                        const now = Date.now();
+                                        const unlocksAt = new Date(lock.unlocksAt).getTime();
+                                        const canClaim = unlocksAt <= now;
+                                        const msLeft = Math.max(0, unlocksAt - now);
+                                        const days = Math.floor(msLeft / (24 * 60 * 60 * 1000));
+                                        const hrs = Math.floor((msLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                                        const min = Math.floor((msLeft % (60 * 60 * 1000)) / (60 * 1000));
+                                        const sec = Math.floor((msLeft % (60 * 1000)) / 1000);
+                                        return (
+                                            <div key={lock._id} className="card" style={{ marginTop: 10, padding: 12 }}>
+                                                <p className="card__hint">{lock.amount?.toLocaleString()} AIBA · {lock.periodDays}d · {lock.apyPercent}% APY</p>
+                                                <p className="card__hint" style={{ marginTop: 6 }}>
+                                                    {canClaim ? (
+                                                        <strong style={{ color: 'var(--accent-green)' }}>Ready to claim!</strong>
+                                                    ) : (
+                                                        <>Live countdown: <strong>{days}d {hrs}h {min}m {sec}s</strong></>
+                                                    )}
+                                                </p>
+                                                {canClaim ? (
+                                                    <button type="button" className="btn btn--success" onClick={() => claimLock(lock._id)} disabled={busy}>Claim</button>
+                                                ) : (
+                                                    <button type="button" className="btn btn--secondary" onClick={() => cancelStakeEarly(lock._id)} disabled={busy}>Cancel early (5% fee)</button>
+                                                )}
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </div>
+                    ) : null}
+                    {walletFlow === 'overview' ? (
+                    <>
+                    <div className="status-banner status-banner--info" style={{ marginBottom: 12, fontSize: 12, padding: '10px 12px' }}>
+                        <strong>Disclaimer:</strong> Rewards (AIBA, NEUR) are not guaranteed. They depend on gameplay and participation. No financial advice. See <Link href="/terms" style={{ color: 'inherit', textDecoration: 'underline' }}>Terms of Service</Link>.
+                    </div>
                     {(treasurySummary || oraclePrice) ? (
-                        <div className="card" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                             <div className="card__title"><IconTreasury /> Ecosystem</div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 8 }}>
                                 {treasurySummary ? (
                                     <div>
                                         <span className="card__hint">Treasury: </span>
-                                        <strong>{Number(treasurySummary.balanceAiba ?? 0).toLocaleString()} AIBA</strong> · <strong>{Number(treasurySummary.balanceNeur ?? 0).toLocaleString()} NEUR</strong>
+                                        <strong>{Number(treasurySummary.balanceAiba ?? 0).toLocaleString()} AIBA</strong> · <strong>{Number(treasurySummary.balanceNeur ?? 0).toLocaleString()} NEUR</strong> · <strong>{Number(treasurySummary.cancelledStakesAiba ?? 0).toLocaleString()} cancelled-stakes AIBA</strong>
                                     </div>
                                 ) : null}
                                 {oraclePrice?.aibaPerTon ? (
@@ -4494,7 +5647,7 @@ export default function HomePage() {
                             )}
                         </div>
                         {economyMe?.profileBoostedUntil && new Date(economyMe.profileBoostedUntil) > new Date() ? (
-                            <p className="card__hint" style={{ marginTop: 8, color: 'var(--accent-cyan)' }}>Profile boosted until {new Date(economyMe.profileBoostedUntil).toLocaleString()}</p>
+                            <p className="card__hint" style={{ marginTop: 8, color: 'var(--accent-gold)' }}>Profile boosted until {new Date(economyMe.profileBoostedUntil).toLocaleString()}</p>
                         ) : null}
                     </div>
                     {Number(economyMe?.economy?.boostProfileCostTonNano) > 0 ? (
@@ -4558,9 +5711,9 @@ export default function HomePage() {
                         </div>
                     ) : null}
                     {p2pConfig?.p2pWallet ? (
-                        <div className="card" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
-                            <div className="card__title">P2P AIBA send</div>
-                            <p className="card__hint">Send AIBA to another user. Fee: <strong>{(p2pConfig.p2pSendFeeTonNano / 1e9).toFixed(2)} TON</strong> (to P2P wallet). Pay fee, paste tx hash, then send.</p>
+                        <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                            <div className="card__title">1. P2P AIBA send</div>
+                            <p className="card__hint">Send AIBA to another user. Transaction charge: <strong>{(p2pConfig.p2pSendFeeTonNano / 1e9).toFixed(2)} TON</strong> → Super Admin wallet (P2P AIBA send). Pay fee, paste tx hash, then send.</p>
                             <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
                                 <input className="input" value={p2pTo} onChange={(e) => setP2pTo(e.target.value)} placeholder="Recipient: Telegram ID or @username" />
                                 <input className="input" type="number" min={1} value={p2pAmount} onChange={(e) => setP2pAmount(e.target.value)} placeholder="Amount AIBA" />
@@ -4572,8 +5725,8 @@ export default function HomePage() {
                     ) : null}
                     {p2pConfig?.buyWallet && (p2pConfig.oracleAibaPerTon || 0) > 0 ? (
                         <div className="card" style={{ borderLeft: '4px solid var(--accent-green)' }}>
-                            <div className="card__title">Buy AIBA with TON</div>
-                            <p className="card__hint">Send TON to the Buy AIBA wallet. Rate: {p2pConfig.oracleAibaPerTon} AIBA/TON (fee {(p2pConfig.buyFeeBps || 0) / 100}%). Any TON-supported wallet.</p>
+                            <div className="card__title">3. Buy AIBA with TON</div>
+                            <p className="card__hint">Send TON to purchase AIBA. Rate: <strong>{p2pConfig.oracleAibaPerTon} AIBA/TON</strong> (fee {(p2pConfig.buyFeeBps || 0) / 100}%). Transaction charge → Super Admin wallet (Buy AIBA with TON). Use any TON-supported wallet.</p>
                             <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                 <input className="input" value={buyAibaTxHash} onChange={(e) => setBuyAibaTxHash(e.target.value)} placeholder="Transaction hash" style={{ flex: '1 1 200px', minWidth: 0 }} />
                                 <button type="button" className="btn btn--primary" onClick={buyAibaWithTon} disabled={busy || !buyAibaTxHash.trim()}>Buy AIBA</button>
@@ -4583,8 +5736,8 @@ export default function HomePage() {
                     ) : null}
                     {p2pConfig?.aibaInGiftsWallet && (p2pConfig.oracleAibaPerTon || 0) > 0 ? (
                         <div className="card" style={{ borderLeft: '4px solid var(--accent-magenta)' }}>
-                            <div className="card__title">AIBA in gifts</div>
-                            <p className="card__hint">Pay TON and send AIBA to a recipient. Cost = amount/rate + fee. Set oracleAibaPerTon in Admin → Economy.</p>
+                            <div className="card__title">2. AIBA in gifts</div>
+                            <p className="card__hint">Pay TON and send AIBA to a recipient. Cost = amount/rate + fee ({(p2pConfig.aibaInGiftsFeeTonNano ?? 100_000_000) / 1e9} TON). Transaction charge → Super Admin wallet (AIBA in gifts).</p>
                             <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
                                 <input className="input" value={giftAibaTo} onChange={(e) => setGiftAibaTo(e.target.value)} placeholder="Recipient: Telegram ID or @username" />
                                 <input className="input" type="number" min={1} value={giftAibaAmount} onChange={(e) => setGiftAibaAmount(e.target.value)} placeholder="Amount AIBA" />
@@ -4596,14 +5749,26 @@ export default function HomePage() {
                     ) : null}
                     {donateConfig?.broker || donateConfig?.car || donateConfig?.bike || donateConfig?.gifts ? (
                         <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
-                            <div className="card__title">Donate</div>
-                            <p className="card__hint">Donate brokers, cars, bikes, or TON to gifts fund. TON fee goes to Super Admin wallet.</p>
+                            <div className="card__title">4. Donate</div>
+                            <p className="card__hint">Donate brokers, cars, bikes, or TON to gifts fund. Transaction charge (TON) → Super Admin wallet per type below.</p>
+                            <div style={{ marginTop: 8, marginBottom: 8 }}>
+                                <button type="button" className="btn btn--ghost" onClick={() => { refreshBrokers().catch(() => {}); refreshCarRacing().catch(() => {}); refreshBikeRacing().catch(() => {}); }} disabled={busy} style={{ fontSize: '0.8rem' }}><IconRefresh /> Load my brokers, cars, bikes</button>
+                            </div>
                             <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 {donateConfig?.broker ? (
                                     <div style={{ padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
-                                        <strong>Donate broker</strong> · {(donateConfig.donateBrokerFeeTonNano / 1e9).toFixed(1)} TON
+                                        <strong>A. Donate a broker</strong> · {(donateConfig.donateBrokerFeeTonNano / 1e9).toFixed(1)} TON → Super Admin (DONATE A BROKER)
                                         <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
-                                            <input className="input" value={donateBrokerId} onChange={(e) => setDonateBrokerId(e.target.value)} placeholder="Broker ID" style={{ flex: '1 1 120px', minWidth: 0 }} />
+                                            {brokers.filter((b) => !b.guildId).length > 0 ? (
+                                                <select className="select" value={donateBrokerId} onChange={(e) => setDonateBrokerId(e.target.value)} style={{ flex: '1 1 140px', minWidth: 0 }}>
+                                                    <option value="">Select broker</option>
+                                                    {brokers.filter((b) => !b.guildId).map((b) => (
+                                                        <option key={b._id} value={b._id}>#{String(b._id).slice(-6)} INT{b.intelligence} SPD{b.speed}</option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <input className="input" value={donateBrokerId} onChange={(e) => setDonateBrokerId(e.target.value)} placeholder="Broker ID" style={{ flex: '1 1 120px', minWidth: 0 }} />
+                                            )}
                                             <input className="input" value={donateBrokerTxHash} onChange={(e) => setDonateBrokerTxHash(e.target.value)} placeholder="Tx hash" style={{ flex: '1 1 160px', minWidth: 0 }} />
                                             <button type="button" className="btn btn--ghost" onClick={donateBroker} disabled={busy}>Donate</button>
                                         </div>
@@ -4611,9 +5776,18 @@ export default function HomePage() {
                                 ) : null}
                                 {donateConfig?.car ? (
                                     <div style={{ padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
-                                        <strong>Donate car</strong> · {(donateConfig.donateCarFeeTonNano / 1e9).toFixed(1)} TON
+                                        <strong>B. Donate a car</strong> · {(donateConfig.donateCarFeeTonNano / 1e9).toFixed(1)} TON → Super Admin (DONATE A CAR)
                                         <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
-                                            <input className="input" value={donateCarId} onChange={(e) => setDonateCarId(e.target.value)} placeholder="Car ID" style={{ flex: '1 1 120px', minWidth: 0 }} />
+                                            {myCars.length > 0 ? (
+                                                <select className="select" value={donateCarId} onChange={(e) => setDonateCarId(e.target.value)} style={{ flex: '1 1 140px', minWidth: 0 }}>
+                                                    <option value="">Select car</option>
+                                                    {myCars.map((c) => (
+                                                        <option key={c._id} value={c._id}>#{String(c._id).slice(-6)}</option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <input className="input" value={donateCarId} onChange={(e) => setDonateCarId(e.target.value)} placeholder="Car ID" style={{ flex: '1 1 120px', minWidth: 0 }} />
+                                            )}
                                             <input className="input" value={donateCarTxHash} onChange={(e) => setDonateCarTxHash(e.target.value)} placeholder="Tx hash" style={{ flex: '1 1 160px', minWidth: 0 }} />
                                             <button type="button" className="btn btn--ghost" onClick={donateCar} disabled={busy}>Donate</button>
                                         </div>
@@ -4621,9 +5795,18 @@ export default function HomePage() {
                                 ) : null}
                                 {donateConfig?.bike ? (
                                     <div style={{ padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
-                                        <strong>Donate bike</strong> · {(donateConfig.donateBikeFeeTonNano / 1e9).toFixed(1)} TON
+                                        <strong>C. Donate a bike</strong> · {(donateConfig.donateBikeFeeTonNano / 1e9).toFixed(1)} TON → Super Admin (DONATE A BIKE)
                                         <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
-                                            <input className="input" value={donateBikeId} onChange={(e) => setDonateBikeId(e.target.value)} placeholder="Bike ID" style={{ flex: '1 1 120px', minWidth: 0 }} />
+                                            {myBikes.length > 0 ? (
+                                                <select className="select" value={donateBikeId} onChange={(e) => setDonateBikeId(e.target.value)} style={{ flex: '1 1 140px', minWidth: 0 }}>
+                                                    <option value="">Select bike</option>
+                                                    {myBikes.map((b) => (
+                                                        <option key={b._id} value={b._id}>#{String(b._id).slice(-6)}</option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <input className="input" value={donateBikeId} onChange={(e) => setDonateBikeId(e.target.value)} placeholder="Bike ID" style={{ flex: '1 1 120px', minWidth: 0 }} />
+                                            )}
                                             <input className="input" value={donateBikeTxHash} onChange={(e) => setDonateBikeTxHash(e.target.value)} placeholder="Tx hash" style={{ flex: '1 1 160px', minWidth: 0 }} />
                                             <button type="button" className="btn btn--ghost" onClick={donateBike} disabled={busy}>Donate</button>
                                         </div>
@@ -4631,7 +5814,7 @@ export default function HomePage() {
                                 ) : null}
                                 {donateConfig?.gifts ? (
                                     <div style={{ padding: 10, border: '1px solid var(--border)', borderRadius: 8 }}>
-                                        <strong>Donate gifts</strong> · {(donateConfig.donateGiftsFeeTonNano / 1e9).toFixed(1)} TON
+                                        <strong>D. Donate gifts</strong> · {(donateConfig.donateGiftsFeeTonNano / 1e9).toFixed(1)} TON → Super Admin (DONATE GIFTS)
                                         <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
                                             <input className="input" value={donateGiftsTxHash} onChange={(e) => setDonateGiftsTxHash(e.target.value)} placeholder="Tx hash" style={{ flex: '1 1 200px', minWidth: 0 }} />
                                             <button type="button" className="btn btn--ghost" onClick={donateGifts} disabled={busy}>Donate</button>
@@ -4729,7 +5912,7 @@ export default function HomePage() {
                         <div className="card__title">DAO</div>
                         <p className="card__hint">Create proposals and vote. Community-driven decisions.</p>
                         <div className="action-row">
-                            <button type="button" className="btn btn--secondary" onClick={refreshProposals} disabled={busy}><IconRefresh /> Refresh</button>
+                            <button type="button" className="btn btn--secondary" onClick={refreshDaoProposals} disabled={busy}><IconRefresh /> Refresh</button>
                         </div>
                         <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                             <input className="input" value={newProposalTitle} onChange={(e) => setNewProposalTitle(e.target.value)} placeholder="New proposal title" />
@@ -4775,6 +5958,8 @@ export default function HomePage() {
                             <p className="guide-tip" style={{ borderLeftColor: 'var(--accent-gold)' }}>Requires backend vault + oracle and a saved wallet.</p>
                         </div>
                     ) : null}
+                    </>
+                    ) : null}
                 </section>
             </div>
             <nav className="android-bottom-nav" aria-label="Primary navigation">
@@ -4786,12 +5971,16 @@ export default function HomePage() {
                             className={`android-bottom-nav__btn ${tab === id ? 'android-bottom-nav__btn--active' : ''}`}
                             onClick={() => setTab(id)}
                             aria-pressed={tab === id}
-                            aria-label={badge ? `${label} ${badge}` : label}
+                            aria-label={badge ? `${label} ${badge}` : (id === 'updates' && announcementsUnreadCount > 0 ? `${label} ${announcementsUnreadCount} unread` : label)}
                         >
-                            <span className="android-bottom-nav__icon"><Icon /></span>
+                            <span className="android-bottom-nav__icon" style={{ position: 'relative' }}>
+                                <Icon />
+                                {id === 'updates' && announcementsUnreadCount > 0 ? <span className="badge-dot" style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-cyan)' }} aria-hidden /> : null}
+                            </span>
                             <span className="android-bottom-nav__label">
                                 {label}
                                 {badge === 'NEW' ? <span className="badge-new">{badge}</span> : null}
+                                {id === 'updates' && announcementsUnreadCount > 0 && badge !== 'NEW' ? <span className="badge-new badge-new--cyan" style={{ marginLeft: 4 }}>{announcementsUnreadCount}</span> : null}
                             </span>
                         </button>
                     ))}

@@ -4,6 +4,7 @@ const { requireTelegram } = require('../middleware/requireTelegram');
 const Referral = require('../models/Referral');
 const ReferralUse = require('../models/ReferralUse');
 const User = require('../models/User');
+const LedgerEntry = require('../models/LedgerEntry');
 const { getConfig, tryEmitNeur, creditNeurNoCap, tryEmitAiba, creditAibaNoCap } = require('../engine/economy');
 const { validateBody } = require('../middleware/validate');
 
@@ -49,6 +50,30 @@ router.get('/me', async (req, res) => {
         res.json({ code: referral.code, _id: referral._id, uses: referral.uses ?? 0 });
     } catch (err) {
         console.error('Referrals me error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
+// GET /api/referrals/me/stats — creator economy: total NEUR & AIBA earned from referrals
+router.get('/me/stats', async (req, res) => {
+    try {
+        const telegramId = String(req.telegramId || '');
+        const agg = await LedgerEntry.aggregate([
+            {
+                $match: {
+                    telegramId,
+                    reason: 'referral_reward_referrer',
+                    direction: 'credit',
+                    applied: true,
+                },
+            },
+            { $group: { _id: '$currency', total: { $sum: '$amount' } } },
+        ]);
+        const earnedNeur = agg.find((r) => r._id === 'NEUR')?.total ?? 0;
+        const earnedAiba = agg.find((r) => r._id === 'AIBA')?.total ?? 0;
+        res.json({ earnedNeur, earnedAiba });
+    } catch (err) {
+        console.error('Referrals me/stats error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
 });

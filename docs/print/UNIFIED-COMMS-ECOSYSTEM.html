@@ -17,7 +17,6 @@
 <hr/>
 <h2>1. Vision</h2>
 <ul>
-<li><strong>Super Futuristic</strong>: Glass-and-glow UI, TON/Telegram-native feel, clear hierarchy (announcements, status, FAQ).</li>
 <li><strong>For Users</strong>: Users see updates, get push notifications for key events (battle win, Stars, Diamonds), check system status, and find help in one flow.</li>
 </ul>
 <hr/>
@@ -57,12 +56,12 @@
 <tr>
 <td><strong>In-app feed</strong></td>
 <td>Announcements, maintenance notices, tips.</td>
-<td>&quot;Updates&quot; tab in miniapp; <code>GET /api/announcements</code>.</td>
+<td>Updates tab in miniapp; <code>GET /api/announcements</code>.</td>
 </tr>
 <tr>
 <td><strong>Telegram push</strong></td>
 <td>Battle win (existing), optional broadcast for critical announcements.</td>
-<td><code>telegramNotify.notifyBattleWin</code>, <code>notifyAnnouncement</code>; admin &quot;Broadcast&quot; action.</td>
+<td><code>telegramNotify.notifyBattleWin</code>, <code>notifyAnnouncement</code>; admin Broadcast action.</td>
 </tr>
 <tr>
 <td><strong>System status</strong></td>
@@ -79,22 +78,23 @@
 <h2>4. Data &amp; API</h2>
 <h3>Announcements</h3>
 <ul>
-<li><strong>Public</strong>: <code>GET /api/announcements?limit=20</code> — active, published, sorted by publishedAt desc.</li>
+<li><strong>Mark as read (Phase 3)</strong>: <code>POST /api/announcements/seen</code> — Body: <code>{ announcementId }</code>. Updates user's <code>lastSeenAnnouncementId</code>.</li>
 <li><strong>Admin</strong>: <code>GET/POST/PATCH/DELETE /api/admin/announcements</code>, plus <code>POST /api/admin/announcements/:id/broadcast</code> (send to all users via Telegram).</li>
 </ul>
 <h3>Status</h3>
 <ul>
+<li><strong><code>GET /api/comms/config</code></strong> — Returns <code>{ supportLink, supportTelegramGroup }</code> (Phase 4; configurable in Admin → Economy).</li>
 </ul>
-<h3>Notifications (existing + new)</h3>
+<h3>Support (Phase 4)</h3>
 <ul>
-<li><strong>New</strong>: <code>notifyAnnouncement(telegramId, { title, body, link })</code> — used by admin broadcast.</li>
+<li><strong>subject</strong> must be one of: <code>question</code>, <code>bug</code>, <code>feature</code>, <code>account</code>, <code>other</code> (case-insensitive; invalid → <code>other</code>).</li>
+<li>Config: <code>supportLink</code>, <code>supportTelegramGroup</code> in EconomyConfig (Admin → Economy).</li>
 </ul>
 <hr/>
 <h2>5. Miniapp UX</h2>
 <ul>
-<li>- <strong>System status</strong>: One line (e.g. &quot;All systems operational&quot; with green dot).</li>
-<li>- <strong>Announcements feed</strong>: Cards (title, date, body snippet, optional link); glass-and-glow style.</li>
-<li>- <strong>FAQ / Support</strong>: Collapsible or short list (e.g. &quot;How do I earn Stars?&quot;, &quot;Where is my AIBA?&quot;) + optional &quot;Contact support&quot; link.</li>
+<li><strong>Announcements feed</strong>: Cards (title, date, body snippet, optional link); glass-and-glow style. Read/unread indicator (Phase 3).</li>
+<li><strong>FAQ / Support</strong>: Collapsible or short list + in-app support form (Phase 4) or optional &quot;Contact support&quot; link.</li>
 <li><strong>Guide tip</strong>: When tab is Updates, show tip like &quot;Stay informed. Announcements and status here.&quot;</li>
 </ul>
 <hr/>
@@ -118,28 +118,31 @@
 </tr>
 <tr>
 <td><strong>3</strong></td>
-<td>Optional: read/unread per user, or &quot;last seen&quot; announcement id</td>
-<td>Future</td>
+<td>Read/unread per user via <code>lastSeenAnnouncementId</code>; <code>POST /api/announcements/seen</code></td>
+<td><strong>Done</strong></td>
 </tr>
 <tr>
 <td><strong>4</strong></td>
-<td>Optional: in-app support form or Telegram deep-link to support group</td>
-<td>Future</td>
+<td>In-app support form (<code>POST /api/support/request</code>) + <code>GET /api/comms/config</code> (supportLink, supportTelegramGroup)</td>
+<td><strong>Done</strong></td>
 </tr>
 </tbody></table>
 <hr/>
 <h2>7. Files Touched</h2>
 <ul>
-<li><strong>backend/models/Announcement.js</strong> — schema (title, body, type, link, active, publishedAt, priority).</li>
-<li><strong>backend/routes/announcements.js</strong> — <code>GET /api/announcements</code> (public feed).</li>
+<li><strong>backend/models/User.js</strong> — <code>lastSeenAnnouncementId</code> (Phase 3).</li>
+<li><strong>backend/models/SupportRequest.js</strong> — support requests (Phase 4).</li>
+<li><strong>backend/models/EconomyConfig.js</strong> — <code>supportLink</code>, <code>supportTelegramGroup</code> (Phase 4).</li>
+<li><strong>backend/routes/announcements.js</strong> — <code>GET /api/announcements</code> (public feed + unreadCount), <code>POST /api/announcements/seen</code>.</li>
 <li><strong>backend/routes/adminAnnouncements.js</strong> — GET/POST/PATCH/DELETE + <code>POST /:id/broadcast</code>.</li>
+<li><strong>backend/routes/comms.js</strong> — <code>GET /api/comms/status</code>, <code>GET /api/comms/config</code>.</li>
+<li><strong>backend/routes/support.js</strong> — <code>POST /api/support/request</code>.</li>
+<li><strong>backend/routes/adminSupport.js</strong> — <code>GET /api/admin/support</code>, <code>PATCH /api/admin/support/:id</code>.</li>
 <li><strong>backend/services/telegramNotify.js</strong> — <code>notifyAnnouncement(telegramId, { title, body, link })</code>.</li>
-<li><strong>backend/app.js</strong> — mount <code>/api/announcements</code>, <code>/api/admin/announcements</code>; <code>GET /api/comms/status</code>.</li>
-<li><strong>miniapp/src/app/page.js</strong> — Updates tab (IconUpdates), feed, system status, FAQ; TAB_LIST.</li>
-<li><strong>miniapp/src/app/globals.css</strong> — <code>.card--comms-status</code>, <code>.comms-status-dot</code>, <code>.comms-feed</code>, <code>.comms-faq</code>.</li>
-<li><strong>admin-panel/src/app/page.js</strong> — Comms tab: list announcements, create form, Broadcast to Telegram.</li>
+<li><strong>backend/app.js</strong> — mount <code>/api/announcements</code>, <code>/api/admin/announcements</code>, <code>/api/comms</code>, <code>/api/support</code>, <code>/api/admin/support</code>.</li>
+<li><strong>miniapp</strong> — Updates tab: feed, status, support form, read/unread.</li>
+<li><strong>admin-panel</strong> — Comms tab; Admin → Support for requests.</li>
 </ul>
-<p>This keeps the ecosystem <strong>unified</strong> (one feed, one status, one notification layer), <strong>super futuristic</strong> (glass-and-glow, clear hierarchy), and <strong>user-first</strong> (re-engagement, transparency, support).</p>
   </div>
 </body>
 </html>

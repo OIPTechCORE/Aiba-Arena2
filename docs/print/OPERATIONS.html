@@ -118,6 +118,35 @@
 <hr/>
 <h2>4. Monitoring and alerting</h2>
 <p><strong>Setup:</strong> Log drain to a log platform; uptime checks for <code>GET /health</code>; Prometheus scraping for <code>GET /metrics</code>; TON provider error monitoring.</p>
+<p><strong>Scripts:</strong></p>
+<table>
+<thead><tr>
+<th>Script</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>node scripts/health-check.js</code></td>
+<td>Basic health + metrics; exit 0/1 for CI/cron</td>
+</tr>
+<tr>
+<td><code>node scripts/health-check.js --vault</code></td>
+<td>Adds vault TON balance check</td>
+</tr>
+<tr>
+<td><code>node scripts/monitoring-check.js</code></td>
+<td>Full monitoring: health, expected metrics, optional vault</td>
+</tr>
+<tr>
+<td><code>node scripts/monitoring-check.js --vault --json</code></td>
+<td>JSON output for alerting pipelines</td>
+</tr>
+</tbody></table>
+<p><strong>Cron example (every 5 min):</strong></p>
+<pre><code>*/5 * * * * cd /path/to/project &amp;&amp; BACKEND_URL=https://api.example.com node scripts/monitoring-check.js --vault || echo &quot;Monitoring check failed&quot;</code></pre>
+<p><strong>Cron example (health-check, lighter weight):</strong></p>
+<pre><code>*/2 * * * * cd /path/to/project &amp;&amp; BACKEND_URL=https://api.example.com node scripts/health-check.js || echo &quot;Health check failed&quot;</code></pre>
+<p><strong>Docs:</strong> <a href="BACKUP-RUNBOOK.md">BACKUP-RUNBOOK.md</a> — Backup and restore. <a href="KEY-ROTATION.md">KEY-ROTATION.md</a> — Key rotation procedures.</p>
 <p><strong>Metrics endpoint:</strong> <code>GET /metrics</code> (Prometheus). Includes: <code>aiba_http_request_duration_seconds</code>, <code>aiba_battle_runs_total</code>, <code>aiba_battle_anomalies_total</code>, <code>aiba_auto_bans_total</code>, <code>aiba_economy_emissions_total</code>, <code>aiba_economy_sinks_total</code>, <code>aiba_economy_withdrawals_total</code>. Treasury: <code>GET /api/treasury/ops</code>.</p>
 <p><strong>Suggested alerts:</strong> Battle anomaly/auto-ban spikes; economy ledger anomalies; vault low TON/jettons; Mongo reconnects; API/battle error rate &gt; threshold; rate limit 429 spikes.</p>
 <p><strong>Thresholds (examples):</strong> API error &gt;5% over 10m; battle error &gt;2%; vault TON below <code>MIN_VAULT_TON_NANO</code>; Mongo reconnects &gt;3 in 5m.</p>
@@ -126,10 +155,12 @@
 <ul>
 <li>[ ] All prod env set; <code>APP_ENV=prod</code>; backend starts without PROD_READINESS_FAILED</li>
 <li>[ ] CORS set to production frontend URLs only</li>
-<li>[ ] Monitoring and backups configured; restore tested</li>
+<li>[ ] Monitoring configured (scripts/health-check.js or scripts/monitoring-check.js via cron; see §4)</li>
+<li>[ ] Backups configured; restore tested (BACKUP-RUNBOOK.md)</li>
 <li>[ ] Runbook and security playbooks read and agreed</li>
 <li>[ ] <code>ENABLE_LEGACY_PENDING_AIBA_DISPATCH</code> not true in production</li>
 </ul>
+<p><strong>Runbooks:</strong> <a href="BACKUP-RUNBOOK.md">BACKUP-RUNBOOK.md</a> (MongoDB, secrets, TON, code). <a href="KEY-ROTATION.md">KEY-ROTATION.md</a> (Oracle, Admin JWT, Bot token, Battle seed).</p>
 <p><strong>Data migrations:</strong> Prefer additive schema changes; add indexes for new lookups; backfill idempotent and batched.</p>
   </div>
 </body>
