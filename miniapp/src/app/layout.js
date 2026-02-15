@@ -1,5 +1,5 @@
 import './globals.css';
-import { Providers } from './providers';
+import { ProvidersWrapper } from './ProvidersWrapper';
 import { ClientOnly } from './ClientOnly';
 import { LegalConsent } from './LegalConsent';
 import { AppFooter } from './AppFooter';
@@ -30,11 +30,11 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body className="aiba-miniapp" suppressHydrationWarning>
         <ClientOnly fallback={<main className="app-main" />}>
-          <Providers>
+          <ProvidersWrapper>
             <LegalConsent />
             <main className="app-main">{children}</main>
             <AppFooter />
-          </Providers>
+          </ProvidersWrapper>
         </ClientOnly>
       </body>
     </html>
