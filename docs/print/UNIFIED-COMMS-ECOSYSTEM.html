@@ -66,7 +66,7 @@
 <tr>
 <td><strong>System status</strong></td>
 <td>Operational / maintenance.</td>
-<td><code>GET /api/health</code> or <code>GET /api/comms/status</code>; shown in Updates tab.</td>
+<td><code>GET /health</code> (uptime; returns <code>{ ok: true }</code>) or <code>GET /api/comms/status</code> (returns <code>{ status, updatedAt }</code>); Updates tab uses comms/status.</td>
 </tr>
 <tr>
 <td><strong>Support / FAQ</strong></td>
@@ -93,9 +93,9 @@
 <hr/>
 <h2>5. Miniapp UX</h2>
 <ul>
-<li><strong>Announcements feed</strong>: Cards (title, date, body snippet, optional link); glass-and-glow style. Read/unread indicator (Phase 3).</li>
-<li><strong>FAQ / Support</strong>: Collapsible or short list + in-app support form (Phase 4) or optional &quot;Contact support&quot; link.</li>
-<li><strong>Guide tip</strong>: When tab is Updates, show tip like &quot;Stay informed. Announcements and status here.&quot;</li>
+<li><strong>Announcements feed</strong>: Cards (title, date, body snippet, optional link); glass-and-glow style (<code>comms-feed</code>, <code>comms-feed__item</code>). Read/unread indicator (Phase 3): &quot;New&quot; badge on first unread; tab bar shows unread count badge on Updates when <code>unreadCount</code> &gt; 0. Click to mark as read (<code>POST /api/announcements/seen</code>).</li>
+<li><strong>FAQ / Support</strong>: Collapsible FAQ block (native <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code>, <code>.comms-faq__item</code>) + in-app support form (Phase 4) with subject (question, bug, feature, account, other) + message. When <code>supportLink</code> or <code>supportTelegramGroup</code> configured (comms/config), display &quot;Open support channel&quot; and/or Telegram link above the form.</li>
+<li><strong>Guide tip</strong>: When tab is Updates, show tip &quot;Stay informed. Announcements, status &amp; support here.&quot;</li>
 </ul>
 <hr/>
 <h2>6. Phased Roadmap</h2>

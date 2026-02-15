@@ -14,7 +14,7 @@ const MentorSchema = new mongoose.Schema(
     { timestamps: true },
 );
 
-MentorSchema.index({ key: 1 }, { unique: true });
+/* key: unique: true on field already creates unique index */
 MentorSchema.index({ realmKey: 1, tier: 1 });
 
 module.exports = mongoose.model('Mentor', MentorSchema);

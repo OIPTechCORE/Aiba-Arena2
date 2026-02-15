@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const BattleSchema = new mongoose.Schema(
     {
-        requestId: { type: String, required: true, unique: true, index: true },
+        requestId: { type: String, required: true, unique: true },
 
         ownerTelegramId: { type: String, required: true, index: true },
-        brokerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Broker', required: true, index: true },
+        brokerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Broker', required: true },
 
         arena: { type: String, required: true, trim: true },
         league: { type: String, default: 'rookie', trim: true },

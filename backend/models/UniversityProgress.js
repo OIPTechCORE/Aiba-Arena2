@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const UniversityProgressSchema = new mongoose.Schema(
     {
-        telegramId: { type: String, required: true, unique: true, index: true },
+        telegramId: { type: String, required: true, unique: true },
         completedKeys: { type: [String], default: [] },
         graduatedAt: { type: Date, default: null },
     },

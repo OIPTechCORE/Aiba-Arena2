@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 
 const CarRaceEntrySchema = new mongoose.Schema(
     {
-        raceId: { type: mongoose.Schema.Types.ObjectId, ref: 'CarRace', required: true, index: true },
+        raceId: { type: mongoose.Schema.Types.ObjectId, ref: 'CarRace', required: true },
         carId: { type: mongoose.Schema.Types.ObjectId, ref: 'RacingCar', required: true, index: true },
-        telegramId: { type: String, required: true, index: true },
+        telegramId: { type: String, required: true },
         position: { type: Number, default: null },
         finishTime: { type: Number, default: null },
         points: { type: Number, default: 0 },

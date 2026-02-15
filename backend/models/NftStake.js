@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const NftStakeSchema = new mongoose.Schema(
     {
-        telegramId: { type: String, required: true, index: true },
+        telegramId: { type: String, required: true },
         universeSlug: { type: String, required: true, index: true },
         // Broker NFT: we use brokerId to identify the staked NFT (broker must have nftItemAddress)
-        brokerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Broker', required: true, index: true },
+        brokerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Broker', required: true },
         stakedAt: { type: Date, default: Date.now },
         lastRewardAt: { type: Date, default: Date.now },
     },

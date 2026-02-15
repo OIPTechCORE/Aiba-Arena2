@@ -69,7 +69,7 @@
 <tr>
 <td><strong>Cancelled stakes</strong></td>
 <td><code>CANCELLED_STAKES_WALLET</code></td>
-<td>AIBA fee from early stake cancel (5% default) → Treasury <code>staking_cancel_early_fee</code></td>
+<td>AIBA fee (5% default) from early stake cancel → Treasury model (<code>staking_cancel_early_fee</code>). Env reserved for future TON-based fee.</td>
 <td><code>POST /api/staking/cancel-early</code></td>
 </tr>
 <tr>
@@ -118,7 +118,7 @@
 <td>Boost group</td>
 <td><code>BOOST_GROUP_WALLET</code></td>
 <td><code>boostGroupCostTonNano</code> (1–10 TON)</td>
-<td><code>POST /api/guilds/:id/boost</code></td>
+<td><code>POST /api/guilds/:guildId/boost</code></td>
 </tr>
 <tr>
 <td>Premium</td>

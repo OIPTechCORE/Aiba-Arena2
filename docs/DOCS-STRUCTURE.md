@@ -8,9 +8,9 @@
 
 | Location | Purpose |
 |----------|---------|
-| **`docs/*.md`** | Primary documentation — **edit these**. |
-| **`docs/marketing/*.md`** | Marketing materials. |
-| **`docs/marketing/templates/*.md`** | Template readme. |
+| `docs/` (all .md) | Primary documentation — **edit these**. |
+| `docs/marketing/` (all .md) | Marketing materials. |
+| `docs/marketing/templates/` (all .md) | Template readme. |
 
 All documentation should be written in **Markdown**. That is the source of truth.
 

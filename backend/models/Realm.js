@@ -14,6 +14,6 @@ const RealmSchema = new mongoose.Schema(
     { timestamps: true },
 );
 
-RealmSchema.index({ key: 1 }, { unique: true });
+/* key: unique: true on field already creates unique index */
 
 module.exports = mongoose.model('Realm', RealmSchema);

@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 
 const TrainerSchema = new mongoose.Schema(
     {
-        telegramId: { type: String, required: true, unique: true, index: true },
+        telegramId: { type: String, required: true, unique: true },
         username: { type: String, default: '', trim: true },
         displayName: { type: String, default: '', trim: true },
         bio: { type: String, default: '', trim: true, maxlength: 500 },
         specialty: { type: String, default: 'general', trim: true },
         region: { type: String, default: '', trim: true },
-        code: { type: String, required: true, unique: true, trim: true, index: true },
+        code: { type: String, required: true, unique: true, trim: true },
         invitedByTrainerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Trainer', default: null },
         status: { type: String, enum: ['pending', 'approved', 'suspended'], default: 'pending' },
         referredUserCount: { type: Number, default: 0 },
@@ -33,7 +33,7 @@ const TrainerSchema = new mongoose.Schema(
     { timestamps: true },
 );
 
-TrainerSchema.index({ code: 1 });
+/* code: unique: true on field already creates unique index */
 TrainerSchema.index({ status: 1 });
 TrainerSchema.index({ totalImpactScore: -1 });
 TrainerSchema.index({ referredUserCount: -1 });

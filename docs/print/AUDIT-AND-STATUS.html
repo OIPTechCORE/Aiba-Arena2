@@ -106,7 +106,7 @@
 <hr/>
 <h2>4. Vision vs codebase</h2>
 <p>Use this section to track high-level vision vs implementation.</p>
-<p><strong>Key alignments (backend + miniapp implemented):</strong> battles, economy (NEUR/AIBA), <strong>brokers for sale</strong> (Market Trade + system catalog), <strong>cars for sale</strong> (Car Racing → Market: list/buy from players or system), <strong>bikes for sale</strong> (Bike Racing → Market: list/buy from players or system), Super Futuristic Unified Marketplace, guilds (create/join, deposit brokers, Guild Wars, top N free create), referrals, car/bike racing (races, leaderboard), university, charity (Max NEUR/AIBA, presets, message, anonymous), multiverse (NFT/stake), governance + <strong>DAO</strong> (staking requirement for proposals), wallet (TonConnect, claim, staking flow switch), <strong>trainers</strong> (global network, dashboard, leaderboard, viral recruitment, 5 AIBA/user, 20 AIBA/recruited), <strong>Unified Comms</strong> (announcements read/unread, support form), predict (Battle of the hour), broker rental.</p>
+<p><strong>Key alignments (backend + miniapp implemented):</strong> battles, economy (NEUR/AIBA), <strong>brokers for sale</strong> (Market Trade + system catalog), <strong>cars for sale</strong> (Car Racing → Market: list/buy from players or system), <strong>bikes for sale</strong> (Bike Racing → Market: list/buy from players or system), Super Futuristic Unified Marketplace, guilds (create/join, deposit brokers, Guild Wars, top N free create), referrals, car/bike racing (races, leaderboard), university, charity (Max NEUR/AIBA, presets, message, anonymous, <strong>campaign detail</strong> with recent donations via <code>GET /api/charity/campaigns/:id</code>), multiverse (NFT/stake), <strong>Governance</strong> (realm proposals) + <strong>DAO</strong> (community proposals, staking requirement for create), wallet (TonConnect, claim, staking flow switch), <strong>trainers</strong> (global network, dashboard, leaderboard, viral recruitment), <strong>Unified Comms</strong> (announcements read/unread, support form, collapsible FAQ), predict (Battle of the hour), broker rental (list, rent, unlist own).</p>
 <p><strong>Gaps (closed):</strong> All previously identified gaps have been implemented:</p>
 <table>
 <thead><tr>
@@ -378,6 +378,27 @@
 </tr>
 </tbody></table>
 <p><strong>Navigation:</strong> CoE, NFT Gallery, Yield Vault in <code>TAB_LIST</code> and <code>HOME_GRID_IDS</code>; accessible from tab bar and Home grid.</p>
+<hr/>
+<h2>10. Global scan (docs, APIs, endpoints) — gaps fixed</h2>
+<table>
+<thead><tr>
+<th>Issue</th>
+<th>Fix</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Guilds route order</strong></td>
+<td><code>GET /api/guilds/list</code> was defined <em>after</em> <code>GET /api/guilds/:guildId/pool</code>, so requests to <code>/list</code> matched <code>/:guildId</code> with guildId=<code>&quot;list&quot;</code> and failed validation. Reordered: <code>/list</code>, <code>/mine</code>, <code>/top</code> now come <em>before</em> <code>/:guildId/pool</code>.</td>
+</tr>
+<tr>
+<td><strong>API-CONTRACT.md gaps</strong></td>
+<td>Added §5h: Charity (campaigns, stats, my-impact, leaderboard, donate), Daily (claim, combo-claim, status), Premium (status, buy), Broker Rental (list, rent, unlist), Tasks, Tournaments, Global Boss, Stars Store.</td>
+</tr>
+<tr>
+<td><strong>Announcements doc</strong></td>
+<td>Clarified <code>GET /api/announcements</code> returns <code>{ items: Announcement[], unreadCount }</code>; added Auth requirement.</td>
+</tr>
+</tbody></table>
 <hr/>
 <h2>11. Up-to-date check</h2>
 <p>When auditing “is everything up to date”: (1) Backend and miniapp env match DEPLOYMENT-AND-ENV.md. (2) All required env set for target (localhost vs prod). (3) CI green; backend and miniapp tests pass. (4) No committed secrets; runbook and monitoring in place for production.</p>

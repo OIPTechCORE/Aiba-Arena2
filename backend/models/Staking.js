@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const StakingSchema = new mongoose.Schema(
     {
-        telegramId: { type: String, required: true, index: true },
+        telegramId: { type: String, required: true },
         amount: { type: Number, required: true, min: 0 },
         lockedAt: { type: Date, default: Date.now },
         lastClaimedAt: { type: Date, default: null },

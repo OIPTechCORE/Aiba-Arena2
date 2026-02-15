@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>HOLISTIC ERRORS INVESTIGATION — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>HOLISTIC ERRORS INVESTIGATION</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Holistic Errors Investigation — AIBA Arena</h1>
+<p><strong>Date:</strong> 2026-02-15 <strong>Scope:</strong> Builds, lint, tests, backend (Mongoose, env), error boundaries, docs, and known issues.</p>
+<hr/>
+<h2>Executive summary</h2>
+<ul>
+<li><strong>Lint:</strong> Root <code>npm run lint</code> runs Prettier <code>--check</code>; <strong>many files are not formatted</strong> (warnings). <strong>3 files</strong> in <code>docs/print/</code> have <strong>HTML syntax errors</strong> (invalid nesting of <code>&lt;em&gt;</code>/<code>&lt;code&gt;</code>); source Markdown was fixed so regeneration yields valid HTML.</li>
+<li><strong>Backend tests:</strong> <code>npm run test:api</code> <strong>passes</strong> (12/12). No MongoDB required for these tests; broker list may timeout if DB is unavailable (expected).</li>
+<li><strong>Mongoose:</strong> <strong>Duplicate schema index</strong> warnings were reduced by removing redundant <code>index: true</code> where <code>Schema.index()</code> or <code>unique: true</code> already defines the same index. A few warnings may remain (telegramId, requestId); run <code>node --trace-warnings</code> in backend to pinpoint models.</li>
+<li><strong>Error boundaries:</strong> Admin has <code>AdminErrorBoundary.jsx</code> in root layout; <strong>miniapp has no root error boundary</strong> (optional improvement).</li>
+<li><strong>Env:</strong> Backend has <code>.env.example</code>; miniapp and admin-panel have no <code>.env.example</code> (optional: add for <code>NEXT_PUBLIC_*</code> and required vars).</li>
+</ul>
+<hr/>
+<h2>1. Builds</h2>
+<table>
+<thead><tr>
+<th>App</th>
+<th>Command</th>
+<th>Result</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Miniapp</td>
+<td><code>cd miniapp &amp;&amp; npm run build</code></td>
+<td>✅ Compiles; static generation OK</td>
+</tr>
+<tr>
+<td>Admin</td>
+<td><code>cd admin-panel &amp;&amp; npm run build</code></td>
+<td>✅ Compiles; static generation OK</td>
+</tr>
+</tbody></table>
+<p><strong>Versions:</strong> Miniapp uses Next 15 + React 19; admin-panel uses Next 14 + React 18.</p>
+<hr/>
+<h2>2. Lint (Prettier)</h2>
+<ul>
+<li><strong>Result:</strong> Many <code>[warn]</code> (files not formatted). No Prettier config change was made; formatting can be normalized with <code>npx prettier --write .</code> when desired.</li>
+<li><strong>Errors (3 files):</strong> Prettier reported <strong>HTML syntax errors</strong> in generated files:</li>
+<li>- <code>docs/print/DOCS-STRUCTURE.html</code>: Nested <code>&lt;/em&gt;</code> inside <code>&lt;code&gt;</code> (from <code>*<em>\</code>docs/</em>.md\<code>**</code> — asterisk interpreted as italic).</li>
+<li>- <code>docs/print/GAME-FUNCTIONALITY.html</code>: Same pattern for <code>/api/assets/<em></code>, <code>/api/asset-marketplace/</em></code>.</li>
+<li>- <code>docs/print/REPORTS-MONITORING.html</code>: Same for <code><em>2</code>, <code></em>1.5</code> in table cell.</li>
+</ul>
+<p><strong>Source fixes applied:</strong> In <code>docs/DOCS-STRUCTURE.md</code>, <code>docs/GAME-FUNCTIONALITY.md</code>, and <code>docs/REPORTS-MONITORING.md</code>, asterisks used in paths or math were escaped or moved into code so the print-docs build no longer produces invalid nesting. <strong>Regenerate</strong> with <code>npm run build:print-docs</code> after pulling.</p>
+<hr/>
+<h2>3. Backend tests</h2>
+<ul>
+<li><strong>Result:</strong> ✅ <strong>12 tests pass.</strong> No MongoDB required; some tests expect 401/400 or tolerate 500 when DB is missing.</li>
+<li><strong>Note:</strong> &quot;Error listing brokers: MongooseError: Operation \<code>brokers.find()\</code> buffering timed out&quot; is expected when MongoDB is not running; tests are written to pass regardless.</li>
+</ul>
+<hr/>
+<h2>4. Mongoose duplicate index warnings</h2>
+<p><strong>Symptom:</strong> At runtime, Mongoose logs: <code>Duplicate schema index on {&quot;telegramId&quot;:1} found. This is often due to declaring an index using both &quot;index: true&quot; and &quot;schema.index()&quot;.</code></p>
+<p><strong>Cause:</strong> A field had both <code>index: true</code> (or <code>unique: true</code>, which implies an index) and a <code>Schema.index()</code> on the same key(s).</p>
+<p><strong>Fixes applied (backend/models):</strong></p>
+<ul>
+<li><strong>ActionRunKey:</strong> Removed <code>index: true</code> from <code>scope</code>, <code>requestId</code>, <code>ownerTelegramId</code>, <code>status</code>, <code>expiresAt</code>.</li>
+<li><strong>Trainer:</strong> Removed <code>index: true</code> from <code>telegramId</code>, <code>code</code>; removed <code>TrainerSchema.index({ code: 1 })</code> (unique on field already creates index).</li>
+<li><strong>Staking, UniversityProgress, FullCertificateMint, CourseBadgeMint:</strong> Removed <code>index: true</code> from <code>telegramId</code> (and from <code>txHash</code> where unique); kept <code>Schema.index({ telegramId: 1 })</code>.</li>
+<li><strong>Mentor, Realm:</strong> Removed redundant <code>Schema.index({ key: 1 }, { unique: true })</code> (field already has <code>unique: true</code>).</li>
+<li><strong>Battle:</strong> Removed <code>index: true</code> from <code>requestId</code>, <code>brokerId</code>.</li>
+<li><strong>NftStake:</strong> Removed <code>index: true</code> from <code>brokerId</code>, <code>telegramId</code>.</li>
+<li><strong>BikeRaceEntry, CarRaceEntry:</strong> Removed <code>index: true</code> from <code>raceId</code>, <code>telegramId</code>.</li>
+<li><strong>BrokerRental:</strong> Removed <code>index: true</code> from <code>brokerId</code>, <code>ownerTelegramId</code>, <code>status</code>.</li>
+<li><strong>Referral:</strong> Removed <code>index: true</code> from <code>code</code>, <code>ownerTelegramId</code>.</li>
+<li><strong>PredictBet:</strong> Removed <code>index: true</code> from <code>eventId</code>, <code>telegramId</code>.</li>
+</ul>
+<p><strong>If warnings remain:</strong> Run from backend: <code>node --trace-warnings node_modules/.bin/node --test tests/api/health.test.js</code> and inspect the stack to see which model still declares a duplicate index for <code>telegramId</code> or <code>requestId</code>.</p>
+<hr/>
+<h2>5. Error boundaries</h2>
+<ul>
+<li><strong>Miniapp:</strong> No root-level error boundary. Consider adding a client component that wraps the main tree and catches render errors (same pattern as admin).</li>
+</ul>
+<hr/>
+<h2>6. Environment variables</h2>
+<ul>
+<li><strong>Miniapp / admin-panel:</strong> No <code>.env.example</code> or <code>.env.local.example</code>. Optional: add a small example listing <code>NEXT_PUBLIC_*</code> and any required API URLs so new contributors know what to set.</li>
+</ul>
+<hr/>
+<h2>7. Other notes</h2>
+<ul>
+<li><strong>TonConnect / miniapp:</strong> Wallet modal and z-index handling are in place so app buttons remain clickable; see <code>docs/MINIAPP-HOME-GRID-BUTTONS-INVESTIGATION.md</code> and related docs.</li>
+<li><strong>Metallic design:</strong> Both miniapp and admin-panel <code>globals.css</code> include the metallic design system variables and utility classes.</li>
+</ul>
+<hr/>
+<h2>8. Checklist (post-investigation)</h2>
+<table>
+<thead><tr>
+<th>Item</th>
+<th>Status</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Miniapp build</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Admin build</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Backend API tests</td>
+<td>✅ 12/12</td>
+</tr>
+<tr>
+<td>Mongoose duplicate indexes</td>
+<td>✅ Reduced; trace if needed for remaining</td>
+</tr>
+<tr>
+<td>Prettier HTML errors in docs/print</td>
+<td>✅ Source .md fixed; regenerate HTML</td>
+</tr>
+<tr>
+<td>Root error boundary in miniapp</td>
+<td>Optional</td>
+</tr>
+<tr>
+<td>.env.example for miniapp/admin</td>
+<td>Optional</td>
+</tr>
+</tbody></table>
+<p>Regenerate print docs after doc changes: <code>npm run build:print-docs</code></p>
+  </div>
+</body>
+</html>

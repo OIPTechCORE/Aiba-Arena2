@@ -4,18 +4,18 @@ const mongoose = require('mongoose');
 // This is intentionally similar to BattleRunKey, but scoped by (scope, requestId, ownerTelegramId).
 const ActionRunKeySchema = new mongoose.Schema(
     {
-        scope: { type: String, required: true, trim: true, index: true }, // e.g. "broker_train"
-        requestId: { type: String, required: true, trim: true, index: true },
-        ownerTelegramId: { type: String, required: true, index: true },
+        scope: { type: String, required: true, trim: true },
+        requestId: { type: String, required: true, trim: true },
+        ownerTelegramId: { type: String, required: true },
 
-        status: { type: String, enum: ['in_progress', 'completed', 'failed'], default: 'in_progress', index: true },
+        status: { type: String, enum: ['in_progress', 'completed', 'failed'], default: 'in_progress' },
         errorCode: { type: String, default: '', trim: true },
         errorMessage: { type: String, default: '', trim: true },
 
         response: { type: Object, default: null },
 
         // TTL cleanup. Set short TTL for in_progress, longer TTL for completed/failed.
-        expiresAt: { type: Date, required: true, index: true },
+        expiresAt: { type: Date, required: true },
     },
     { timestamps: true },
 );

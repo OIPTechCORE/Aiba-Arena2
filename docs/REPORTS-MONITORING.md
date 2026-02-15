@@ -41,8 +41,8 @@
 
 | Advisory | Code (`referrals.js`) | Status |
 |----------|------------------------|--------|
-| 10th = 2× referrer, 1.5× referee | `newUses >= 10` → `*2`, `*1.5` | ✅ Match |
-| 100th = 5× referrer, 2× referee | `newUses >= 100` → `*5`, `*2` | ✅ Match |
+| 10th = 2× referrer, 1.5× referee | `newUses >= 10` → ×2, ×1.5 | ✅ Match |
+| 100th = 5× referrer, 2× referee | `newUses >= 100` → ×5, ×2 | ✅ Match |
 
 ### 2.3 Token Splits Implementation
 

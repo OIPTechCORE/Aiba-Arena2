@@ -468,7 +468,7 @@ Create car/bike (AIBA or TON) → Enter race (AIBA entry fee)
 | `/api/charity/*` | Campaigns, donate, leaderboard |
 | `/api/university/*` | Courses, progress, mint badges |
 | `/api/realms`, `/api/missions`, `/api/mentors` | Realms |
-| `/api/assets/*`, `/api/asset-marketplace/*` | AI assets |
+| `/api/assets/` (and subtree), `/api/asset-marketplace/` (and subtree) | AI assets |
 | `/api/governance/*` | Proposals, vote |
 | `/api/multiverse/*` | NFT universes, stake, claim |
 | `/api/staking/*` | Stake AIBA, claim |

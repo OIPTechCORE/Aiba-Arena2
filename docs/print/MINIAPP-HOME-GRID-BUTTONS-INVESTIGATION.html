@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>MINIAPP HOME GRID BUTTONS INVESTIGATION — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>MINIAPP HOME GRID BUTTONS INVESTIGATION</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Miniapp home page grid buttons – investigation</h1>
+<h2>Summary</h2>
+<p>The home page 4×4 grid (Brokers, Arenas, Market, Tasks, etc.) was not responding to clicks. Investigation showed that the <strong>TonConnect widget root</strong> (<code>#tc-widget-root</code>), which is injected by <code>@tonconnect/ui-react</code> and covers the full viewport with <code>position: fixed</code> and <code>z-index: 10000</code>, was capturing all pointer events. Its child elements (wrapper divs) use the default <code>pointer-events: auto</code>, so they sat on top of the app and blocked clicks to the grid and the rest of the page.</p>
+<h2>Fix (in <code>miniapp/src/app/globals.css</code>)</h2>
+<ol>
+</ol>
+<p>All descendants of the widget pass clicks through, so full‑viewport wrappers no longer block the app.</p>
+<ol>
+</ol>
+<p>Only real controls inside the widget (e.g. Connect Wallet button, links) receive clicks.</p>
+<ol>
+</ol>
+<p>When the wallet modal is open, the modal content is made interactive again.</p>
+<ol>
+<li>- <code>.aiba-app</code>: <code>position: relative</code>, <code>z-index: 1</code>, <code>pointer-events: auto</code></li>
+<li>- <code>main.app-main</code>: <code>position: relative</code>, <code>pointer-events: auto</code></li>
+<li>- <code>.home-grid</code> and <code>.home-grid__item</code>: <code>pointer-events: auto</code></li>
+</ol>
+<p>So the app and the grid are explicitly marked as interactive and not dependent on inheritance.</p>
+<h2>Flow checked</h2>
+<ul>
+<li><strong>DOM</strong>: Root is <code>&lt;div className=&quot;aiba-app&quot;&gt;</code>; inside it, header, balance strip, hero, then <code>&lt;div className=&quot;tab-content&quot;&gt;</code> and <code>&lt;section className=&quot;tab-panel ... is-active&quot;&gt;</code> containing <code>&lt;div className=&quot;home-grid&quot;&gt;</code> and the buttons. No wrapper with <code>pointer-events: none</code> or overlay from our code covering the grid.</li>
+<li><strong>Overlays that can block when visible</strong> (not the cause when they are hidden):</li>
+<li>- <code>.legal-consent-overlay</code> (z-index 10000) – legal consent</li>
+<li>- <code>.cinematic</code> (z-index 10000) – first‑time intro</li>
+<li>- <code>.tutorial-overlay</code> (z-index 9999) – tutorial steps 1–4</li>
+<li>- <code>#tc-widget-root</code> (z-index 10000) – always present; fixed by the rules above.</li>
+</ul>
+<h2>How to verify</h2>
+<ol>
+<li>Ensure no legal/cinematic/tutorial overlay is showing (dismiss if needed).</li>
+<li>Click grid items (e.g. Brokers, Market, Tasks); the tab should switch and the corresponding panel should show.</li>
+<li>Click “Connect Wallet” in the header; the TonConnect modal should open and remain clickable.</li>
+<li>In devtools, confirm <code>#tc-widget-root</code> exists under <code>body</code> and that our CSS rules are applied (no overrides forcing <code>pointer-events: auto</code> on its non‑button descendants).</li>
+</ol>
+<h2>Files touched</h2>
+<ul>
+</ul>
+  </div>
+</body>
+</html>

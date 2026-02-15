@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const BikeRaceEntrySchema = new mongoose.Schema({
-    raceId: { type: mongoose.Schema.Types.ObjectId, ref: 'BikeRace', required: true, index: true },
+    raceId: { type: mongoose.Schema.Types.ObjectId, ref: 'BikeRace', required: true },
     bikeId: { type: mongoose.Schema.Types.ObjectId, ref: 'RacingMotorcycle', required: true, index: true },
-    telegramId: { type: String, required: true, index: true },
+    telegramId: { type: String, required: true },
     position: { type: Number, default: null },
     finishTime: { type: Number, default: null },
     points: { type: Number, default: 0 },
