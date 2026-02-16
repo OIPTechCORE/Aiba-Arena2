@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@tonconnect/ui-react'],
+  transpilePackages: ['@tonconnect/ui-react', '@ton/core'],
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**', pathname: '/**' },
