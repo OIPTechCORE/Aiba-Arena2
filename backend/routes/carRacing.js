@@ -222,15 +222,17 @@ async function runCarRaceIfFull(raceId) {
     const fee = Math.floor((pool * feeBps) / 10000);
     const toDistribute = pool - fee;
     const totalPositions = results.length;
-    const positionShare = totalPositions > 0 ? toDistribute / totalPositions : 0;
     const positionBonus = [1.5, 1.2, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5];
+    const sumBonuses = results.length > 0
+        ? results.reduce((s, _, i) => s + (positionBonus[i] ?? 0.5), 0)
+        : 0;
     race.status = 'running';
     race.startedAt = new Date();
     await race.save();
     for (let i = 0; i < results.length; i++) {
         const r = results[i];
         const bonus = positionBonus[i] ?? 0.5;
-        const aibaReward = Math.floor(positionShare * bonus);
+        const aibaReward = sumBonuses > 0 ? Math.floor((toDistribute * bonus) / sumBonuses) : 0;
         const entry = valid.find((e) => String(e._id) === r.entryId);
         await CarRaceEntry.updateOne(
             { _id: r.entryId },
