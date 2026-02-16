@@ -9,6 +9,7 @@ alwaysApply: true
 
 - When you add, edit, or delete files in the project, stage, commit, and push the changes.
 - Use a clear, descriptive commit message that summarizes what was changed (e.g. "Add University plan section", "Fix lint in page.js").
+- **Co-author (required — ever use):** Every commit MUST include: `Co-authored-by: OIPTechCore <oiptechcore@gmail.com>`. Use: `git commit --trailer "Co-authored-by: OIPTechCore <oiptechcore@gmail.com>" -m "Your message"`. Do not omit this.
 - Request `git_write` permission when running `git add` and `git commit`.
 - Request `network` permission when running `git push` so every commit is pushed to the remote.
 - Prefer pushing to the **main** branch (production). If the repo uses `main` as default, push to `origin main` so Vercel and other integrations auto-deploy.
