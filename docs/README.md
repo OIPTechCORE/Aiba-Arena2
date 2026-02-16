@@ -56,7 +56,9 @@ Use this phase table first, then open the detailed docs below.
 | **CAR-RACING-DEEP-EXPLANATION.md** | Car racing: config, tracks, cars, races, enter, buy, leaderboard. |
 | **MARKETPLACE-DEEP-EXPLANATION.md** | Unified marketplace: brokers, assets, rentals, boosts, system shop. |
 
-**Gaps and audits:** [GAP-AUDIT.md](GAP-AUDIT.md), [GAPS-SCAN-REPORT.md](GAPS-SCAN-REPORT.md) (full app & docs gap scan).
+**Gaps and audits:** [GAP-AUDIT.md](GAP-AUDIT.md), [GAPS-SCAN-REPORT.md](GAPS-SCAN-REPORT.md) (full app & docs gap scan), [APP-SCAN-REPORT.md](APP-SCAN-REPORT.md) (issues/errors scan).
+
+**UI & updatedness:** [UI-DESIGN-PRINCIPLES.md](UI-DESIGN-PRINCIPLES.md) (nav, card-based, responsive). [DOCS-UPDATEDNESS.md](DOCS-UPDATEDNESS.md) (code, .md, .html refresh status).
 
 **Print folder:** `print/` contains HTML exports of docs. Run `npm run build:print-docs` to regenerate from `.md` sources. See [DOCS-STRUCTURE.md](DOCS-STRUCTURE.md).
 
@@ -71,3 +73,4 @@ Use this phase table first, then open the detailed docs below.
 - **Trainer button:** Coloured styling on Home grid. See `miniapp/src/config/navigation.js` (`gridStyle: 'trainers'`).
 - **API-CONTRACT audit:** §0 Core (Economy, Vault, Wallet, Battle) added; duplicate §5e fixed (Predict → 5e.2); Trainers claim-rewards requestId documented.
 - **Gaps scan:** [GAPS-SCAN-REPORT.md](GAPS-SCAN-REPORT.md) — full app & docs gap scan; README deep-feature-docs index and GAME-FUNCTIONALITY §12 API mapping extended (broker-rental, predict, trainers, donate, premium, etc.).
+- **Updatedness:** Code, .md, and print HTML kept in sync. Run `npm run build:print-docs` after doc edits. See [DOCS-UPDATEDNESS.md](DOCS-UPDATEDNESS.md).

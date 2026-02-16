@@ -1,0 +1,10 @@
+---
+description: UI must be futuristic, modular, card-based, extensible, multi-tabbed; every page has Back to Home and Back to Previous
+globs: miniapp/**/*.js, miniapp/**/*.jsx, miniapp/**/*.css, admin-panel/**/*.js, admin-panel/**/*.jsx, admin-panel/**/*.css
+---
+
+# UI Design — AIBA Arena
+
+- **Futuristic, modular, card-based, extensible, interoperable, multi-tabbed.** Prefer design tokens from `miniapp/src/app/globals.css` (e.g. `--bg-panel`, `--accent-gold`, `--shadow-3d-card`, `.card`, `.btn`). Avoid one-off inline styles for layout; use existing card and button classes.
+- **Every page must offer:** (A) **Back to Home** and (B) **Back to Previous** (where the user was). Route pages (privacy, terms, trainer, admin): use `PageNav` from `miniapp/src/components/PageNav.js`. In-app tabs (HomeContent): show “← Back to Previous” (previous tab) and “← Back to Home” in the hero when not on home.
+- **New route-level pages:** Include `<PageNav />` at the top. See `docs/UI-DESIGN-PRINCIPLES.md` for full guidance.

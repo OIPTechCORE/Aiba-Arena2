@@ -137,6 +137,7 @@ router.get('/me', async (req, res) => {
             baseRewardAibaPerScore: cfg.baseRewardAibaPerScore,
             baseRewardNeurPerScore: cfg.baseRewardNeurPerScore,
             trainNeurCost: cfg.trainNeurCost,
+            repairNeurCost: cfg.repairNeurCost,
             upgradeAibaCost: cfg.upgradeAibaCost,
             combineNeurCost: cfg.combineNeurCost,
             mintAibaCost: cfg.mintAibaCost,

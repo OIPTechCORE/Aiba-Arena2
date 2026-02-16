@@ -243,7 +243,12 @@ router.post(
 
             const broker = await Broker.findById(brokerId);
             if (!broker) return res.status(404).json({ error: 'broker not found' });
-            if (String(broker.ownerTelegramId) !== telegramId)
+            const isOwner = String(broker.ownerTelegramId) === telegramId;
+            const isRenter =
+                String(broker.rentedByTelegramId || '') === telegramId &&
+                broker.rentedUntil &&
+                new Date(broker.rentedUntil).getTime() > Date.now();
+            if (!isOwner && !isRenter)
                 return res.status(403).json({ error: 'not your broker' });
             if (broker.banned)
                 return res.status(403).json({ error: 'broker banned', reason: broker.banReason || 'banned' });
@@ -251,7 +256,11 @@ router.post(
             const cfg = await getConfig();
             const maxEnergy = clampInt(cfg?.battleMaxEnergy ?? 100, 1, 1_000);
 
-            const energyCost = clampInt(mode?.energyCost ?? 1, 0, maxEnergy);
+            const energyCost = clampInt(
+                mode?.energyCost ?? cfg?.battleEnergyCost ?? 1,
+                0,
+                maxEnergy,
+            );
             const cooldownSeconds = clampInt(mode?.cooldownSeconds ?? 30, 0, 24 * 3600);
             const entryNeurCost = clampInt(mode?.entryNeurCost ?? 0, 0, 1_000_000_000);
             const entryAibaCost = clampInt(mode?.entryAibaCost ?? 0, 0, 1_000_000_000);

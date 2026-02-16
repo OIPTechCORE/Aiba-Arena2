@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>DOCS UPDATEDNESS — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>DOCS UPDATEDNESS</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>Docs &amp; code updatedness</h1>
+<p><strong>Last refresh:</strong> 2026-02-16 <strong>Purpose:</strong> Single place to see whether code, .md docs, and .html (print) are up to date.</p>
+<hr/>
+<h2>1. Summary</h2>
+<table>
+<thead><tr>
+<th>Area</th>
+<th>Status</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Code</strong></td>
+<td>✅ Current</td>
+<td>Miniapp (PageNav, TabBackNav, responsive, tournament guard), backend (MongoDB URI), no known stale code.</td>
+</tr>
+<tr>
+<td><strong>Markdown (.md)</strong></td>
+<td>✅ Source of truth</td>
+<td>All docs in <code>docs/</code> and <code>docs/marketing/</code>. New/updated: GAPS-SCAN-REPORT, APP-SCAN-REPORT, UI-DESIGN-PRINCIPLES, README (deep docs + gaps), GAME-FUNCTIONALITY §12.</td>
+</tr>
+<tr>
+<td><strong>HTML (print)</strong></td>
+<td>✅ Regenerated</td>
+<td><code>npm run build:print-docs</code> run; all <code>.md</code> → <code>docs/print/*.html</code> and <code>index.html</code>. <strong>Edit .md only;</strong> re-run after doc changes.</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>2. Doc dates (optional consistency)</h2>
+<p>Some docs still show <strong>Feb 2025</strong> or <strong>2025</strong> in &quot;Last updated&quot; / &quot;Version&quot;; content has been updated in places. Not critical; for clarity you can set them to <strong>Feb 2026</strong> when you next touch the file.</p>
+<table>
+<thead><tr>
+<th>Doc</th>
+<th>Current date in doc</th>
+<th>Content</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>APP-SCAN-REPORT.md</td>
+<td>2026-02-16</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GAPS-SCAN-REPORT.md</td>
+<td>2026-02-15</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>UI-DESIGN-PRINCIPLES.md</td>
+<td>Feb 2026</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GAME-FUNCTIONALITY.md</td>
+<td>2025</td>
+<td>§12 API mapping extended 2026</td>
+</tr>
+<tr>
+<td>API-CONTRACT.md</td>
+<td>Feb 2025</td>
+<td>Canonical API ref</td>
+</tr>
+<tr>
+<td>GAP-AUDIT.md</td>
+<td>Feb 2025</td>
+<td>Gap investigation</td>
+</tr>
+<tr>
+<td>README.md</td>
+<td>—</td>
+<td>Index + recent updates 2026</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>3. Keeping everything up to date</h2>
+<ol>
+<li><strong>After changing docs,</strong> run: <code>npm run build:print-docs</code> (from repo root).</li>
+<li><strong>Code vs docs:</strong> API and behaviour are documented in API-CONTRACT.md, GAME-FUNCTIONALITY.md, USER-GUIDE.md. When you add endpoints or flows, update those and (if needed) GAPS-SCAN-REPORT or APP-SCAN-REPORT.</li>
+</ol>
+<hr/>
+<h2>4. References</h2>
+<ul>
+<li><a href="README.md">README.md</a> — Doc index and recent updates.</li>
+<li><a href="GAPS-SCAN-REPORT.md">GAPS-SCAN-REPORT.md</a> — App &amp; docs gap scan.</li>
+</ul>
+  </div>
+</body>
+</html>

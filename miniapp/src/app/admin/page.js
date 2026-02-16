@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
+import { PageNav } from '../../components/PageNav';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
@@ -854,10 +855,10 @@ export default function AdminHome() {
 
     return (
         <div style={{ padding: 16 }}>
+            <PageNav className="page-nav--admin" />
             <h1 style={{ marginTop: 0 }}>Super Admin</h1>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }}>
-                <a href="/" style={{ color: '#666', fontSize: 14 }}>← Game</a>
-                <a href="/trainer" style={{ color: '#666', fontSize: 14 }}>Trainer portal</a>
+                <a href="/trainer" style={{ color: 'var(--accent-gold)', fontSize: 14 }}>Trainer portal</a>
                 <span style={{ color: '#666', fontSize: 12 }}>Backend: {BACKEND_URL}</span>
             </div>
 

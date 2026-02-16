@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  productionBrowserSourceMaps: true, // debug TDZ / minified errors in production
   transpilePackages: ['@tonconnect/ui-react', '@ton/core'],
   images: {
     remotePatterns: [

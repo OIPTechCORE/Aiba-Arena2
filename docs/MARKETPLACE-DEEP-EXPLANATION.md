@@ -1,10 +1,10 @@
 # Super Futuristic Unified Marketplace — Deep Explanation & Readiness Audit
 
-A full technical and product explanation of the **Super Futuristic Unified Marketplace**: one place for brokers, assets, rentals, system shop, and boosts. Trade with TON + AIBA. List, buy, create — all in one hub.
+A full technical and product explanation of the **Super Futuristic Unified Marketplace**: super, futuristic, **multi-tabbed**, **seamlessly extensible**, **full fledged**. One place for brokers, assets, rentals, system shop, and boosts. Trade with TON + AIBA. List, buy, create — all in one hub.
 
 ---
 
-## 1. Spec vs implementation (deeply operational?)
+## 1. Spec vs implementation (deeply operational, full fledged?)
 
 | Requirement | Status | Notes |
 |-------------|--------|--------|
@@ -17,7 +17,7 @@ A full technical and product explanation of the **Super Futuristic Unified Marke
 | **Trade with TON + AIBA** | ✅ | TON: create broker, Stars Store, boosts. AIBA: broker list/buy, system brokers, rentals, boosts (NEUR in-app). |
 | **List, buy, create** | ✅ | List: brokers (Trade), rentals (Rental). Buy: listings (Trade), system (System), rentals (Rental), boosts (Boosts). Create: broker with TON (Overview). |
 
-**Verdict: Deeply operational.** All pillars are implemented and wired in one hub; TON + AIBA and list/buy/create are covered. Enhancements made in this audit: Boost with TON in hub, AI Assets shortcut in Overview, GET /api/boosts/config for UI.
+**Verdict: Deeply operational, full fledged.** Multi-tabbed and seamlessly extensible via `MARKET_FLOWS`; all pillars implemented; TON + AIBA; list, buy, create across the hub.
 
 ---
 
@@ -25,7 +25,7 @@ A full technical and product explanation of the **Super Futuristic Unified Marke
 
 **Tab:** `market` — “Super Futuristic Unified Marketplace”.
 
-**Flow switches:** `overview` | `trade` | `rental` | `system` | `boosts`.
+**Multi-tabbed bar:** Driven by `MARKET_FLOWS` (id, label, optional badge). **Seamlessly extensible:** add entry + one panel `marketFlow === id`. **Flows:** `overview` | `trade` | `rental` | `system` | `boosts`.
 
 ### 2.1 Overview
 
@@ -130,4 +130,4 @@ When `tab === 'market'`:
 
 ---
 
-**Conclusion:** The Super Futuristic Unified Marketplace is **deeply operational**: one hub with Overview (create broker TON, Stars Store, AI Assets shortcut), Trade (list/buy brokers AIBA), Rental (list/rent/unlist AIBA), System (buy brokers AIBA), and Boosts (NEUR + TON). List, buy, and create are supported; TON and AIBA are used across the hub.
+**Conclusion:** The Super Futuristic Unified Marketplace is **deeply operational and full fledged**: super, futuristic, **multi-tabbed** (data-driven `MARKET_FLOWS`), **seamlessly extensible** (add flow + panel), and **unified** in one hub. Overview (create broker TON, Stars Store, AI Assets shortcut), Trade (list/buy brokers AIBA), Rental (list/rent/unlist AIBA), System (buy brokers AIBA), Boosts (NEUR + TON). List, buy, and create everywhere; TON and AIBA throughout; Refresh all in hero.

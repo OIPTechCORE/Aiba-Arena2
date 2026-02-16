@@ -112,6 +112,7 @@ const EconomyConfigSchema = new mongoose.Schema(
         stakingCancelEarlyFeeBps: { type: Number, default: 500 }, // 5% fee for early cancel
 
         // Battle hardening knobs (server-enforced)
+        battleEnergyCost: { type: Number, default: 1 }, // default energy per battle when mode.energyCost not set
         battleMaxEnergy: { type: Number, default: 100 },
         battleEnergyRegenSecondsPerEnergy: { type: Number, default: 60 }, // 1 energy / minute baseline
         battleAnomalyScoreMax: { type: Number, default: 220 },

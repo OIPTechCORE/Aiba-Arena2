@@ -15,6 +15,150 @@
 <h1>Deployment &amp; environment — Localhost, Vercel, Telegram</h1>
 <p>Single guide: run locally, deploy backend and miniapp on Vercel, and open the app from Telegram. Backend can run on <strong>localhost and Vercel</strong>; use the same env names and point the miniapp at the backend you use.</p>
 <hr/>
+<h2>Where to get variables &amp; how to put them in Vercel</h2>
+<h3>How to add variables in Vercel (any project)</h3>
+<p><strong>Path in Vercel:</strong> <a href="https://vercel.com/dashboard">Dashboard</a> → select <strong>project</strong> → <strong>Settings</strong> → <strong>Environment Variables</strong>.</p>
+<ol>
+<li>Select your <strong>project</strong> (backend, miniapp, or admin-panel).</li>
+<li>In the top nav, click <strong>Settings</strong>, then in the left sidebar click <strong>Environment Variables</strong>.</li>
+<li>For each variable:</li>
+<li>- <strong>Key:</strong> exact name (e.g. <code>MONGO_URI</code>).</li>
+<li>- <strong>Value:</strong> the secret or value (paste; do not commit).</li>
+<li>- <strong>Environment:</strong> choose <strong>Production</strong> (and optionally Preview/Development if you use Vercel previews).</li>
+<li>Click <strong>Save</strong>. Redeploy the project so new variables apply (Deployments → … → Redeploy, or push a new commit).</li>
+</ol>
+<p><strong>Important:</strong> Variables added or changed take effect on the <strong>next deployment</strong>. No trailing spaces in keys or values.</p>
+<hr/>
+<h3>Where to get each variable</h3>
+<h4>Backend (Vercel backend project or <code>backend/.env</code>)</h4>
+<table>
+<thead><tr>
+<th>Variable</th>
+<th>Where to get it</th>
+<th>How / notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>MONGO_URI</strong></td>
+<td><a href="https://www.mongodb.com/cloud/atlas">MongoDB Atlas</a></td>
+<td>1) Create free cluster. 2) Database Access → Add user (save username/password). 3) Network Access → Add IP <code>0.0.0.0/0</code> (or Vercel IPs if you restrict). 4) Clusters → Connect → “Connect your application” → copy URI. Replace <code>&lt;password&gt;</code> with your user password. Example: <code>mongodb+srv://user:pass@cluster0.xxxxx.mongodb.net/aiba_arena?retryWrites=true&amp;w=majority</code></td>
+</tr>
+<tr>
+<td><strong>APP_ENV</strong></td>
+<td>You choose</td>
+<td>Use <code>prod</code> for production. Use <code>dev</code> only for local.</td>
+</tr>
+<tr>
+<td><strong>CORS_ORIGIN</strong></td>
+<td>Your deployed URLs</td>
+<td>Comma-separated, no spaces. Example: <code>https://your-miniapp.vercel.app,https://your-admin.vercel.app</code>. Get the URLs from your Vercel miniapp and admin project domains after deploy.</td>
+</tr>
+<tr>
+<td><strong>TELEGRAM_BOT_TOKEN</strong></td>
+<td><a href="https://t.me/BotFather">Telegram @BotFather</a></td>
+<td>1) Open Telegram, search <code>@BotFather</code>. 2) Send <code>/newbot</code>, follow name/username. 3) BotFather replies with a token like <code>7123456789:AAH...</code>. Copy that; this is <code>TELEGRAM_BOT_TOKEN</code>. Never share or commit it.</td>
+</tr>
+<tr>
+<td><strong>TELEGRAM_INITDATA_MAX_AGE_SECONDS</strong></td>
+<td>You choose</td>
+<td>Recommended <code>300</code>–<code>900</code> (5–15 minutes). Example: <code>600</code>.</td>
+</tr>
+<tr>
+<td><strong>ADMIN_JWT_SECRET</strong></td>
+<td>Generate yourself</td>
+<td>At least 32 random characters. Example (Node): <code>node -e &quot;console.log(require('crypto').randomBytes(32).toString('hex'))&quot;</code>. Or use a password generator; store securely.</td>
+</tr>
+<tr>
+<td><strong>ADMIN_EMAIL</strong></td>
+<td>You choose</td>
+<td>Email you use to log in to the admin panel (e.g. <code>admin@yourdomain.com</code>).</td>
+</tr>
+<tr>
+<td><strong>ADMIN_PASSWORD_HASH</strong></td>
+<td>From your password</td>
+<td><strong>Production:</strong> use bcrypt hash, not plaintext. In Node: <code>node -e &quot;const bcrypt=require('bcrypt'); bcrypt.hash('YOUR_PLAIN_PASSWORD', 10).then(h=&gt;console.log(h))&quot;</code> (run from a folder that has <code>bcrypt</code> installed). Copy the long hash into <code>ADMIN_PASSWORD_HASH</code>. Leave <code>ADMIN_PASSWORD</code> empty in prod.</td>
+</tr>
+<tr>
+<td><strong>BATTLE_SEED_SECRET</strong></td>
+<td>Generate yourself</td>
+<td>Same as ADMIN_JWT_SECRET: ≥32 random characters. Use a different value than ADMIN_JWT_SECRET.</td>
+</tr>
+<tr>
+<td><strong>PUBLIC_BASE_URL</strong></td>
+<td>Your backend URL</td>
+<td>After deploying backend on Vercel, copy its URL (e.g. <code>https://your-backend.vercel.app</code>). No trailing slash. Used for broker metadata and links.</td>
+</tr>
+</tbody></table>
+<h4>Optional backend (TON wallets, etc.)</h4>
+<table>
+<thead><tr>
+<th>Variable</th>
+<th>Where to get it</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>CREATED_BROKERS_WALLET</strong></td>
+<td>Your TON wallet address (e.g. from Tonkeeper/TON Space). Users send TON here to create a broker.</td>
+</tr>
+<tr>
+<td><strong>BOOST_TON_WALLET</strong>, <strong>STARS_STORE_WALLET</strong>, <strong>CAR_RACING_WALLET</strong>, <strong>MOTORCYCLE_RACING_WALLET</strong></td>
+<td>Same: create or use a TON wallet; put the <strong>address</strong> (starts with <code>EQ...</code>).</td>
+</tr>
+<tr>
+<td><strong>LEADER_BOARD_WALLET</strong>, <strong>BOOST_GROUP_WALLET</strong>, <strong>BOOST_PROFILE_WALLET</strong>, <strong>GIFTS_WALLET</strong></td>
+<td>Same: TON wallet addresses for each feature.</td>
+</tr>
+<tr>
+<td><strong>TON_PROVIDER_URL</strong></td>
+<td><a href="https://toncenter.com/api/v2/">TON API</a> or <a href="https://tonapi.io/">TonAPI</a>. Example: <code>https://toncenter.com/api/v2</code>. For mainnet claims use a mainnet provider.</td>
+</tr>
+<tr>
+<td><strong>TON_API_KEY</strong></td>
+<td>Optional; from the provider (e.g. Toncenter) if you use authenticated requests.</td>
+</tr>
+</tbody></table>
+<h4>Miniapp (Vercel miniapp project)</h4>
+<table>
+<thead><tr>
+<th>Variable</th>
+<th>Where to get it</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>NEXT_PUBLIC_BACKEND_URL</strong></td>
+<td>Your <strong>backend</strong> deployment URL. After the backend is on Vercel, copy it (e.g. <code>https://your-backend.vercel.app</code>). No trailing slash.</td>
+</tr>
+<tr>
+<td><strong>NEXT_PUBLIC_APP_URL</strong></td>
+<td>Optional. Your miniapp URL (e.g. <code>https://your-miniapp.vercel.app</code>). Defaults to current origin.</td>
+</tr>
+<tr>
+<td><strong>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</strong></td>
+<td>Optional. Full URL to your TonConnect manifest (e.g. <code>https://your-miniapp.vercel.app/api/tonconnect-manifest</code>).</td>
+</tr>
+</tbody></table>
+<h4>Admin panel (Vercel admin project)</h4>
+<table>
+<thead><tr>
+<th>Variable</th>
+<th>Where to get it</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>NEXT_PUBLIC_BACKEND_URL</strong></td>
+<td>Same as miniapp: your backend URL (e.g. <code>https://your-backend.vercel.app</code>).</td>
+</tr>
+</tbody></table>
+<hr/>
+<h3>Order of operations (Vercel)</h3>
+<ol>
+<li><strong>Backend first:</strong> Add all backend env vars in the <strong>backend</strong> project. Deploy. Copy the backend URL (e.g. <code>https://aiba-backend-xxx.vercel.app</code>).</li>
+<li><strong>Miniapp:</strong> In the <strong>miniapp</strong> project, add <code>NEXT_PUBLIC_BACKEND_URL</code> = that backend URL. Deploy. Copy the miniapp URL.</li>
+<li><strong>Admin:</strong> In the <strong>admin</strong> project, add <code>NEXT_PUBLIC_BACKEND_URL</code> = same backend URL. Deploy.</li>
+<li><strong>Backend again:</strong> Set <code>CORS_ORIGIN</code> to include your miniapp and admin URLs (comma-separated). Set <code>PUBLIC_BASE_URL</code> to the backend URL. Redeploy backend.</li>
+<li><strong>Telegram:</strong> In BotFather, set the bot’s menu/URL to your miniapp URL. Put <code>TELEGRAM_BOT_TOKEN</code> in the backend project (already done in step 2).</li>
+</ol>
+<hr/>
 <h2>Quick reference</h2>
 <table>
 <thead><tr>

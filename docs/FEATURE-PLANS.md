@@ -67,3 +67,11 @@ System catalogs: `GET /api/marketplace/system-brokers`, `GET /api/car-racing/sys
 ## 7. AI learning multiverse / economy (token flow)
 
 **Vision:** AIBA flows: users acquire (rewards, missions, asset sales) → spend (realms, mentors, assets) → split to burn, treasury, reward pools, staking. Micro loops: asset economy (mint → list → buy → fee → upgrade); arena (entry fee → prize pool → winners). Balancing: caps, fee %, burn %. Aligns with governance, mentors, leagues. See backend economy engine and ledger.
+
+---
+
+## 8. Platform extensibility (other games / apps)
+
+**Vision:** The app is a seamless home for multiple games and mini-apps — like LoveBank or Hamster Kombat. One entry point; users can jump to other ecosystem apps without leaving the platform.
+
+**Implemented:** “More games” tab in the miniapp lists external apps from config. Add entries to `miniapp/src/config/navigation.js` → `EXTERNAL_APPS` (array of `{ id, name, description, url }`). Each entry shows a card with “Play” opening the URL (Telegram Mini App or web). Empty list shows instructions for adding games. New games require no backend change; only config and optional deep links.

@@ -1,13 +1,11 @@
 const router = require('express').Router();
 const GameMode = require('../models/GameMode');
-const { requireTelegram } = require('../middleware/requireTelegram');
 const { validateQuery } = require('../middleware/validate');
 
-// Public listing for miniapp
+// Public listing for miniapp (no auth required so arena dropdown loads before login)
 // GET /api/game-modes?arena=prediction&league=rookie
 router.get(
     '/',
-    requireTelegram,
     validateQuery({
         arena: { type: 'string', trim: true, maxLength: 50 },
         league: { type: 'string', trim: true, maxLength: 50 },

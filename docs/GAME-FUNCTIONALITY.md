@@ -1,6 +1,6 @@
 # AIBA Arena — Game Functionality (Expanded)
 
-**Last updated:** 2025  
+**Last updated:** Feb 2026  
 **Scope:** Core loop, brokers, battles, economy, racing, security, API mapping, config, data flows.
 
 ---

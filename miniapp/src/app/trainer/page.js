@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useEffect, useState } from 'react';
-import Link from 'next/link';
+import { PageNav } from '../../components/PageNav';
 import { createApi, getErrorMessage } from '../../lib/api';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
@@ -159,12 +159,12 @@ export default function TrainerPage() {
 
     return (
         <div style={{ padding: 24, maxWidth: 640, margin: '0 auto', minHeight: '100vh' }}>
+            <PageNav className="page-nav--trainer" />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
                 <div>
                     <h1 style={{ marginTop: 0, marginBottom: 4 }}>Global Trainers &amp; Coaches</h1>
                     <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: 14 }}>Network · Dashboard · Leaderboard</p>
                 </div>
-                <Link href="/" style={{ color: 'var(--accent-gold)', fontSize: 14 }}>← Game</Link>
             </div>
 
             {trainer?.status !== 'suspended' && (

@@ -9,7 +9,12 @@ export function Providers({ children }) {
     const envManifestUrl = useMemo(() => {
         const env = String(process.env.NEXT_PUBLIC_TONCONNECT_MANIFEST_URL || '').trim();
         const origin = (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/+$/, '');
-        if (!env) return origin ? `${origin}/api/tonconnect-manifest` : '';
+        if (!env) {
+            if (origin) return `${origin}/api/tonconnect-manifest`;
+            if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development')
+                return 'http://localhost:3000/api/tonconnect-manifest';
+            return '';
+        }
         if (/^https?:\/\//i.test(env)) return env;
         if (env.startsWith('/') && origin) return `${origin}${env}`;
         return origin ? `${origin}/${env.replace(/^\/+/, '')}` : env;

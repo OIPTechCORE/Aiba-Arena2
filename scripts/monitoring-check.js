@@ -13,6 +13,7 @@
  *   MIN_VAULT_TON_NANO=50000000 node scripts/monitoring-check.js --vault
  *
  * Exit: 0 on success, 1 on failure.
+ * Default backend: http://localhost:5000 (set BACKEND_URL or NEXT_PUBLIC_BACKEND_URL for prod).
  */
 
 const baseUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';

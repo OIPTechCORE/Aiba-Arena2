@@ -13,7 +13,7 @@
   </div>
   <div class="doc-body">
 <h1>AIBA Arena — Game Functionality (Expanded)</h1>
-<p><strong>Last updated:</strong> 2025 <strong>Scope:</strong> Core loop, brokers, battles, economy, racing, security, API mapping, config, data flows.</p>
+<p><strong>Last updated:</strong> Feb 2026 <strong>Scope:</strong> Core loop, brokers, battles, economy, racing, security, API mapping, config, data flows.</p>
 <hr/>
 <h2>Table of Contents</h2>
 <ol>
@@ -746,6 +746,13 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)</code></pre>
 <ul>
 <li>Bike: same pattern</li>
 </ul>
+<h3>8.3 Car Racing — Practically Ready</h3>
+<ul>
+<li><strong>Enter open races:</strong> Open races per track (seeded on startup); entry fee AIBA; select race + car → enter.</li>
+<li><strong>Earn AIBA by finish position:</strong> Race runs when ≥2 entries; deterministic <code>simulateRace</code>; reward pool from entry fees distributed by position (1st gets largest share); AIBA credited to each entrant.</li>
+<li><strong>Inspired by:</strong> Car classes and labels (Formula 1, Le Mans, Can-Am, IndyCar, Group B, GT1, Electric, Drag, Touring/DTM, Hillclimb, NASCAR, Historic, Hypercar, Extreme) in model and config; system shop offers Touring, GT1, Formula 1, Le Mans.</li>
+<li><strong>Flow:</strong> Races run when at least 2 have entered; on completion a new open race is created for the same track so races stay available.</li>
+</ul>
 <hr/>
 <h2>9. Security &amp; Fairness</h2>
 <h3>9.1 Idempotency</h3>
@@ -991,14 +998,34 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)</code></pre>
 <td>Buy from system</td>
 </tr>
 <tr>
+<td><code>/api/broker-rental</code></td>
+<td>GET</td>
+<td>List available rentals</td>
+</tr>
+<tr>
+<td><code>/api/broker-rental/list</code></td>
+<td>POST</td>
+<td>List broker for rent</td>
+</tr>
+<tr>
+<td><code>/api/broker-rental/:id/rent</code></td>
+<td>POST</td>
+<td>Rent broker (AIBA, 1h)</td>
+</tr>
+<tr>
+<td><code>/api/broker-rental/:id/unlist</code></td>
+<td>POST</td>
+<td>Unlist your broker</td>
+</tr>
+<tr>
 <td><code>/api/car-racing/*</code></td>
 <td>Mixed</td>
-<td>Config, tracks, races, cars, enter, buy</td>
+<td>Config, tracks, races, cars, enter, buy, list, leaderboard</td>
 </tr>
 <tr>
 <td><code>/api/bike-racing/*</code></td>
 <td>Mixed</td>
-<td>Same for bikes</td>
+<td>Same for bikes (config, tracks, races, bikes, enter, buy, list, leaderboard)</td>
 </tr>
 </tbody></table>
 <h3>12.4 Extensions</h3>
@@ -1022,7 +1049,11 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)</code></pre>
 </tr>
 <tr>
 <td><code>/api/charity/*</code></td>
-<td>Campaigns, donate, leaderboard</td>
+<td>Campaigns, donate (NEUR/AIBA), leaderboard</td>
+</tr>
+<tr>
+<td><code>/api/donate/config</code>, <code>/broker</code>, <code>/car</code>, <code>/bike</code>, <code>/gifts</code></td>
+<td>Donate broker/car/bike/gifts (TON)</td>
 </tr>
 <tr>
 <td><code>/api/university/*</code></td>
@@ -1030,7 +1061,7 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)</code></pre>
 </tr>
 <tr>
 <td><code>/api/realms</code>, <code>/api/missions</code>, <code>/api/mentors</code></td>
-<td>Realms</td>
+<td>Realms, missions, mentors (stake/unstake)</td>
 </tr>
 <tr>
 <td><code>/api/assets/</code> (and subtree), <code>/api/asset-marketplace/</code> (and subtree)</td>
@@ -1046,11 +1077,11 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)</code></pre>
 </tr>
 <tr>
 <td><code>/api/staking/*</code></td>
-<td>Stake AIBA, claim</td>
+<td>Stake AIBA, claim, cancel-early (fee)</td>
 </tr>
 <tr>
 <td><code>/api/dao/*</code></td>
-<td>Proposals, vote</td>
+<td>Proposals, vote (create requires staked AIBA)</td>
 </tr>
 <tr>
 <td><code>/api/boosts/*</code></td>
@@ -1059,6 +1090,46 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)</code></pre>
 <tr>
 <td><code>/api/gifts/*</code></td>
 <td>Send/receive gifts</td>
+</tr>
+<tr>
+<td><code>/api/p2p-aiba/config</code>, <code>/send</code>, <code>/buy</code></td>
+<td>P2P AIBA send, Buy AIBA with TON</td>
+</tr>
+<tr>
+<td><code>/api/predict/events</code>, <code>/events/:id</code>, <code>/events/:id/bet</code></td>
+<td>Predict: list events, bet (brokerId, amountAiba)</td>
+</tr>
+<tr>
+<td><code>/api/trainers/me</code>, <code>/apply</code>, <code>/network</code>, <code>/leaderboard</code>, <code>/claim-rewards</code>, etc.</td>
+<td>Trainers: apply, network, leaderboard, claim</td>
+</tr>
+<tr>
+<td><code>/api/tournaments</code>, <code>/api/tournaments/:id</code>, <code>/api/tournaments/:id/enter</code></td>
+<td>Tournaments: list, single, enter</td>
+</tr>
+<tr>
+<td><code>/api/global-boss</code>, <code>/api/global-boss/record-damage</code></td>
+<td>Global boss: state, record damage</td>
+</tr>
+<tr>
+<td><code>/api/premium/status</code>, <code>/api/premium/buy</code></td>
+<td>Premium status, buy (TON)</td>
+</tr>
+<tr>
+<td><code>/api/breeding/breed</code></td>
+<td>Breed two brokers (burns both + AIBA)</td>
+</tr>
+<tr>
+<td><code>/api/game-modes</code></td>
+<td>Game modes config</td>
+</tr>
+<tr>
+<td><code>/api/treasury</code></td>
+<td>Treasury telemetry</td>
+</tr>
+<tr>
+<td><code>/api/oracle</code></td>
+<td>Oracle (AIBA/TON rate, etc.)</td>
 </tr>
 </tbody></table>
 <hr/>

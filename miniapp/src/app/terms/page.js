@@ -1,12 +1,12 @@
 'use client';
 
-import Link from 'next/link';
+import { PageNav } from '../../components/PageNav';
 
 export default function TermsPage() {
   return (
     <div className="legal-page">
       <header className="legal-page__header">
-        <Link href="/" className="legal-page__back">← Back</Link>
+        <PageNav />
         <h1>Terms of Service</h1>
         <p className="legal-page__meta">AIBA Arena</p>
       </header>

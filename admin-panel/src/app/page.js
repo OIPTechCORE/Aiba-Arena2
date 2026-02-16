@@ -73,6 +73,7 @@ export default function AdminHome() {
             (error) => {
                 const status = Number(error?.response?.status || 0);
                 if (status === 401 || status === 403) {
+                    setGlobalError('');
                     logout();
                     setAuthError('Session expired or unauthorized. Please sign in again.');
                 }
@@ -973,7 +974,12 @@ export default function AdminHome() {
                 <h1 className="admin-header__title">Admin Panel</h1>
                 <p className="admin-header__sub">AIBA Arena · Backend: {BACKEND_URL}</p>
                 {token && tabLoading ? <p className="admin-header__sub">Loading {tab}...</p> : null}
-                {globalError ? <p className="admin-auth-error">{globalError}</p> : null}
+                {globalError ? (
+                    <p className="admin-auth-error" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span>{globalError}</span>
+                        <button type="button" onClick={() => setGlobalError('')} style={{ padding: '2px 8px', fontSize: 12 }} aria-label="Dismiss">Dismiss</button>
+                    </p>
+                ) : null}
             </header>
 
             {!token ? (

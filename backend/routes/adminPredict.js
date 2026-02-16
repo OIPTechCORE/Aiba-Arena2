@@ -82,30 +82,7 @@ router.post('/events/:id/resolve', validateParams({ id: { type: 'objectId', requ
         const vigAiba = Math.floor((totalPool * vigBps) / 10000);
         const toWinners = Math.max(0, totalPool - vigAiba);
 
-        // Pay winners first with idempotent source IDs. If this fails, event stays open and can be retried safely.
-        if (toWinners > 0 && winnerPool > 0) {
-            const bets = await PredictBet.find({ eventId: ev._id, brokerId: winnerId }).lean();
-            const totalWinnerBets = bets.reduce((s, b) => s + (b.amountAiba || 0), 0);
-            if (totalWinnerBets > 0) {
-                for (const b of bets) {
-                    const share = Math.floor((toWinners * b.amountAiba) / totalWinnerBets);
-                    if (share > 0) {
-                        await creditAibaNoCap(share, {
-                            telegramId: b.telegramId,
-                            reason: 'predict_win',
-                            arena: 'predict',
-                            league: 'global',
-                            sourceType: 'predict_win',
-                            sourceId: `${String(ev._id)}:${String(b._id)}`,
-                            requestId: `predict_resolve:${String(ev._id)}`,
-                            meta: { eventId: String(ev._id), amountAiba: share },
-                        });
-                        if (!credited?.ok) throw new Error(`payout_failed:${String(b._id)}`);
-                    }
-                }
-            }
-        }
-
+        // Atomic: status transition + treasury op in one transaction first; then payouts (idempotent by sourceId).
         const session = await mongoose.startSession();
         try {
             await session.withTransaction(async () => {
@@ -125,14 +102,46 @@ router.post('/events/:id/resolve', validateParams({ id: { type: 'objectId', requ
                 if (!updated.modifiedCount) throw new Error('already_resolved');
 
                 if (vigAiba > 0) {
-                    await TreasuryOp.create(
-                        [{ type: 'predict_vig', amountAiba: vigAiba, source: 'predict', refId: String(ev._id) }],
-                        { session },
-                    );
+                    try {
+                        await TreasuryOp.create(
+                            [{ type: 'predict_vig', amountAiba: vigAiba, source: 'predict', refId: String(ev._id) }],
+                            { session },
+                        );
+                    } catch (treasuryErr) {
+                        console.error('Admin predict resolve: treasury op failed', { eventId: String(ev._id), vigAiba, err: treasuryErr });
+                        throw treasuryErr;
+                    }
                 }
             });
         } finally {
             await session.endSession();
+        }
+
+        // Payout winners (idempotent by sourceId; log failures, do not swallow)
+        if (toWinners > 0 && winnerPool > 0) {
+            const bets = await PredictBet.find({ eventId: ev._id, brokerId: winnerId }).lean();
+            const totalWinnerBets = bets.reduce((s, b) => s + (b.amountAiba || 0), 0);
+            if (totalWinnerBets > 0) {
+                for (const b of bets) {
+                    const share = Math.floor((toWinners * b.amountAiba) / totalWinnerBets);
+                    if (share > 0) {
+                        const credited = await creditAibaNoCap(share, {
+                            telegramId: b.telegramId,
+                            reason: 'predict_win',
+                            arena: 'predict',
+                            league: 'global',
+                            sourceType: 'predict_win',
+                            sourceId: `${String(ev._id)}:${String(b._id)}`,
+                            requestId: `predict_resolve:${String(ev._id)}`,
+                            meta: { eventId: String(ev._id), amountAiba: share },
+                        });
+                        if (!credited?.ok) {
+                            console.error('Admin predict resolve payout failed', { eventId: String(ev._id), betId: String(b._id), share, telegramId: b.telegramId });
+                            throw new Error(`payout_failed:${String(b._id)}`);
+                        }
+                    }
+                }
+            }
         }
 
         res.json({

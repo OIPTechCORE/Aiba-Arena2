@@ -4,6 +4,88 @@ Single guide: run locally, deploy backend and miniapp on Vercel, and open the ap
 
 ---
 
+## Where to get variables & how to put them in Vercel
+
+### How to add variables in Vercel (any project)
+
+**Path in Vercel:** [Dashboard](https://vercel.com/dashboard) → select **project** → **Settings** → **Environment Variables**.
+
+1. Open [Vercel Dashboard](https://vercel.com/dashboard).
+2. Select your **project** (backend, miniapp, or admin-panel).
+3. In the top nav, click **Settings**, then in the left sidebar click **Environment Variables**.
+4. For each variable:
+   - **Key:** exact name (e.g. `MONGO_URI`).
+   - **Value:** the secret or value (paste; do not commit).
+   - **Environment:** choose **Production** (and optionally Preview/Development if you use Vercel previews).
+5. Click **Save**. Redeploy the project so new variables apply (Deployments → … → Redeploy, or push a new commit).
+
+**Important:** Variables added or changed take effect on the **next deployment**. No trailing spaces in keys or values.
+
+---
+
+### Where to get each variable
+
+#### Backend (Vercel backend project or `backend/.env`)
+
+| Variable | Where to get it | How / notes |
+|----------|------------------|--------------|
+| **MONGO_URI** | [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) | 1) Create free cluster. 2) Database Access → Add user (save username/password). 3) Network Access → Add IP `0.0.0.0/0` (or Vercel IPs if you restrict). 4) Clusters → Connect → “Connect your application” → copy URI. Replace `<password>` with your user password. Example: `mongodb+srv://user:pass@cluster0.xxxxx.mongodb.net/aiba_arena?retryWrites=true&w=majority` |
+| **APP_ENV** | You choose | Use `prod` for production. Use `dev` only for local. |
+| **CORS_ORIGIN** | Your deployed URLs | Comma-separated, no spaces. Example: `https://your-miniapp.vercel.app,https://your-admin.vercel.app`. Get the URLs from your Vercel miniapp and admin project domains after deploy. |
+| **TELEGRAM_BOT_TOKEN** | [Telegram @BotFather](https://t.me/BotFather) | 1) Open Telegram, search `@BotFather`. 2) Send `/newbot`, follow name/username. 3) BotFather replies with a token like `7123456789:AAH...`. Copy that; this is `TELEGRAM_BOT_TOKEN`. Never share or commit it. |
+| **TELEGRAM_INITDATA_MAX_AGE_SECONDS** | You choose | Recommended `300`–`900` (5–15 minutes). Example: `600`. |
+| **ADMIN_JWT_SECRET** | Generate yourself | At least 32 random characters. Example (Node): `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Or use a password generator; store securely. |
+| **ADMIN_EMAIL** | You choose | Email you use to log in to the admin panel (e.g. `admin@yourdomain.com`). |
+| **ADMIN_PASSWORD_HASH** | From your password | **Production:** use bcrypt hash, not plaintext. In Node: `node -e "const bcrypt=require('bcrypt'); bcrypt.hash('YOUR_PLAIN_PASSWORD', 10).then(h=>console.log(h))"` (run from a folder that has `bcrypt` installed). Copy the long hash into `ADMIN_PASSWORD_HASH`. Leave `ADMIN_PASSWORD` empty in prod. |
+| **BATTLE_SEED_SECRET** | Generate yourself | Same as ADMIN_JWT_SECRET: ≥32 random characters. Use a different value than ADMIN_JWT_SECRET. |
+| **PUBLIC_BASE_URL** | Your backend URL | After deploying backend on Vercel, copy its URL (e.g. `https://your-backend.vercel.app`). No trailing slash. Used for broker metadata and links. |
+
+#### Optional backend (TON wallets, etc.)
+
+| Variable | Where to get it |
+|----------|------------------|
+| **CREATED_BROKERS_WALLET** | Your TON wallet address (e.g. from Tonkeeper/TON Space). Users send TON here to create a broker. |
+| **BOOST_TON_WALLET**, **STARS_STORE_WALLET**, **CAR_RACING_WALLET**, **MOTORCYCLE_RACING_WALLET** | Same: create or use a TON wallet; put the **address** (starts with `EQ...`). |
+| **LEADER_BOARD_WALLET**, **BOOST_GROUP_WALLET**, **BOOST_PROFILE_WALLET**, **GIFTS_WALLET** | Same: TON wallet addresses for each feature. |
+| **TON_PROVIDER_URL** | [TON API](https://toncenter.com/api/v2/) or [TonAPI](https://tonapi.io/). Example: `https://toncenter.com/api/v2`. For mainnet claims use a mainnet provider. |
+| **TON_API_KEY** | Optional; from the provider (e.g. Toncenter) if you use authenticated requests. |
+
+#### Miniapp (Vercel miniapp project)
+
+| Variable | Where to get it |
+|----------|------------------|
+| **NEXT_PUBLIC_BACKEND_URL** | Your **backend** deployment URL. After the backend is on Vercel, copy it (e.g. `https://your-backend.vercel.app`). No trailing slash. |
+| **NEXT_PUBLIC_APP_URL** | Optional. Your miniapp URL (e.g. `https://your-miniapp.vercel.app`). Defaults to current origin. |
+| **NEXT_PUBLIC_TONCONNECT_MANIFEST_URL** | Optional. Full URL to your TonConnect manifest (e.g. `https://your-miniapp.vercel.app/api/tonconnect-manifest`). |
+
+#### Admin panel (Vercel admin project)
+
+| Variable | Where to get it |
+|----------|------------------|
+| **NEXT_PUBLIC_BACKEND_URL** | Same as miniapp: your backend URL (e.g. `https://your-backend.vercel.app`). |
+
+---
+
+### Order of operations (Vercel)
+
+1. **Create three Vercel projects** (if not already): one for **backend** (root `backend/`), one for **miniapp** (root `miniapp/`), one for **admin** (root `admin-panel/`). Connect the same repo; set Root Directory per project.
+2. **Backend first:** Add all backend env vars in the **backend** project. Deploy. Copy the backend URL (e.g. `https://aiba-backend-xxx.vercel.app`).
+3. **Miniapp:** In the **miniapp** project, add `NEXT_PUBLIC_BACKEND_URL` = that backend URL. Deploy. Copy the miniapp URL.
+4. **Admin:** In the **admin** project, add `NEXT_PUBLIC_BACKEND_URL` = same backend URL. Deploy.
+5. **Backend again:** Set `CORS_ORIGIN` to include your miniapp and admin URLs (comma-separated). Set `PUBLIC_BASE_URL` to the backend URL. Redeploy backend.
+6. **Telegram:** In BotFather, set the bot’s menu/URL to your miniapp URL. Put `TELEGRAM_BOT_TOKEN` in the backend project (already done in step 2).
+
+---
+
+**If the miniapp on Vercel is not up to date but the admin is:**  
+1) Vercel Dashboard → **miniapp** project → **Deployments** → open latest → **⋯** → **Redeploy** (uncheck “Use existing Build Cache” if you changed code).  
+2) **Settings** → **General** → **Root Directory** must be **`miniapp`**.  
+3) If the latest miniapp deployment shows **Failed**, open the build logs, fix the error, then push or Redeploy.
+
+**Runtime errors** (e.g. “Unexpected token 'export'” or “Cannot access 'dw' before initialization”): see [Miniapp runtime errors investigation](MINIAPP-RUNTIME-ERRORS-INVESTIGATION.md) for causes and mitigations.
+
+---
+
 ## Quick reference
 
 | Scenario | Backend env | Miniapp env |

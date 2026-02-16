@@ -14,7 +14,10 @@ const { rateLimit } = require('../middleware/rateLimit');
 const { validateBody, validateParams } = require('../middleware/validate');
 
 // GET /api/predict/events — list open (and optionally resolved) events
-router.get('/events', async (req, res) => {
+router.get(
+    '/events',
+    rateLimit({ windowMs: 60_000, max: 60, keyFn: (req) => `predict_events:${req.ip || 'unknown'}` }),
+    async (req, res) => {
         try {
             const status = String(req.query.status || 'open').toLowerCase();
             const query = status === 'all' ? {} : { status: status === 'resolved' ? 'resolved' : 'open' };
@@ -29,7 +32,8 @@ router.get('/events', async (req, res) => {
         console.error('Predict events list error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-});
+    },
+);
 
 // GET /api/predict/events/:id — single event with bets (aggregated)
 router.get(
@@ -70,6 +74,12 @@ router.post(
             if (!requestId) return res.status(400).json({ error: 'requestId required' });
             const { brokerId, amountAiba } = req.validatedBody;
 
+            // Idempotency: return existing bet if same requestId already processed
+            const existing = await PredictBet.findOne({ requestId }).lean();
+            if (existing) {
+                return res.status(201).json({ ok: true, amountAiba: existing.amountAiba, brokerId: String(existing.brokerId) });
+            }
+
             const ev = await PredictEvent.findById(eventId);
             if (!ev) return res.status(404).json({ error: 'event not found' });
             if (ev.status !== 'open') return res.status(400).json({ error: 'event not open for betting' });
@@ -103,13 +113,16 @@ router.post(
                 requestId,
                 meta: { eventId: String(ev._id), brokerId: betBrokerStr },
             });
-            if (!debit.ok) return res.status(403).json({ error: debit.reason || 'insufficient AIBA' });
+            if (!debit.ok) {
+                if (debit.duplicate) return res.status(201).json({ ok: true, amountAiba: amt, brokerId: betBrokerStr });
+                return res.status(403).json({ error: debit.reason || 'insufficient AIBA' });
+            }
 
             try {
                 const session = await mongoose.startSession();
                 try {
                     await session.withTransaction(async () => {
-                        await PredictBet.create([{ eventId: ev._id, telegramId, brokerId, amountAiba: amt }], { session });
+                        await PredictBet.create([{ eventId: ev._id, telegramId, brokerId, amountAiba: amt, requestId }], { session });
                         const updated = await PredictEvent.updateOne(
                             {
                                 _id: ev._id,

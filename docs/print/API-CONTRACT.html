@@ -13,7 +13,7 @@
   </div>
   <div class="doc-body">
 <h1>API Contract — Multiverse Expansion</h1>
-<p><strong>Version:</strong> Feb 2025 <strong>Status:</strong> Phase 1 baseline (schemas + endpoints for new systems).</p>
+<p><strong>Version:</strong> Feb 2026 <strong>Status:</strong> Phase 1 baseline (schemas + endpoints for new systems).</p>
 <p>This document defines the <strong>API surface</strong> for core flows, Realms, Missions, Mentors, Assets, Marketplace, Governance, and Treasury telemetry.</p>
 <h2>0) Core (Economy, Vault, Wallet, Battle)</h2>
 <p><strong>GET</strong> <code>/api/economy/me</code> — Auth. User balances (NEUR, AIBA, Stars, Diamonds), wallet, badges, economy config snapshot. <strong>POST</strong> <code>/api/economy/claim-aiba</code> — Auth. Body: <code>{ requestId, amount? }</code>. Create signed claim for on-chain withdrawal. Idempotent.</p>

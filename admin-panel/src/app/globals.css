@@ -1,30 +1,67 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   AIBA Arena Admin Panel — matches miniapp design system
-   Warm chocolate brown, rich gold/amber, glass-and-glow
+   AIBA Arena Admin Panel — Metallic design system (matches miniapp)
+   Deep dark + brass gold, 3D metal gradients, heavy type
    ═══════════════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 
 :root {
     color-scheme: dark;
-    --bg-deep: #0d0a07;
-    --bg-space: #1a140e;
-    --bg-panel: rgba(45, 32, 22, 0.96);
-    --bg-glass: rgba(38, 28, 20, 0.94);
+    /* ─── Metallic design system: brass gold ───────────────────────────────── */
+    --bg-deep: #080604;
+    --bg-space: #120e0a;
+    --bg-panel: rgba(30, 22, 14, 0.98);
+    --bg-glass: rgba(28, 20, 12, 0.96);
+    /* Metal stops (highlight → mid → shadow for 3D) */
+    --metal-light: #ffe066;
+    --metal-mid: #e6b800;
+    --metal-dark: #996600;
+    --metal-shadow: #4d3300;
+    /* Gradients */
+    --metal-gradient: linear-gradient(180deg, #ffe066 0%, #ffcc00 20%, #e6b800 45%, #b38600 75%, #996600 100%);
+    --metal-gradient-btn: linear-gradient(180deg, #fff0aa 0%, #ffcc00 25%, #cc9900 60%, #996600 100%);
+    --metal-gradient-text: linear-gradient(180deg, var(--metal-light) 0%, var(--accent-gold) 50%, var(--metal-mid) 100%);
+    /* Bevel / depth */
+    --metal-inset: inset 0 1px 0 rgba(255,255,255,0.35);
+    --metal-outer: 0 4px 0 #4d3300, 0 6px 20px rgba(0,0,0,0.6), 0 0 28px rgba(255,204,0,0.4);
+    --metal-glow: 0 0 28px rgba(255,204,0,0.45);
+    --metal-border: 1px solid rgba(255, 224, 102, 0.4);
+    --border-metal: rgba(255, 224, 102, 0.4);
     --accent-gold: #ffcc00;
-    --accent-amber: #f5a623;
+    --accent-amber: #e6b800;
     --accent-green: #22c55e;
     --accent-red: #ef4444;
-    --text-primary: #fef3e2;
+    --text-primary: #fff8eb;
     --text-secondary: #e8d4b8;
-    --text-muted: #b8a078;
-    --border-subtle: rgba(255, 204, 0, 0.15);
-    --border-gold: rgba(255, 204, 0, 0.35);
-    --glow-gold: 0 0 20px rgba(255, 204, 0, 0.25);
+    --text-muted: #a89070;
+    --border-subtle: rgba(255, 204, 0, 0.18);
+    --border-gold: rgba(255, 224, 102, 0.45);
+    --glow-gold: 0 0 28px rgba(255, 204, 0, 0.5);
     --radius-sm: 10px;
     --radius-md: 14px;
     --radius-lg: 18px;
     --font-body: 'Nunito', system-ui, sans-serif;
+}
+
+/* Metallic design system — utility classes */
+.metal-text {
+    background: var(--metal-gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 18px rgba(255,204,0,0.4)) drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+.metal-panel {
+    background: var(--bg-glass);
+    border: var(--metal-border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4), var(--metal-inset), 0 0 0 1px rgba(255,204,0,0.08);
+}
+.metal-btn {
+    background: var(--metal-gradient-btn);
+    color: #0a0804;
+    font-weight: 700;
+    box-shadow: var(--metal-inset), var(--metal-outer);
+    border: 1px solid rgba(255,224,102,0.35);
 }
 
 * {
@@ -39,9 +76,9 @@ body {
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     background-image:
-        radial-gradient(ellipse 100% 60% at 50% -10%, rgba(245, 166, 35, 0.1) 0%, transparent 55%),
-        radial-gradient(ellipse 80% 40% at 80% 100%, rgba(255, 204, 0, 0.05) 0%, transparent 50%),
-        linear-gradient(180deg, var(--bg-deep) 0%, #151008 25%, var(--bg-space) 60%, #1e170f 100%);
+        radial-gradient(ellipse 120% 70% at 50% -15%, rgba(255, 204, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse 80% 50% at 85% 105%, rgba(230, 184, 0, 0.08) 0%, transparent 45%),
+        linear-gradient(180deg, var(--bg-deep) 0%, #0c0906 20%, var(--bg-space) 55%, #14100b 100%);
 }
 
 /* ─── Admin app shell ────────────────────────────────────────────────────── */
@@ -52,23 +89,27 @@ body {
     margin: 0 auto;
 }
 
-/* ─── Admin header (miniapp-style) ──────────────────────────────────────── */
+/* ─── Admin header — metallic ───────────────────────────────────────────── */
 .admin-header {
     margin-bottom: 24px;
-    padding: 16px 20px;
+    padding: 18px 22px;
     background: var(--bg-glass);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border-metal);
     border-radius: var(--radius-md);
-    border-left: 4px solid var(--accent-gold);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border-left: 5px solid var(--accent-gold);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 24px rgba(255,204,0,0.08), -2px 0 0 var(--metal-dark);
 }
 
 .admin-header__title {
     margin: 0 0 4px;
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: var(--accent-gold);
-    letter-spacing: 0.02em;
+    font-size: 1.45rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    background: linear-gradient(180deg, var(--metal-light) 0%, var(--accent-gold) 50%, var(--metal-mid) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 16px rgba(255,204,0,0.4)) drop-shadow(0 1px 2px rgba(0,0,0,0.5));
 }
 
 .admin-header__sub {
@@ -93,12 +134,15 @@ body {
 }
 
 .admin-login-hero__title {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--accent-gold);
+    font-size: 1.9rem;
+    font-weight: 900;
     margin: 0 0 8px;
-    letter-spacing: 0.03em;
-    text-shadow: 0 0 24px rgba(255, 204, 0, 0.3);
+    letter-spacing: 0.04em;
+    background: linear-gradient(180deg, var(--metal-light) 0%, var(--accent-gold) 50%, var(--metal-mid) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 28px rgba(255,204,0,0.45)) drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 
 .admin-login-hero__sub {
@@ -112,17 +156,18 @@ body {
     max-width: 400px;
     padding: 28px;
     background: var(--bg-glass);
-    border: 1px solid var(--border-gold);
+    border: 1px solid var(--border-metal);
     border-radius: var(--radius-lg);
-    box-shadow: var(--glow-gold), 0 8px 32px rgba(0, 0, 0, 0.4);
-    border-left: 4px solid var(--accent-gold);
+    border-left: 5px solid var(--accent-gold);
+    box-shadow: var(--glow-gold), 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 1px rgba(255,204,0,0.1);
 }
 
 .admin-login-card__title {
-    font-size: 1.15rem;
-    font-weight: 700;
+    font-size: 1.2rem;
+    font-weight: 800;
     color: var(--accent-gold);
     margin-bottom: 6px;
+    text-shadow: 0 0 20px rgba(255,204,0,0.35);
 }
 
 .admin-login-card__hint {
@@ -255,13 +300,21 @@ body {
 }
 
 .admin-btn--primary {
-    background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
-    color: #0d0a07;
-    box-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);
+    background: var(--metal-gradient-btn);
+    color: #0a0804;
+    font-weight: 700;
+    box-shadow: var(--metal-inset), var(--metal-outer);
+    border: 1px solid rgba(255,224,102,0.35);
 }
 
 .admin-btn--primary:hover {
-    box-shadow: 0 4px 16px rgba(255, 204, 0, 0.4);
+    filter: brightness(1.08);
+    box-shadow: var(--metal-inset), 0 5px 0 var(--metal-shadow), 0 8px 28px rgba(0,0,0,0.55), 0 0 32px rgba(255,204,0,0.45);
+}
+
+.admin-btn--primary:active {
+    box-shadow: var(--metal-inset), 0 2px 0 var(--metal-shadow), 0 4px 16px rgba(0,0,0,0.5);
+    transform: translateY(2px) scale(0.98);
 }
 
 .admin-auth-error {
@@ -271,7 +324,7 @@ body {
     margin-top: 4px;
 }
 
-/* ─── Admin tabs (miniapp-style nav) ────────────────────────────────────── */
+/* ─── Admin tabs — metallic nav ─────────────────────────────────────────── */
 .admin-tabs {
     display: flex;
     flex-wrap: wrap;
@@ -280,12 +333,12 @@ body {
     padding: 20px 24px;
     margin-bottom: 24px;
     background: var(--bg-glass);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border-metal);
     border-radius: var(--radius-md);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 16px rgba(255, 204, 0, 0.05);
-    border-left: 4px solid var(--accent-gold);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 20px rgba(255,204,0,0.08);
+    border-left: 5px solid var(--accent-gold);
 }
 
 .admin-tabs-group {
@@ -357,17 +410,18 @@ body {
     padding: 24px;
     margin-bottom: 24px;
     background: var(--bg-glass);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border-metal);
     border-radius: var(--radius-md);
-    border-left: 4px solid var(--accent-gold);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 16px rgba(255, 204, 0, 0.06);
+    border-left: 5px solid var(--accent-gold);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 20px rgba(255,204,0,0.06);
 }
 
 .admin-card__title {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 1.15rem;
+    font-weight: 800;
     color: var(--accent-gold);
     margin: 0 0 6px;
+    text-shadow: 0 0 16px rgba(255,204,0,0.3);
 }
 
 .admin-card__hint {

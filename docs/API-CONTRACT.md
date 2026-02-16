@@ -1,6 +1,6 @@
 # API Contract — Multiverse Expansion
 
-**Version:** Feb 2025  
+**Version:** Feb 2026  
 **Status:** Phase 1 baseline (schemas + endpoints for new systems).
 
 This document defines the **API surface** for core flows, Realms, Missions, Mentors, Assets, Marketplace, Governance, and Treasury telemetry.

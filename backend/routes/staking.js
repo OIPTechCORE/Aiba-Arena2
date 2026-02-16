@@ -68,7 +68,13 @@ router.post(
             requestId,
             meta: { action: 'stake' },
         });
-        if (!debit.ok) return res.status(403).json({ error: 'insufficient AIBA' });
+        if (!debit.ok) {
+            if (debit.duplicate) {
+                const summary = await getStakingSummary(telegramId);
+                return res.json({ ok: true, stakedAmount: summary.stakedAmount, summary });
+            }
+            return res.status(403).json({ error: 'insufficient AIBA' });
+        }
         const staking = await Staking.findOneAndUpdate(
             { telegramId },
             {
@@ -197,7 +203,16 @@ router.post(
             requestId,
             meta: { periodDays, apyPercent },
         });
-        if (!debit.ok) return res.status(403).json({ error: debit.reason || 'insufficient AIBA' });
+        if (!debit.ok) {
+            if (debit.duplicate) {
+                return res.status(201).json({
+                    ok: true,
+                    message: 'Stake already placed (idempotent).',
+                    expectedRewardAiba: Math.floor((amount * (apyPercent / 100) * periodDays) / 365),
+                });
+            }
+            return res.status(403).json({ error: debit.reason || 'insufficient AIBA' });
+        }
 
         const lockedAt = new Date();
         const unlocksAt = new Date(lockedAt.getTime() + periodDays * 24 * 60 * 60 * 1000);
@@ -344,6 +359,9 @@ router.post(
             await StakingLock.updateOne({ _id: lock._id, status: 'unlocked' }, { $set: { status: 'active' } }).catch(() => {});
             return res.status(500).json({ error: 'claim_credit_failed' });
         }
+        if (credited.duplicate) {
+            return res.json({ ok: true, principal: amount, reward, total });
+        }
 
         res.json({
             ok: true,
@@ -375,7 +393,7 @@ router.post(
         if (reward <= 0) return res.json({ ok: true, claimed: 0, summary });
         const staking = await Staking.findOne({ telegramId });
         if (!staking) return res.json({ ok: true, claimed: 0, summary });
-        await creditAibaNoCap(reward, {
+        const credited = await creditAibaNoCap(reward, {
             telegramId,
             reason: 'staking_reward',
             arena: 'staking',
@@ -385,6 +403,11 @@ router.post(
             requestId,
             meta: { stakedAmount: staking.amount },
         });
+        if (!credited?.ok) return res.status(500).json({ error: 'claim_credit_failed' });
+        if (credited.duplicate) {
+            const newSummary = await getStakingSummary(telegramId);
+            return res.json({ ok: true, claimed: reward, summary: newSummary });
+        }
         staking.lastClaimedAt = new Date();
         await staking.save();
         const newSummary = await getStakingSummary(telegramId);

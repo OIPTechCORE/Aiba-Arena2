@@ -1,38 +1,59 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   AIBA ARENA — Hamster Kombat design system
-   Warm chocolate brown, rich gold/amber, tap-to-earn casino vibe
-   Palette inspired by Hamster Kombat: cozy browns + vibrant gold rewards
+   AIBA ARENA — Metallic design system
+   Deep dark + brass gold, 3D metal gradients, heavy type (matches admin)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 
 :root {
     color-scheme: dark;
-    /* Hamster Kombat — chocolate brown & honey gold palette */
-    --bg-deep: #0d0a07;
-    --bg-space: #1a140e;
-    --bg-panel: rgba(45, 32, 22, 0.96);
-    --bg-glass: rgba(38, 28, 20, 0.94);
-    /* Primary accents — warm gold/amber (match admin panel bold orange-gold) */
+    /* ─── Responsive breakpoints (use in media queries) ────────────────────── */
+    --bp-narrow: 400px;
+    --bp-mobile: 500px;
+    --bp-wide: 600px;
+    --bp-tablet: 769px;
+    --bp-desktop: 1024px;
+    --container-max: min(560px, 100vw);
+    /* ─── Metallic design system: brass gold ───────────────────────────────── */
+    --bg-deep: #080604;
+    --bg-space: #120e0a;
+    --bg-panel: rgba(30, 22, 14, 0.98);
+    --bg-glass: rgba(28, 20, 12, 0.96);
+    /* Metal stops (highlight → mid → shadow for 3D) */
+    --metal-light: #ffe066;
+    --metal-mid: #e6b800;
+    --metal-dark: #996600;
+    --metal-shadow: #4d3300;
+    /* Gradients */
+    --metal-gradient: linear-gradient(180deg, #ffe066 0%, #ffcc00 20%, #e6b800 45%, #b38600 75%, #996600 100%);
+    --metal-gradient-btn: linear-gradient(180deg, #fff0aa 0%, #ffcc00 25%, #cc9900 60%, #996600 100%);
+    --metal-gradient-text: linear-gradient(180deg, var(--metal-light) 0%, var(--accent-gold) 50%, var(--metal-mid) 100%);
+    /* Bevel / depth */
+    --metal-inset: inset 0 1px 0 rgba(255,255,255,0.35);
+    --metal-outer: 0 4px 0 #4d3300, 0 6px 20px rgba(0,0,0,0.6), 0 0 28px rgba(255,204,0,0.4);
+    --metal-glow: 0 0 28px rgba(255,204,0,0.45);
+    --metal-border: 1px solid rgba(255, 224, 102, 0.4);
+    /* Accents */
     --accent-cyan: #f5a623;
     --accent-magenta: #f59e0b;
     --accent-gold: #ffcc00;
-    --accent-amber: #f5a623;
+    --accent-amber: #e6b800;
     --accent-green: #22c55e;
     --accent-blue: #fbbf24;
     --accent-orange: #f97316;
-    /* Text — cream & caramel */
-    --text-primary: #fef3e2;
+    /* Text — strong contrast */
+    --text-primary: #fff8eb;
     --text-secondary: #e8d4b8;
-    --text-muted: #b8a078;
-    --border-glass: rgba(245, 166, 35, 0.45);
-    --border-subtle: rgba(255, 204, 0, 0.12);
-    --glow-gold: 0 0 24px rgba(255, 204, 0, 0.4);
-    --glow-amber: 0 0 20px rgba(245, 166, 35, 0.35);
-    --shadow-deep: 0 12px 32px rgba(0, 0, 0, 0.55);
-    --shadow-3d: 0 2px 10px rgba(0, 0, 0, 0.45);
-    --shadow-3d-button: 0 2px 6px rgba(0, 0, 0, 0.35), 0 4px 16px rgba(255, 204, 0, 0.2);
-    --shadow-3d-card: 0 1px 3px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.4);
+    --text-muted: #a89070;
+    --border-glass: rgba(255, 204, 0, 0.5);
+    --border-subtle: rgba(255, 204, 0, 0.18);
+    --border-metal: rgba(255, 224, 102, 0.4);
+    --glow-gold: 0 0 28px rgba(255, 204, 0, 0.5);
+    --glow-amber: 0 0 24px rgba(230, 184, 0, 0.4);
+    --shadow-deep: 0 14px 40px rgba(0, 0, 0, 0.6);
+    --shadow-3d: 0 3px 12px rgba(0, 0, 0, 0.5);
+    --shadow-3d-button: 0 4px 0 #4d3300, 0 6px 24px rgba(0,0,0,0.5), 0 0 20px rgba(255,204,0,0.35);
+    --shadow-3d-card: 0 2px 4px rgba(0,0,0,0.4), 0 10px 28px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,204,0,0.12);
     --perspective-view: none;
     --radius-sm: 12px;
     --radius-md: 14px;
@@ -58,6 +79,27 @@
     --android-state-layer-strong: rgba(255, 204, 0, 0.3);
 }
 
+/* Metallic design system — utility classes */
+.metal-text {
+    background: var(--metal-gradient-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 18px rgba(255,204,0,0.4)) drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+.metal-panel {
+    background: var(--bg-glass);
+    border: var(--metal-border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4), var(--metal-inset), 0 0 0 1px rgba(255,204,0,0.08);
+}
+.metal-btn {
+    background: var(--metal-gradient-btn);
+    color: #0a0804;
+    font-weight: 700;
+    box-shadow: var(--metal-inset), var(--metal-outer);
+    border: 1px solid rgba(255,224,102,0.35);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -70,7 +112,7 @@
   }
 }
 
-/* Unified shell — Hamster Kombat warm chocolate gradient */
+/* Unified shell — strong metallic dark + gold radials */
 body,
 .aiba-miniapp {
     margin: 0;
@@ -80,23 +122,32 @@ body,
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     background-image:
-        radial-gradient(ellipse 100% 60% at 50% -10%, rgba(245, 166, 35, 0.12) 0%, transparent 55%),
-        radial-gradient(ellipse 80% 40% at 80% 100%, rgba(255, 204, 0, 0.06) 0%, transparent 50%),
-        linear-gradient(180deg, var(--bg-deep) 0%, #151008 25%, var(--bg-space) 60%, #1e170f 100%);
+        radial-gradient(ellipse 120% 70% at 50% -15%, rgba(255, 204, 0, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse 80% 50% at 85% 105%, rgba(230, 184, 0, 0.08) 0%, transparent 45%),
+        linear-gradient(180deg, var(--bg-deep) 0%, #0c0906 20%, var(--bg-space) 55%, #14100b 100%);
 }
 
 /* ─── App shell ─────────────────────────────────────────────────────────── */
 .aiba-app {
+    position: relative;
+    z-index: 1;
     min-height: 100vh;
     min-height: 100dvh;
     padding-top: max(90px, calc(75px + env(safe-area-inset-top)));
     padding-right: max(12px, env(safe-area-inset-right));
     padding-bottom: max(100px, calc(env(safe-area-inset-bottom) + 80px));
     padding-left: max(12px, env(safe-area-inset-left));
-    max-width: min(560px, 100vw);
+    max-width: var(--container-max);
     margin: 0 auto;
     width: 100%;
+    min-width: 0;
+    pointer-events: auto;
     /* No transform-style/transform: would break position:sticky/fixed on header */
+}
+
+main.app-main {
+    position: relative;
+    pointer-events: auto;
 }
 
 /* Compact header: AIBA, Home, Profile, Guide, FAQs, Settings, Connect Wallet — single line */
@@ -130,11 +181,11 @@ body,
     z-index: 100;
     min-height: 56px;
     padding: 8px max(12px, env(safe-area-inset-right)) 10px max(12px, env(safe-area-inset-left));
-    background: rgba(26, 21, 16, 0.98);
-    backdrop-filter: blur(12px);
+    background: linear-gradient(180deg, rgba(22, 16, 10, 0.98) 0%, rgba(18, 14, 10, 0.99) 100%);
+    backdrop-filter: blur(14px);
     border-radius: 0 0 var(--radius-md) var(--radius-md);
-    border-bottom: 1px solid rgba(255, 204, 0, 0.35);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 204, 0, 0.15);
+    border-bottom: 2px solid var(--border-metal);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 1px 0 rgba(255,224,102,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
     max-width: min(560px, 100vw);
     margin: 0 auto;
 }
@@ -208,12 +259,15 @@ body,
 
 .aiba-app__title {
     font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 1.2rem;
-    letter-spacing: 0.02em;
+    font-weight: 900;
+    font-size: 1.22rem;
+    letter-spacing: 0.04em;
     margin: 0;
-    color: var(--accent-gold);
-    text-shadow: 0 0 24px rgba(255, 204, 0, 0.3);
+    background: linear-gradient(180deg, var(--metal-light) 0%, var(--accent-gold) 50%, var(--metal-mid) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 18px rgba(255,204,0,0.45)) drop-shadow(0 1px 3px rgba(0,0,0,0.6));
 }
 
 .aiba-app__sub {
@@ -452,20 +506,23 @@ body,
     transform: none;
 }
 
-/* Primary — bold gold-to-amber (match admin panel) */
+/* Primary — metallic brass gold */
 .btn--primary {
-    background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
-    color: #0d0a07;
-    box-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);
+    background: var(--metal-gradient-btn);
+    color: #0a0804;
+    font-weight: 700;
+    box-shadow: var(--metal-inset), var(--metal-outer);
+    border: 1px solid rgba(255,224,102,0.3);
 }
 
 .btn--primary:hover:not(:disabled) {
-    filter: brightness(1.06);
-    box-shadow: 0 4px 16px rgba(255, 204, 0, 0.4);
+    filter: brightness(1.08);
+    box-shadow: var(--metal-inset), 0 5px 0 var(--metal-shadow), 0 8px 28px rgba(0,0,0,0.55), 0 0 32px rgba(255,204,0,0.45);
 }
 
 .btn--primary:active:not(:disabled) {
-    box-shadow: 0 1px 4px rgba(255, 204, 0, 0.35);
+    box-shadow: var(--metal-inset), 0 2px 0 var(--metal-shadow), 0 4px 16px rgba(0,0,0,0.5);
+    transform: translateY(2px);
 }
 
 /* Secondary — outlined Android action */
@@ -522,7 +579,7 @@ body,
     background: rgba(255, 255, 255, 0.06);
 }
 
-/* ─── Tab bar (scrollable segmented controls) ─────────────────────────────── */
+/* ─── Tab bar (scrollable segmented controls) — metallic ─────────────────── */
 .tab-bar {
     display: flex;
     gap: 8px;
@@ -533,9 +590,9 @@ body,
     padding: 10px 8px;
     background: var(--bg-glass);
     border-radius: var(--radius-pill);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border-metal);
     backdrop-filter: blur(8px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24), 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
 }
@@ -583,7 +640,7 @@ body,
 /* ─── Cards / panels (Android surface + elevation) ───────────────────────── */
 .card {
     background: var(--bg-glass);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border-metal);
     border-radius: var(--radius-lg);
     padding: var(--android-space-3);
     margin-top: var(--android-space-2);
@@ -608,6 +665,13 @@ body,
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* Keep card title icons small so they sit next to the title text */
+.card__title .icon-svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 
 .card__title::before {
@@ -829,11 +893,33 @@ body,
     padding: 20px 24px;
 }
 
-/* Each hero line on one line (no wrap) */
-.hero-center__title,
+/* Trainers (and other text-heavy) hero: compact so card content below fits in view */
+.hero-center--compact.hero-center--trainers {
+    min-height: 0;
+    padding: 12px 16px 16px;
+    align-items: flex-start;
+    text-align: left;
+}
+.hero-center--compact.hero-center--trainers .hero-center__title {
+    font-size: clamp(1.15rem, 4vw, 1.5rem);
+    margin-bottom: 6px;
+}
+.hero-center--compact.hero-center--trainers .hero-center__sub,
+.hero-center--compact.hero-center--trainers .hero-center__hint {
+    text-align: left;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Hero text: wrap so long content (e.g. Trainers copy) fits and content below is visible */
 .hero-center__sub,
 .hero-center__hint {
-    white-space: nowrap;
+    white-space: normal;
+    max-width: 100%;
+}
+.hero-center__title {
+    white-space: normal;
+    word-break: break-word;
 }
 .hero-center__enter--btn {
     white-space: nowrap;
@@ -1036,11 +1122,13 @@ body,
     color: var(--text-muted);
 }
 
+/* Home grid: quick-access buttons (Brokers, Market, Tasks, etc.). Must stay clickable. */
 .home-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 16px;
+    pointer-events: auto;
 }
 .home-grid__item {
     display: flex;
@@ -1054,6 +1142,7 @@ body,
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     cursor: pointer;
+    pointer-events: auto;
     color: var(--text-secondary);
     transition:
         color var(--android-motion-standard) var(--android-ease-standard),
@@ -1287,12 +1376,7 @@ body,
     overflow: hidden;
     text-overflow: ellipsis;
 }
-@media (max-width: 400px) {
-    .dashboard-grid { gap: 8px; }
-    .dashboard-tile { min-height: 72px; padding: 10px 6px; }
-    .dashboard-tile__icon .icon-svg { width: 22px; height: 22px; }
-    .dashboard-tile__label { font-size: 0.62rem; }
-}
+/* Consolidated narrow viewport: see "Seamless responsiveness" below */
 
 /* Quick-nav (balance strip) wrapper: auto hide on scroll down, show on scroll up */
 .quick-nav-wrap {
@@ -1786,6 +1870,17 @@ body,
     text-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
 }
 
+.arena-visual__cta {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 220, 100, 0.95);
+    text-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
 .arena-visual--hero {
     min-height: 100px;
     margin-top: 0;
@@ -2248,12 +2343,20 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
     min-height: 100dvh;
 }
 
+/* ─── App must be above TonConnect widget so all buttons work ──────────────────
+   The widget is position:fixed and would sit on top and block every click.
+   We keep it behind our app (z-index 0) and only bring it forward when the
+   wallet modal is open (z-index 10000). Header uses our own "Wallet" button
+   that calls openModal() so we never need to click into the widget when closed. */
+body.aiba-miniapp > *:not(#tc-widget-root) {
+    position: relative;
+    z-index: 1;
+}
 #tc-widget-root {
     position: fixed;
     inset: 0;
-    z-index: 10000;
+    z-index: 0;
     width: 100%;
-    pointer-events: none;
     height: 100%;
     height: 100dvh;
     min-height: -webkit-fill-available;
@@ -2265,10 +2368,8 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
     align-items: center;
     justify-content: center;
 }
-
-/* When modal is open: capture pointer events and show full viewport */
 #tc-widget-root:has([data-tc-modal="true"]) {
-    pointer-events: auto;
+    z-index: 10000;
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
@@ -2429,23 +2530,21 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
     .app-header__row .header-nav__btn { min-width: auto; padding: 4px 6px; }
 }
 
+/* Seamless responsiveness: single consolidated block for narrow viewports (--bp-narrow = 400px) */
 @media (max-width: 400px) {
+    .dashboard-grid { gap: 8px; }
+    .dashboard-tile { min-height: 72px; padding: 10px 6px; }
+    .dashboard-tile__icon .icon-svg { width: 22px; height: 22px; }
+    .dashboard-tile__label { font-size: 0.62rem; }
     .app-header__row .aiba-app__title { font-size: 0.95rem; }
     .app-header__row .header-nav__btn { padding: 4px 5px; font-size: 0.65rem; }
     .app-header__wallet .connect-wallet-btn { padding: 6px 10px; font-size: 0.75rem; }
-}
-
-/* Seamless responsiveness: balance strip, cards, hero */
-@media (max-width: 400px) {
     .home-grid__item { min-height: 68px; padding: 8px 4px; }
     .home-grid__label { font-size: 0.65rem; }
     .balance-strip { padding: 10px 12px; gap: 8px; }
     .balance-strip__value { font-size: 0.9rem; }
     .quick-nav { gap: 6px; }
     .quick-nav__btn { padding: 6px 10px; font-size: 0.82rem; }
-}
-
-@media (max-width: 400px) {
     .card { padding: 12px 14px; }
     .hero-center__title { font-size: clamp(1.2rem, 5vw, 1.4rem); }
     .hero-center__sub { font-size: 0.88rem; }
@@ -2458,10 +2557,17 @@ html:has(#tc-widget-root [data-tc-modal="true"]) {
 
 .card, .balance-strip { max-width: 100%; }
 
-/* Body/html: prevent horizontal overflow, never hide header */
-html, body { overflow-x: hidden; }
+/* Body/html: prevent horizontal overflow, seamless responsive base */
+html, body { overflow-x: hidden; width: 100%; min-width: 0; }
 html { scroll-behavior: smooth; scroll-padding-top: 80px; }
-body { scroll-padding-top: 80px; }
+body { scroll-padding-top: 80px; -webkit-overflow-scrolling: touch; }
+/* Flex/grid children: allow shrinking to prevent overflow */
+.aiba-app .tab-content,
+.aiba-app .action-row,
+.aiba-app .card,
+.aiba-app .balance-strip,
+.aiba-app .flow-switch { min-width: 0; }
+.aiba-app img { max-width: 100%; height: auto; }
 
 /* ─── Status message ────────────────────────────────────────────────────── */
 .status-msg {
@@ -2739,11 +2845,66 @@ body { scroll-padding-top: 80px; }
     font-size: 0.85rem;
 }
 
+/* ─── Page nav (Back to Previous + Back to Home) — every page ─────────────── */
+.page-nav {
+    margin-bottom: var(--android-space-3);
+}
+.page-nav__card {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    padding: 10px 14px;
+    background: var(--bg-panel);
+    border: var(--metal-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-3d-card);
+    max-width: 100%;
+    min-width: 0;
+}
+.page-nav__btn,
+.page-nav__link {
+    font-size: 0.9rem;
+    font-family: var(--font-body);
+    color: var(--accent-gold);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 4px;
+    min-height: 44px;
+    text-decoration: none;
+    transition: opacity var(--android-motion-fast) var(--android-ease-standard);
+}
+.page-nav__btn:hover,
+.page-nav__link:hover {
+    opacity: 0.9;
+    text-decoration: underline;
+}
+.page-nav__btn:focus-visible,
+.page-nav__link:focus-visible {
+    outline: 2px solid var(--accent-gold);
+    outline-offset: 2px;
+}
+
+.tab-back-nav {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+}
+.tab-back-nav--hero {
+    margin-bottom: 12px;
+    align-self: flex-start;
+}
+
 /* ─── Legal pages (Privacy, Terms) ────────────────────────────────────────── */
 .legal-page {
     min-height: 100vh;
-    padding: env(safe-area-inset-top) 16px 24px;
+    padding: env(safe-area-inset-top) max(12px, env(safe-area-inset-right)) 24px max(12px, env(safe-area-inset-left));
     background: var(--bg-deep);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .legal-page__header {

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>APP SCAN REPORT — Aiba Arena Docs</title>
+  <link rel="stylesheet" href="../print.css"/>
+</head>
+<body>
+  <div class="doc-header">
+    <h1>APP SCAN REPORT</h1>
+    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+  </div>
+  <div class="doc-body">
+<h1>App scan report — issues and errors</h1>
+<p><strong>Date:</strong> 2026-02-16 <strong>Scope:</strong> Miniapp and backend; lint, build, runtime patterns, and defensive checks.</p>
+<hr/>
+<h2>1. Summary</h2>
+<table>
+<thead><tr>
+<th>Category</th>
+<th>Status</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Linter</strong></td>
+<td>✅ Clean</td>
+<td>No ESLint errors in <code>miniapp/src</code> or <code>backend</code>.</td>
+</tr>
+<tr>
+<td><strong>Build</strong></td>
+<td>⏳ Verified</td>
+<td>Next.js build started; confirm completion locally.</td>
+</tr>
+<tr>
+<td><strong>Duplicates</strong></td>
+<td>✅ Reduced</td>
+<td>Tab back nav uses <code>TabBackNav</code>; single <code>@media (max-width: 400px)</code> block.</td>
+</tr>
+<tr>
+<td><strong>Silent catch</strong></td>
+<td>⚠️ Many</td>
+<td>Many <code>.catch(() =&gt; {})</code> in HomeContent/telegram; intentional for non-critical fetches.</td>
+</tr>
+<tr>
+<td><strong>Console</strong></td>
+<td>⚠️ One</td>
+<td><code>console.error</code> in broker API proxy (route) for debugging.</td>
+</tr>
+<tr>
+<td><strong>Keys</strong></td>
+<td>✅ Safe</td>
+<td>Lists use stable keys (<code>_id</code>, <code>id</code>, or <code>i</code> fallback).</td>
+</tr>
+<tr>
+<td><strong>Null/array guards</strong></td>
+<td>✅ Hardened</td>
+<td>Tournament <code>detail.entries</code> guarded with <code>Array.isArray</code> before <code>.slice</code>/<code>.map</code>.</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>2. Findings</h2>
+<h3>2.1 Lint and build</h3>
+<ul>
+<li><strong>ESLint disables:</strong> Four <code>eslint-disable-next-line react-hooks/exhaustive-deps</code> in HomeContent and one in admin. Used where effect dependencies are intentionally omitted (e.g. run-on-mount or tab-specific refresh). Acceptable; consider adding a short comment per use if not already present.</li>
+<li><strong>Build:</strong> Run <code>npm run build</code> in <code>miniapp</code> to confirm a full production build. No compile errors were observed in the scan.</li>
+</ul>
+<h3>2.2 Duplicate code</h3>
+<ul>
+<li><strong>CSS:</strong> All narrow-viewport rules consolidated into one <code>@media (max-width: 400px)</code> block in <code>globals.css</code>.</li>
+</ul>
+<h3>2.3 Error handling and logging</h3>
+<ul>
+<li><strong>Broker proxy:</strong> <code>miniapp/src/app/api/brokers/[[...path]]/route.js</code> uses <code>console.error('Broker proxy error:', err)</code> on proxy failure. Acceptable for server-side debugging; consider forwarding to a logger or removing in production if logs are not desired.</li>
+</ul>
+<h3>2.4 Runtime safety</h3>
+<ul>
+<li>- <code>taskProfile?.userKinds</code> is guarded with <code>Array.isArray(taskProfile?.userKinds)</code> before <code>.map</code>.</li>
+<li>- <code>globalBoss.topDamagers</code> is guarded with <code>Array.isArray(globalBoss.topDamagers)</code> and only used when <code>globalBoss?.active</code> is true.</li>
+<li>- <strong>Tournament detail:</strong> Condition updated to <code>detail?.entries &amp;&amp; Array.isArray(detail.entries) &amp;&amp; detail.entries.length &gt; 0</code> before using <code>detail.entries.slice(0, 20).map(...)</code> to avoid runtime errors if the API returns a non-array.</li>
+<li><strong>Leaderboard:</strong> <code>leaderboard</code> is <code>useState([])</code>; <code>row.badges</code> is checked with <code>Array.isArray(row.badges)</code> before <code>.slice</code>/<code>.map</code>. Safe.</li>
+<li><strong>Keys:</strong> List items use <code>key={id}</code>, <code>key={b._id}</code>, or <code>key={… || i}</code>. No unsafe or missing keys detected.</li>
+</ul>
+<h3>2.5 Environment and config</h3>
+<ul>
+</ul>
+<h3>2.6 Accessibility and UX</h3>
+<ul>
+<li><strong>Reduced motion:</strong> <code>globals.css</code> includes <code>@media (prefers-reduced-motion: reduce)</code> to shorten animations. Good.</li>
+</ul>
+<hr/>
+<h2>3. Fixes applied in this scan</h2>
+<ol>
+</ol>
+<hr/>
+<h2>4. Recommended follow-ups (optional)</h2>
+<table>
+<thead><tr>
+<th>Priority</th>
+<th>Action</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>P2</td>
+<td>Replace critical-path <code>.catch(() =&gt; {})</code> (e.g. battle submit, economy refresh) with user-visible error state or toast.</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Add a one-line comment above each <code>eslint-disable-next-line react-hooks/exhaustive-deps</code> explaining why deps are omitted.</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>In production, replace or gate <code>console.error</code> in broker proxy with a logger or remove if not needed.</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>Add a contract test that asserts every API path used by the miniapp has a corresponding backend route (see GAPS-SCAN-REPORT.md).</td>
+</tr>
+</tbody></table>
+<hr/>
+<h2>5. References</h2>
+<ul>
+<li><strong>UI-DESIGN-PRINCIPLES.md</strong> — Nav and layout standards.</li>
+<li><strong>DEPLOYMENT-AND-ENV.md</strong> — Env vars and deployment.</li>
+</ul>
+  </div>
+</body>
+</html>
