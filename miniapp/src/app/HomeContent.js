@@ -5,9 +5,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { createApi, getErrorMessage } from '../lib/api';
 import { getTelegramUserUnsafe, shareViaTelegram } from '../lib/telegram';
-import { buildRewardClaimPayload } from '../lib/tonRewardClaim';
-import { buildJettonTransferPayload, buildListingForwardPayload } from '../lib/tonJetton';
 import { EXTERNAL_APPS } from '../config/navigation';
+import { TabBackNav } from '../components/TabBackNav';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 const IS_DEV = BACKEND_URL.includes('localhost');
@@ -270,6 +269,9 @@ const ARENA_OPTIONS_FALLBACK = [
     { value: 'arbitrage:elite', label: 'Arbitrage (elite)' },
 ];
 
+/** Single source of truth: Super, futuristic, multi-tabbed, seamlessly extensible, full fledged — used in hero, marketplace section, and grid. */
+const MARKETPLACE_TAGLINE = 'Super, futuristic, multi-tabbed, seamlessly extensible, full fledged.';
+
 /* Hero banner content per tab */
 const HERO_BY_TAB = {
     home: { title: 'AI BROKER ARENA', sub: 'Own AI brokers. Compete in 3D arenas. Earn NEUR & AIBA.', hint: 'Swipe the tab bar to explore Home, Brokers, Market, Racing, and more.', buttonLabel: 'FAQs', buttonAction: 'updates' },
@@ -279,7 +281,7 @@ const HERO_BY_TAB = {
     referrals: { title: 'REFERRALS', sub: 'Earn NEUR & AIBA when friends join.', hint: 'Share your link or apply a friend\'s code.', buttonLabel: 'View', buttonAction: 'scroll' },
     arenas: { title: 'ARENAS', sub: ARENAS_EXPLANATION, hint: 'Choose arena and run battle. Guild Wars needs a guild.', buttonLabel: 'View', buttonAction: 'scroll' },
     guilds: { title: 'GUILDS', sub: GUILDS_EXPLANATION, hint: 'Create or join a group; deposit brokers to the pool.', buttonLabel: 'View', buttonAction: 'scroll' },
-    market: { title: 'SUPER FUTURISTIC UNIFIED MARKETPLACE', sub: 'Brokers, system shop, assets, rentals, boosts — one place to trade, list, and buy. TON + AIBA.', hint: 'Overview · Trade · Rental · System · Boosts.', buttonLabel: 'View', buttonAction: 'scroll' },
+    market: { title: 'SUPER FUTURISTIC UNIFIED MARKETPLACE', sub: `${MARKETPLACE_TAGLINE} Brokers, assets, rentals, system shop, boosts. TON + AIBA.`, hint: 'Overview · Trade · Rental · System · Boosts. List, buy, create — one hub.', buttonLabel: 'View', buttonAction: 'scroll' },
     tournaments: { title: 'TOURNAMENTS', sub: 'Enter AIBA tournaments. Compete, win prizes from the pool.', hint: 'Pay AIBA to enter; top 4 share the prize pool.', buttonLabel: 'View', buttonAction: 'scroll' },
     globalBoss: { title: 'GLOBAL BOSS', sub: 'Fight the community boss. Damage from battles counts. Share reward pool.', hint: 'Run battles to deal damage. When boss falls, top damagers earn AIBA.', buttonLabel: 'View', buttonAction: 'scroll' },
     carRacing: { title: 'CAR RACING', sub: 'Autonomous car racing. Create or buy a car, enter open races.', hint: 'Earn AIBA by finish position. System shop sells cars for AIBA.', buttonLabel: 'View', buttonAction: 'scroll' },
@@ -334,6 +336,15 @@ const TAB_LIST = [
     { id: 'games', label: 'More games', Icon: IconGames, badge: 'NEW' },
 ];
 
+/** Unified Marketplace: multi-tabbed flows. Add a new flow here + one panel (marketFlow === id) to extend seamlessly. */
+const MARKET_FLOWS = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'trade', label: 'Trade' },
+    { id: 'rental', label: 'Rental', badge: 'NEW' },
+    { id: 'system', label: 'System' },
+    { id: 'boosts', label: 'Boosts' },
+];
+
 /* Home grid: derived from TAB_LIST (minus home) so grid always has all features */
 const HOME_GRID_ITEMS = TAB_LIST.filter((t) => t.id !== 'home');
 
@@ -375,6 +386,8 @@ export default function HomePage() {
     const [tab, setTab] = useState('home');
     const scrollToFaqRef = useRef(false);
     const nftGalleryDefaultAppliedRef = useRef(false);
+    const currentTabRef = useRef('home');
+    const previousTabRef = useRef('home');
     const [dailyStatus, setDailyStatus] = useState(null);
     const [showCinematicIntro, setShowCinematicIntro] = useState(false);
     const [mintNftMsg, setMintNftMsg] = useState('');
@@ -1749,6 +1762,8 @@ export default function HomePage() {
     }, [charityViewMode, charityFavoritesOnly, charityFavoriteIds]);
 
     useEffect(() => {
+        previousTabRef.current = currentTabRef.current;
+        currentTabRef.current = tab;
         if (tab === 'brokers') {
             refreshBrokers().catch((e) => setStatus(getErrorMessage(e, 'Failed to load brokers.')));
             refreshGameModes().catch(() => {});
@@ -1786,9 +1801,8 @@ export default function HomePage() {
         if (tab === 'tournaments') { refreshTournaments().catch(() => {}); refreshBrokers().catch(() => {}); }
         if (tab === 'globalBoss') { refreshGlobalBoss().catch(() => {}); }
         if (tab === 'predict') { refreshPredictEvents().catch(() => {}); }
-        // Keep header visible: scroll to top so header is never hidden on tab change
         setBalanceStripVisible(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // No automatic scroll on tab change — user keeps their scroll position; only scroll to FAQ when they tap "FAQs"
         if (tab === 'updates' && scrollToFaqRef.current) {
             scrollToFaqRef.current = false;
             const t = setTimeout(() => document.getElementById('faq-support')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 400);
@@ -1804,17 +1818,8 @@ export default function HomePage() {
         }
     }, [multiverseMyNfts]);
 
-    useEffect(() => {
-        const onScroll = () => {
-            const y = typeof window !== 'undefined' ? (window.scrollY ?? document.documentElement?.scrollTop ?? 0) : 0;
-            const delta = y - lastScrollYRef.current;
-            lastScrollYRef.current = y;
-            if (delta > 20 && y > 100) setBalanceStripVisible(false);
-            else if (delta < -10 || y < 60) setBalanceStripVisible(true);
-        };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        return () => window.removeEventListener('scroll', onScroll);
-    }, []);
+    /* Scroll-based hide/show of balance strip removed: it changed document height (max-height 120px → 0)
+       and caused scroll bar jitter (small steps up/down). Strip is always visible for a stable scroll. */
 
     useEffect(() => {
         const hasActiveLocks = stakingLocks.some((l) => l.status === 'active');
@@ -2633,6 +2638,7 @@ export default function HomePage() {
                 return;
             }
 
+            const { buildJettonTransferPayload, buildListingForwardPayload } = await import('../lib/tonJetton');
             const forwardCell = buildListingForwardPayload(info.listingId);
             const payload = buildJettonTransferPayload({
                 destination: info.escrowAddress,
@@ -2673,6 +2679,7 @@ export default function HomePage() {
                 return;
             }
 
+            const { buildJettonTransferPayload } = await import('../lib/tonJetton');
             const payload = buildJettonTransferPayload({
                 destination: info.vaultAddress,
                 responseAddress: wallet.account.address,
@@ -2993,6 +3000,7 @@ export default function HomePage() {
                 // ignore
             }
 
+            const { buildRewardClaimPayload } = await import('../lib/tonRewardClaim');
             const payload = buildRewardClaimPayload({
                 toAddress: claim.toAddress,
                 amount: claim.amount,
@@ -3207,8 +3215,17 @@ export default function HomePage() {
 
             {(() => {
                 const hero = HERO_BY_TAB[tab] || HERO_BY_TAB.home;
+                const isTrainers = tab === 'trainers';
                 return (
-                    <div className="hero-center hero-center--compact" aria-hidden="false">
+                    <div className={`hero-center hero-center--compact${isTrainers ? ' hero-center--trainers' : ''}`} aria-hidden="false">
+                        {tab !== 'home' ? (
+                            <TabBackNav
+                                previousTab={previousTabRef.current}
+                                onGoToPrevious={() => setTab(previousTabRef.current)}
+                                onGoToHome={() => setTab('home')}
+                                className="tab-back-nav--hero"
+                            />
+                        ) : null}
                         <h2 className="hero-center__title">{hero.title}</h2>
                         <p className="hero-center__sub">{hero.sub}</p>
                         <p className="hero-center__hint">{hero.hint}</p>
@@ -3434,7 +3451,7 @@ export default function HomePage() {
                         <p className="card__hint">Personalized mission queue for every player profile: newcomer, fighter, trader, racer, social, scholar, and investor.</p>
                         <div className="action-row action-row--android">
                             <button type="button" className="btn btn--secondary" onClick={refreshTasks} disabled={busy}><IconRefresh /> Refresh tasks</button>
-                            <button type="button" className="btn btn--ghost" onClick={() => setTab('home')} disabled={busy}><IconHome /> Back to Home</button>
+                            <TabBackNav previousTab={previousTabRef.current} onGoToPrevious={() => setTab(previousTabRef.current)} onGoToHome={() => setTab('home')} disabled={busy} />
                         </div>
                         {Array.isArray(taskProfile?.userKinds) && taskProfile.userKinds.length > 0 ? (
                             <div className="tasks-kinds">
@@ -3607,7 +3624,7 @@ export default function HomePage() {
                                                 </>
                                             ) : null}
                                         </div>
-                                        {detail?.entries?.length > 0 ? (
+                                        {detail?.entries && Array.isArray(detail.entries) && detail.entries.length > 0 ? (
                                             <div style={{ marginTop: 12, padding: 10, background: 'rgba(0,0,0,0.2)', borderRadius: 8 }}>
                                                 <p className="card__hint" style={{ marginBottom: 8 }}>Entered brokers:</p>
                                                 <ol style={{ margin: 0, paddingLeft: 20, fontSize: '0.85rem' }}>
@@ -4006,15 +4023,19 @@ export default function HomePage() {
                     ) : null}
                 </section>
 
-                {/* ─── Super Futuristic Unified Marketplace ───────────────────────────────── */}
-                <section className={`tab-panel major-tab major-tab--market ${tab === 'market' ? 'is-active' : ''}`} aria-hidden={tab !== 'market'}>
+                {/* ─── Super Futuristic Unified Marketplace (multi-tabbed, seamlessly extensible, full fledged) ─── */}
+                <section className={`tab-panel major-tab major-tab--market unified-marketplace ${tab === 'market' ? 'is-active' : ''}`} aria-hidden={tab !== 'market'}>
                     <div className="card card--elevated major-tab__hero" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title">Super Futuristic Unified Marketplace</div>
                         <p className="card__hint">One place for brokers, assets, rentals, system shop, and boosts. Trade with TON + AIBA. List, buy, create — all in one hub.</p>
+                        <p className="major-tab__subcopy" style={{ marginTop: 6, opacity: 0.95 }}>{MARKETPLACE_TAGLINE}</p>
+                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await Promise.all([refreshListings(), refreshBrokerRentals(), refreshBoostConfig(), refreshStarsStoreConfig()]); } finally { setBusy(false); } }} disabled={busy}><IconRefresh /> Refresh all</button>
+                        </div>
                     </div>
-                    <div className="flow-switch" role="group" aria-label="Market flow">
-                        {['overview', 'trade', 'rental', 'system', 'boosts'].map((f) => (
-                            <button key={f} type="button" className={`flow-switch__btn ${marketFlow === f ? 'is-active' : ''}`} onClick={() => setMarketFlow(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}{f === 'rental' ? <><span className="badge-new badge-new--green" style={{ marginLeft: 6 }}>NEW</span></> : ''}</button>
+                    <div className="flow-switch" role="tablist" aria-label="Marketplace tabs">
+                        {MARKET_FLOWS.map((f) => (
+                            <button key={f.id} type="button" role="tab" aria-selected={marketFlow === f.id} className={`flow-switch__btn ${marketFlow === f.id ? 'is-active' : ''}`} onClick={() => setMarketFlow(f.id)}>{f.label}{f.badge ? <><span className="badge-new badge-new--green" style={{ marginLeft: 6 }}>{f.badge}</span></> : ''}</button>
                         ))}
                     </div>
                     {marketFlow === 'overview' && (
