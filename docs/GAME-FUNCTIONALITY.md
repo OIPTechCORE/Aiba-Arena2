@@ -324,6 +324,14 @@ simulateRace({ vehicles, trackLength, trackDifficulty, seed })
 - Car: `createCarCostAiba` 100, `createCarCostTonNano` 1e9, `carEntryFeeAiba` 10
 - Bike: same pattern
 
+### 8.3 Car Racing — Practically Ready
+
+- **Create or buy a car:** Create with AIBA or TON; buy from system shop (SYSTEM_CARS) or player marketplace (list/buy).
+- **Enter open races:** Open races per track (seeded on startup); entry fee AIBA; select race + car → enter.
+- **Earn AIBA by finish position:** Race runs when ≥2 entries; deterministic `simulateRace`; reward pool from entry fees distributed by position (1st gets largest share); AIBA credited to each entrant.
+- **Inspired by:** Car classes and labels (Formula 1, Le Mans, Can-Am, IndyCar, Group B, GT1, Electric, Drag, Touring/DTM, Hillclimb, NASCAR, Historic, Hypercar, Extreme) in model and config; system shop offers Touring, GT1, Formula 1, Le Mans.
+- **Flow:** Races run when at least 2 have entered; on completion a new open race is created for the same track so races stay available.
+
 ---
 
 ## 9. Security & Fairness

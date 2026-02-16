@@ -193,7 +193,7 @@ async function runCarRaceIfFull(raceId) {
     const race = await CarRace.findById(raceId);
     if (!race || race.status !== 'open') return;
     const count = await CarRaceEntry.countDocuments({ raceId });
-    if (count < race.maxEntries || count < 2) return;
+    if (count < 2) return;
     const track = await CarTrack.findOne({ trackId: race.trackId }).lean();
     const entries = await CarRaceEntry.find({ raceId }).populate('carId').lean();
     const valid = entries.filter((e) => e.carId);
@@ -269,6 +269,15 @@ async function runCarRaceIfFull(raceId) {
     race.status = 'completed';
     race.completedAt = new Date();
     await race.save();
+    // Replenish: create a new open race for the same track so players can keep entering
+    await CarRace.create({
+        trackId: race.trackId,
+        league: race.league,
+        status: 'open',
+        entryFeeAiba: race.entryFeeAiba ?? 10,
+        rewardPool: 0,
+        maxEntries: race.maxEntries ?? 16,
+    });
 }
 
 router.post(
@@ -316,9 +325,8 @@ router.post(
         const newPool = (race.rewardPool || 0) + fee;
         await CarRace.updateOne({ _id: raceId }, { $set: { rewardPool: newPool } });
         const entry = await CarRaceEntry.create({ raceId, carId, telegramId });
-        const updatedRace = await CarRace.findById(raceId).lean();
         const newCount = entryCount + 1;
-        if (newCount >= updatedRace.maxEntries) {
+        if (newCount >= 2) {
             await runCarRaceIfFull(raceId);
         }
         res.status(201).json({ ok: true, entry, race: await CarRace.findById(raceId).lean() });
