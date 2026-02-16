@@ -22,7 +22,9 @@ Use this phase table first, then open the detailed docs below.
 | **FEATURE-PLANS.md** | University, autonomous racing, charity, marketplace & payments, NFT multiverse, comms, economy (vision + key design). |
 | **STARS-BADGES-DIAMONDS.md** | Stars, profile badges, diamonds: plan, vision, implementation gaps. |
 | **AUDIT-AND-STATUS.md** | Project assessment, leaderboard & groups, ecosystems audit (NFT, staking, CoE, Wall of Fame, Trainers), vision vs codebase. |
+| **WHAT-IS-AIBA-ARENA.md** | Deep from-zero explainer: what AIBA Arena is, who it's for, core loop, tokens, features, where to play. |
 | **GAME-FUNCTIONALITY.md** | Expanded game functionality: battle engine, brokers, economy config, trainers, automation, racing, security, data flows, API mapping. |
+| **GAP-AUDIT.md** | Docs vs code gap investigation: privacy/terms, ads, brokers/cars/bikes, extensibility, recommendations. |
 | **ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md** | Advisory: 1T AIBA mint, viral growth strategies, founder revenue calculations. |
 | **AIBA-SELF-AUTOMATION.md** | Dynamic caps, allocation config, mint constraints, anti-inflation, referralUnlock3BonusBps. |
 | **REPORTS-MONITORING.md** | Cross-validation of advisory/audit reports vs codebase; invite-3, K-factor, trainers. |
@@ -45,6 +47,17 @@ Use this phase table first, then open the detailed docs below.
 | **TRAINERS-MANUAL.md** | Exhaustive trainer guide: product, journeys, scripts, influencer angles. |
 | **marketing/** | Marketing materials: influencer kit, ad templates, post bank, customizable HTML banners. |
 
+**Deep feature docs** (per-feature deep dives):
+
+| Doc | Contents |
+|-----|----------|
+| **BROKERS-DEEP-EXPLANATION.md** | Brokers: stats, creation, listing, buying, system catalog. |
+| **ARENAS-DEEP-EXPLANATION.md** | Arenas, leagues, battle flow, scoring. |
+| **CAR-RACING-DEEP-EXPLANATION.md** | Car racing: config, tracks, cars, races, enter, buy, leaderboard. |
+| **MARKETPLACE-DEEP-EXPLANATION.md** | Unified marketplace: brokers, assets, rentals, boosts, system shop. |
+
+**Gaps and audits:** [GAP-AUDIT.md](GAP-AUDIT.md), [GAPS-SCAN-REPORT.md](GAPS-SCAN-REPORT.md) (full app & docs gap scan).
+
 **Print folder:** `print/` contains HTML exports of docs. Run `npm run build:print-docs` to regenerate from `.md` sources. See [DOCS-STRUCTURE.md](DOCS-STRUCTURE.md).
 
 ---
@@ -57,3 +70,4 @@ Use this phase table first, then open the detailed docs below.
 - **Charity:** Max NEUR/AIBA, presets, optional message, anonymous toggle. See [FEATURE-PLANS.md](FEATURE-PLANS.md) §3, [USER-GUIDE.md](USER-GUIDE.md) §16.
 - **Trainer button:** Coloured styling on Home grid. See `miniapp/src/config/navigation.js` (`gridStyle: 'trainers'`).
 - **API-CONTRACT audit:** §0 Core (Economy, Vault, Wallet, Battle) added; duplicate §5e fixed (Predict → 5e.2); Trainers claim-rewards requestId documented.
+- **Gaps scan:** [GAPS-SCAN-REPORT.md](GAPS-SCAN-REPORT.md) — full app & docs gap scan; README deep-feature-docs index and GAME-FUNCTIONALITY §12 API mapping extended (broker-rental, predict, trainers, donate, premium, etc.).

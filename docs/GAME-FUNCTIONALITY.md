@@ -463,8 +463,12 @@ Create car/bike (AIBA or TON) → Enter race (AIBA entry fee)
 | `/api/marketplace/list` | POST | List broker |
 | `/api/marketplace/buy` | POST | Buy listing |
 | `/api/marketplace/buy-system-broker` | POST | Buy from system |
-| `/api/car-racing/*` | Mixed | Config, tracks, races, cars, enter, buy |
-| `/api/bike-racing/*` | Mixed | Same for bikes |
+| `/api/broker-rental` | GET | List available rentals |
+| `/api/broker-rental/list` | POST | List broker for rent |
+| `/api/broker-rental/:id/rent` | POST | Rent broker (AIBA, 1h) |
+| `/api/broker-rental/:id/unlist` | POST | Unlist your broker |
+| `/api/car-racing/*` | Mixed | Config, tracks, races, cars, enter, buy, list, leaderboard |
+| `/api/bike-racing/*` | Mixed | Same for bikes (config, tracks, races, bikes, enter, buy, list, leaderboard) |
 
 ### 12.4 Extensions
 
@@ -473,16 +477,27 @@ Create car/bike (AIBA or TON) → Enter race (AIBA entry fee)
 | `/api/referrals/me`, `/create`, `/use`, `/top` | Referrals |
 | `/api/tasks` | Personalized tasks |
 | `/api/daily/status`, `/claim` | Daily NEUR |
-| `/api/charity/*` | Campaigns, donate, leaderboard |
+| `/api/charity/*` | Campaigns, donate (NEUR/AIBA), leaderboard |
+| `/api/donate/config`, `/broker`, `/car`, `/bike`, `/gifts` | Donate broker/car/bike/gifts (TON) |
 | `/api/university/*` | Courses, progress, mint badges |
-| `/api/realms`, `/api/missions`, `/api/mentors` | Realms |
+| `/api/realms`, `/api/missions`, `/api/mentors` | Realms, missions, mentors (stake/unstake) |
 | `/api/assets/` (and subtree), `/api/asset-marketplace/` (and subtree) | AI assets |
 | `/api/governance/*` | Proposals, vote |
 | `/api/multiverse/*` | NFT universes, stake, claim |
-| `/api/staking/*` | Stake AIBA, claim |
-| `/api/dao/*` | Proposals, vote |
+| `/api/staking/*` | Stake AIBA, claim, cancel-early (fee) |
+| `/api/dao/*` | Proposals, vote (create requires staked AIBA) |
 | `/api/boosts/*` | Buy boost (NEUR/TON) |
 | `/api/gifts/*` | Send/receive gifts |
+| `/api/p2p-aiba/config`, `/send`, `/buy` | P2P AIBA send, Buy AIBA with TON |
+| `/api/predict/events`, `/events/:id`, `/events/:id/bet` | Predict: list events, bet (brokerId, amountAiba) |
+| `/api/trainers/me`, `/apply`, `/network`, `/leaderboard`, `/claim-rewards`, etc. | Trainers: apply, network, leaderboard, claim |
+| `/api/tournaments`, `/api/tournaments/:id`, `/api/tournaments/:id/enter` | Tournaments: list, single, enter |
+| `/api/global-boss`, `/api/global-boss/record-damage` | Global boss: state, record damage |
+| `/api/premium/status`, `/api/premium/buy` | Premium status, buy (TON) |
+| `/api/breeding/breed` | Breed two brokers (burns both + AIBA) |
+| `/api/game-modes` | Game modes config |
+| `/api/treasury` | Treasury telemetry |
+| `/api/oracle` | Oracle (AIBA/TON rate, etc.) |
 
 ---
 

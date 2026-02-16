@@ -1373,6 +1373,16 @@ export default function HomePage() {
     // Boosts
     const [boosts, setBoosts] = useState([]);
     const [boostMsg, setBoostMsg] = useState('');
+    const [boostConfig, setBoostConfig] = useState(null);
+    const [boostTonTxHash, setBoostTonTxHash] = useState('');
+    async function refreshBoostConfig() {
+        try {
+            const res = await api.get('/api/boosts/config');
+            setBoostConfig(res.data || null);
+        } catch {
+            setBoostConfig(null);
+        }
+    }
     async function refreshBoosts() {
         try {
             const res = await api.get('/api/boosts/mine');
@@ -1391,6 +1401,22 @@ export default function HomePage() {
             await refreshEconomy();
         } catch {
             setBoostMsg('Buy failed (insufficient NEUR?).');
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function buyBoostWithTon() {
+        if (!boostTonTxHash.trim()) return;
+        setBusy(true);
+        setBoostMsg('');
+        try {
+            await api.post('/api/boosts/buy-with-ton', { boostKey: 'score_multiplier', txHash: boostTonTxHash.trim() });
+            setBoostMsg('Boost activated (TON).');
+            setBoostTonTxHash('');
+            await refreshBoosts();
+            await refreshEconomy();
+        } catch (e) {
+            setBoostMsg(getErrorMessage(e, 'Buy with TON failed.'));
         } finally {
             setBusy(false);
         }
@@ -1745,7 +1771,7 @@ export default function HomePage() {
         if (tab === 'updates') refreshUpdatesAll().catch(() => setStatus('Failed to load updates.'));
         if (tab === 'home' || tab === 'referrals') { refreshReferralMe().catch(() => {}); refreshTopReferrers().catch(() => {}); }
         if (tab === 'trainers') { refreshTrainerMe().catch(() => {}); refreshTrainersNetwork().catch(() => {}); refreshTrainersLeaderboard().catch(() => {}); }
-        if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshReferralMe().catch(() => {}); refreshBrokerRentals().catch(() => {}); }
+        if (tab === 'market') { refreshListings().catch(() => {}); refreshStarsStoreConfig().catch(() => {}); refreshReferralMe().catch(() => {}); refreshBrokerRentals().catch(() => {}); refreshBoostConfig().catch(() => {}); }
         if (tab === 'carRacing') refreshCarRacing().catch(() => {});
         if (tab === 'bikeRacing') refreshBikeRacing().catch(() => {});
         if (tab === 'multiverse') refreshMultiverse().catch(() => {});
@@ -4025,6 +4051,11 @@ export default function HomePage() {
                                     {starsStoreMsg ? <p className={`status-banner ${starsStoreMsg.includes('Purchased') ? 'status-banner--success' : 'status-banner--error'}`}>{starsStoreMsg}</p> : null}
                                 </div>
                             ) : null}
+                            <div className="card sheet-card" style={{ borderLeft: '4px solid var(--accent-cyan)' }}>
+                                <div className="card__title">AI Assets</div>
+                                <p className="card__hint">Mint, upgrade, list, buy, and rent AI assets (AI Agent, AI Brain, AI Creator, AI Workflow, AI System). All in one hub.</p>
+                                <button type="button" className="btn btn--primary" onClick={() => setTab('assets')}>Go to AI Assets</button>
+                            </div>
                         </>
                     )}
                     {marketFlow === 'trade' && (
@@ -4126,10 +4157,17 @@ export default function HomePage() {
                     {marketFlow === 'boosts' && (
                         <div className="card sheet-card">
                             <div className="card__title">Boosts</div>
-                            <p className="card__hint">Multiply battle rewards for a period.</p>
+                            <p className="card__hint">Multiply battle rewards for a period. Pay with NEUR or TON.</p>
                             <div className="action-row">
                                 <button type="button" className="btn btn--secondary" onClick={refreshBoosts} disabled={busy}><IconRefresh /> Refresh</button>
                                 <button type="button" className="btn btn--primary" onClick={buyBoost} disabled={busy}>Buy boost (NEUR)</button>
+                                {boostConfig?.boostCostTonNano > 0 && boostConfig?.walletForTon ? (
+                                    <>
+                                        <span className="card__hint" style={{ margin: 0 }}>Or send {(boostConfig.boostCostTonNano / 1e9).toFixed(2)} TON to Boost wallet, then paste tx hash:</span>
+                                        <input className="input" value={boostTonTxHash} onChange={(e) => setBoostTonTxHash(e.target.value)} placeholder="TON tx hash" style={{ flex: '1 1 180px', minWidth: 0 }} />
+                                        <button type="button" className="btn btn--primary" onClick={buyBoostWithTon} disabled={busy || !boostTonTxHash.trim()}>Buy with TON</button>
+                                    </>
+                                ) : null}
                             </div>
                             {boostMsg ? <p className="status-banner status-banner--success">{boostMsg}</p> : null}
                             {boosts.length > 0 ? <p className="card__hint" style={{ marginTop: 8 }}>Active: {boosts.map((b) => `${b.multiplier}x until ${new Date(b.expiresAt).toLocaleString()}`).join('; ')}</p> : <p className="guide-tip">Buy a boost to multiply battle rewards.</p>}

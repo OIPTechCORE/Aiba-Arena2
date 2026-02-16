@@ -8,6 +8,25 @@ const { getIdempotencyKey } = require('../engine/idempotencyKey');
 const { verifyTonPayment } = require('../util/tonVerify');
 const { validateBody } = require('../middleware/validate');
 
+// GET /api/boosts/config — public config for UI (costs, wallet for TON)
+router.get('/config', async (req, res) => {
+    try {
+        const cfg = await getConfig();
+        const boostCostTonNano = Math.max(0, Number(cfg.boostCostTonNano ?? 0));
+        const walletForTon = (process.env.BOOST_TON_WALLET || '').trim() || null;
+        res.json({
+            boostCostTonNano,
+            walletForTon,
+            boostCostNeur: Math.max(0, Math.floor(Number(cfg.boostCostNeur ?? 100))),
+            boostDurationHours: Math.max(1, Math.min(168, Math.floor(Number(cfg.boostDurationHours ?? 24)))),
+            boostMultiplier: Math.max(1, Math.min(3, Number(cfg.boostMultiplier ?? 1.2) || 1.2)),
+        });
+    } catch (err) {
+        console.error('Boosts config error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
 // GET /api/boosts/mine — active boosts for current user
 router.get('/mine', requireTelegram, async (req, res) => {
     try {
