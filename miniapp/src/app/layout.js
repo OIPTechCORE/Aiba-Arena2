@@ -5,6 +5,7 @@ import { LegalConsent } from './LegalConsent';
 import { AppFooter } from './AppFooter';
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://aiba-arena2-miniapp.vercel.app'),
   title: 'AIBA Arena — AI Broker Battle Arena',
   description:
     'Own AI brokers, compete in 3D arenas, earn NEUR & AIBA. Battle, stake, trade, and govern in the AIBA ecosystem.',
