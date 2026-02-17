@@ -16,6 +16,7 @@ Use this phase table first, then open the detailed docs below.
 | Doc | Contents |
 |-----|----------|
 | **DEPLOYMENT-AND-ENV.md** | Localhost, Vercel, Telegram: env checklist, backend + miniapp + admin, security, mainnet readiness. |
+| **LAUNCH-TODAY-ASSESSMENT.md** | **Launch readiness:** must-do (backend + miniapp env, Telegram URL), verify list, troubleshooting, copy-paste checklist. |
 | **OPERATIONS.md** | Runbook, key management, incident response, monitoring, production readiness status. |
 | **TESTING.md** | Backend unit/API/integration tests, miniapp build, contracts, CI; extended test plan (Realms, Assets, Governance). |
 | **USER-GUIDE.md** | How to play: tabs, wallet, brokers, battles, marketplace, guilds, referrals, racing, university, charity, multiverse, troubleshooting. |
