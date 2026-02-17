@@ -69,3 +69,5 @@ To deliver "3D super power futuristic arenas" you can:
 - **Short term:** Add arena hero images (Phase A) so each mode has a distinct visual.
 - **Medium term:** Add Phase B or C for a "see it" experience.
 - **Long term:** Full 3D (Phase D) if the roadmap prioritizes it.
+
+**Do we need Unity / Unreal / Three.js?** No. The game is server-simulated; the client only displays results. If you add 3D later, prefer Three.js or React Three Fiber. See [3D-ENGINE-NEEDS.md](3D-ENGINE-NEEDS.md).

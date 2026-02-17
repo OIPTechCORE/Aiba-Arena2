@@ -45,6 +45,7 @@ Use this phase table first, then open the detailed docs below.
 | **UNIFIED-COMMS-ECOSYSTEM.md** | Unified comms: announcements, status, support; Phases 1–4 (read/unread, support form) done. |
 | **PRINT.md** | Print/export. |
 | **VISION-3D-ARENAS-STATUS.md** | 3D arenas: what exists vs vision. Can you see them? Roadmap. |
+| **3D-ENGINE-NEEDS.md** | Do we need Unity/Unreal/Three.js? No — battles are server-simulated; optional 3D later → Three.js/React Three Fiber. |
 | **TRAINERS-MANUAL.md** | Exhaustive trainer guide: product, journeys, scripts, influencer angles. |
 | **marketing/** | Marketing materials: influencer kit, ad templates, post bank, customizable HTML banners. |
 
