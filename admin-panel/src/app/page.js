@@ -3,11 +3,18 @@
 import axios from 'axios';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+const ADMIN_URL = 'https://aiba-arena2-admin-panel.vercel.app';
+const DEFAULT_BACKEND_URL = 'https://aiba-arena2-backend.vercel.app';
+
+function getBackendUrl() {
+    if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_BACKEND_URL) return process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (typeof window !== 'undefined' && window.location?.origin === ADMIN_URL) return DEFAULT_BACKEND_URL;
+    return 'http://localhost:5000';
+}
 
 function getAdminErrorMessage(error, fallback = 'Request failed.') {
     if (!error?.response && (error?.code === 'ERR_NETWORK' || error?.message?.includes('Network Error'))) {
-        return `Backend unreachable. Is the API running at ${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}? Start it with: npm run dev (from project root) or npm start (from backend/).`;
+        return `Backend unreachable. Is the API running at ${getBackendUrl()}? Start it with: npm run dev (from project root) or npm start (from backend/).`;
     }
     const data = error?.response?.data || {};
     if (data?.error && typeof data.error === 'object') {
@@ -50,7 +57,7 @@ export default function AdminHome() {
     };
 
     const api = useMemo(() => {
-        const a = axios.create({ baseURL: BACKEND_URL });
+        const a = axios.create({ baseURL: getBackendUrl() });
         a.interceptors.request.use((cfg) => {
             if (token) cfg.headers.Authorization = `Bearer ${token}`;
             return cfg;
@@ -95,7 +102,7 @@ export default function AdminHome() {
     const login = async () => {
         setAuthError('');
         try {
-            const res = await axios.post(`${BACKEND_URL}/api/admin/auth/login`, { email, password });
+            const res = await axios.post(`${getBackendUrl()}/api/admin/auth/login`, { email, password });
             const t = String(res.data?.token || '');
             if (!t) throw new Error('no token');
             setToken(t);
@@ -972,7 +979,7 @@ export default function AdminHome() {
         <div className="admin-app">
             <header className="admin-header">
                 <h1 className="admin-header__title">Admin Panel</h1>
-                <p className="admin-header__sub">AIBA Arena · Backend: {BACKEND_URL}</p>
+                <p className="admin-header__sub">AIBA Arena · Backend: {getBackendUrl()}</p>
                 {token && tabLoading ? <p className="admin-header__sub">Loading {tab}...</p> : null}
                 {globalError ? (
                     <p className="admin-auth-error" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1606,7 +1613,7 @@ export default function AdminHome() {
                                     <div style={{ marginTop: 12, color: '#666' }}>Load stats.</div>
                                 )}
                                 <div style={{ marginTop: 12, fontSize: 12 }}>
-                                    <a href={`${BACKEND_URL}/api/admin/economy/simulate?days=30`} target="_blank" rel="noopener noreferrer">Economy simulator (30 days)</a>
+                                    <a href={`${getBackendUrl()}/api/admin/economy/simulate?days=30`} target="_blank" rel="noopener noreferrer">Economy simulator (30 days)</a>
                                 </div>
                             </>
                         ) : null}

@@ -1,6 +1,20 @@
 import axios from 'axios';
 import { getTelegramInitData, getTelegramUserUnsafe } from './telegram';
 
+const MINIAPP_URL = 'https://aiba-arena2-miniapp.vercel.app';
+const DEFAULT_BACKEND_URL = 'https://aiba-arena2-backend.vercel.app';
+
+/** Backend base URL: env, or production fallback when miniapp is deployed at known URL */
+export function getBackendUrl() {
+  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_BACKEND_URL) {
+    return process.env.NEXT_PUBLIC_BACKEND_URL;
+  }
+  if (typeof window !== 'undefined' && window.location?.origin === MINIAPP_URL) {
+    return DEFAULT_BACKEND_URL;
+  }
+  return process.env?.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+}
+
 function extractErrorPayload(error) {
     const data = error?.response?.data || {};
     if (data?.error && typeof data.error === 'object') {
@@ -39,7 +53,7 @@ export function getErrorMessage(error, fallback = 'Request failed.') {
             msg === 'Network Error' ||
             (typeof msg === 'string' && msg.toLowerCase().includes('network error')));
     if (isNetworkFailure) {
-        const base = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000') : 'http://localhost:5000';
+        const base = typeof window !== 'undefined' ? getBackendUrl() : (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000');
         return `Backend unreachable at ${base}. Make sure the backend is running (npm run dev from project root). If using MongoDB Atlas, whitelist your IP in Network Access.`;
     }
     return msg;

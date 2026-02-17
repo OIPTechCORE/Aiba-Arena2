@@ -3,13 +3,12 @@
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { createApi, getErrorMessage } from '../lib/api';
+import { createApi, getBackendUrl, getErrorMessage } from '../lib/api';
 import { getTelegramUserUnsafe, shareViaTelegram } from '../lib/telegram';
 import { EXTERNAL_APPS } from '../config/navigation';
 import { TabBackNav } from '../components/TabBackNav';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-const IS_DEV = BACKEND_URL.includes('localhost');
+const IS_DEV = typeof window !== 'undefined' ? getBackendUrl().includes('localhost') : true;
 
 /* Futuristic 24×24 icons (stroke, bold) for tabs and buttons */
 const IconHome = () => (
@@ -359,7 +358,7 @@ function uuid() {
 export default function HomePage() {
     const wallet = useTonWallet();
     const [tonConnectUI] = useTonConnectUI();
-    const api = useMemo(() => createApi(BACKEND_URL), []);
+    const api = useMemo(() => createApi(getBackendUrl()), []);
     /* Same-origin proxy for broker endpoints to avoid CORS/405 when frontend and backend are on different origins */
     const proxyApi = useMemo(() => createApi(''), []);
 
@@ -1869,7 +1868,7 @@ export default function HomePage() {
         } catch (e) {
             const isNetworkError = e?.code === 'ERR_NETWORK' || e?.message === 'Network Error';
             if (isNetworkError) {
-                setStatus(`Backend unreachable at ${BACKEND_URL}. Start it: cd backend && npm start`);
+                setStatus(`Backend unreachable at ${getBackendUrl()}. Start it: cd backend && npm start`);
             } else {
                 setStatus(getErrorMessage(e, 'Failed to create broker.'));
             }
@@ -3184,7 +3183,7 @@ export default function HomePage() {
                 </div>
                 {IS_DEV ? (
                     <p className="aiba-app__sub app-header__sub">
-                        Backend: {BACKEND_URL}
+                        Backend: {getBackendUrl()}
                         <span style={{ display: 'block', marginTop: 2, color: 'var(--text-muted)', fontSize: '0.7rem' }}>
                             Connect Wallet: works best on deployed HTTPS app. On localhost use a wallet extension or ngrok.
                         </span>
@@ -4528,7 +4527,7 @@ export default function HomePage() {
                                             {filtered.map((nft) => (
                                                 <div key={nft.brokerId} className="nft-gallery-card nft-gallery-card--large" style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--card-bg)', boxShadow: 'var(--shadow-3d-card)' }}>
                                                     <div style={{ aspectRatio: '1', background: 'var(--bg)', position: 'relative' }}>
-                                                        <img src={`${BACKEND_URL}/api/metadata/brokers/${nft.brokerId}/image.svg`} alt={`Broker #${String(nft.brokerId).slice(-6)}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
+                                                        <img src={`${getBackendUrl()}/api/metadata/brokers/${nft.brokerId}/image.svg`} alt={`Broker #${String(nft.brokerId).slice(-6)}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
                                                     </div>
                                                     <div style={{ padding: 12 }}>
                                                         <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem' }}>Broker #{String(nft.brokerId).slice(-6)}</p>
@@ -4613,7 +4612,7 @@ export default function HomePage() {
                                         {multiverseMyNfts.map((nft) => (
                                             <div key={nft.brokerId} className="nft-gallery-card" style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--card-bg)' }}>
                                                 <div style={{ aspectRatio: '1', background: 'var(--bg)', position: 'relative' }}>
-                                                    <img src={`${BACKEND_URL}/api/metadata/brokers/${nft.brokerId}/image.svg`} alt={`Broker #${String(nft.brokerId).slice(-6)}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
+                                                    <img src={`${getBackendUrl()}/api/metadata/brokers/${nft.brokerId}/image.svg`} alt={`Broker #${String(nft.brokerId).slice(-6)}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
                                                 </div>
                                                 <div style={{ padding: 10 }}>
                                                     <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>#{String(nft.brokerId).slice(-6)}</p>
@@ -5566,7 +5565,7 @@ export default function HomePage() {
                         <div className="card__title">About</div>
                         <p className="card__hint">AIBA Arena — Own AI brokers. Compete in 3D arenas. Earn NEUR &amp; AIBA.</p>
                         <p className="card__hint" style={{ marginTop: 6 }}>Version: 1.0.0</p>
-                        <p className="card__hint">Backend: {BACKEND_URL}</p>
+                        <p className="card__hint">Backend: {getBackendUrl()}</p>
                     </div>
                     <div className="card">
                         <div className="card__title">Support</div>

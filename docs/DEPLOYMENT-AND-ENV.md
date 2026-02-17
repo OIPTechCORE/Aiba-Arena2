@@ -66,6 +66,8 @@ Single guide: run locally, deploy backend and miniapp on Vercel, and open the ap
 
 ---
 
+**Production URLs (miniapp + admin):** For copy-paste env values see [Production env — Vercel](PRODUCTION-ENV-VERCEL.md) (miniapp: `https://aiba-arena2-miniapp.vercel.app`, admin: `https://aiba-arena2-admin-panel.vercel.app`, CORS and backend URL).
+
 ### Order of operations (Vercel)
 
 1. **Create three Vercel projects** (if not already): one for **backend** (root `backend/`), one for **miniapp** (root `miniapp/`), one for **admin** (root `admin-panel/`). Connect the same repo; set Root Directory per project.

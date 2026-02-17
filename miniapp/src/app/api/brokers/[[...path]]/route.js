@@ -3,7 +3,8 @@
  * Use when NEXT_PUBLIC_BACKEND_URL causes CORS/405 issues.
  * Requests to /api/brokers/* are forwarded to BACKEND_URL/api/brokers/*
  */
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'http://localhost:5000';
+const DEFAULT_BACKEND = 'https://aiba-arena2-backend.vercel.app';
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || (process.env.VERCEL ? DEFAULT_BACKEND : 'http://localhost:5000');
 
 async function proxy(request, { params }, method) {
   const resolved = await params;

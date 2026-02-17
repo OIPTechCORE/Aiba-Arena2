@@ -2,9 +2,8 @@
 
 import { useMemo, useEffect, useState } from 'react';
 import { PageNav } from '../../components/PageNav';
-import { createApi, getErrorMessage } from '../../lib/api';
+import { createApi, getBackendUrl, getErrorMessage } from '../../lib/api';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 const APP_URL = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/+$/, '');
 
 const TRAINER_SPECIALTIES = ['general', 'crypto', 'gaming', 'trading', 'newcomer', 'strategy', 'guilds', 'marketplace', 'racing', 'nft'];
@@ -12,7 +11,7 @@ const TABS_APPROVED = ['dashboard', 'network', 'leaderboard'];
 const TABS_PUBLIC = ['network', 'leaderboard'];
 
 export default function TrainerPage() {
-    const api = useMemo(() => createApi(BACKEND_URL), []);
+    const api = useMemo(() => createApi(getBackendUrl()), []);
     const [trainer, setTrainer] = useState(null);
     const [loading, setLoading] = useState(true);
     const [applyMsg, setApplyMsg] = useState('');
