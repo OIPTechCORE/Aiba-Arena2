@@ -21,6 +21,7 @@ Use this phase table first, then open the detailed docs below.
 | **TESTING.md** | Backend unit/API/integration tests, miniapp build, contracts, CI; extended test plan (Realms, Assets, Governance). |
 | **USER-GUIDE.md** | How to play: tabs, wallet, brokers, battles, marketplace, guilds, referrals, racing, university, charity, multiverse, troubleshooting. |
 | **FEATURE-PLANS.md** | University, autonomous racing, charity, marketplace & payments, NFT multiverse, comms, economy (vision + key design). |
+| **MEMEFI-MASTER-STRATEGY-FEASIBILITY.md** | MemeFi master strategy: feasible as modular add-on; MemeFi engine → token → Memes/Earn tabs → LMS/school-fees; stack alignment, phases. |
 | **STARS-BADGES-DIAMONDS.md** | Stars, profile badges, diamonds: plan, vision, implementation gaps. |
 | **AUDIT-AND-STATUS.md** | Project assessment, leaderboard & groups, ecosystems audit (NFT, staking, CoE, Wall of Fame, Trainers), vision vs codebase. |
 | **WHAT-IS-AIBA-ARENA.md** | Deep from-zero explainer: what AIBA Arena is, who it's for, core loop, tokens, features, where to play. |
