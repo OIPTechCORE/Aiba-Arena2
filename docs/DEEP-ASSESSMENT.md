@@ -104,6 +104,8 @@ Do this in order:
 
 ## 6. Quick reference
 
+- **Console errors and 404/508 fix:** [APP-DEEP-ASSESSMENT.md](APP-DEEP-ASSESSMENT.md) (checklist and your exact errors).
+- **Full detailed assessment (request flow, route audit, file paths):** [DEEP-ASSESSMENT-APP.md](DEEP-ASSESSMENT-APP.md).
 - **Miniapp URL:** [https://aiba-arena2-miniapp.vercel.app](https://aiba-arena2-miniapp.vercel.app)
 - **Backend:** Must be deployed and its URL set as `NEXT_PUBLIC_BACKEND_URL` in the miniapp project.
 - **Deployment and env:** [DEPLOYMENT-AND-ENV.md](DEPLOYMENT-AND-ENV.md)

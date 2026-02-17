@@ -56,7 +56,7 @@ Use this phase table first, then open the detailed docs below.
 | **CAR-RACING-DEEP-EXPLANATION.md** | Car racing: config, tracks, cars, races, enter, buy, leaderboard. |
 | **MARKETPLACE-DEEP-EXPLANATION.md** | Unified marketplace: brokers, assets, rentals, boosts, system shop. |
 
-**Gaps and audits:** [GAP-AUDIT.md](GAP-AUDIT.md), [GAPS-SCAN-REPORT.md](GAPS-SCAN-REPORT.md) (full app & docs gap scan), [APP-SCAN-REPORT.md](APP-SCAN-REPORT.md) (issues/errors scan).
+**Gaps and audits:** [GAP-AUDIT.md](GAP-AUDIT.md), [GAPS-SCAN-REPORT.md](GAPS-SCAN-REPORT.md) (full app & docs gap scan), [APP-SCAN-REPORT.md](APP-SCAN-REPORT.md) (issues/errors scan). **Deep assessment (API 404/508, backend URL, console errors):** [DEEP-ASSESSMENT-APP.md](DEEP-ASSESSMENT-APP.md).
 
 **UI & updatedness:** [UI-DESIGN-PRINCIPLES.md](UI-DESIGN-PRINCIPLES.md) (nav, card-based, responsive). [DOCS-UPDATEDNESS.md](DOCS-UPDATEDNESS.md) (code, .md, .html refresh status).
 
@@ -74,3 +74,4 @@ Use this phase table first, then open the detailed docs below.
 - **API-CONTRACT audit:** §0 Core (Economy, Vault, Wallet, Battle) added; duplicate §5e fixed (Predict → 5e.2); Trainers claim-rewards requestId documented.
 - **Gaps scan:** [GAPS-SCAN-REPORT.md](GAPS-SCAN-REPORT.md) — full app & docs gap scan; README deep-feature-docs index and GAME-FUNCTIONALITY §12 API mapping extended (broker-rental, predict, trainers, donate, premium, etc.).
 - **Updatedness:** Code, .md, and print HTML kept in sync. Run `npm run build:print-docs` after doc edits. See [DOCS-UPDATEDNESS.md](DOCS-UPDATEDNESS.md).
+- **Deep assessment (Feb 2026):** [DEEP-ASSESSMENT-APP.md](DEEP-ASSESSMENT-APP.md) — console/network errors (ERR_NETWORK_CHANGED, extension export, API 404s, 508), where the miniapp sends requests, backend route audit, fix (NEXT_PUBLIC_BACKEND_URL on Vercel miniapp), references to runtime errors and deployment docs.

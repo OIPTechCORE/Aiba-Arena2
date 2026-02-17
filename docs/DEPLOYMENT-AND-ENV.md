@@ -86,6 +86,8 @@ Single guide: run locally, deploy backend and miniapp on Vercel, and open the ap
 
 **Runtime errors** (e.g. “Unexpected token 'export'” or “Cannot access 'dw' before initialization”): see [Miniapp runtime errors investigation](MINIAPP-RUNTIME-ERRORS-INVESTIGATION.md) for causes and mitigations.
 
+**API 404s / 508 / full app health:** see [Deep assessment — app](DEEP-ASSESSMENT-APP.md) (backend URL, routes, console errors).
+
 ---
 
 ## Quick reference
