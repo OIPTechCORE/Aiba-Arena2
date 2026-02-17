@@ -24,6 +24,7 @@ Use this phase table first, then open the detailed docs below.
 | **AUDIT-AND-STATUS.md** | Project assessment, leaderboard & groups, ecosystems audit (NFT, staking, CoE, Wall of Fame, Trainers), vision vs codebase. |
 | **WHAT-IS-AIBA-ARENA.md** | Deep from-zero explainer: what AIBA Arena is, who it's for, core loop, tokens, features, where to play. |
 | **GAME-FUNCTIONALITY.md** | Expanded game functionality: battle engine, brokers, economy config, trainers, automation, racing, security, data flows, API mapping. |
+| **GAME-STRUCTURE.md** | **Deep game structure:** entities (User, Broker, GameMode, Battle), core loop, battle flow step-by-step, score formula, rewards, miniapp flow, API surface, one-page diagram. |
 | **GAP-AUDIT.md** | Docs vs code gap investigation: privacy/terms, ads, brokers/cars/bikes, extensibility, recommendations. |
 | **ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md** | Advisory: 1T AIBA mint, viral growth strategies, founder revenue calculations. |
 | **AIBA-SELF-AUTOMATION.md** | Dynamic caps, allocation config, mint constraints, anti-inflation, referralUnlock3BonusBps. |
@@ -51,6 +52,7 @@ Use this phase table first, then open the detailed docs below.
 
 | Doc | Contents |
 |-----|----------|
+| **GAME-STRUCTURE.md** | **Game structure:** entities, core loop, battle flow (26 steps), score formula, rewards, miniapp flow, API, text diagram. Start here for "how the game works." |
 | **BROKERS-DEEP-EXPLANATION.md** | Brokers: stats, creation, listing, buying, system catalog. |
 | **ARENAS-DEEP-EXPLANATION.md** | Arenas, leagues, battle flow, scoring. |
 | **CAR-RACING-DEEP-EXPLANATION.md** | Car racing: config, tracks, cars, races, enter, buy, leaderboard. |
@@ -75,3 +77,4 @@ Use this phase table first, then open the detailed docs below.
 - **Gaps scan:** [GAPS-SCAN-REPORT.md](GAPS-SCAN-REPORT.md) — full app & docs gap scan; README deep-feature-docs index and GAME-FUNCTIONALITY §12 API mapping extended (broker-rental, predict, trainers, donate, premium, etc.).
 - **Updatedness:** Code, .md, and print HTML kept in sync. Run `npm run build:print-docs` after doc edits. See [DOCS-UPDATEDNESS.md](DOCS-UPDATEDNESS.md).
 - **Deep assessment (Feb 2026):** [DEEP-ASSESSMENT-APP.md](DEEP-ASSESSMENT-APP.md) — console/network errors (ERR_NETWORK_CHANGED, extension export, API 404s, 508), where the miniapp sends requests, backend route audit, fix (NEXT_PUBLIC_BACKEND_URL on Vercel miniapp), references to runtime errors and deployment docs.
+- **Game structure (Feb 2026):** [GAME-STRUCTURE.md](GAME-STRUCTURE.md) — single deep view: entities (User, Broker, GameMode, Battle), core loop, full battle flow (26 steps), score formula and arena weights, rewards (NEUR, AIBA, Stars, Diamonds), miniapp runBattle flow, API surface, one-page text diagram.
