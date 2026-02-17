@@ -56,6 +56,8 @@ function createApp() {
     app.use('/api/admin/marketplace', require('./routes/adminMarketplace'));
     app.use('/api/admin/treasury-ops', require('./routes/adminTreasuryOps'));
     app.use('/api/admin/stats', require('./routes/adminStats'));
+    app.use('/api/admin/memefi', require('./routes/adminMemefi'));
+    app.use('/api/admin/redemption', require('./routes/adminRedemption'));
     app.use('/api/battle', require('./routes/battle'));
     app.use('/api/brokers', require('./routes/brokers'));
     app.use('/api/vault', require('./routes/vault'));
@@ -100,6 +102,8 @@ function createApp() {
     app.use('/api/donate', require('./routes/donate'));
     app.use('/api/predict', require('./routes/predict'));
     app.use('/api/admin/predict', require('./routes/adminPredict'));
+    app.use('/api/memefi', require('./routes/memefi'));
+    app.use('/api/redemption', require('./routes/redemption'));
 
     // Comms status moved to /api/comms router
 

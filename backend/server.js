@@ -81,6 +81,18 @@ if (enableLegacyPendingAibaDispatch) {
             accrueMentorRewards().catch((err) => console.error('Cron mentor rewards failed:', err));
         });
 
+        // MemeFi daily reward pool (Phase 2)
+        const { runDailyMemeFiRewards, utcDayKey } = require('./jobs/memefiDailyRewards');
+        cron.schedule('0 0 * * *', async () => {
+            try {
+                const dayKey = utcDayKey();
+                const results = await runDailyMemeFiRewards(dayKey);
+                console.log('MemeFi daily rewards:', dayKey, results.distributedAiba, 'AIBA', results.distributedNeur, 'NEUR');
+            } catch (err) {
+                console.error('Cron MemeFi daily rewards failed:', err);
+            }
+        });
+
         // Holistic automated AIBA/TON oracle (when oracleAutoUpdateEnabled + oracleAibaUsd or fallback set)
         const { runOracleUpdate, shouldRunOracleCron } = require('./engine/aibaTonOracle');
         const oracleIntervalMin = Math.max(5, Number(process.env.ORACLE_UPDATE_INTERVAL_MINUTES) || 15);

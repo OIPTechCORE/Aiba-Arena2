@@ -228,6 +228,16 @@ const IconDiamond = () => (
         <path d="M12 2L2 8l4 14h12l4-14L12 2z" /><path d="M12 2v20" /><path d="M2 8h20" /><path d="M6 22l6-14 6 14" />
     </svg>
 );
+const IconMemes = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M8 12h8" /><path d="M12 8v8" /><path d="M7 16l2-3" /><path d="M15 16l2-3" />
+    </svg>
+);
+const IconEarn = () => (
+    <svg className="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+    </svg>
+);
 
 /* X-style profile badges: id → { label, color, title (tooltip) } */
 const BADGE_LABELS = {
@@ -277,6 +287,8 @@ const HERO_BY_TAB = {
     brokers: { title: 'BROKERS', sub: BROKERS_EXPLANATION, hint: 'New broker, tasks, run battle, vault. Combine or mint NFT.', buttonLabel: 'View', buttonAction: 'scroll' },
     tasks: { title: 'TASK CENTER', sub: 'Personalized mission queue for every player profile.', hint: 'Newcomer, fighter, trader, racer, social, scholar, and investor.', buttonLabel: 'View', buttonAction: 'scroll' },
     leaderboard: { title: 'LEADERBOARD', sub: 'Global ranks by score, AIBA, NEUR, or battles.', hint: 'Run battles to climb the ranks.', buttonLabel: 'View', buttonAction: 'scroll' },
+    memes: { title: 'MEMES', sub: 'Create memes, get likes, comments, shares. Boost with AIBA/NEUR. Top memes earn from the daily pool.', hint: 'Upload image, add caption, engage. Education categories: study humor, exam tips, school events.', buttonLabel: 'View', buttonAction: 'scroll' },
+    earn: { title: 'EARN', sub: 'All ways you earn: battles, memes, referrals, daily, tasks. Track your AIBA & NEUR from each source.', hint: 'Dashboard of earnings and rewards.', buttonLabel: 'View', buttonAction: 'scroll' },
     referrals: { title: 'REFERRALS', sub: 'Earn NEUR & AIBA when friends join.', hint: 'Share your link or apply a friend\'s code.', buttonLabel: 'View', buttonAction: 'scroll' },
     arenas: { title: 'ARENAS', sub: ARENAS_EXPLANATION, hint: 'Choose arena and run battle. Guild Wars needs a guild.', buttonLabel: 'View', buttonAction: 'scroll' },
     guilds: { title: 'GUILDS', sub: GUILDS_EXPLANATION, hint: 'Create or join a group; deposit brokers to the pool.', buttonLabel: 'View', buttonAction: 'scroll' },
@@ -307,6 +319,8 @@ const TAB_LIST = [
     { id: 'home', label: 'Home', Icon: IconHome },
     { id: 'brokers', label: 'Brokers', Icon: IconBrokers },
     { id: 'arenas', label: 'Arenas', Icon: IconArena },
+    { id: 'memes', label: 'Memes', Icon: IconMemes, badge: 'NEW' },
+    { id: 'earn', label: 'Earn', Icon: IconEarn, badge: 'NEW' },
     { id: 'market', label: 'Market', Icon: IconMarket },
     { id: 'tasks', label: 'Tasks', Icon: IconTasks },
     { id: 'leaderboard', label: 'Leaderboard', Icon: IconLeaderboard },
@@ -446,6 +460,27 @@ export default function HomePage() {
     const [stakingLockMsg, setStakingLockMsg] = useState('');
     const [gameModes, setGameModes] = useState([]);
     const [league, setLeague] = useState('rookie');
+    const [memefiFeed, setMemefiFeed] = useState([]);
+    const [memefiFeedOffset, setMemefiFeedOffset] = useState(0);
+    const [memefiLikedIds, setMemefiLikedIds] = useState([]);
+    const [memefiDetail, setMemefiDetail] = useState(null);
+    const [memefiCreateCaption, setMemefiCreateCaption] = useState('');
+    const [memefiCreateImageUrl, setMemefiCreateImageUrl] = useState('');
+    const [memefiCreateCategory, setMemefiCreateCategory] = useState('general');
+    const [memefiCreateEducationCategory, setMemefiCreateEducationCategory] = useState('');
+    const [memefiLeaderboardBy, setMemefiLeaderboardBy] = useState('score');
+    const [memefiLeaderboard, setMemefiLeaderboard] = useState({ memes: [], creators: [] });
+    const [memefiTop5ForLeaderboard, setMemefiTop5ForLeaderboard] = useState([]);
+    const [memefiMsg, setMemefiMsg] = useState('');
+    const [memefiDetailComments, setMemefiDetailComments] = useState([]);
+    const [memefiCommentText, setMemefiCommentText] = useState('');
+    const [memefiBoostAiba, setMemefiBoostAiba] = useState('');
+    const [memefiBoostNeur, setMemefiBoostNeur] = useState('');
+    const [earnSummary, setEarnSummary] = useState(null);
+    const [redemptionProducts, setRedemptionProducts] = useState([]);
+    const [myRedemptions, setMyRedemptions] = useState([]);
+    const [redeemProductKey, setRedeemProductKey] = useState('');
+    const [redeemMsg, setRedeemMsg] = useState('');
     const [treasurySummary, setTreasurySummary] = useState(null);
     const [oraclePrice, setOraclePrice] = useState(null);
     const [treasuryOps, setTreasuryOps] = useState([]);
@@ -670,6 +705,70 @@ export default function HomePage() {
             setPredictEvents(Array.isArray(res.data) ? res.data : []);
         } catch {
             setPredictEvents([]);
+        }
+    }
+    async function refreshMemefiFeed() {
+        try {
+            const res = await fetch(`${getBackendUrl()}/api/memefi/feed?limit=20&offset=0&sort=recent`);
+            const data = await res.json();
+            setMemefiFeed(Array.isArray(data.memes) ? data.memes : []);
+            setMemefiFeedOffset(0);
+        } catch {
+            setMemefiFeed([]);
+        }
+    }
+    async function refreshMemefiLikes() {
+        try {
+            const res = await api.get('/api/memefi/me/likes');
+            setMemefiLikedIds(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setMemefiLikedIds([]);
+        }
+    }
+    async function refreshMemefiLeaderboard(by) {
+        const sortBy = by || memefiLeaderboardBy;
+        try {
+            const res = await fetch(`${getBackendUrl()}/api/memefi/leaderboard?by=${sortBy}&limit=20`);
+            const data = await res.json();
+            if (data.by === 'score') setMemefiLeaderboard({ memes: data.memes || [], creators: [] });
+            else setMemefiLeaderboard({ memes: [], creators: data.creators || [] });
+        } catch {
+            setMemefiLeaderboard({ memes: [], creators: [] });
+        }
+    }
+    async function refreshMemefiDetailComments(memeId) {
+        if (!memeId) { setMemefiDetailComments([]); return; }
+        try {
+            const res = await fetch(`${getBackendUrl()}/api/memefi/memes/${memeId}/comments`);
+            const data = await res.json();
+            setMemefiDetailComments(Array.isArray(data) ? data : []);
+        } catch {
+            setMemefiDetailComments([]);
+        }
+    }
+    async function refreshEarnSummary() {
+        try {
+            const res = await api.get('/api/memefi/earn-summary');
+            setEarnSummary(res.data || null);
+        } catch {
+            setEarnSummary(null);
+        }
+    }
+    async function refreshRedemptionProducts() {
+        try {
+            const res = await fetch(`${getBackendUrl()}/api/redemption/products`);
+            const data = await res.json();
+            setRedemptionProducts(Array.isArray(data) ? data : []);
+        } catch {
+            setRedemptionProducts([]);
+        }
+    }
+    async function refreshMyRedemptions() {
+        try {
+            const res = await api.get('/api/redemption/me');
+            setMyRedemptions(Array.isArray(res.data) ? res.data : []);
+        } catch {
+            setMyRedemptions([]);
         }
     }
     async function placePredictBet(eventId, brokerId, amountAiba) {
@@ -1767,7 +1866,7 @@ export default function HomePage() {
             refreshBrokers().catch((e) => setStatus(getErrorMessage(e, 'Failed to load brokers.')));
             refreshGameModes().catch(() => {});
         }
-        if (tab === 'leaderboard') refreshLeaderboard().catch((e) => setStatus(getErrorMessage(e, 'Failed to load leaderboard.')));
+        if (tab === 'leaderboard') { refreshLeaderboard().catch((e) => setStatus(getErrorMessage(e, 'Failed to load leaderboard.'))); (async () => { try { const r = await fetch(`${getBackendUrl()}/api/memefi/leaderboard?by=score&limit=5`); const d = await r.json(); setMemefiTop5ForLeaderboard(Array.isArray(d.memes) ? d.memes : []); } catch { setMemefiTop5ForLeaderboard([]); } })(); }
         if (tab === 'tasks') refreshTasks().catch((e) => setTasksMsg(getErrorMessage(e, 'Failed to load tasks.')));
         if (tab === 'guilds') refreshMyRank().catch(() => {});
         if (tab === 'arenas') refreshGameModes().catch(() => {});
@@ -1800,6 +1899,8 @@ export default function HomePage() {
         if (tab === 'tournaments') { refreshTournaments().catch(() => {}); refreshBrokers().catch(() => {}); }
         if (tab === 'globalBoss') { refreshGlobalBoss().catch(() => {}); }
         if (tab === 'predict') { refreshPredictEvents().catch(() => {}); }
+        if (tab === 'memes') { refreshMemefiFeed().catch(() => {}); refreshMemefiLikes().catch(() => {}); refreshMemefiLeaderboard().catch(() => {}); }
+        if (tab === 'earn') { refreshEarnSummary().catch(() => {}); refreshRedemptionProducts().catch(() => {}); refreshMyRedemptions().catch(() => {}); refreshEconomy().catch(() => {}); }
         setBalanceStripVisible(true);
         // No automatic scroll on tab change — user keeps their scroll position; only scroll to FAQ when they tap "FAQs"
         if (tab === 'updates' && scrollToFaqRef.current) {
@@ -3723,6 +3824,166 @@ export default function HomePage() {
                     )}
                 </section>
 
+                {/* ─── Memes (MemeFi) ───────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'memes' ? 'is-active' : ''}`} aria-hidden={tab !== 'memes'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title"><IconMemes /> Memes <span className="badge-new">NEW</span></div>
+                        <p className="card__hint">Create memes, get likes, comments, shares. Boost with AIBA/NEUR. Top memes earn from the daily pool. Education: study humor, exam tips, school events.</p>
+                    </div>
+                    <div className="action-row action-row--android">
+                        <button type="button" className="btn btn--primary" onClick={refreshMemefiFeed} disabled={busy}><IconRefresh /> Refresh feed</button>
+                        <button type="button" className="btn btn--secondary" onClick={() => { setMemefiDetail(null); setMemefiCreateCaption(''); setMemefiCreateImageUrl(''); setMemefiCreateCategory('general'); setMemefiCreateEducationCategory(''); }}>Create meme</button>
+                    </div>
+                    {memefiMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{memefiMsg}</p> : null}
+                    {memefiDetail ? (
+                        <div className="card card--elevated" style={{ marginTop: 12 }}>
+                            <div className="card__title">Meme detail</div>
+                            <img src={memefiDetail.imageUrl} alt="Meme" style={{ maxWidth: '100%', borderRadius: 8, marginBottom: 8 }} onError={(e) => { e.target.style.display = 'none'; }} />
+                            <p className="card__hint">{memefiDetail.caption || 'No caption'}</p>
+                            <p className="card__hint">Score: {memefiDetail.engagementScore} · Likes: {memefiDetail.likeCount} · Comments: {memefiDetail.commentCount} · Boosts: {memefiDetail.boostTotal ?? 0}</p>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                                <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/like`); await refreshMemefiFeed(); await refreshMemefiLikes(); setMemefiDetail((m) => m ? { ...m, likeCount: (m.likeCount || 0) + (memefiLikedIds.includes(m._id) ? -1 : 1) } : null); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Like failed')); } finally { setBusy(false); } }} disabled={busy}>
+                                    {memefiLikedIds.includes(memefiDetail._id) ? 'Unlike' : 'Like'}
+                                </button>
+                                <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/share`, { kind: 'internal' }); setMemefiDetail((m) => m ? { ...m, internalShareCount: (m.internalShareCount || 0) + 1 } : null); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Share failed')); } finally { setBusy(false); } }} disabled={busy}>Share (in-app)</button>
+                                <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/share`, { kind: 'external' }); shareViaTelegram({ title: 'Meme', text: memefiDetail.caption || 'Check this meme!', url: window.location.href }); setMemefiDetail((m) => m ? { ...m, externalShareCount: (m.externalShareCount || 0) + 1 } : null); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Share failed')); } finally { setBusy(false); } }} disabled={busy}><IconShare /> Share (Telegram)</button>
+                                <button type="button" className="btn btn--ghost" onClick={() => setMemefiDetail(null); setMemefiDetailComments([]); setMemefiCommentText(''); setMemefiBoostAiba(''); setMemefiBoostNeur(''); }}>Back to feed</button>
+                            </div>
+                            <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                                <div className="card__title">Boost (stake AIBA/NEUR)</div>
+                                <p className="card__hint">Stake tokens to boost this meme&apos;s score. Locked for 24h.</p>
+                                <input className="input" type="number" min="0" placeholder="AIBA" value={memefiBoostAiba} onChange={(e) => setMemefiBoostAiba(e.target.value)} style={{ width: 80, marginRight: 8, marginTop: 8, display: 'inline-block' }} />
+                                <input className="input" type="number" min="0" placeholder="NEUR" value={memefiBoostNeur} onChange={(e) => setMemefiBoostNeur(e.target.value)} style={{ width: 80, marginRight: 8, marginTop: 8, display: 'inline-block' }} />
+                                <button type="button" className="btn btn--primary" onClick={async () => { const a = Math.floor(Number(memefiBoostAiba) || 0); const n = Math.floor(Number(memefiBoostNeur) || 0); if (a <= 0 && n <= 0) { setMemefiMsg('Enter AIBA or NEUR'); return; } setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/boost`, { amountAiba: a, amountNeur: n }); setMemefiBoostAiba(''); setMemefiBoostNeur(''); const r = await api.get(`/api/memefi/memes/${memefiDetail._id}`); setMemefiDetail(r.data); setMemefiMsg('Boosted!'); await refreshMemefiFeed(); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Boost failed')); } finally { setBusy(false); } }} disabled={busy}>Boost</button>
+                            </div>
+                            <div style={{ marginTop: 12 }}>
+                                <div className="card__title">Comments</div>
+                                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                                    <input className="input" type="text" placeholder="Add a comment..." value={memefiCommentText} onChange={(e) => setMemefiCommentText(e.target.value)} style={{ flex: 1 }} maxLength={500} />
+                                    <button type="button" className="btn btn--primary" onClick={async () => { if (!memefiCommentText.trim()) return; setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/comment`, { text: memefiCommentText.trim() }); setMemefiCommentText(''); await refreshMemefiDetailComments(memefiDetail._id); setMemefiDetail((m) => m ? { ...m, commentCount: (m.commentCount || 0) + 1 } : null); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Comment failed')); } finally { setBusy(false); } }} disabled={busy}>Post</button>
+                                </div>
+                                {memefiDetailComments.length > 0 ? (
+                                    <ul style={{ marginTop: 12, paddingLeft: 20, listStyle: 'disc' }}>
+                                        {memefiDetailComments.slice(0, 50).map((c) => (
+                                            <li key={c._id} style={{ marginBottom: 6 }}><span className="card__hint">{c.telegramId?.slice(-6)}:</span> {c.text}</li>
+                                        ))}
+                                    </ul>
+                                ) : <p className="guide-tip" style={{ marginTop: 8 }}>No comments yet.</p>}
+                            </div>
+                            <div style={{ marginTop: 12 }}>
+                                <button type="button" className="btn btn--ghost" style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }} onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/report`, { reason: 'spam' }); setMemefiMsg('Reported. Thanks for helping.'); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Report failed')); } finally { setBusy(false); } }} disabled={busy}>Report</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="card card--elevated" style={{ marginTop: 12 }}>
+                                <div className="card__title">Create meme</div>
+                                <p className="card__hint">Paste image URL (upload to Telegram or any host first). Add caption and category.</p>
+                                <input className="input" type="url" placeholder="Image URL" value={memefiCreateImageUrl} onChange={(e) => setMemefiCreateImageUrl(e.target.value)} style={{ width: '100%', marginTop: 8 }} />
+                                <input className="input" type="text" placeholder="Caption" value={memefiCreateCaption} onChange={(e) => setMemefiCreateCaption(e.target.value)} style={{ width: '100%', marginTop: 8 }} />
+                                <select className="select" value={memefiCreateCategory} onChange={(e) => setMemefiCreateCategory(e.target.value)} style={{ marginTop: 8 }}>
+                                    <option value="general">General</option>
+                                    <option value="study_humor">Study humor</option>
+                                    <option value="exam_tips">Exam tips</option>
+                                    <option value="school_events">School events</option>
+                                    <option value="general_edu">General education</option>
+                                </select>
+                                <button type="button" className="btn btn--primary" style={{ marginTop: 12 }} onClick={async () => { if (!memefiCreateImageUrl.trim()) { setMemefiMsg('Enter image URL'); return; } setBusy(true); setMemefiMsg(''); try { await api.post('/api/memefi/upload', { imageUrl: memefiCreateImageUrl.trim(), caption: memefiCreateCaption.trim(), category: memefiCreateCategory, educationCategory: memefiCreateCategory === 'general' ? '' : memefiCreateCategory }); setMemefiCreateImageUrl(''); setMemefiCreateCaption(''); await refreshMemefiFeed(); setMemefiMsg('Meme created!'); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Upload failed')); } finally { setBusy(false); }} disabled={busy}>Post meme</button>
+                            </div>
+                            <div className="card card--elevated" style={{ marginTop: 12 }}>
+                                <div className="card__title">Meme leaderboard</div>
+                                <select className="select" value={memefiLeaderboardBy} onChange={(e) => { const v = e.target.value; setMemefiLeaderboardBy(v); refreshMemefiLeaderboard(v); }}>
+                                    <option value="score">Top memes by score</option>
+                                    <option value="creators">Top creators</option>
+                                </select>
+                                {memefiLeaderboardBy === 'score' && memefiLeaderboard.memes.length > 0 ? (
+                                    <ul style={{ marginTop: 12, paddingLeft: 20 }}>
+                                        {memefiLeaderboard.memes.slice(0, 10).map((m, i) => (
+                                            <li key={m._id} style={{ marginBottom: 8 }}>
+                                                <button type="button" className="btn btn--ghost" style={{ textAlign: 'left' }} onClick={async () => { try { const r = await api.get(`/api/memefi/memes/${m._id}`); setMemefiDetail(r.data); refreshMemefiDetailComments(m._id); } catch { setMemefiMsg('Failed to load meme'); }}}>#{i + 1} Score {m.engagementScore} · {m.caption ? m.caption.slice(0, 30) : 'Meme'}</button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : memefiLeaderboardBy === 'creators' && memefiLeaderboard.creators.length > 0 ? (
+                                    <ul style={{ marginTop: 12, paddingLeft: 20 }}>
+                                        {memefiLeaderboard.creators.slice(0, 10).map((c, i) => (
+                                            <li key={c._id} style={{ marginBottom: 8 }}>#{i + 1} {c._id} — Score {c.totalScore} ({c.memeCount} memes)</li>
+                                        ))}
+                                    </ul>
+                                ) : <p className="guide-tip" style={{ marginTop: 12 }}>No data yet. Create and engage with memes.</p>}
+                            </div>
+                            <div className="card card--elevated" style={{ marginTop: 12 }}>
+                                <div className="card__title">Feed</div>
+                                {memefiFeed.length === 0 ? <p className="guide-tip">No memes yet. Create one above.</p> : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
+                                        {memefiFeed.map((m) => (
+                                            <div key={m._id} className="card">
+                                                <img src={m.imageUrl} alt="Meme" style={{ maxWidth: '100%', borderRadius: 8 }} onError={(e) => { e.target.style.display = 'none'; }} />
+                                                <p className="card__hint">{m.caption || 'No caption'}</p>
+                                                <p className="card__hint">Score {m.engagementScore} · Like {m.likeCount} · Comment {m.commentCount}</p>
+                                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                                    <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post(`/api/memefi/memes/${m._id}/like`); await refreshMemefiFeed(); await refreshMemefiLikes(); } catch (e) { setMemefiMsg(getErrorMessage(e)); } finally { setBusy(false); } }} disabled={busy}>{memefiLikedIds.includes(m._id) ? 'Unlike' : 'Like'}</button>
+                                                    <button type="button" className="btn btn--secondary" onClick={async () => { try { await api.post(`/api/memefi/memes/${m._id}/share`, { kind: 'external' }); shareViaTelegram({ title: 'Meme', text: m.caption || 'Check this meme!', url: window.location.href }); await refreshMemefiFeed(); } catch (e) { setMemefiMsg(getErrorMessage(e)); } }} disabled={busy}><IconShare /> Share</button>
+                                                    <button type="button" className="btn btn--secondary" onClick={async () => { try { const r = await api.get(`/api/memefi/memes/${m._id}`); setMemefiDetail(r.data); refreshMemefiDetailComments(m._id); } catch { setMemefiMsg('Failed to load'); }}}>View</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
+                </section>
+
+                {/* ─── Earn ─────────────────────────────────────────────────────── */}
+                <section className={`tab-panel ${tab === 'earn' ? 'is-active' : ''}`} aria-hidden={tab !== 'earn'}>
+                    <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title"><IconEarn /> Earn <span className="badge-new">NEW</span></div>
+                        <p className="card__hint">All ways you earn: battles, memes, referrals, daily, tasks. Redeem tokens for school fees, LMS premium, exam prep, merch.</p>
+                    </div>
+                    <div className="card card--elevated" style={{ marginTop: 12 }}>
+                        <div className="card__title">Earn from</div>
+                        <p className="card__hint">Battles (Arenas tab) · Referrals (share link) · Daily (Wallet) · Tasks (Tasks tab) · Memes (create, boost, top 10, lottery, mining). Your total balance below includes all sources.</p>
+                    </div>
+                    <div className="card card--elevated" style={{ marginTop: 12 }}>
+                        <div className="card__title">Your earnings (MemeFi)</div>
+                        {earnSummary ? (
+                            <p className="card__hint">Meme AIBA: {earnSummary.earnedAiba ?? 0} · Meme NEUR: {earnSummary.earnedNeur ?? 0} · My memes: {earnSummary.myMemesCount ?? 0} · My boosts: {earnSummary.myBoostsCount ?? 0}</p>
+                        ) : <p className="guide-tip">Load earnings from MemeFi (create & engage with memes to earn).</p>}
+                    </div>
+                    <div className="card card--elevated" style={{ marginTop: 12 }}>
+                        <div className="card__title">Wallet balance</div>
+                        {economyMe ? <p className="card__hint">AIBA: {economyMe.aibaBalance ?? 0} · NEUR: {economyMe.neurBalance ?? 0} · Stars: {economyMe.starsBalance ?? 0}</p> : <p className="guide-tip">Connect to see balance.</p>}
+                    </div>
+                    <div className="card card--elevated" style={{ marginTop: 12 }}>
+                        <div className="card__title">Redeem (LMS / school fees)</div>
+                        <p className="card__hint">Spend AIBA/NEUR/Stars for school fee discount, LMS premium, exam prep, merch.</p>
+                        {redemptionProducts.length === 0 ? <p className="guide-tip">No redemption products yet. Admins add them in Admin.</p> : (
+                            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                {redemptionProducts.map((p) => (
+                                    <div key={p.key} className="card">
+                                        <div className="card__title">{p.name}</div>
+                                        <p className="card__hint">{p.description || p.type}</p>
+                                        <p className="card__hint">Cost: {p.costAiba || 0} AIBA, {p.costNeur || 0} NEUR, {p.costStars || 0} Stars</p>
+                                        <button type="button" className="btn btn--primary" onClick={async () => { setBusy(true); setRedeemMsg(''); try { const r = await api.post('/api/redemption/redeem', { productKey: p.key }); setRedeemMsg(r.data?.message || 'Redeemed! Code: ' + (r.data?.code || '')); await refreshMyRedemptions(); await refreshEconomy(); } catch (e) { setRedeemMsg(getErrorMessage(e, 'Redeem failed')); } finally { setBusy(false); }} } disabled={busy}>Redeem</button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {redeemMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{redeemMsg}</p> : null}
+                    </div>
+                    <div className="card card--elevated" style={{ marginTop: 12 }}>
+                        <div className="card__title">My redemptions</div>
+                        {myRedemptions.length === 0 ? <p className="guide-tip">No redemptions yet.</p> : (
+                            <ul style={{ paddingLeft: 20, marginTop: 8 }}>
+                                {myRedemptions.slice(0, 20).map((r) => (
+                                    <li key={r._id} style={{ marginBottom: 6 }}>{r.productKey} — {r.code || r.status} ({r.status})</li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </section>
+
                 {/* ─── Global Leaderboard ──────────────────────────────────────── */}
                 <section className={`tab-panel ${tab === 'leaderboard' ? 'is-active' : ''}`} aria-hidden={tab !== 'leaderboard'}>
                     <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
@@ -3753,6 +4014,19 @@ export default function HomePage() {
                                 </div>
                             ))
                         ) : <p className="guide-tip">Run battles to appear on the board. Tap Refresh to load.</p>}
+                    </div>
+                    <div className="card card--elevated" style={{ marginTop: 12, borderLeft: '4px solid var(--accent-gold)' }}>
+                        <div className="card__title">Meme leaderboard</div>
+                        <p className="card__hint">Top memes by engagement score. Create and boost memes in the Memes tab.</p>
+                        {memefiTop5ForLeaderboard.length > 0 ? (
+                            <ul style={{ marginTop: 8, paddingLeft: 20, listStyle: 'decimal' }}>
+                                {memefiTop5ForLeaderboard.map((m, i) => (
+                                    <li key={m._id} style={{ marginBottom: 6 }}>#{i + 1} Score {m.engagementScore} · {m.caption ? String(m.caption).slice(0, 40) : 'Meme'}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : <p className="guide-tip" style={{ marginTop: 8 }}>No memes yet.</p>}
+                        <button type="button" className="btn btn--secondary" style={{ marginTop: 8 }} onClick={() => setTab('memes')}>View all in Memes tab</button>
                     </div>
                 </section>
 

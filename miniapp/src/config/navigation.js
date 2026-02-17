@@ -13,14 +13,14 @@
  * Add entries to show in the "More games" tab. URL can be Telegram Mini App or web.
  */
 export const HOME_GRID_IDS = [
-    'brokers', 'arenas', 'market', 'tasks',
+    'brokers', 'arenas', 'memes', 'earn', 'market', 'tasks',
     'leaderboard', 'tournaments', 'globalBoss', 'predict', 'referrals',
     'carRacing', 'bikeRacing', 'guilds', 'trainers',
     'multiverse', 'nftGallery', 'coe', 'university', 'staking', 'wallet', 'profile',
     'charity', 'realms', 'assets', 'dao', 'governance', 'updates', 'settings', 'games',
 ];
 export const TAB_IDS = [
-    'home', 'brokers', 'arenas', 'market', 'tasks', 'leaderboard',
+    'home', 'brokers', 'arenas', 'memes', 'earn', 'market', 'tasks', 'leaderboard',
     'tournaments', 'globalBoss', 'predict', 'carRacing', 'bikeRacing',
     'referrals', 'trainers', 'guilds', 'multiverse', 'nftGallery', 'coe', 'university', 'staking', 'wallet',
     'profile', 'charity', 'realms', 'assets', 'dao', 'governance', 'updates', 'settings', 'games',
