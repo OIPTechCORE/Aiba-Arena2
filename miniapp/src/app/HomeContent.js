@@ -7,6 +7,7 @@ import { createApi, getBackendUrl, getErrorMessage } from '../lib/api';
 import { getTelegramUserUnsafe, shareViaTelegram } from '../lib/telegram';
 import { EXTERNAL_APPS } from '../config/navigation';
 import { TabBackNav } from '../components/TabBackNav';
+import { AgentFab } from '../components/AgentFab';
 
 const IS_DEV = typeof window !== 'undefined' ? getBackendUrl().includes('localhost') : true;
 
@@ -476,6 +477,23 @@ export default function HomePage() {
     const [memefiCommentText, setMemefiCommentText] = useState('');
     const [memefiBoostAiba, setMemefiBoostAiba] = useState('');
     const [memefiBoostNeur, setMemefiBoostNeur] = useState('');
+    const [memefiFeedSort, setMemefiFeedSort] = useState('recent');
+    const [memefiFeedTag, setMemefiFeedTag] = useState('');
+    const [memefiFeedWindow, setMemefiFeedWindow] = useState('');
+    const [memefiFeedCategory, setMemefiFeedCategory] = useState('');
+    const [memefiFeedEducationCategory, setMemefiFeedEducationCategory] = useState('');
+    const [memefiSavedIds, setMemefiSavedIds] = useState([]);
+    const [memefiDraftsList, setMemefiDraftsList] = useState([]);
+    const [memefiDetailReactionCounts, setMemefiDetailReactionCounts] = useState({});
+    const [memefiDetailMyReaction, setMemefiDetailMyReaction] = useState('');
+    const [memefiDetailSaved, setMemefiDetailSaved] = useState(false);
+    const [memefiTrendingWindow, setMemefiTrendingWindow] = useState('24h');
+    const [memefiTrendingList, setMemefiTrendingList] = useState([]);
+    const [memefiMemesView, setMemefiMemesView] = useState('feed'); // feed | trending | saved | drafts
+    const [memefiLeaderboardSchoolId, setMemefiLeaderboardSchoolId] = useState('');
+    const [memefiCreateTags, setMemefiCreateTags] = useState('');
+    const [memefiCreateStatus, setMemefiCreateStatus] = useState('published');
+    const [memefiAppealReason, setMemefiAppealReason] = useState('');
     const [earnSummary, setEarnSummary] = useState(null);
     const [redemptionProducts, setRedemptionProducts] = useState([]);
     const [myRedemptions, setMyRedemptions] = useState([]);
@@ -707,15 +725,103 @@ export default function HomePage() {
             setPredictEvents([]);
         }
     }
-    async function refreshMemefiFeed() {
+    function buildMemefiFeedParams(offset = 0) {
+        const params = new URLSearchParams({ limit: '20', offset: String(offset), sort: memefiFeedSort });
+        if (memefiFeedTag.trim()) params.set('tag', memefiFeedTag.trim());
+        if (memefiFeedWindow && ['6h', '24h', '7d'].includes(memefiFeedWindow)) params.set('window', memefiFeedWindow);
+        if (memefiFeedCategory.trim()) params.set('category', memefiFeedCategory.trim());
+        if (memefiFeedEducationCategory.trim()) params.set('educationCategory', memefiFeedEducationCategory.trim());
+        return params.toString();
+    }
+    async function refreshMemefiFeed(append = false) {
+        const offset = append ? memefiFeedOffset : 0;
         try {
-            const res = await fetch(`${getBackendUrl()}/api/memefi/feed?limit=20&offset=0&sort=recent`);
+            const q = buildMemefiFeedParams(offset);
+            const res = await fetch(`${getBackendUrl()}/api/memefi/feed?${q}`);
             const data = await res.json();
-            setMemefiFeed(Array.isArray(data.memes) ? data.memes : []);
-            setMemefiFeedOffset(0);
+            const list = Array.isArray(data.memes) ? data.memes : [];
+            if (append) setMemefiFeed((prev) => (offset === 0 ? list : [...prev, ...list]));
+            else setMemefiFeed(list);
+            setMemefiFeedOffset(offset + list.length);
         } catch {
-            setMemefiFeed([]);
+            if (!append) setMemefiFeed([]);
         }
+    }
+    async function refreshMemefiTrending() {
+        try {
+            const res = await fetch(`${getBackendUrl()}/api/memefi/trending?window=${memefiTrendingWindow}&limit=20`);
+            const data = await res.json();
+            setMemefiTrendingList(Array.isArray(data.memes) ? data.memes : []);
+        } catch {
+            setMemefiTrendingList([]);
+        }
+    }
+    async function refreshMemefiSaved() {
+        try {
+            const res = await api.get('/api/memefi/me/saved?limit=50');
+            const ids = Array.isArray(res.data) ? res.data : [];
+            setMemefiSavedIds(ids);
+        } catch {
+            setMemefiSavedIds([]);
+        }
+    }
+    async function refreshMemefiDrafts() {
+        try {
+            const res = await api.get('/api/memefi/me/memes?status=draft&limit=50');
+            setMemefiDraftsList(Array.isArray(res.data?.memes) ? res.data.memes : []);
+        } catch {
+            setMemefiDraftsList([]);
+        }
+    }
+    async function openMemeDetail(memeId) {
+        try {
+            let r;
+            try {
+                r = await api.get(`/api/memefi/memes/${memeId}`);
+            } catch (e) {
+                if (e.response?.status === 404 || e.response?.status === 403) {
+                    r = await api.get(`/api/memefi/me/memes/${memeId}`);
+                } else throw e;
+            }
+            setMemefiDetail(r.data);
+            refreshMemefiDetailComments(memeId);
+            try {
+                const rx = await api.get(`/api/memefi/memes/${memeId}/reactions`);
+                setMemefiDetailReactionCounts(rx.data?.reactionCounts || {});
+                setMemefiDetailMyReaction(rx.data?.myReaction || '');
+                setMemefiDetailSaved(!!rx.data?.saved);
+            } catch {
+                setMemefiDetailReactionCounts({});
+                setMemefiDetailMyReaction('');
+                setMemefiDetailSaved(false);
+            }
+        } catch {
+            setMemefiMsg('Failed to load meme');
+        }
+    }
+    function openMemeDetailFromDraft(meme) {
+        setMemefiDetail(meme);
+        refreshMemefiDetailComments(meme._id);
+        api.get(`/api/memefi/memes/${meme._id}/reactions`).then((rx) => {
+            setMemefiDetailReactionCounts(rx.data?.reactionCounts || {});
+            setMemefiDetailMyReaction(rx.data?.myReaction || '');
+            setMemefiDetailSaved(!!rx.data?.saved);
+        }).catch(() => {
+            setMemefiDetailReactionCounts({});
+            setMemefiDetailMyReaction('');
+            setMemefiDetailSaved(false);
+        });
+    }
+    function closeMemeDetail() {
+        setMemefiDetail(null);
+        setMemefiDetailComments([]);
+        setMemefiCommentText('');
+        setMemefiBoostAiba('');
+        setMemefiBoostNeur('');
+        setMemefiDetailReactionCounts({});
+        setMemefiDetailMyReaction('');
+        setMemefiDetailSaved(false);
+        setMemefiAppealReason('');
     }
     async function refreshMemefiLikes() {
         try {
@@ -728,7 +834,9 @@ export default function HomePage() {
     async function refreshMemefiLeaderboard(by) {
         const sortBy = by || memefiLeaderboardBy;
         try {
-            const res = await fetch(`${getBackendUrl()}/api/memefi/leaderboard?by=${sortBy}&limit=20`);
+            let url = `${getBackendUrl()}/api/memefi/leaderboard?by=${sortBy}&limit=20`;
+            if (memefiLeaderboardSchoolId && memefiLeaderboardSchoolId.trim()) url += `&schoolId=${encodeURIComponent(memefiLeaderboardSchoolId.trim())}`;
+            const res = await fetch(url);
             const data = await res.json();
             if (data.by === 'score') setMemefiLeaderboard({ memes: data.memes || [], creators: [] });
             else setMemefiLeaderboard({ memes: [], creators: data.creators || [] });
@@ -756,9 +864,14 @@ export default function HomePage() {
     }
     async function refreshRedemptionProducts() {
         try {
-            const res = await fetch(`${getBackendUrl()}/api/redemption/products`);
-            const data = await res.json();
-            setRedemptionProducts(Array.isArray(data) ? data : []);
+            const res = await api.get('/api/redemption/products/for-me').catch(() => null);
+            const data = res?.data;
+            if (Array.isArray(data) && data.length >= 0) {
+                setRedemptionProducts(data);
+                return;
+            }
+            const fallback = await fetch(`${getBackendUrl()}/api/redemption/products`).then((r) => r.json()).catch(() => []);
+            setRedemptionProducts(Array.isArray(fallback) ? fallback : []);
         } catch {
             setRedemptionProducts([]);
         }
@@ -1899,7 +2012,14 @@ export default function HomePage() {
         if (tab === 'tournaments') { refreshTournaments().catch(() => {}); refreshBrokers().catch(() => {}); }
         if (tab === 'globalBoss') { refreshGlobalBoss().catch(() => {}); }
         if (tab === 'predict') { refreshPredictEvents().catch(() => {}); }
-        if (tab === 'memes') { refreshMemefiFeed().catch(() => {}); refreshMemefiLikes().catch(() => {}); refreshMemefiLeaderboard().catch(() => {}); }
+        if (tab === 'memes') {
+            refreshMemefiFeed(false).catch(() => {});
+            refreshMemefiLikes().catch(() => {});
+            refreshMemefiLeaderboard().catch(() => {});
+            refreshMemefiSaved().catch(() => {});
+            refreshMemefiDrafts().catch(() => {});
+            if (memefiMemesView === 'trending') refreshMemefiTrending().catch(() => {});
+        }
         if (tab === 'earn') { refreshEarnSummary().catch(() => {}); refreshRedemptionProducts().catch(() => {}); refreshMyRedemptions().catch(() => {}); refreshEconomy().catch(() => {}); }
         setBalanceStripVisible(true);
         // No automatic scroll on tab change — user keeps their scroll position; only scroll to FAQ when they tap "FAQs"
@@ -3830,24 +3950,36 @@ export default function HomePage() {
                         <div className="card__title"><IconMemes /> Memes <span className="badge-new">NEW</span></div>
                         <p className="card__hint">Create memes, get likes, comments, shares. Boost with AIBA/NEUR. Top memes earn from the daily pool. Education: study humor, exam tips, school events.</p>
                     </div>
-                    <div className="action-row action-row--android">
-                        <button type="button" className="btn btn--primary" onClick={refreshMemefiFeed} disabled={busy}><IconRefresh /> Refresh feed</button>
-                        <button type="button" className="btn btn--secondary" onClick={() => { setMemefiDetail(null); setMemefiCreateCaption(''); setMemefiCreateImageUrl(''); setMemefiCreateCategory('general'); setMemefiCreateEducationCategory(''); }}>Create meme</button>
+                    <div className="action-row action-row--android" style={{ flexWrap: 'wrap', gap: 8 }}>
+                        <button type="button" className="btn btn--primary" onClick={() => refreshMemefiFeed(false)} disabled={busy}><IconRefresh /> Refresh</button>
+                        <button type="button" className="btn btn--secondary" onClick={() => { closeMemeDetail(); setMemefiCreateCaption(''); setMemefiCreateImageUrl(''); setMemefiCreateCategory('general'); setMemefiCreateEducationCategory(''); setMemefiCreateTags(''); setMemefiCreateStatus('published'); }}>Create meme</button>
+                        <select className="select" value={memefiMemesView} onChange={(e) => { const v = e.target.value; setMemefiMemesView(v); if (v === 'trending') refreshMemefiTrending(); if (v === 'saved') refreshMemefiSaved(); if (v === 'drafts') refreshMemefiDrafts(); }} style={{ minWidth: 100 }}>
+                            <option value="feed">Feed</option>
+                            <option value="trending">Trending</option>
+                            <option value="saved">Saved</option>
+                            <option value="drafts">Drafts</option>
+                        </select>
                     </div>
                     {memefiMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{memefiMsg}</p> : null}
                     {memefiDetail ? (
                         <div className="card card--elevated" style={{ marginTop: 12 }}>
                             <div className="card__title">Meme detail</div>
+                            {memefiDetail.hidden ? <p className="card__hint" style={{ color: 'var(--text-muted)' }}>This meme is hidden. {memefiDetail.ownerTelegramId === (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user?.id ? String(window.Telegram.WebApp.initDataUnsafe.user.id) : '') ? 'You can appeal below.' : ''}</p> : null}
                             <img src={memefiDetail.imageUrl} alt="Meme" style={{ maxWidth: '100%', borderRadius: 8, marginBottom: 8 }} onError={(e) => { e.target.style.display = 'none'; }} />
                             <p className="card__hint">{memefiDetail.caption || 'No caption'}</p>
+                            {(memefiDetail.tags && memefiDetail.tags.length > 0) ? <p className="card__hint">Tags: {memefiDetail.tags.join(', ')}</p> : null}
                             <p className="card__hint">Score: {memefiDetail.engagementScore} · Likes: {memefiDetail.likeCount} · Comments: {memefiDetail.commentCount} · Boosts: {memefiDetail.boostTotal ?? 0}</p>
                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-                                <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/like`); await refreshMemefiFeed(); await refreshMemefiLikes(); setMemefiDetail((m) => m ? { ...m, likeCount: (m.likeCount || 0) + (memefiLikedIds.includes(m._id) ? -1 : 1) } : null); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Like failed')); } finally { setBusy(false); } }} disabled={busy}>
+                                <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/like`); await refreshMemefiFeed(false); await refreshMemefiLikes(); setMemefiDetail((m) => m ? { ...m, likeCount: (m.likeCount || 0) + (memefiLikedIds.includes(m._id) ? -1 : 1) } : null); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Like failed')); } finally { setBusy(false); } }} disabled={busy}>
                                     {memefiLikedIds.includes(memefiDetail._id) ? 'Unlike' : 'Like'}
                                 </button>
                                 <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/share`, { kind: 'internal' }); setMemefiDetail((m) => m ? { ...m, internalShareCount: (m.internalShareCount || 0) + 1 } : null); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Share failed')); } finally { setBusy(false); } }} disabled={busy}>Share (in-app)</button>
                                 <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/share`, { kind: 'external' }); shareViaTelegram({ title: 'Meme', text: memefiDetail.caption || 'Check this meme!', url: window.location.href }); setMemefiDetail((m) => m ? { ...m, externalShareCount: (m.externalShareCount || 0) + 1 } : null); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Share failed')); } finally { setBusy(false); } }} disabled={busy}><IconShare /> Share (Telegram)</button>
-                                <button type="button" className="btn btn--ghost" onClick={() => setMemefiDetail(null); setMemefiDetailComments([]); setMemefiCommentText(''); setMemefiBoostAiba(''); setMemefiBoostNeur(''); }}>Back to feed</button>
+                                <button type="button" className={`btn ${memefiDetailSaved ? 'btn--primary' : 'btn--secondary'}`} onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/save`); setMemefiDetailSaved(!memefiDetailSaved); await refreshMemefiSaved(); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Save failed')); } finally { setBusy(false); } }} disabled={busy}>{memefiDetailSaved ? 'Saved' : 'Save'}</button>
+                                {['fire', 'funny', 'edu'].map((t) => (
+                                    <button key={t} type="button" className={`btn btn--secondary ${memefiDetailMyReaction === t ? 'btn--primary' : ''}`} onClick={async () => { setBusy(true); setMemefiMsg(''); try { const r = await api.post(`/api/memefi/memes/${memefiDetail._id}/reaction`, { reactionType: t }); setMemefiDetailMyReaction(t); setMemefiDetailReactionCounts(r.data?.reactionCounts || {}); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Reaction failed')); } finally { setBusy(false); } }} disabled={busy}>{t} {memefiDetailReactionCounts[t] ?? 0}</button>
+                                ))}
+                                <button type="button" className="btn btn--ghost" onClick={closeMemeDetail}>Back</button>
                             </div>
                             <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
                                 <div className="card__title">Boost (stake AIBA/NEUR)</div>
@@ -3873,14 +4005,28 @@ export default function HomePage() {
                             <div style={{ marginTop: 12 }}>
                                 <button type="button" className="btn btn--ghost" style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }} onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/report`, { reason: 'spam' }); setMemefiMsg('Reported. Thanks for helping.'); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Report failed')); } finally { setBusy(false); } }} disabled={busy}>Report</button>
                             </div>
+                            {memefiDetail.status === 'draft' && memefiDetail.ownerTelegramId === (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user?.id ? String(window.Telegram.WebApp.initDataUnsafe.user.id) : '') ? (
+                                <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                                    <button type="button" className="btn btn--primary" onClick={async () => { setBusy(true); setMemefiMsg(''); try { const r = await api.patch(`/api/memefi/memes/${memefiDetail._id}/publish`); setMemefiDetail((m) => m ? { ...m, status: 'published', publishedAt: r.data?.publishedAt } : null); setMemefiMsg('Published!'); await refreshMemefiDrafts(); await refreshMemefiFeed(false); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Publish failed')); } finally { setBusy(false); } }} disabled={busy}>Publish draft</button>
+                                </div>
+                            ) : null}
+                            {memefiDetail.hidden && memefiDetail.ownerTelegramId === (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user?.id ? String(window.Telegram.WebApp.initDataUnsafe.user.id) : '') ? (
+                                <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                                    <div className="card__title">Appeal</div>
+                                    <p className="card__hint">Explain why this meme should be visible again. Moderators will review.</p>
+                                    <input className="input" type="text" placeholder="Reason for appeal" value={memefiAppealReason} onChange={(e) => setMemefiAppealReason(e.target.value)} style={{ width: '100%', marginTop: 8 }} maxLength={500} />
+                                    <button type="button" className="btn btn--primary" style={{ marginTop: 8 }} onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/appeal`, { reason: memefiAppealReason.trim() }); setMemefiMsg('Appeal submitted. We will review it.'); setMemefiAppealReason(''); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Appeal failed')); } finally { setBusy(false); } }} disabled={busy}>Submit appeal</button>
+                                </div>
+                            ) : null}
                         </div>
                     ) : (
                         <>
                             <div className="card card--elevated" style={{ marginTop: 12 }}>
                                 <div className="card__title">Create meme</div>
-                                <p className="card__hint">Paste image URL (upload to Telegram or any host first). Add caption and category.</p>
+                                <p className="card__hint">Paste image URL (upload to Telegram or any host first). Add caption, tags, and category.</p>
                                 <input className="input" type="url" placeholder="Image URL" value={memefiCreateImageUrl} onChange={(e) => setMemefiCreateImageUrl(e.target.value)} style={{ width: '100%', marginTop: 8 }} />
                                 <input className="input" type="text" placeholder="Caption" value={memefiCreateCaption} onChange={(e) => setMemefiCreateCaption(e.target.value)} style={{ width: '100%', marginTop: 8 }} />
+                                <input className="input" type="text" placeholder="Tags (comma-separated, e.g. exam, funny)" value={memefiCreateTags} onChange={(e) => setMemefiCreateTags(e.target.value)} style={{ width: '100%', marginTop: 8 }} />
                                 <select className="select" value={memefiCreateCategory} onChange={(e) => setMemefiCreateCategory(e.target.value)} style={{ marginTop: 8 }}>
                                     <option value="general">General</option>
                                     <option value="study_humor">Study humor</option>
@@ -3888,19 +4034,25 @@ export default function HomePage() {
                                     <option value="school_events">School events</option>
                                     <option value="general_edu">General education</option>
                                 </select>
-                                <button type="button" className="btn btn--primary" style={{ marginTop: 12 }} onClick={async () => { if (!memefiCreateImageUrl.trim()) { setMemefiMsg('Enter image URL'); return; } setBusy(true); setMemefiMsg(''); try { await api.post('/api/memefi/upload', { imageUrl: memefiCreateImageUrl.trim(), caption: memefiCreateCaption.trim(), category: memefiCreateCategory, educationCategory: memefiCreateCategory === 'general' ? '' : memefiCreateCategory }); setMemefiCreateImageUrl(''); setMemefiCreateCaption(''); await refreshMemefiFeed(); setMemefiMsg('Meme created!'); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Upload failed')); } finally { setBusy(false); }} disabled={busy}>Post meme</button>
+                                <select className="select" value={memefiCreateStatus} onChange={(e) => setMemefiCreateStatus(e.target.value)} style={{ marginTop: 8 }}>
+                                    <option value="published">Publish now</option>
+                                    <option value="draft">Save as draft</option>
+                                </select>
+                                <button type="button" className="btn btn--primary" style={{ marginTop: 12 }} onClick={async () => { if (!memefiCreateImageUrl.trim()) { setMemefiMsg('Enter image URL'); return; } setBusy(true); setMemefiMsg(''); try { const tags = memefiCreateTags.trim() ? memefiCreateTags.split(/,\s*/).map((t) => t.trim().toLowerCase()).filter(Boolean).slice(0, 10) : undefined; await api.post('/api/memefi/upload', { imageUrl: memefiCreateImageUrl.trim(), caption: memefiCreateCaption.trim(), category: memefiCreateCategory, educationCategory: memefiCreateCategory === 'general' ? '' : memefiCreateCategory, tags, status: memefiCreateStatus }); setMemefiCreateImageUrl(''); setMemefiCreateCaption(''); setMemefiCreateTags(''); await refreshMemefiFeed(false); await refreshMemefiDrafts(); setMemefiMsg(memefiCreateStatus === 'draft' ? 'Draft saved!' : 'Meme created!'); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Upload failed')); } finally { setBusy(false); }} disabled={busy}>{memefiCreateStatus === 'draft' ? 'Save draft' : 'Post meme'}</button>
                             </div>
                             <div className="card card--elevated" style={{ marginTop: 12 }}>
                                 <div className="card__title">Meme leaderboard</div>
-                                <select className="select" value={memefiLeaderboardBy} onChange={(e) => { const v = e.target.value; setMemefiLeaderboardBy(v); refreshMemefiLeaderboard(v); }}>
+                                <input className="input" type="text" placeholder="School ID (optional)" value={memefiLeaderboardSchoolId} onChange={(e) => setMemefiLeaderboardSchoolId(e.target.value)} style={{ width: '100%', marginTop: 8, maxWidth: 200 }} />
+                                <select className="select" value={memefiLeaderboardBy} onChange={(e) => { const v = e.target.value; setMemefiLeaderboardBy(v); refreshMemefiLeaderboard(v); }} style={{ marginTop: 8 }}>
                                     <option value="score">Top memes by score</option>
                                     <option value="creators">Top creators</option>
                                 </select>
+                                <button type="button" className="btn btn--secondary" style={{ marginTop: 8 }} onClick={() => refreshMemefiLeaderboard()}>Refresh</button>
                                 {memefiLeaderboardBy === 'score' && memefiLeaderboard.memes.length > 0 ? (
                                     <ul style={{ marginTop: 12, paddingLeft: 20 }}>
                                         {memefiLeaderboard.memes.slice(0, 10).map((m, i) => (
                                             <li key={m._id} style={{ marginBottom: 8 }}>
-                                                <button type="button" className="btn btn--ghost" style={{ textAlign: 'left' }} onClick={async () => { try { const r = await api.get(`/api/memefi/memes/${m._id}`); setMemefiDetail(r.data); refreshMemefiDetailComments(m._id); } catch { setMemefiMsg('Failed to load meme'); }}}>#{i + 1} Score {m.engagementScore} · {m.caption ? m.caption.slice(0, 30) : 'Meme'}</button>
+                                                <button type="button" className="btn btn--ghost" style={{ textAlign: 'left' }} onClick={() => openMemeDetail(m._id)}>#{i + 1} Score {m.engagementScore} · {m.caption ? m.caption.slice(0, 30) : 'Meme'}</button>
                                             </li>
                                         ))}
                                     </ul>
@@ -3912,25 +4064,108 @@ export default function HomePage() {
                                     </ul>
                                 ) : <p className="guide-tip" style={{ marginTop: 12 }}>No data yet. Create and engage with memes.</p>}
                             </div>
-                            <div className="card card--elevated" style={{ marginTop: 12 }}>
-                                <div className="card__title">Feed</div>
-                                {memefiFeed.length === 0 ? <p className="guide-tip">No memes yet. Create one above.</p> : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 8 }}>
-                                        {memefiFeed.map((m) => (
-                                            <div key={m._id} className="card">
-                                                <img src={m.imageUrl} alt="Meme" style={{ maxWidth: '100%', borderRadius: 8 }} onError={(e) => { e.target.style.display = 'none'; }} />
-                                                <p className="card__hint">{m.caption || 'No caption'}</p>
-                                                <p className="card__hint">Score {m.engagementScore} · Like {m.likeCount} · Comment {m.commentCount}</p>
-                                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                                    <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post(`/api/memefi/memes/${m._id}/like`); await refreshMemefiFeed(); await refreshMemefiLikes(); } catch (e) { setMemefiMsg(getErrorMessage(e)); } finally { setBusy(false); } }} disabled={busy}>{memefiLikedIds.includes(m._id) ? 'Unlike' : 'Like'}</button>
-                                                    <button type="button" className="btn btn--secondary" onClick={async () => { try { await api.post(`/api/memefi/memes/${m._id}/share`, { kind: 'external' }); shareViaTelegram({ title: 'Meme', text: m.caption || 'Check this meme!', url: window.location.href }); await refreshMemefiFeed(); } catch (e) { setMemefiMsg(getErrorMessage(e)); } }} disabled={busy}><IconShare /> Share</button>
-                                                    <button type="button" className="btn btn--secondary" onClick={async () => { try { const r = await api.get(`/api/memefi/memes/${m._id}`); setMemefiDetail(r.data); refreshMemefiDetailComments(m._id); } catch { setMemefiMsg('Failed to load'); }}}>View</button>
-                                                </div>
-                                            </div>
-                                        ))}
+                            {memefiMemesView === 'feed' ? (
+                                <div className="card card--elevated" style={{ marginTop: 12 }}>
+                                    <div className="card__title">Feed</div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+                                        <select className="select" value={memefiFeedSort} onChange={(e) => { setMemefiFeedSort(e.target.value); setMemefiFeedOffset(0); refreshMemefiFeed(false); }}>
+                                            <option value="recent">Recent</option>
+                                            <option value="score">Score</option>
+                                        </select>
+                                        <input className="input" type="text" placeholder="Tag" value={memefiFeedTag} onChange={(e) => setMemefiFeedTag(e.target.value)} style={{ width: 80 }} onBlur={() => { setMemefiFeedOffset(0); refreshMemefiFeed(false); }} />
+                                        <select className="select" value={memefiFeedWindow} onChange={(e) => { setMemefiFeedWindow(e.target.value); setMemefiFeedOffset(0); refreshMemefiFeed(false); }}>
+                                            <option value="">All time</option>
+                                            <option value="6h">6h</option>
+                                            <option value="24h">24h</option>
+                                            <option value="7d">7d</option>
+                                        </select>
+                                        <select className="select" value={memefiFeedCategory} onChange={(e) => { setMemefiFeedCategory(e.target.value); setMemefiFeedOffset(0); refreshMemefiFeed(false); }}>
+                                            <option value="">All categories</option>
+                                            <option value="general">General</option>
+                                            <option value="study_humor">Study humor</option>
+                                            <option value="exam_tips">Exam tips</option>
+                                            <option value="school_events">School events</option>
+                                            <option value="general_edu">General education</option>
+                                        </select>
+                                        <select className="select" value={memefiFeedEducationCategory} onChange={(e) => { setMemefiFeedEducationCategory(e.target.value); setMemefiFeedOffset(0); refreshMemefiFeed(false); }}>
+                                            <option value="">All edu</option>
+                                            <option value="study_humor">Study humor</option>
+                                            <option value="exam_tips">Exam tips</option>
+                                            <option value="school_events">School events</option>
+                                            <option value="general_edu">General education</option>
+                                        </select>
                                     </div>
-                                )}
-                            </div>
+                                    {memefiFeed.length === 0 ? <p className="guide-tip" style={{ marginTop: 12 }}>No memes yet. Create one or change filters.</p> : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+                                            {memefiFeed.map((m) => (
+                                                <div key={m._id} className="card">
+                                                    <img src={m.imageUrl} alt="Meme" style={{ maxWidth: '100%', borderRadius: 8 }} onError={(e) => { e.target.style.display = 'none'; }} />
+                                                    <p className="card__hint">{m.caption || 'No caption'}</p>
+                                                    <p className="card__hint">Score {m.engagementScore} · Like {m.likeCount} · Comment {m.commentCount}</p>
+                                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                                        <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post(`/api/memefi/memes/${m._id}/like`); await refreshMemefiFeed(false); await refreshMemefiLikes(); } catch (e) { setMemefiMsg(getErrorMessage(e)); } finally { setBusy(false); } }} disabled={busy}>{memefiLikedIds.includes(m._id) ? 'Unlike' : 'Like'}</button>
+                                                        <button type="button" className="btn btn--secondary" onClick={async () => { try { await api.post(`/api/memefi/memes/${m._id}/share`, { kind: 'external' }); shareViaTelegram({ title: 'Meme', text: m.caption || 'Check this meme!', url: window.location.href }); await refreshMemefiFeed(false); } catch (e) { setMemefiMsg(getErrorMessage(e)); } }} disabled={busy}><IconShare /> Share</button>
+                                                        <button type="button" className="btn btn--secondary" onClick={() => openMemeDetail(m._id)}>View</button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <button type="button" className="btn btn--secondary" onClick={() => refreshMemefiFeed(true)} disabled={busy}>Load more</button>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : memefiMemesView === 'trending' ? (
+                                <div className="card card--elevated" style={{ marginTop: 12 }}>
+                                    <div className="card__title">Trending</div>
+                                    <select className="select" value={memefiTrendingWindow} onChange={(e) => { setMemefiTrendingWindow(e.target.value); refreshMemefiTrending(); }} style={{ marginTop: 8 }}>
+                                        <option value="6h">6h</option>
+                                        <option value="24h">24h</option>
+                                        <option value="7d">7d</option>
+                                    </select>
+                                    {memefiTrendingList.length === 0 ? <p className="guide-tip" style={{ marginTop: 12 }}>No trending memes in this window.</p> : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+                                            {memefiTrendingList.map((m) => (
+                                                <div key={m._id} className="card">
+                                                    <img src={m.imageUrl} alt="Meme" style={{ maxWidth: '100%', borderRadius: 8 }} onError={(e) => { e.target.style.display = 'none'; }} />
+                                                    <p className="card__hint">{m.caption || 'No caption'}</p>
+                                                    <p className="card__hint">Score {m.engagementScore} · Like {m.likeCount}</p>
+                                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                                        <button type="button" className="btn btn--secondary" onClick={() => openMemeDetail(m._id)}>View</button>
+                                                        <button type="button" className="btn btn--secondary" onClick={async () => { try { await api.post(`/api/memefi/memes/${m._id}/share`, { kind: 'external' }); shareViaTelegram({ title: 'Meme', text: m.caption || 'Check this meme!', url: window.location.href }); } catch (e) { setMemefiMsg(getErrorMessage(e)); } }} disabled={busy}><IconShare /> Share</button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : memefiMemesView === 'saved' ? (
+                                <div className="card card--elevated" style={{ marginTop: 12 }}>
+                                    <div className="card__title">My saved</div>
+                                    {memefiSavedIds.length === 0 ? <p className="guide-tip" style={{ marginTop: 8 }}>No saved memes. Save memes from the feed or detail view.</p> : (
+                                        <ul style={{ marginTop: 8, paddingLeft: 20 }}>
+                                            {memefiSavedIds.map((id) => (
+                                                <li key={String(id)} style={{ marginBottom: 8 }}>
+                                                    <button type="button" className="btn btn--ghost" style={{ textAlign: 'left' }} onClick={() => openMemeDetail(String(id))}>View saved meme</button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            ) : memefiMemesView === 'drafts' ? (
+                                <div className="card card--elevated" style={{ marginTop: 12 }}>
+                                    <div className="card__title">My drafts</div>
+                                    {memefiDraftsList.length === 0 ? <p className="guide-tip" style={{ marginTop: 8 }}>No drafts. Create a meme and choose &quot;Save as draft&quot;.</p> : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                                            {memefiDraftsList.map((m) => (
+                                                <div key={m._id} className="card">
+                                                    <img src={m.imageUrl} alt="Meme" style={{ maxWidth: '100%', borderRadius: 8, maxHeight: 120, objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                                                    <p className="card__hint">{m.caption ? m.caption.slice(0, 60) : 'No caption'}</p>
+                                                    <button type="button" className="btn btn--secondary" onClick={() => openMemeDetailFromDraft(m)}>Open / Publish</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : null}
                         </>
                     )}
                 </section>
@@ -3965,7 +4200,7 @@ export default function HomePage() {
                                         <div className="card__title">{p.name}</div>
                                         <p className="card__hint">{p.description || p.type}</p>
                                         <p className="card__hint">Cost: {p.costAiba || 0} AIBA, {p.costNeur || 0} NEUR, {p.costStars || 0} Stars</p>
-                                        <button type="button" className="btn btn--primary" onClick={async () => { setBusy(true); setRedeemMsg(''); try { const r = await api.post('/api/redemption/redeem', { productKey: p.key }); setRedeemMsg(r.data?.message || 'Redeemed! Code: ' + (r.data?.code || '')); await refreshMyRedemptions(); await refreshEconomy(); } catch (e) { setRedeemMsg(getErrorMessage(e, 'Redeem failed')); } finally { setBusy(false); }} } disabled={busy}>Redeem</button>
+                                        <button type="button" className="btn btn--primary" onClick={async () => { setBusy(true); setRedeemMsg(''); try { const idempotencyKey = `${p.key}-${Date.now()}`; const r = await api.post('/api/redemption/redeem', { productKey: p.key, idempotencyKey }); let msg = r.data?.message || 'Redeemed!'; if (r.data?.code) msg += ' Code: ' + r.data.code; if (r.data?.expiresAt) msg += ' Expires: ' + new Date(r.data.expiresAt).toLocaleString(); setRedeemMsg(msg); await refreshMyRedemptions(); await refreshEconomy(); } catch (e) { setRedeemMsg(getErrorMessage(e, 'Redeem failed')); } finally { setBusy(false); }} } disabled={busy}>Redeem</button>
                                     </div>
                                 ))}
                             </div>
@@ -3977,7 +4212,7 @@ export default function HomePage() {
                         {myRedemptions.length === 0 ? <p className="guide-tip">No redemptions yet.</p> : (
                             <ul style={{ paddingLeft: 20, marginTop: 8 }}>
                                 {myRedemptions.slice(0, 20).map((r) => (
-                                    <li key={r._id} style={{ marginBottom: 6 }}>{r.productKey} — {r.code || r.status} ({r.status})</li>
+                                    <li key={r._id} style={{ marginBottom: 6 }}>{r.productKey} — {r.code || r.status} ({r.status}){r.expiresAt ? ' · Expires: ' + new Date(r.expiresAt).toLocaleString() : ''}</li>
                                 ))}
                             </ul>
                         )}
@@ -4172,6 +4407,9 @@ export default function HomePage() {
                     <div className="card card--elevated" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title">What are arenas?</div>
                         <p className="card__hint">{ARENAS_EXPLANATION}</p>
+                        {(Number(economyMe?.economy?.starRewardPerBattle ?? 0) > 0 || Number(economyMe?.economy?.diamondRewardFirstWin ?? 0) > 0) ? (
+                            <p className="card__hint" style={{ marginTop: 8 }}>Rewards: {Number(economyMe?.economy?.starRewardPerBattle ?? 0) > 0 ? <>+{economyMe.economy.starRewardPerBattle} Stars per win</> : null}{Number(economyMe?.economy?.starRewardPerBattle ?? 0) > 0 && Number(economyMe?.economy?.diamondRewardFirstWin ?? 0) > 0 ? ' · ' : null}{Number(economyMe?.economy?.diamondRewardFirstWin ?? 0) > 0 ? <>+{economyMe.economy.diamondRewardFirstWin} Diamond on first win</> : null}</p>
+                        ) : null}
                     </div>
                     <div className="card card--elevated">
                         <div className="card__title">Broker</div>
@@ -6143,6 +6381,9 @@ export default function HomePage() {
                         {economyMe?.profileBoostedUntil && new Date(economyMe.profileBoostedUntil) > new Date() ? (
                             <p className="card__hint" style={{ marginTop: 8, color: 'var(--accent-gold)' }}>Profile boosted until {new Date(economyMe.profileBoostedUntil).toLocaleString()}</p>
                         ) : null}
+                        {economyMe?.wallet && String(economyMe.wallet).trim() ? (
+                            <p className="card__hint" style={{ marginTop: 8, wordBreak: 'break-all', fontSize: 11 }} title={economyMe.wallet}>Claim address: {String(economyMe.wallet).length > 20 ? `${String(economyMe.wallet).slice(0, 10)}…${String(economyMe.wallet).slice(-8)}` : economyMe.wallet}</p>
+                        ) : null}
                     </div>
                     {Number(economyMe?.economy?.boostProfileCostTonNano) > 0 ? (
                         <div className="card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
@@ -6480,6 +6721,7 @@ export default function HomePage() {
                     ))}
                 </div>
             </nav>
+            <AgentFab />
         </div>
     );
 }
