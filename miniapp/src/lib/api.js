@@ -6,12 +6,35 @@ const DEFAULT_BACKEND_URL = 'https://aiba-arena2-backend.vercel.app';
 
 /** Backend base URL: env, or production fallback when miniapp is deployed at known URL */
 export function getBackendUrl() {
+  // 1. Build-time env (most reliable)
   if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_BACKEND_URL) {
     return process.env.NEXT_PUBLIC_BACKEND_URL;
   }
-  if (typeof window !== 'undefined' && window.location?.origin === MINIAPP_URL) {
-    return DEFAULT_BACKEND_URL;
+  
+  // 2. Runtime check: known production miniapp URL
+  if (typeof window !== 'undefined') {
+    const origin = window.location?.origin;
+    
+    // Exact match for production miniapp
+    if (origin === MINIAPP_URL) {
+      return DEFAULT_BACKEND_URL;
+    }
+    
+    // Telegram webview: check if we're in Telegram (t.me or web.telegram.org)
+    // This helps when miniapp is opened from Telegram bot but origin differs
+    const isTelegramWebview = 
+      origin.includes('t.me') || 
+      origin.includes('web.telegram.org') ||
+      (typeof window !== 'undefined' && window.Telegram?.WebApp);
+    
+    // If in Telegram webview and no env set, use production backend
+    // This prevents localhost fallback when opened from Telegram
+    if (isTelegramWebview) {
+      return DEFAULT_BACKEND_URL;
+    }
   }
+  
+  // 3. Fallback: localhost for local dev (only if not in production context)
   return process.env?.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 }
 
