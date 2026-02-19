@@ -453,7 +453,7 @@ export default function HomePage() {
     const [comboClaimMsg, setComboClaimMsg] = useState('');
     const [walletFlow, setWalletFlow] = useState('overview');
     const [stakingPeriods, setStakingPeriods] = useState([]);
-    const [stakingMinAiba, setStakingMinAiba] = useState(100);
+    const [stakingMinAiba, setStakingMinAiba] = useState(1000);
     const [stakingLocks, setStakingLocks] = useState([]);
     const [stakingCountdownTick, setStakingCountdownTick] = useState(0);
     const [stakeLockAmount, setStakeLockAmount] = useState('');
@@ -494,6 +494,13 @@ export default function HomePage() {
     const [memefiCreateTags, setMemefiCreateTags] = useState('');
     const [memefiCreateStatus, setMemefiCreateStatus] = useState('published');
     const [memefiAppealReason, setMemefiAppealReason] = useState('');
+    const [memefiTemplatesList, setMemefiTemplatesList] = useState([]);
+    const [memefiCreateTemplateId, setMemefiCreateTemplateId] = useState('');
+    const [memefiCreateSchoolId, setMemefiCreateSchoolId] = useState('');
+    const [schoolsList, setSchoolsList] = useState([]);
+    const [memesEarnTipDismissed, setMemesEarnTipDismissed] = useState(false);
+    const [profileSchoolId, setProfileSchoolId] = useState('');
+    const [profileSchoolMsg, setProfileSchoolMsg] = useState('');
     const [earnSummary, setEarnSummary] = useState(null);
     const [redemptionProducts, setRedemptionProducts] = useState([]);
     const [myRedemptions, setMyRedemptions] = useState([]);
@@ -771,6 +778,58 @@ export default function HomePage() {
             setMemefiDraftsList(Array.isArray(res.data?.memes) ? res.data.memes : []);
         } catch {
             setMemefiDraftsList([]);
+        }
+    }
+    async function refreshMemefiTemplates() {
+        try {
+            const res = await fetch(`${getBackendUrl()}/api/memefi/templates`);
+            const data = await res.json();
+            setMemefiTemplatesList(Array.isArray(data) ? data : []);
+        } catch {
+            setMemefiTemplatesList([]);
+        }
+    }
+    async function refreshSchoolsList() {
+        try {
+            const res = await fetch(`${getBackendUrl()}/api/schools`);
+            const data = await res.json();
+            setSchoolsList(Array.isArray(data) ? data : []);
+        } catch {
+            setSchoolsList([]);
+        }
+    }
+    async function submitMemefiCreate() {
+        if (!memefiCreateImageUrl.trim()) {
+            setMemefiMsg('Enter image URL');
+            return;
+        }
+        setBusy(true);
+        setMemefiMsg('');
+        try {
+            const tags = memefiCreateTags.trim()
+                ? memefiCreateTags.split(/,\s*/).map((t) => t.trim().toLowerCase()).filter(Boolean).slice(0, 10)
+                : undefined;
+            await api.post('/api/memefi/upload', {
+                imageUrl: memefiCreateImageUrl.trim(),
+                caption: memefiCreateCaption.trim(),
+                category: memefiCreateCategory,
+                educationCategory: memefiCreateCategory === 'general' ? '' : memefiCreateCategory,
+                tags,
+                status: memefiCreateStatus,
+                templateId: memefiCreateTemplateId.trim() || undefined,
+                schoolId: memefiCreateSchoolId.trim() && /^[a-fA-F0-9]{24}$/.test(memefiCreateSchoolId.trim()) ? memefiCreateSchoolId.trim() : undefined,
+            });
+            setMemefiCreateImageUrl('');
+            setMemefiCreateCaption('');
+            setMemefiCreateTags('');
+            setMemefiCreateTemplateId('');
+            await refreshMemefiFeed(false);
+            await refreshMemefiDrafts();
+            setMemefiMsg(memefiCreateStatus === 'draft' ? 'Draft saved!' : 'Meme created!');
+        } catch (e) {
+            setMemefiMsg(getErrorMessage(e, 'Upload failed'));
+        } finally {
+            setBusy(false);
         }
     }
     async function openMemeDetail(memeId) {
@@ -1663,10 +1722,10 @@ export default function HomePage() {
         try {
             const res = await api.get('/api/staking/periods');
             setStakingPeriods(Array.isArray(res.data?.periods) ? res.data.periods : []);
-            setStakingMinAiba(Math.max(1, Number(res.data?.minAiba ?? 100) || 100));
+            setStakingMinAiba(Math.max(1, Number(res.data?.minAiba ?? 1000) || 1000));
         } catch {
             setStakingPeriods([]);
-            setStakingMinAiba(100);
+            setStakingMinAiba(1000);
         }
     }
     async function refreshStakingLocks() {
@@ -1694,7 +1753,7 @@ export default function HomePage() {
             await refreshEconomy();
         } catch (err) {
             const d = err?.response?.data;
-            setStakingLockMsg(d?.error === 'min_stake_required' ? (d.message || `Minimum ${(d.minAiba ?? 100).toLocaleString()} AIBA.`) : getErrorMessage(err, 'Lock failed.'));
+            setStakingLockMsg(d?.error === 'min_stake_required' ? (d.message || `Minimum ${(d.minAiba ?? 1000).toLocaleString()} AIBA.`) : getErrorMessage(err, 'Lock failed.'));
         } finally {
             setBusy(false);
         }
@@ -1740,7 +1799,7 @@ export default function HomePage() {
             await refreshEconomy();
         } catch (err) {
             const d = err?.response?.data;
-            setStakeMsg(d?.error === 'min_stake_required' ? (d.message || `Minimum ${(d.minAiba ?? 100).toLocaleString()} AIBA.`) : 'Stake failed (insufficient AIBA?).');
+            setStakeMsg(d?.error === 'min_stake_required' ? (d.message || `Minimum ${(d.minAiba ?? 1000).toLocaleString()} AIBA.`) : 'Stake failed (insufficient AIBA?).');
         } finally {
             setBusy(false);
         }
@@ -2018,9 +2077,18 @@ export default function HomePage() {
             refreshMemefiLeaderboard().catch(() => {});
             refreshMemefiSaved().catch(() => {});
             refreshMemefiDrafts().catch(() => {});
+            refreshMemefiTemplates().catch(() => {});
+            refreshSchoolsList().catch(() => {});
             if (memefiMemesView === 'trending') refreshMemefiTrending().catch(() => {});
+            // Default create form school to user's profile school when opening Memes (once)
+            if (!memefiCreateSchoolId && economyMe?.schoolId) setMemefiCreateSchoolId(String(economyMe.schoolId));
         }
         if (tab === 'earn') { refreshEarnSummary().catch(() => {}); refreshRedemptionProducts().catch(() => {}); refreshMyRedemptions().catch(() => {}); refreshEconomy().catch(() => {}); }
+        if (tab === 'profile') {
+            refreshEconomy().catch(() => {});
+            refreshSchoolsList().catch(() => {});
+            setProfileSchoolId(economyMe?.schoolId ? String(economyMe.schoolId) : '');
+        }
         setBalanceStripVisible(true);
         // No automatic scroll on tab change — user keeps their scroll position; only scroll to FAQ when they tap "FAQs"
         if (tab === 'updates' && scrollToFaqRef.current) {
@@ -2030,6 +2098,13 @@ export default function HomePage() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab]);
+
+    // Keep profile school dropdown in sync when economyMe loads (e.g. after refreshEconomy)
+    useEffect(() => {
+        if (tab === 'profile' && economyMe) {
+            setProfileSchoolId(economyMe.schoolId ? String(economyMe.schoolId) : '');
+        }
+    }, [tab, economyMe]);
 
     useEffect(() => {
         if (multiverseMyNfts.length > 0 && !nftGalleryDefaultAppliedRef.current) {
@@ -3577,12 +3652,34 @@ export default function HomePage() {
                             </button>
                         ))}
                     </div>
-                    {/* Quick-access strip: CoE · NFT Gallery · Yield Vault · DAO */}
+                    {/* Onboarding: Try Memes & Earn (dismissible) */}
+                    {!memesEarnTipDismissed ? (
+                        <div className="card card--elevated" style={{ marginTop: 16, borderLeft: '4px solid var(--accent-gold)', background: 'linear-gradient(135deg, rgba(255,200,100,0.12) 0%, transparent 70%)', position: 'relative' }}>
+                            <button type="button" className="btn btn--ghost" style={{ position: 'absolute', top: 8, right: 8, fontSize: 18, padding: 4 }} onClick={() => setMemesEarnTipDismissed(true)} aria-label="Dismiss">×</button>
+                            <div className="card__title">New: Create &amp; Earn</div>
+                            <p className="card__hint">Create memes and earn AIBA/NEUR from the daily pool. Redeem tokens for school fees, LMS premium, exam prep, merch.</p>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 12 }}>
+                                <button type="button" className="btn btn--primary" onClick={() => setTab('memes')}><IconMemes /> Memes</button>
+                                <button type="button" className="btn btn--primary" onClick={() => setTab('earn')}><IconEarn /> Earn</button>
+                            </div>
+                        </div>
+                    ) : null}
+                    {/* Quick-access strip: Memes · Earn · Yield Vault · CoE · DAO */}
                     <div className="home-featured-strip" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
+                        <button type="button" className="btn btn--primary" onClick={() => setTab('memes')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconMemes /> Memes</button>
+                        <button type="button" className="btn btn--primary" onClick={() => setTab('earn')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconEarn /> Earn</button>
+                        <button type="button" className="btn btn--secondary" onClick={() => setTab('staking')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconStake /> Yield Vault</button>
                         <button type="button" className="btn btn--secondary" onClick={() => setTab('coe')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconCoe /> CoE</button>
-                        <button type="button" className="btn btn--secondary" onClick={() => setTab('nftGallery')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconMultiverse /> NFT Gallery</button>
-                        <button type="button" className="btn btn--primary" onClick={() => setTab('staking')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconStake /> Yield Vault</button>
                         <button type="button" className="btn btn--secondary" onClick={() => setTab('dao')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><IconGov /> DAO</button>
+                    </div>
+                    {/* Create & Earn hero: Memes + Redemption */}
+                    <div className="card card--elevated" style={{ marginTop: 16, borderLeft: '4px solid var(--accent-gold)', background: 'linear-gradient(135deg, rgba(255,200,100,0.08) 0%, transparent 60%)' }}>
+                        <div className="card__title">Create &amp; Earn</div>
+                        <p className="card__hint">Create memes, get likes and shares — top memes earn AIBA/NEUR from the daily pool. Redeem tokens for school fees, LMS premium, exam prep, merch.</p>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 12 }}>
+                            <button type="button" className="btn btn--primary" onClick={() => setTab('memes')}><IconMemes /> Memes</button>
+                            <button type="button" className="btn btn--primary" onClick={() => setTab('earn')}><IconEarn /> Earn / Redeem</button>
+                        </div>
                     </div>
                     <div className="card card--elevated home-overview__yield-vault" style={{ marginTop: 16 }}>
                         <div className="card__title"><IconStake /> Yield Vault — stake AIBA, earn APY</div>
@@ -3974,7 +4071,7 @@ export default function HomePage() {
                                     {memefiLikedIds.includes(memefiDetail._id) ? 'Unlike' : 'Like'}
                                 </button>
                                 <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/share`, { kind: 'internal' }); setMemefiDetail((m) => m ? { ...m, internalShareCount: (m.internalShareCount || 0) + 1 } : null); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Share failed')); } finally { setBusy(false); } }} disabled={busy}>Share (in-app)</button>
-                                <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/share`, { kind: 'external' }); shareViaTelegram({ title: 'Meme', text: memefiDetail.caption || 'Check this meme!', url: window.location.href }); setMemefiDetail((m) => m ? { ...m, externalShareCount: (m.externalShareCount || 0) + 1 } : null); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Share failed')); } finally { setBusy(false); } }} disabled={busy}><IconShare /> Share (Telegram)</button>
+                                <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/share`, { kind: 'external' }); const shareText = (memefiDetail.caption || 'Check this meme!') + ' — Create memes & earn AIBA/NEUR in AIBA Arena'; shareViaTelegram({ title: 'Meme', text: shareText, url: window.location.href }); setMemefiDetail((m) => m ? { ...m, externalShareCount: (m.externalShareCount || 0) + 1 } : null); setMemefiMsg('Shared! More shares = higher score = more rewards.'); setTimeout(() => setMemefiMsg(''), 3000); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Share failed')); } finally { setBusy(false); } }} disabled={busy}><IconShare /> Share (Telegram)</button>
                                 <button type="button" className={`btn ${memefiDetailSaved ? 'btn--primary' : 'btn--secondary'}`} onClick={async () => { setBusy(true); setMemefiMsg(''); try { await api.post(`/api/memefi/memes/${memefiDetail._id}/save`); setMemefiDetailSaved(!memefiDetailSaved); await refreshMemefiSaved(); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Save failed')); } finally { setBusy(false); } }} disabled={busy}>{memefiDetailSaved ? 'Saved' : 'Save'}</button>
                                 {['fire', 'funny', 'edu'].map((t) => (
                                     <button key={t} type="button" className={`btn btn--secondary ${memefiDetailMyReaction === t ? 'btn--primary' : ''}`} onClick={async () => { setBusy(true); setMemefiMsg(''); try { const r = await api.post(`/api/memefi/memes/${memefiDetail._id}/reaction`, { reactionType: t }); setMemefiDetailMyReaction(t); setMemefiDetailReactionCounts(r.data?.reactionCounts || {}); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Reaction failed')); } finally { setBusy(false); } }} disabled={busy}>{t} {memefiDetailReactionCounts[t] ?? 0}</button>
@@ -4023,7 +4120,18 @@ export default function HomePage() {
                         <>
                             <div className="card card--elevated" style={{ marginTop: 12 }}>
                                 <div className="card__title">Create meme</div>
-                                <p className="card__hint">Paste image URL (upload to Telegram or any host first). Add caption, tags, and category.</p>
+                                <p className="card__hint">Paste image URL (upload to Telegram or any host first). Add caption, tags, and category. Optional: template and school.</p>
+                                {memefiTemplatesList.length > 0 ? (
+                                    <div style={{ marginTop: 8 }}>
+                                        <label className="card__hint" style={{ display: 'block', marginBottom: 4 }}>Template (optional)</label>
+                                        <select className="select" value={memefiCreateTemplateId} onChange={(e) => setMemefiCreateTemplateId(e.target.value)} style={{ width: '100%' }}>
+                                            <option value="">None</option>
+                                            {memefiTemplatesList.map((t) => (
+                                                <option key={t._id} value={t._id}>{t.name}{t.category ? ` (${t.category})` : ''}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                ) : null}
                                 <input className="input" type="url" placeholder="Image URL" value={memefiCreateImageUrl} onChange={(e) => setMemefiCreateImageUrl(e.target.value)} style={{ width: '100%', marginTop: 8 }} />
                                 <input className="input" type="text" placeholder="Caption" value={memefiCreateCaption} onChange={(e) => setMemefiCreateCaption(e.target.value)} style={{ width: '100%', marginTop: 8 }} />
                                 <input className="input" type="text" placeholder="Tags (comma-separated, e.g. exam, funny)" value={memefiCreateTags} onChange={(e) => setMemefiCreateTags(e.target.value)} style={{ width: '100%', marginTop: 8 }} />
@@ -4034,11 +4142,22 @@ export default function HomePage() {
                                     <option value="school_events">School events</option>
                                     <option value="general_edu">General education</option>
                                 </select>
+                                {schoolsList.length > 0 ? (
+                                    <div style={{ marginTop: 8 }}>
+                                        <label className="card__hint" style={{ display: 'block', marginBottom: 4 }}>School (optional)</label>
+                                        <select className="select" value={memefiCreateSchoolId} onChange={(e) => setMemefiCreateSchoolId(e.target.value)} style={{ width: '100%' }}>
+                                            <option value="">None</option>
+                                            {schoolsList.map((s) => (
+                                                <option key={s._id} value={s._id}>{s.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                ) : null}
                                 <select className="select" value={memefiCreateStatus} onChange={(e) => setMemefiCreateStatus(e.target.value)} style={{ marginTop: 8 }}>
                                     <option value="published">Publish now</option>
                                     <option value="draft">Save as draft</option>
                                 </select>
-                                <button type="button" className="btn btn--primary" style={{ marginTop: 12 }} onClick={async () => { if (!memefiCreateImageUrl.trim()) { setMemefiMsg('Enter image URL'); return; } setBusy(true); setMemefiMsg(''); try { const tags = memefiCreateTags.trim() ? memefiCreateTags.split(/,\s*/).map((t) => t.trim().toLowerCase()).filter(Boolean).slice(0, 10) : undefined; await api.post('/api/memefi/upload', { imageUrl: memefiCreateImageUrl.trim(), caption: memefiCreateCaption.trim(), category: memefiCreateCategory, educationCategory: memefiCreateCategory === 'general' ? '' : memefiCreateCategory, tags, status: memefiCreateStatus }); setMemefiCreateImageUrl(''); setMemefiCreateCaption(''); setMemefiCreateTags(''); await refreshMemefiFeed(false); await refreshMemefiDrafts(); setMemefiMsg(memefiCreateStatus === 'draft' ? 'Draft saved!' : 'Meme created!'); } catch (e) { setMemefiMsg(getErrorMessage(e, 'Upload failed')); } finally { setBusy(false); }} disabled={busy}>{memefiCreateStatus === 'draft' ? 'Save draft' : 'Post meme'}</button>
+                                <button type="button" className="btn btn--primary" style={{ marginTop: 12 }} onClick={submitMemefiCreate} disabled={busy}>{memefiCreateStatus === 'draft' ? 'Save draft' : 'Post meme'}</button>
                             </div>
                             <div className="card card--elevated" style={{ marginTop: 12 }}>
                                 <div className="card__title">Meme leaderboard</div>
@@ -4104,7 +4223,7 @@ export default function HomePage() {
                                                     <p className="card__hint">Score {m.engagementScore} · Like {m.likeCount} · Comment {m.commentCount}</p>
                                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                                         <button type="button" className="btn btn--secondary" onClick={async () => { setBusy(true); try { await api.post(`/api/memefi/memes/${m._id}/like`); await refreshMemefiFeed(false); await refreshMemefiLikes(); } catch (e) { setMemefiMsg(getErrorMessage(e)); } finally { setBusy(false); } }} disabled={busy}>{memefiLikedIds.includes(m._id) ? 'Unlike' : 'Like'}</button>
-                                                        <button type="button" className="btn btn--secondary" onClick={async () => { try { await api.post(`/api/memefi/memes/${m._id}/share`, { kind: 'external' }); shareViaTelegram({ title: 'Meme', text: m.caption || 'Check this meme!', url: window.location.href }); await refreshMemefiFeed(false); } catch (e) { setMemefiMsg(getErrorMessage(e)); } }} disabled={busy}><IconShare /> Share</button>
+                                                        <button type="button" className="btn btn--secondary" onClick={async () => { try { await api.post(`/api/memefi/memes/${m._id}/share`, { kind: 'external' }); shareViaTelegram({ title: 'Meme', text: (m.caption || 'Check this meme!') + ' — Create memes & earn AIBA/NEUR in AIBA Arena', url: window.location.href }); await refreshMemefiFeed(false); } catch (e) { setMemefiMsg(getErrorMessage(e)); } }} disabled={busy}><IconShare /> Share</button>
                                                         <button type="button" className="btn btn--secondary" onClick={() => openMemeDetail(m._id)}>View</button>
                                                     </div>
                                                 </div>
@@ -4130,7 +4249,7 @@ export default function HomePage() {
                                                     <p className="card__hint">Score {m.engagementScore} · Like {m.likeCount}</p>
                                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                                         <button type="button" className="btn btn--secondary" onClick={() => openMemeDetail(m._id)}>View</button>
-                                                        <button type="button" className="btn btn--secondary" onClick={async () => { try { await api.post(`/api/memefi/memes/${m._id}/share`, { kind: 'external' }); shareViaTelegram({ title: 'Meme', text: m.caption || 'Check this meme!', url: window.location.href }); } catch (e) { setMemefiMsg(getErrorMessage(e)); } }} disabled={busy}><IconShare /> Share</button>
+                                                        <button type="button" className="btn btn--secondary" onClick={async () => { try { await api.post(`/api/memefi/memes/${m._id}/share`, { kind: 'external' }); shareViaTelegram({ title: 'Meme', text: (m.caption || 'Check this meme!') + ' — Create memes & earn AIBA/NEUR in AIBA Arena', url: window.location.href }); } catch (e) { setMemefiMsg(getErrorMessage(e)); } }} disabled={busy}><IconShare /> Share</button>
                                                     </div>
                                                 </div>
                                             ))}
@@ -4176,14 +4295,18 @@ export default function HomePage() {
                         <div className="card__title"><IconEarn /> Earn <span className="badge-new">NEW</span></div>
                         <p className="card__hint">All ways you earn: battles, memes, referrals, daily, tasks. Redeem tokens for school fees, LMS premium, exam prep, merch.</p>
                     </div>
-                    <div className="card card--elevated" style={{ marginTop: 12 }}>
-                        <div className="card__title">Earn from</div>
-                        <p className="card__hint">Battles (Arenas tab) · Referrals (share link) · Daily (Wallet) · Tasks (Tasks tab) · Memes (create, boost, top 10, lottery, mining). Your total balance below includes all sources.</p>
+                    {/* Redemption prominence: turn tokens into real value */}
+                    <div className="card card--elevated" style={{ marginTop: 12, borderLeft: '4px solid var(--accent-gold)', background: 'linear-gradient(135deg, rgba(255,200,100,0.1) 0%, transparent 70%)' }}>
+                        <div className="card__title">Turn AIBA &amp; NEUR into real value</div>
+                        <p className="card__hint">Redeem for <strong>school fee discounts</strong>, <strong>LMS premium</strong>, exam prep, merchandise. Use your balance below.</p>
                     </div>
                     <div className="card card--elevated" style={{ marginTop: 12 }}>
                         <div className="card__title">Your earnings (MemeFi)</div>
                         {earnSummary ? (
-                            <p className="card__hint">Meme AIBA: {earnSummary.earnedAiba ?? 0} · Meme NEUR: {earnSummary.earnedNeur ?? 0} · My memes: {earnSummary.myMemesCount ?? 0} · My boosts: {earnSummary.myBoostsCount ?? 0}</p>
+                            <>
+                                <p className="card__hint">Meme AIBA: {earnSummary.earnedAiba ?? 0} · Meme NEUR: {earnSummary.earnedNeur ?? 0} · My memes: {earnSummary.myMemesCount ?? 0} · My boosts: {earnSummary.myBoostsCount ?? 0}</p>
+                                <p className="card__hint" style={{ marginTop: 6, color: earnSummary.creatorTier && earnSummary.creatorTier !== 'bronze' ? 'var(--accent-gold)' : undefined }}>Creator tier: <strong>{String(earnSummary.creatorTier || 'bronze').toUpperCase()}</strong>{earnSummary.creatorTier === 'bronze' || !earnSummary.creatorTier ? ' — Create more memes & score to reach Silver/Gold/Platinum for higher reward share.' : ' — Higher tier = higher reward share from daily pool.'}</p>
+                            </>
                         ) : <p className="guide-tip">Load earnings from MemeFi (create & engage with memes to earn).</p>}
                     </div>
                     <div className="card card--elevated" style={{ marginTop: 12 }}>
@@ -4191,7 +4314,7 @@ export default function HomePage() {
                         {economyMe ? <p className="card__hint">AIBA: {economyMe.aibaBalance ?? 0} · NEUR: {economyMe.neurBalance ?? 0} · Stars: {economyMe.starsBalance ?? 0}</p> : <p className="guide-tip">Connect to see balance.</p>}
                     </div>
                     <div className="card card--elevated" style={{ marginTop: 12 }}>
-                        <div className="card__title">Redeem (LMS / school fees)</div>
+                        <div className="card__title">Redeem (LMS / school fees / merch)</div>
                         <p className="card__hint">Spend AIBA/NEUR/Stars for school fee discount, LMS premium, exam prep, merch.</p>
                         {redemptionProducts.length === 0 ? <p className="guide-tip">No redemption products yet. Admins add them in Admin.</p> : (
                             <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -6022,6 +6145,20 @@ export default function HomePage() {
                             <span className="home-stat-pill"><IconDiamond /> Diamonds {Number(economyMe?.diamondsBalance ?? 0)}</span>
                             <span className="home-stat-pill">Brokers {brokers.length}</span>
                         </div>
+                        {schoolsList.length > 0 ? (
+                            <div className="card" style={{ marginTop: 16 }}>
+                                <div className="card__title">School (MemeFi / LMS)</div>
+                                <p className="card__hint">Used for school leaderboard and redemption products. Super Admin adds schools in Admin.</p>
+                                <select className="select" value={profileSchoolId || (economyMe?.schoolId ? String(economyMe.schoolId) : '')} onChange={(e) => setProfileSchoolId(e.target.value)} style={{ width: '100%', marginTop: 8 }} onBlur={async () => { const v = (profileSchoolId || economyMe?.schoolId) ? String(profileSchoolId || economyMe.schoolId) : ''; if (v === (economyMe?.schoolId ? String(economyMe.schoolId) : '')) return; setProfileSchoolMsg(''); setBusy(true); try { await api.patch('/api/economy/me', { schoolId: v || null }); setProfileSchoolMsg('Saved.'); await refreshEconomy(); } catch (e) { setProfileSchoolMsg(getErrorMessage(e, 'Save failed')); } finally { setBusy(false); } }}>
+                                    <option value="">None</option>
+                                    {schoolsList.map((s) => (
+                                        <option key={s._id} value={s._id}>{s.name}</option>
+                                    ))}
+                                </select>
+                                <button type="button" className="btn btn--secondary" style={{ marginTop: 8 }} onClick={async () => { const v = profileSchoolId || (economyMe?.schoolId ? String(economyMe.schoolId) : ''); setProfileSchoolMsg(''); setBusy(true); try { await api.patch('/api/economy/me', { schoolId: v || null }); setProfileSchoolMsg('Saved.'); await refreshEconomy(); } finally { setBusy(false); } }} disabled={busy}>Save school</button>
+                                {profileSchoolMsg ? <p className="status-msg" style={{ marginTop: 8 }}>{profileSchoolMsg}</p> : null}
+                            </div>
+                        ) : null}
                         <button type="button" className="btn btn--secondary" onClick={() => setTab('wallet')} style={{ marginTop: 16 }}><IconWallet /> Wallet &amp; more</button>
                     </div>
                 </section>
@@ -6116,7 +6253,7 @@ export default function HomePage() {
                     <div className="card card--elevated major-tab__hero yield-vault-hero" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
                         <div className="card__title"><IconStake /> Yield Vault</div>
                         <p className="card__hint">Lock AIBA for flexible or fixed periods. Higher APY for longer locks. Early cancel = 5% fee to Treasury.</p>
-                        <p className="card__hint" style={{ marginTop: 6, padding: '6px 10px', background: 'rgba(255,200,100,0.12)', borderRadius: 6, display: 'inline-block' }}><strong>Minimum stake:</strong> {stakingMinAiba.toLocaleString()} AIBA (ecosystem-aligned: 1T AIBA, broker mint cost)</p>
+                        <p className="card__hint" style={{ marginTop: 6, padding: '6px 10px', background: 'rgba(255,200,100,0.12)', borderRadius: 6, display: 'inline-block' }}><strong>Minimum stake:</strong> {stakingMinAiba.toLocaleString()} AIBA (Super Admin sets in Admin → Economy)</p>
                         {(() => {
                             const activeLocks = stakingLocks.filter((l) => l.status === 'active');
                             const totalLocked = activeLocks.reduce((s, l) => s + (Number(l.amount) || 0), 0);
