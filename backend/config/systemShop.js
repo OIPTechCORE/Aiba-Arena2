@@ -16,18 +16,90 @@ const SYSTEM_BROKERS = [
 
 /** System car types: id, name, carClass, topSpeed, acceleration, handling, durability, priceAiba */
 const SYSTEM_CARS = [
-    { id: 'touring', name: 'Touring Pro', carClass: 'touring', topSpeed: 55, acceleration: 52, handling: 58, durability: 55, priceAiba: 80 },
-    { id: 'gt1', name: 'GT1 Racer', carClass: 'gt1', topSpeed: 62, acceleration: 58, handling: 60, durability: 55, priceAiba: 150 },
-    { id: 'formula1', name: 'Formula 1', carClass: 'formula1', topSpeed: 70, acceleration: 68, handling: 72, durability: 50, priceAiba: 300 },
-    { id: 'lemans', name: 'Le Mans Hypercar', carClass: 'lemans', topSpeed: 72, acceleration: 70, handling: 70, durability: 58, priceAiba: 400 },
+    {
+        id: 'touring',
+        name: 'Touring Pro',
+        carClass: 'touring',
+        topSpeed: 55,
+        acceleration: 52,
+        handling: 58,
+        durability: 55,
+        priceAiba: 80,
+    },
+    {
+        id: 'gt1',
+        name: 'GT1 Racer',
+        carClass: 'gt1',
+        topSpeed: 62,
+        acceleration: 58,
+        handling: 60,
+        durability: 55,
+        priceAiba: 150,
+    },
+    {
+        id: 'formula1',
+        name: 'Formula 1',
+        carClass: 'formula1',
+        topSpeed: 70,
+        acceleration: 68,
+        handling: 72,
+        durability: 50,
+        priceAiba: 300,
+    },
+    {
+        id: 'lemans',
+        name: 'Le Mans Hypercar',
+        carClass: 'lemans',
+        topSpeed: 72,
+        acceleration: 70,
+        handling: 70,
+        durability: 58,
+        priceAiba: 400,
+    },
 ];
 
 /** System bike types: id, name, bikeClass, topSpeed, acceleration, handling, durability, priceAiba */
 const SYSTEM_BIKES = [
-    { id: 'supersport', name: 'Supersport 600', bikeClass: 'supersport', topSpeed: 52, acceleration: 55, handling: 60, durability: 52, priceAiba: 80 },
-    { id: 'superbike', name: 'Superbike', bikeClass: 'superbike', topSpeed: 60, acceleration: 62, handling: 65, durability: 55, priceAiba: 150 },
-    { id: 'motogp', name: 'MotoGP Racer', bikeClass: 'motogp', topSpeed: 68, acceleration: 70, handling: 72, durability: 50, priceAiba: 300 },
-    { id: 'hyperTrack', name: 'Hyper Track', bikeClass: 'hyperTrack', topSpeed: 72, acceleration: 72, handling: 70, durability: 52, priceAiba: 400 },
+    {
+        id: 'supersport',
+        name: 'Supersport 600',
+        bikeClass: 'supersport',
+        topSpeed: 52,
+        acceleration: 55,
+        handling: 60,
+        durability: 52,
+        priceAiba: 80,
+    },
+    {
+        id: 'superbike',
+        name: 'Superbike',
+        bikeClass: 'superbike',
+        topSpeed: 60,
+        acceleration: 62,
+        handling: 65,
+        durability: 55,
+        priceAiba: 150,
+    },
+    {
+        id: 'motogp',
+        name: 'MotoGP Racer',
+        bikeClass: 'motogp',
+        topSpeed: 68,
+        acceleration: 70,
+        handling: 72,
+        durability: 50,
+        priceAiba: 300,
+    },
+    {
+        id: 'hyperTrack',
+        name: 'Hyper Track',
+        bikeClass: 'hyperTrack',
+        topSpeed: 72,
+        acceleration: 72,
+        handling: 70,
+        durability: 52,
+        priceAiba: 400,
+    },
 ];
 
 function getSystemBroker(catalogId) {

@@ -48,15 +48,9 @@ router.get('/courses', async (_req, res) => {
 });
 
 /** GET /api/admin/university/graduates?limit=100 — list users with university_graduate badge. */
-router.get(
-    '/graduates',
-    validateQuery({ limit: { type: 'integer', min: 1, max: 200 } }),
-    async (req, res) => {
+router.get('/graduates', validateQuery({ limit: { type: 'integer', min: 1, max: 200 } }), async (req, res) => {
     try {
-        const limit = getLimit(
-            { query: { limit: req.validatedQuery?.limit } },
-            { defaultLimit: 100, maxLimit: 200 },
-        );
+        const limit = getLimit({ query: { limit: req.validatedQuery?.limit } }, { defaultLimit: 100, maxLimit: 200 });
         const users = await User.find({ badges: 'university_graduate' })
             .select('telegramId username telegram badges graduatedAt')
             .limit(limit)
@@ -65,7 +59,9 @@ router.get(
             .select('telegramId graduatedAt')
             .lean();
         const graduatedAtByTelegram = {};
-        withGraduatedAt.forEach((d) => { graduatedAtByTelegram[d.telegramId] = d.graduatedAt; });
+        withGraduatedAt.forEach((d) => {
+            graduatedAtByTelegram[d.telegramId] = d.graduatedAt;
+        });
         const list = users.map((u) => ({
             telegramId: u.telegramId,
             username: u.username || (u.telegram && u.telegram.username) || '',
@@ -76,7 +72,6 @@ router.get(
         console.error('Admin university graduates error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-    },
-);
+});
 
 module.exports = router;

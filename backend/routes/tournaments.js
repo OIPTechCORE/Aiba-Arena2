@@ -48,56 +48,57 @@ router.post(
         txHash: { type: 'string', trim: true, maxLength: 128 },
     }),
     async (req, res) => {
-    try {
-        const telegramId = String(req.telegramId || '');
-        const tournament = await Tournament.findById(req.params.id);
-        if (!tournament) return res.status(404).json({ error: 'tournament not found' });
-        if (tournament.status !== 'open') return res.status(400).json({ error: 'tournament not open' });
-        const count = await TournamentEntry.countDocuments({ tournamentId: tournament._id });
-        if (count >= tournament.maxEntries) return res.status(400).json({ error: 'tournament full' });
-        const existing = await TournamentEntry.findOne({ tournamentId: tournament._id, telegramId });
-        if (existing) return res.status(409).json({ error: 'already entered' });
-        const broker = await Broker.findById(req.validatedBody?.brokerId);
-        if (!broker || String(broker.ownerTelegramId) !== telegramId) return res.status(403).json({ error: 'invalid broker' });
-        if (broker.guildId) return res.status(400).json({ error: 'withdraw broker from guild first' });
-        const cfg = await getConfig();
-        const feeBps = Math.min(10000, Number(cfg.tournamentFeeBps ?? 2000));
-        if (tournament.entryCostAiba > 0) {
-            const debit = await debitAibaFromUser(tournament.entryCostAiba, {
+        try {
+            const telegramId = String(req.telegramId || '');
+            const tournament = await Tournament.findById(req.params.id);
+            if (!tournament) return res.status(404).json({ error: 'tournament not found' });
+            if (tournament.status !== 'open') return res.status(400).json({ error: 'tournament not open' });
+            const count = await TournamentEntry.countDocuments({ tournamentId: tournament._id });
+            if (count >= tournament.maxEntries) return res.status(400).json({ error: 'tournament full' });
+            const existing = await TournamentEntry.findOne({ tournamentId: tournament._id, telegramId });
+            if (existing) return res.status(409).json({ error: 'already entered' });
+            const broker = await Broker.findById(req.validatedBody?.brokerId);
+            if (!broker || String(broker.ownerTelegramId) !== telegramId)
+                return res.status(403).json({ error: 'invalid broker' });
+            if (broker.guildId) return res.status(400).json({ error: 'withdraw broker from guild first' });
+            const cfg = await getConfig();
+            const feeBps = Math.min(10000, Number(cfg.tournamentFeeBps ?? 2000));
+            if (tournament.entryCostAiba > 0) {
+                const debit = await debitAibaFromUser(tournament.entryCostAiba, {
+                    telegramId,
+                    reason: 'tournament_entry',
+                    arena: 'tournament',
+                    league: tournament.league,
+                    sourceType: 'tournament',
+                    sourceId: String(tournament._id),
+                    requestId: req.requestId || '',
+                    meta: { tournamentId: String(tournament._id) },
+                });
+                if (!debit.ok) return res.status(403).json({ error: debit.reason || 'insufficient AIBA' });
+                const treasuryCut = Math.floor((tournament.entryCostAiba * feeBps) / 10000);
+                const toPool = tournament.entryCostAiba - treasuryCut;
+                await Tournament.updateOne(
+                    { _id: tournament._id },
+                    { $inc: { prizePoolAiba: toPool, treasuryCutAiba: treasuryCut } },
+                );
+            }
+            await TournamentEntry.create({
+                tournamentId: tournament._id,
                 telegramId,
-                reason: 'tournament_entry',
-                arena: 'tournament',
-                league: tournament.league,
-                sourceType: 'tournament',
-                sourceId: String(tournament._id),
-                requestId: req.requestId || '',
-                meta: { tournamentId: String(tournament._id) },
+                brokerId: broker._id,
+                paidAiba: tournament.entryCostAiba,
+                paidTonTxHash: req.validatedBody?.txHash || '',
             });
-            if (!debit.ok) return res.status(403).json({ error: debit.reason || 'insufficient AIBA' });
-            const treasuryCut = Math.floor((tournament.entryCostAiba * feeBps) / 10000);
-            const toPool = tournament.entryCostAiba - treasuryCut;
-            await Tournament.updateOne(
-                { _id: tournament._id },
-                { $inc: { prizePoolAiba: toPool, treasuryCutAiba: treasuryCut } },
-            );
+            const updated = await Tournament.findById(tournament._id).lean();
+            const newCount = count + 1;
+            if (newCount >= updated.maxEntries) {
+                runTournamentBracket(tournament._id).catch((e) => console.error('Tournament run error:', e));
+            }
+            res.status(201).json({ ok: true, tournament: await Tournament.findById(tournament._id).lean() });
+        } catch (err) {
+            console.error('Tournament enter error:', err);
+            res.status(500).json({ error: 'internal server error' });
         }
-        await TournamentEntry.create({
-            tournamentId: tournament._id,
-            telegramId,
-            brokerId: broker._id,
-            paidAiba: tournament.entryCostAiba,
-            paidTonTxHash: req.validatedBody?.txHash || '',
-        });
-        const updated = await Tournament.findById(tournament._id).lean();
-        const newCount = count + 1;
-        if (newCount >= updated.maxEntries) {
-            runTournamentBracket(tournament._id).catch((e) => console.error('Tournament run error:', e));
-        }
-        res.status(201).json({ ok: true, tournament: await Tournament.findById(tournament._id).lean() });
-    } catch (err) {
-        console.error('Tournament enter error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
     },
 );
 
@@ -111,7 +112,9 @@ async function runTournamentBracket(tournamentId) {
     const prizes = [0.4, 0.25, 0.15, 0.1];
     const pool = tournament.prizePoolAiba || 0;
     const wins = {};
-    valid.forEach((_, idx) => { wins[idx] = 0; });
+    valid.forEach((_, idx) => {
+        wins[idx] = 0;
+    });
     for (let i = 0; i < valid.length; i++) {
         for (let j = i + 1; j < valid.length; j++) {
             const a = valid[i].brokerId;
@@ -145,23 +148,25 @@ async function runTournamentBracket(tournamentId) {
                     { tournamentId, telegramId: winnerId },
                     { position: p + 1, aibaReward: share },
                 );
-                getConfig().then((cfg) =>
-                    getCreatorReferrerAndBps(winnerId, cfg).then(async (creator) => {
-                        if (!creator?.referrerTelegramId) return;
-                        const creatorAiba = Math.floor((share * creator.bps) / 10000);
-                        if (creatorAiba > 0) {
-                            await creditAibaNoCap(creatorAiba, {
-                                telegramId: creator.referrerTelegramId,
-                                reason: 'creator_earnings',
-                                arena: 'tournament',
-                                league: tournament.league,
-                                sourceType: 'creator_referee_tournament',
-                                sourceId: String(tournamentId),
-                                meta: { refereeTelegramId: winnerId, bps: creator.bps, amountAiba: creatorAiba },
-                            });
-                        }
-                    })
-                ).catch(() => {});
+                getConfig()
+                    .then((cfg) =>
+                        getCreatorReferrerAndBps(winnerId, cfg).then(async (creator) => {
+                            if (!creator?.referrerTelegramId) return;
+                            const creatorAiba = Math.floor((share * creator.bps) / 10000);
+                            if (creatorAiba > 0) {
+                                await creditAibaNoCap(creatorAiba, {
+                                    telegramId: creator.referrerTelegramId,
+                                    reason: 'creator_earnings',
+                                    arena: 'tournament',
+                                    league: tournament.league,
+                                    sourceType: 'creator_referee_tournament',
+                                    sourceId: String(tournamentId),
+                                    meta: { refereeTelegramId: winnerId, bps: creator.bps, amountAiba: creatorAiba },
+                                });
+                            }
+                        }),
+                    )
+                    .catch(() => {});
             }
         }
     }

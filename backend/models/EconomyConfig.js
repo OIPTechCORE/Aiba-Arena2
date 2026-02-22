@@ -75,8 +75,8 @@ const EconomyConfigSchema = new mongoose.Schema(
         // Groups (guilds): pay TON to create or boost. 1–10 TON = 1e9–10e9 nano. Wallets: env LEADER_BOARD_WALLET, BOOST_GROUP_WALLET
         guildCreatorShareBps: { type: Number, default: 100 }, // INNOVATIONS: guild leader earns 1% of guild war earnings from members
         createGroupCostTonNano: { type: Number, default: 1_000_000_000 }, // 1 TON default
-        boostGroupCostTonNano: { type: Number, default: 1_000_000_000 },  // 1 TON default
-        leaderboardTopFreeCreate: { type: Number, default: 50 },          // top N by score can create group for free
+        boostGroupCostTonNano: { type: Number, default: 1_000_000_000 }, // 1 TON default
+        leaderboardTopFreeCreate: { type: Number, default: 50 }, // top N by score can create group for free
 
         // Oracle / reserve (display only; admin can set; automated when oracleAutoUpdateEnabled)
         oracleAibaPerTon: { type: Number, default: 0 },
@@ -97,7 +97,7 @@ const EconomyConfigSchema = new mongoose.Schema(
         boostMultiplier: { type: Number, default: 1.2 },
 
         // Staking (off-chain: lock AIBA, earn APY). Advisory: 1T AIBA, 20% staking allocation.
-        stakingMinAiba: { type: Number, default: 100 }, // Min AIBA to stake (flexible + locked). Ecosystem-aligned: broker mint cost (100), 1T AIBA supply.
+        stakingMinAiba: { type: Number, default: 1000 }, // Min AIBA to stake (flexible + locked). Super Admin sets via Admin → Economy.
         stakingApyPercent: { type: Number, default: 15 },
         // Period-based staking: [{ days: 30, apyPercent: 10 }, { days: 90, apyPercent: 12 }, { days: 180, apyPercent: 15 }, { days: 365, apyPercent: 18 }]
         stakingPeriods: {
@@ -188,7 +188,7 @@ const EconomyConfigSchema = new mongoose.Schema(
         trainerRewardAibaPerUser: { type: Number, default: 5 }, // AIBA per referred user with 3+ battles
         trainerRewardAibaPerRecruitedTrainer: { type: Number, default: 20 }, // AIBA per trainer you recruited (when approved)
         // Trainer tier multipliers (bps): at least N referred users → reward multiplier. e.g. 10 refs = 110 bps = 1.1x
-        trainerTierBpsByReferred: { type: Map, of: Number, default: { '0': 100, '10': 110, '50': 150, '100': 200, '500': 250 } },
+        trainerTierBpsByReferred: { type: Map, of: Number, default: { 0: 100, 10: 110, 50: 150, 100: 200, 500: 250 } },
         // Milestone definitions: referred [5,10,25,50,100,250,500], recruited [1,3,5,10] (for badges/unlocks)
         trainerMilestonesReferred: { type: [Number], default: [5, 10, 25, 50, 100, 250, 500] },
         trainerMilestonesRecruited: { type: [Number], default: [1, 3, 5, 10] },
@@ -218,7 +218,7 @@ const EconomyConfigSchema = new mongoose.Schema(
         donateGiftsFeeTonNano: { type: Number, default: 100_000_000 }, // 0.1 TON
 
         // Unified Comms Phase 4: support link (Telegram group/channel) and optional contact
-        supportLink: { type: String, default: '', trim: true },       // e.g. https://t.me/aibaarena_support
+        supportLink: { type: String, default: '', trim: true }, // e.g. https://t.me/aibaarena_support
         supportTelegramGroup: { type: String, default: '', trim: true }, // e.g. aibaarena_support (for tg://resolve?domain=X)
     },
     { timestamps: true },

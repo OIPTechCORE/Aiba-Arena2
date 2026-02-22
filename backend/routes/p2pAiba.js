@@ -37,7 +37,9 @@ router.post(
                 toUsername = toUsername.replace(/^@/, '');
                 const u = await User.findOne({
                     $or: [{ username: toUsername }, { 'telegram.username': toUsername }],
-                }).select({ telegramId: 1 }).lean();
+                })
+                    .select({ telegramId: 1 })
+                    .lean();
                 if (!u) return res.status(404).json({ error: 'recipient not found' });
                 recipientId = u.telegramId;
             }
@@ -120,7 +122,11 @@ router.post(
             }
 
             // Fetch tx value to know how much TON was sent
-            const base = (process.env.TON_PROVIDER_URL || process.env.TON_API_URL || 'https://toncenter.com/api/v2').replace(/\/+$/, '');
+            const base = (
+                process.env.TON_PROVIDER_URL ||
+                process.env.TON_API_URL ||
+                'https://toncenter.com/api/v2'
+            ).replace(/\/+$/, '');
             const url = `${base}/getTransactionByHash?hash=${encodeURIComponent(txHash)}`;
             const opts = { headers: process.env.TON_API_KEY ? { 'X-API-Key': process.env.TON_API_KEY } : {} };
             const txRes = await fetch(url, opts);
@@ -131,7 +137,8 @@ router.post(
 
             const cfg = await getConfig();
             const rate = Number(cfg.oracleAibaPerTon ?? 0);
-            if (!rate || rate <= 0) return res.status(400).json({ error: 'AIBA/TON rate not set; admin must set oracleAibaPerTon' });
+            if (!rate || rate <= 0)
+                return res.status(400).json({ error: 'AIBA/TON rate not set; admin must set oracleAibaPerTon' });
 
             const feeBps = Math.max(0, Math.min(10000, Number(cfg.buyAibaWithTonFeeBps ?? 500)));
             const grossAiba = Math.floor((tonNano / 1e9) * rate);

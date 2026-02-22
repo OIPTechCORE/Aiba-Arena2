@@ -155,8 +155,31 @@ router.get('/me', async (req, res) => {
             fullCourseCompletionCertificateMintCostTonNano: cfg.fullCourseCompletionCertificateMintCostTonNano,
         },
         profileBoostedUntil: user?.profileBoostedUntil || null,
+        schoolId: user?.schoolId ?? null,
     });
 });
+
+// PATCH /api/economy/me — update profile (e.g. schoolId for MemeFi/LMS)
+router.patch(
+    '/me',
+    validateBody({
+        schoolId: { type: 'string', trim: true, maxLength: 30 },
+    }),
+    async (req, res) => {
+        const telegramId = req.telegramId ? String(req.telegramId) : '';
+        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+        const body = req.validatedBody || {};
+        const upd = {};
+        if (body.schoolId !== undefined) {
+            const sid = (body.schoolId || '').trim();
+            upd.schoolId = /^[a-fA-F0-9]{24}$/.test(sid) ? sid : null;
+        }
+        if (Object.keys(upd).length === 0) return res.status(400).json({ error: 'no valid fields to update' });
+        const user = await User.findOneAndUpdate({ telegramId }, { $set: upd }, { new: true }).lean();
+        if (!user) return res.status(404).json({ error: 'user not found' });
+        res.json({ ok: true, schoolId: user.schoolId ?? null });
+    },
+);
 
 // POST /api/economy/claim-aiba
 // Body: { requestId?: string, amount?: number|string }
@@ -168,30 +191,149 @@ router.post(
         amount: { type: 'integer', min: 1 },
     }),
     async (req, res) => {
-    let claimMutexId = '';
-    try {
-        const telegramId = req.telegramId ? String(req.telegramId) : '';
-        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+        let claimMutexId = '';
+        try {
+            const telegramId = req.telegramId ? String(req.telegramId) : '';
+            if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
 
-        const requestId = getIdempotencyKey(req);
-        if (!requestId) return res.status(400).json({ error: 'requestId required' });
+            const requestId = getIdempotencyKey(req);
+            if (!requestId) return res.status(400).json({ error: 'requestId required' });
 
-        const lock = await acquireActionLock({ scope: 'aiba_claim', requestId, telegramId });
-        if (!lock.ok && lock.inProgress) return res.status(409).json({ error: 'in_progress', retryAfterMs: 1500 });
-        if (lock.ok && lock.completed) return res.json(lock.response);
+            const lock = await acquireActionLock({ scope: 'aiba_claim', requestId, telegramId });
+            if (!lock.ok && lock.inProgress) return res.status(409).json({ error: 'in_progress', retryAfterMs: 1500 });
+            if (lock.ok && lock.completed) return res.json(lock.response);
 
-        // Idempotency: if we already created a claim for this requestId, return it.
-        const existing = await LedgerEntry.findOne({
-            telegramId,
-            currency: 'AIBA',
-            direction: 'debit',
-            sourceType: 'aiba_claim',
-            sourceId: requestId,
-        })
-            .sort({ createdAt: -1 })
-            .lean();
-        if (existing?.meta?.claim) {
-            const response = { ok: true, claim: existing.meta.claim, requestId };
+            // Idempotency: if we already created a claim for this requestId, return it.
+            const existing = await LedgerEntry.findOne({
+                telegramId,
+                currency: 'AIBA',
+                direction: 'debit',
+                sourceType: 'aiba_claim',
+                sourceId: requestId,
+            })
+                .sort({ createdAt: -1 })
+                .lean();
+            if (existing?.meta?.claim) {
+                const response = { ok: true, claim: existing.meta.claim, requestId };
+                if (lock.lockId) {
+                    await ActionRunKey.updateOne(
+                        { _id: lock.lockId },
+                        {
+                            $set: {
+                                status: 'completed',
+                                response,
+                                errorCode: '',
+                                errorMessage: '',
+                                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                            },
+                        },
+                    );
+                }
+                metrics?.economyWithdrawalsTotal?.inc?.({ result: 'ok' });
+                return res.json(response);
+            }
+
+            const user = req.user || (await User.findOne({ telegramId }).lean());
+            const toAddress = user?.wallet ? String(user.wallet).trim() : '';
+            if (!toAddress) return res.status(403).json({ error: 'wallet_required' });
+
+            const vaultAddress = String(process.env.ARENA_VAULT_ADDRESS || '').trim();
+            const jettonMaster = String(process.env.AIBA_JETTON_MASTER || '').trim();
+            if (!vaultAddress || !jettonMaster) {
+                return res.status(500).json({ error: 'vault not configured' });
+            }
+
+            // Serialize claim creation per-user to prevent concurrent requests generating the same seqno.
+            const mutex = await acquireClaimMutex({ telegramId });
+            if (!mutex.ok && mutex.inProgress)
+                return res.status(409).json({ error: 'in_progress', retryAfterMs: 1500 });
+            claimMutexId = mutex.lockId || '';
+
+            const rawAmount = req.validatedBody?.amount ?? req.body?.amount;
+            const amt =
+                rawAmount === undefined || rawAmount === null
+                    ? Math.floor(Number(user?.aibaBalance ?? 0))
+                    : Math.floor(Number(rawAmount));
+            if (!Number.isFinite(amt) || amt <= 0) return res.status(400).json({ error: 'amount must be > 0' });
+
+            const lastOnchain = await getVaultLastSeqno(vaultAddress, toAddress);
+            const lastIssued = safeVaultClaimSeqno(user);
+            if (lastIssued > lastOnchain) {
+                // There's an outstanding unconfirmed claim for this recipient. Issuing another claim would either
+                // collide (same seqno) or create an unusable gap (seqno > last+1), so block and ask the client
+                // to finalize/check the previous claim first.
+                const latest = await LedgerEntry.findOne({
+                    telegramId,
+                    currency: 'AIBA',
+                    direction: 'debit',
+                    reason: 'withdraw_to_chain',
+                    $or: [{ sourceType: 'aiba_claim' }, { sourceType: 'battle_auto_claim' }],
+                })
+                    .sort({ createdAt: -1 })
+                    .lean();
+                const claim = latest?.meta?.claim || null;
+                return res.status(409).json({
+                    error: 'pending_claim',
+                    lastOnchainSeqno: lastOnchain.toString(),
+                    lastIssuedSeqno: lastIssued.toString(),
+                    claim,
+                });
+            }
+
+            const nextSeqno = (lastIssued > lastOnchain ? lastIssued : lastOnchain) + 1n;
+            const validUntil = Math.floor(Date.now() / 1000) + 10 * 60; // 10 minutes
+            const amount = String(amt);
+
+            const signed = await createSignedClaim({
+                vaultAddress,
+                jettonMaster,
+                to: toAddress,
+                amount,
+                seqno: nextSeqno.toString(),
+                validUntil,
+            });
+
+            const claim = {
+                vaultAddress,
+                toAddress,
+                amount,
+                seqno: Number(nextSeqno),
+                validUntil,
+                ...signed,
+            };
+
+            const deb = await debitAibaFromUserNoBurn(amt, {
+                telegramId,
+                reason: 'withdraw_to_chain',
+                arena: 'vault',
+                league: 'global',
+                sourceType: 'aiba_claim',
+                sourceId: requestId,
+                requestId,
+                meta: { claim },
+            });
+            if (!deb.ok) {
+                if (lock.lockId) {
+                    await ActionRunKey.updateOne(
+                        { _id: lock.lockId },
+                        {
+                            $set: {
+                                status: 'failed',
+                                errorCode: 'insufficient_aiba',
+                                errorMessage: 'insufficient AIBA',
+                                expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+                            },
+                        },
+                    );
+                }
+                metrics?.economyWithdrawalsTotal?.inc?.({ result: 'insufficient' });
+                return res.status(403).json({ error: 'insufficient AIBA' });
+            }
+
+            // Best-effort tracking for operators/debugging.
+            await User.updateOne({ telegramId }, { $max: { vaultClaimSeqno: Number(nextSeqno) } }).catch(() => {});
+
+            const response = { ok: true, claim, requestId };
             if (lock.lockId) {
                 await ActionRunKey.updateOne(
                     { _id: lock.lockId },
@@ -206,134 +348,17 @@ router.post(
                     },
                 );
             }
+
             metrics?.economyWithdrawalsTotal?.inc?.({ result: 'ok' });
-            return res.json(response);
+            res.json(response);
+        } catch (err) {
+            console.error('Error in /api/economy/claim-aiba:', err);
+            metrics?.economyWithdrawalsTotal?.inc?.({ result: 'error' });
+            res.status(500).json({ error: 'internal server error' });
+        } finally {
+            await releaseClaimMutex(claimMutexId);
         }
-
-        const user = req.user || (await User.findOne({ telegramId }).lean());
-        const toAddress = user?.wallet ? String(user.wallet).trim() : '';
-        if (!toAddress) return res.status(403).json({ error: 'wallet_required' });
-
-        const vaultAddress = String(process.env.ARENA_VAULT_ADDRESS || '').trim();
-        const jettonMaster = String(process.env.AIBA_JETTON_MASTER || '').trim();
-        if (!vaultAddress || !jettonMaster) {
-            return res.status(500).json({ error: 'vault not configured' });
-        }
-
-        // Serialize claim creation per-user to prevent concurrent requests generating the same seqno.
-        const mutex = await acquireClaimMutex({ telegramId });
-        if (!mutex.ok && mutex.inProgress) return res.status(409).json({ error: 'in_progress', retryAfterMs: 1500 });
-        claimMutexId = mutex.lockId || '';
-
-        const rawAmount = req.validatedBody?.amount ?? req.body?.amount;
-        const amt =
-            rawAmount === undefined || rawAmount === null
-                ? Math.floor(Number(user?.aibaBalance ?? 0))
-                : Math.floor(Number(rawAmount));
-        if (!Number.isFinite(amt) || amt <= 0) return res.status(400).json({ error: 'amount must be > 0' });
-
-        const lastOnchain = await getVaultLastSeqno(vaultAddress, toAddress);
-        const lastIssued = safeVaultClaimSeqno(user);
-        if (lastIssued > lastOnchain) {
-            // There's an outstanding unconfirmed claim for this recipient. Issuing another claim would either
-            // collide (same seqno) or create an unusable gap (seqno > last+1), so block and ask the client
-            // to finalize/check the previous claim first.
-            const latest = await LedgerEntry.findOne({
-                telegramId,
-                currency: 'AIBA',
-                direction: 'debit',
-                reason: 'withdraw_to_chain',
-                $or: [{ sourceType: 'aiba_claim' }, { sourceType: 'battle_auto_claim' }],
-            })
-                .sort({ createdAt: -1 })
-                .lean();
-            const claim = latest?.meta?.claim || null;
-            return res.status(409).json({
-                error: 'pending_claim',
-                lastOnchainSeqno: lastOnchain.toString(),
-                lastIssuedSeqno: lastIssued.toString(),
-                claim,
-            });
-        }
-
-        const nextSeqno = (lastIssued > lastOnchain ? lastIssued : lastOnchain) + 1n;
-        const validUntil = Math.floor(Date.now() / 1000) + 10 * 60; // 10 minutes
-        const amount = String(amt);
-
-        const signed = await createSignedClaim({
-            vaultAddress,
-            jettonMaster,
-            to: toAddress,
-            amount,
-            seqno: nextSeqno.toString(),
-            validUntil,
-        });
-
-        const claim = {
-            vaultAddress,
-            toAddress,
-            amount,
-            seqno: Number(nextSeqno),
-            validUntil,
-            ...signed,
-        };
-
-        const deb = await debitAibaFromUserNoBurn(amt, {
-            telegramId,
-            reason: 'withdraw_to_chain',
-            arena: 'vault',
-            league: 'global',
-            sourceType: 'aiba_claim',
-            sourceId: requestId,
-            requestId,
-            meta: { claim },
-        });
-        if (!deb.ok) {
-            if (lock.lockId) {
-                await ActionRunKey.updateOne(
-                    { _id: lock.lockId },
-                    {
-                        $set: {
-                            status: 'failed',
-                            errorCode: 'insufficient_aiba',
-                            errorMessage: 'insufficient AIBA',
-                            expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-                        },
-                    },
-                );
-            }
-            metrics?.economyWithdrawalsTotal?.inc?.({ result: 'insufficient' });
-            return res.status(403).json({ error: 'insufficient AIBA' });
-        }
-
-        // Best-effort tracking for operators/debugging.
-        await User.updateOne({ telegramId }, { $max: { vaultClaimSeqno: Number(nextSeqno) } }).catch(() => {});
-
-        const response = { ok: true, claim, requestId };
-        if (lock.lockId) {
-            await ActionRunKey.updateOne(
-                { _id: lock.lockId },
-                {
-                    $set: {
-                        status: 'completed',
-                        response,
-                        errorCode: '',
-                        errorMessage: '',
-                        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                    },
-                },
-            );
-        }
-
-        metrics?.economyWithdrawalsTotal?.inc?.({ result: 'ok' });
-        res.json(response);
-    } catch (err) {
-        console.error('Error in /api/economy/claim-aiba:', err);
-        metrics?.economyWithdrawalsTotal?.inc?.({ result: 'error' });
-        res.status(500).json({ error: 'internal server error' });
-    } finally {
-        await releaseClaimMutex(claimMutexId);
-    }
-});
+    },
+);
 
 module.exports = router;

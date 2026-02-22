@@ -20,16 +20,16 @@ router.post(
         mentorId: { type: 'objectId', required: true },
     }),
     async (req, res) => {
-    const mentorId = String(req.validatedBody?.mentorId || req.body?.mentorId || '').trim();
-    const mentor = await Mentor.findById(mentorId).lean();
-    if (!mentor) return res.status(404).json({ error: 'Mentor not found' });
+        const mentorId = String(req.validatedBody?.mentorId || req.body?.mentorId || '').trim();
+        const mentor = await Mentor.findById(mentorId).lean();
+        if (!mentor) return res.status(404).json({ error: 'Mentor not found' });
 
-    const user = await User.findOne({ telegramId: req.telegramId });
-    if (!user) return res.status(404).json({ error: 'User not found' });
+        const user = await User.findOne({ telegramId: req.telegramId });
+        if (!user) return res.status(404).json({ error: 'User not found' });
 
-    user.mentorId = mentor._id;
-    await user.save();
-    res.json({ ok: true });
+        user.mentorId = mentor._id;
+        await user.save();
+        res.json({ ok: true });
     },
 );
 
@@ -40,22 +40,22 @@ router.post(
         mentorId: { type: 'objectId', required: true },
     }),
     async (req, res) => {
-    const mentorId = String(req.validatedBody?.mentorId || req.body?.mentorId || '').trim();
-    const mentor = await Mentor.findById(mentorId);
-    if (!mentor) return res.status(404).json({ error: 'Mentor not found' });
+        const mentorId = String(req.validatedBody?.mentorId || req.body?.mentorId || '').trim();
+        const mentor = await Mentor.findById(mentorId);
+        if (!mentor) return res.status(404).json({ error: 'Mentor not found' });
 
-    const user = await User.findOne({ telegramId: req.telegramId });
-    if (!user) return res.status(404).json({ error: 'User not found' });
+        const user = await User.findOne({ telegramId: req.telegramId });
+        if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const cfg = (await EconomyConfig.findOne().sort({ createdAt: -1 })) || new EconomyConfig();
-    const tierCost = Number(cfg.mentorTierStakeAiba?.get?.(mentor.tier) || mentor.stakingRequiredAiba || 0);
-    if (tierCost > 0 && user.aibaBalance < tierCost) {
-        return res.status(400).json({ error: 'Insufficient AIBA' });
-    }
-    user.aibaBalance -= tierCost;
-    await user.save();
+        const cfg = (await EconomyConfig.findOne().sort({ createdAt: -1 })) || new EconomyConfig();
+        const tierCost = Number(cfg.mentorTierStakeAiba?.get?.(mentor.tier) || mentor.stakingRequiredAiba || 0);
+        if (tierCost > 0 && user.aibaBalance < tierCost) {
+            return res.status(400).json({ error: 'Insufficient AIBA' });
+        }
+        user.aibaBalance -= tierCost;
+        await user.save();
 
-    res.json({ ok: true, costAiba: tierCost });
+        res.json({ ok: true, costAiba: tierCost });
     },
 );
 
@@ -68,26 +68,26 @@ router.post(
         amountAiba: { type: 'integer', min: 1, required: true },
     }),
     async (req, res) => {
-    const { mentorId, amountAiba } = req.body || {};
-    const amount = Math.floor(Number(amountAiba) || 0);
-    if (!amount) return res.status(400).json({ error: 'Amount required' });
+        const { mentorId, amountAiba } = req.body || {};
+        const amount = Math.floor(Number(amountAiba) || 0);
+        if (!amount) return res.status(400).json({ error: 'Amount required' });
 
-    const mentor = await Mentor.findById(mentorId);
-    if (!mentor) return res.status(404).json({ error: 'Mentor not found' });
+        const mentor = await Mentor.findById(mentorId);
+        if (!mentor) return res.status(404).json({ error: 'Mentor not found' });
 
-    const user = await User.findOne({ telegramId: req.telegramId });
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    if (user.aibaBalance < amount) return res.status(400).json({ error: 'Insufficient AIBA' });
+        const user = await User.findOne({ telegramId: req.telegramId });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (user.aibaBalance < amount) return res.status(400).json({ error: 'Insufficient AIBA' });
 
-    user.aibaBalance -= amount;
-    await user.save();
+        user.aibaBalance -= amount;
+        await user.save();
 
-    const stake = await MentorStake.create({
-        userId: user._id,
-        mentorId: mentor._id,
-        amountAiba: amount,
-    });
-    res.json({ stake });
+        const stake = await MentorStake.create({
+            userId: user._id,
+            mentorId: mentor._id,
+            amountAiba: amount,
+        });
+        res.json({ stake });
     },
 );
 
@@ -98,21 +98,21 @@ router.post(
         stakeId: { type: 'objectId', required: true },
     }),
     async (req, res) => {
-    const { stakeId } = req.body || {};
-    const stake = await MentorStake.findById(stakeId);
-    if (!stake || stake.status !== 'active') return res.status(404).json({ error: 'Stake not found' });
+        const { stakeId } = req.body || {};
+        const stake = await MentorStake.findById(stakeId);
+        if (!stake || stake.status !== 'active') return res.status(404).json({ error: 'Stake not found' });
 
-    const user = await User.findOne({ telegramId: req.telegramId });
-    if (!user || String(stake.userId) !== String(user._id)) return res.status(403).json({ error: 'Not owner' });
+        const user = await User.findOne({ telegramId: req.telegramId });
+        if (!user || String(stake.userId) !== String(user._id)) return res.status(403).json({ error: 'Not owner' });
 
-    const amount = Number(stake.amountAiba || 0) + Number(stake.rewardAccruedAiba || 0);
-    user.aibaBalance += amount;
-    await user.save();
+        const amount = Number(stake.amountAiba || 0) + Number(stake.rewardAccruedAiba || 0);
+        user.aibaBalance += amount;
+        await user.save();
 
-    stake.status = 'unstaked';
-    await stake.save();
+        stake.status = 'unstaked';
+        await stake.save();
 
-    res.json({ ok: true, amount });
+        res.json({ ok: true, amount });
     },
 );
 

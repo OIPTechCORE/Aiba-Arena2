@@ -16,7 +16,7 @@ const CharityDonationSchema = new mongoose.Schema(
         message: { type: String, default: '', trim: true },
         anonymous: { type: Boolean, default: false },
         txHash: { type: String, default: '', trim: true, index: true },
-        requestId: { type: String, default: null, trim: true, sparse: true, index: true },
+        requestId: { type: String, default: null, trim: true, sparse: true },
         donatedAt: { type: Date, default: Date.now, index: true },
     },
     { timestamps: true },

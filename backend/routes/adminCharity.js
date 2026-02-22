@@ -12,9 +12,7 @@ router.use(requireAdmin(), adminAudit());
 // GET /api/admin/charity/campaigns — list all campaigns (any status)
 router.get('/campaigns', async (req, res) => {
     try {
-        const list = await CharityCampaign.find({})
-            .sort({ status: 1, featured: -1, order: 1, createdAt: -1 })
-            .lean();
+        const list = await CharityCampaign.find({}).sort({ status: 1, featured: -1, order: 1, createdAt: -1 }).lean();
         res.json(list);
     } catch (err) {
         console.error('Admin charity campaigns list error:', err);
@@ -41,38 +39,38 @@ router.post(
         order: { type: 'integer', min: 0 },
     }),
     async (req, res) => {
-    try {
-        const body = req.validatedBody || {};
-        const name = (body.name || '').trim();
-        if (!name) return res.status(400).json({ error: 'name required' });
+        try {
+            const body = req.validatedBody || {};
+            const name = (body.name || '').trim();
+            if (!name) return res.status(400).json({ error: 'name required' });
 
-        const cause = ['education', 'environment', 'health', 'emergency', 'community', 'other'].includes(
-            (body.cause || '').trim().toLowerCase(),
-        )
-            ? (body.cause || 'community').trim().toLowerCase()
-            : 'community';
+            const cause = ['education', 'environment', 'health', 'emergency', 'community', 'other'].includes(
+                (body.cause || '').trim().toLowerCase(),
+            )
+                ? (body.cause || 'community').trim().toLowerCase()
+                : 'community';
 
-        const campaign = await CharityCampaign.create({
-            name,
-            description: (body.description || '').trim().slice(0, 2000),
-            cause,
-            goalNeur: Math.max(0, Math.floor(Number(body.goalNeur) || 0)),
-            goalAiba: Math.max(0, Math.floor(Number(body.goalAiba) || 0)),
-            goalTonNano: Math.max(0, Math.floor(Number(body.goalTonNano) || 0)),
-            status: body.status === 'active' ? 'active' : 'draft',
-            beneficiaryTonAddress: (body.beneficiaryTonAddress || '').trim().slice(0, 128),
-            beneficiaryType: body.beneficiaryType === 'external' ? 'external' : 'treasury',
-            startAt: body.startAt ? new Date(body.startAt) : null,
-            endAt: body.endAt ? new Date(body.endAt) : null,
-            featured: Boolean(body.featured),
-            order: Math.floor(Number(body.order) || 0),
-            createdBy: (req.admin?.telegramId || req.admin?.id || 'admin') + '',
-        });
-        res.status(201).json(campaign.toObject());
-    } catch (err) {
-        console.error('Admin charity create campaign error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
+            const campaign = await CharityCampaign.create({
+                name,
+                description: (body.description || '').trim().slice(0, 2000),
+                cause,
+                goalNeur: Math.max(0, Math.floor(Number(body.goalNeur) || 0)),
+                goalAiba: Math.max(0, Math.floor(Number(body.goalAiba) || 0)),
+                goalTonNano: Math.max(0, Math.floor(Number(body.goalTonNano) || 0)),
+                status: body.status === 'active' ? 'active' : 'draft',
+                beneficiaryTonAddress: (body.beneficiaryTonAddress || '').trim().slice(0, 128),
+                beneficiaryType: body.beneficiaryType === 'external' ? 'external' : 'treasury',
+                startAt: body.startAt ? new Date(body.startAt) : null,
+                endAt: body.endAt ? new Date(body.endAt) : null,
+                featured: Boolean(body.featured),
+                order: Math.floor(Number(body.order) || 0),
+                createdBy: (req.admin?.telegramId || req.admin?.id || 'admin') + '',
+            });
+            res.status(201).json(campaign.toObject());
+        } catch (err) {
+            console.error('Admin charity create campaign error:', err);
+            res.status(500).json({ error: 'internal server error' });
+        }
     },
 );
 
@@ -96,45 +94,52 @@ router.patch(
         order: { type: 'integer', min: 0 },
     }),
     async (req, res) => {
-    try {
-        const campaign = await CharityCampaign.findById(req.validatedParams.id);
-        if (!campaign) return res.status(404).json({ error: 'not found' });
+        try {
+            const campaign = await CharityCampaign.findById(req.validatedParams.id);
+            if (!campaign) return res.status(404).json({ error: 'not found' });
 
-        const body = req.validatedBody || {};
-        if (body.name !== undefined) campaign.name = String(body.name).trim().slice(0, 200);
-        if (body.description !== undefined) campaign.description = String(body.description).trim().slice(0, 2000);
-        if (body.cause !== undefined && ['education', 'environment', 'health', 'emergency', 'community', 'other'].includes(String(body.cause).toLowerCase())) {
-            campaign.cause = String(body.cause).toLowerCase();
-        }
-        if (body.goalNeur !== undefined) campaign.goalNeur = Math.max(0, Math.floor(Number(body.goalNeur) || 0));
-        if (body.goalAiba !== undefined) campaign.goalAiba = Math.max(0, Math.floor(Number(body.goalAiba) || 0));
-        if (body.goalTonNano !== undefined) campaign.goalTonNano = Math.max(0, Math.floor(Number(body.goalTonNano) || 0));
-        if (body.status !== undefined && ['draft', 'active', 'ended', 'funded', 'disbursed'].includes(body.status)) {
-            campaign.status = body.status;
-        }
-        if (body.beneficiaryTonAddress !== undefined) campaign.beneficiaryTonAddress = String(body.beneficiaryTonAddress).trim().slice(0, 128);
-        if (body.beneficiaryType !== undefined && ['treasury', 'external'].includes(body.beneficiaryType)) {
-            campaign.beneficiaryType = body.beneficiaryType;
-        }
-        if (body.startAt !== undefined) campaign.startAt = body.startAt ? new Date(body.startAt) : null;
-        if (body.endAt !== undefined) campaign.endAt = body.endAt ? new Date(body.endAt) : null;
-        if (body.featured !== undefined) campaign.featured = Boolean(body.featured);
-        if (body.order !== undefined) campaign.order = Math.floor(Number(body.order) || 0);
+            const body = req.validatedBody || {};
+            if (body.name !== undefined) campaign.name = String(body.name).trim().slice(0, 200);
+            if (body.description !== undefined) campaign.description = String(body.description).trim().slice(0, 2000);
+            if (
+                body.cause !== undefined &&
+                ['education', 'environment', 'health', 'emergency', 'community', 'other'].includes(
+                    String(body.cause).toLowerCase(),
+                )
+            ) {
+                campaign.cause = String(body.cause).toLowerCase();
+            }
+            if (body.goalNeur !== undefined) campaign.goalNeur = Math.max(0, Math.floor(Number(body.goalNeur) || 0));
+            if (body.goalAiba !== undefined) campaign.goalAiba = Math.max(0, Math.floor(Number(body.goalAiba) || 0));
+            if (body.goalTonNano !== undefined)
+                campaign.goalTonNano = Math.max(0, Math.floor(Number(body.goalTonNano) || 0));
+            if (
+                body.status !== undefined &&
+                ['draft', 'active', 'ended', 'funded', 'disbursed'].includes(body.status)
+            ) {
+                campaign.status = body.status;
+            }
+            if (body.beneficiaryTonAddress !== undefined)
+                campaign.beneficiaryTonAddress = String(body.beneficiaryTonAddress).trim().slice(0, 128);
+            if (body.beneficiaryType !== undefined && ['treasury', 'external'].includes(body.beneficiaryType)) {
+                campaign.beneficiaryType = body.beneficiaryType;
+            }
+            if (body.startAt !== undefined) campaign.startAt = body.startAt ? new Date(body.startAt) : null;
+            if (body.endAt !== undefined) campaign.endAt = body.endAt ? new Date(body.endAt) : null;
+            if (body.featured !== undefined) campaign.featured = Boolean(body.featured);
+            if (body.order !== undefined) campaign.order = Math.floor(Number(body.order) || 0);
 
-        await campaign.save();
-        res.json(campaign.toObject());
-    } catch (err) {
-        console.error('Admin charity update campaign error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
+            await campaign.save();
+            res.json(campaign.toObject());
+        } catch (err) {
+            console.error('Admin charity update campaign error:', err);
+            res.status(500).json({ error: 'internal server error' });
+        }
     },
 );
 
 // POST /api/admin/charity/campaigns/:id/close — set status to ended (or funded if goals met)
-router.post(
-    '/campaigns/:id/close',
-    validateParams({ id: { type: 'objectId', required: true } }),
-    async (req, res) => {
+router.post('/campaigns/:id/close', validateParams({ id: { type: 'objectId', required: true } }), async (req, res) => {
     try {
         const campaign = await CharityCampaign.findById(req.validatedParams.id);
         if (!campaign) return res.status(404).json({ error: 'not found' });
@@ -152,26 +157,25 @@ router.post(
         console.error('Admin charity close campaign error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-    },
-);
+});
 
 // POST /api/admin/charity/campaigns/:id/disburse — mark as disbursed (record disbursedAt)
 router.post(
     '/campaigns/:id/disburse',
     validateParams({ id: { type: 'objectId', required: true } }),
     async (req, res) => {
-    try {
-        const campaign = await CharityCampaign.findById(req.validatedParams.id);
-        if (!campaign) return res.status(404).json({ error: 'not found' });
+        try {
+            const campaign = await CharityCampaign.findById(req.validatedParams.id);
+            if (!campaign) return res.status(404).json({ error: 'not found' });
 
-        campaign.status = 'disbursed';
-        campaign.disbursedAt = new Date();
-        await campaign.save();
-        res.json({ ok: true, campaign: campaign.toObject() });
-    } catch (err) {
-        console.error('Admin charity disburse campaign error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
+            campaign.status = 'disbursed';
+            campaign.disbursedAt = new Date();
+            await campaign.save();
+            res.json({ ok: true, campaign: campaign.toObject() });
+        } catch (err) {
+            console.error('Admin charity disburse campaign error:', err);
+            res.status(500).json({ error: 'internal server error' });
+        }
     },
 );
 
@@ -186,35 +190,35 @@ router.get(
         limit: { type: 'integer', min: 1, max: 500 },
     }),
     async (req, res) => {
-    try {
-        const campaignId = (req.validatedQuery?.campaignId || '').trim();
-        const telegramId = (req.validatedQuery?.telegramId || '').trim();
-        const from = req.validatedQuery?.from ? new Date(req.validatedQuery.from) : null;
-        const to = req.validatedQuery?.to ? new Date(req.validatedQuery.to) : null;
-        const limit = getLimit(
-            { query: { limit: req.validatedQuery?.limit } },
-            { defaultLimit: 100, maxLimit: 500 },
-        );
+        try {
+            const campaignId = (req.validatedQuery?.campaignId || '').trim();
+            const telegramId = (req.validatedQuery?.telegramId || '').trim();
+            const from = req.validatedQuery?.from ? new Date(req.validatedQuery.from) : null;
+            const to = req.validatedQuery?.to ? new Date(req.validatedQuery.to) : null;
+            const limit = getLimit(
+                { query: { limit: req.validatedQuery?.limit } },
+                { defaultLimit: 100, maxLimit: 500 },
+            );
 
-        const query = {};
-        if (campaignId) query.campaignId = new mongoose.Types.ObjectId(campaignId);
-        if (telegramId) query.telegramId = telegramId;
-        if (from || to) {
-            query.donatedAt = {};
-            if (from) query.donatedAt.$gte = from;
-            if (to) query.donatedAt.$lte = to;
+            const query = {};
+            if (campaignId) query.campaignId = new mongoose.Types.ObjectId(campaignId);
+            if (telegramId) query.telegramId = telegramId;
+            if (from || to) {
+                query.donatedAt = {};
+                if (from) query.donatedAt.$gte = from;
+                if (to) query.donatedAt.$lte = to;
+            }
+
+            const list = await CharityDonation.find(query)
+                .sort({ donatedAt: -1 })
+                .limit(limit)
+                .lean()
+                .populate('campaignId', 'name cause status');
+            res.json(list);
+        } catch (err) {
+            console.error('Admin charity donations list error:', err);
+            res.status(500).json({ error: 'internal server error' });
         }
-
-        const list = await CharityDonation.find(query)
-            .sort({ donatedAt: -1 })
-            .limit(limit)
-            .lean()
-            .populate('campaignId', 'name cause status');
-        res.json(list);
-    } catch (err) {
-        console.error('Admin charity donations list error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
     },
 );
 

@@ -27,29 +27,29 @@ router.post(
         league: { type: 'string', trim: true, minLength: 1, maxLength: 64 },
     }),
     async (req, res) => {
-    try {
-        const { brokerAId, brokerBId, arena = 'prediction', league = 'rookie' } = req.validatedBody || {};
-        if (!brokerAId || !brokerBId || String(brokerAId) === String(brokerBId)) {
-            return res.status(400).json({ error: 'brokerAId and brokerBId required, must differ' });
+        try {
+            const { brokerAId, brokerBId, arena = 'prediction', league = 'rookie' } = req.validatedBody || {};
+            if (!brokerAId || !brokerBId || String(brokerAId) === String(brokerBId)) {
+                return res.status(400).json({ error: 'brokerAId and brokerBId required, must differ' });
+            }
+            const [a, b] = await Promise.all([Broker.findById(brokerAId), Broker.findById(brokerBId)]);
+            if (!a || !b) return res.status(404).json({ error: 'broker not found' });
+
+            const cfg = await getConfig();
+            const ev = await PredictEvent.create({
+                brokerAId: a._id,
+                brokerBId: b._id,
+                arena: arena || 'prediction',
+                league: league || 'rookie',
+                vigBps: Math.min(1000, Math.max(0, Number(cfg?.predictVigBps ?? 300))),
+                maxBetAiba: Math.min(100000, Math.max(100, Number(cfg?.predictMaxBetAiba ?? 10_000))),
+            });
+
+            res.status(201).json(ev);
+        } catch (err) {
+            console.error('Admin predict create error:', err);
+            res.status(500).json({ error: 'internal server error' });
         }
-        const [a, b] = await Promise.all([Broker.findById(brokerAId), Broker.findById(brokerBId)]);
-        if (!a || !b) return res.status(404).json({ error: 'broker not found' });
-
-        const cfg = await getConfig();
-        const ev = await PredictEvent.create({
-            brokerAId: a._id,
-            brokerBId: b._id,
-            arena: arena || 'prediction',
-            league: league || 'rookie',
-            vigBps: Math.min(1000, Math.max(0, Number(cfg?.predictVigBps ?? 300))),
-            maxBetAiba: Math.min(100000, Math.max(100, Number(cfg?.predictMaxBetAiba ?? 10_000))),
-        });
-
-        res.status(201).json(ev);
-    } catch (err) {
-        console.error('Admin predict create error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
     },
 );
 
@@ -69,13 +69,23 @@ router.post('/events/:id/resolve', validateParams({ id: { type: 'objectId', requ
 
         const seedHex = crypto.randomBytes(8).toString('hex');
         const seed = seedFromHex(seedHex);
-        const resultA = simulateBattle({ broker: brokerA, seed, arena: ev.arena || 'prediction', league: ev.league || 'rookie' });
-        const resultB = simulateBattle({ broker: brokerB, seed, arena: ev.arena || 'prediction', league: ev.league || 'rookie' });
+        const resultA = simulateBattle({
+            broker: brokerA,
+            seed,
+            arena: ev.arena || 'prediction',
+            league: ev.league || 'rookie',
+        });
+        const resultB = simulateBattle({
+            broker: brokerB,
+            seed,
+            arena: ev.arena || 'prediction',
+            league: ev.league || 'rookie',
+        });
 
         const scoreA = resultA.score;
         const scoreB = resultB.score;
         const winnerId = scoreA >= scoreB ? ev.brokerAId : ev.brokerBId;
-        const winnerPool = String(winnerId) === String(ev.brokerAId) ? (ev.poolAiba || 0) : (ev.poolBiba || 0);
+        const winnerPool = String(winnerId) === String(ev.brokerAId) ? ev.poolAiba || 0 : ev.poolBiba || 0;
         const totalPool = (ev.poolAiba || 0) + (ev.poolBiba || 0);
         if (!Number.isFinite(totalPool) || totalPool < 0) return res.status(400).json({ error: 'invalid pool totals' });
         const vigBps = Math.min(1000, Math.max(0, ev.vigBps ?? 300));
@@ -108,7 +118,11 @@ router.post('/events/:id/resolve', validateParams({ id: { type: 'objectId', requ
                             { session },
                         );
                     } catch (treasuryErr) {
-                        console.error('Admin predict resolve: treasury op failed', { eventId: String(ev._id), vigAiba, err: treasuryErr });
+                        console.error('Admin predict resolve: treasury op failed', {
+                            eventId: String(ev._id),
+                            vigAiba,
+                            err: treasuryErr,
+                        });
                         throw treasuryErr;
                     }
                 }
@@ -136,7 +150,12 @@ router.post('/events/:id/resolve', validateParams({ id: { type: 'objectId', requ
                             meta: { eventId: String(ev._id), amountAiba: share },
                         });
                         if (!credited?.ok) {
-                            console.error('Admin predict resolve payout failed', { eventId: String(ev._id), betId: String(b._id), share, telegramId: b.telegramId });
+                            console.error('Admin predict resolve payout failed', {
+                                eventId: String(ev._id),
+                                betId: String(b._id),
+                                share,
+                                telegramId: b.telegramId,
+                            });
                             throw new Error(`payout_failed:${String(b._id)}`);
                         }
                     }

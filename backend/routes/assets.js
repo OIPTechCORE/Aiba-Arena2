@@ -27,33 +27,33 @@ router.post(
         metadataUri: { type: 'string', trim: true, maxLength: 500 },
     }),
     async (req, res) => {
-    const { category, name, realmKey, metadataUri } = req.validatedBody || {};
-    const user = await User.findOne({ telegramId: req.telegramId });
-    if (!user) return res.status(404).json({ error: 'User not found' });
+        const { category, name, realmKey, metadataUri } = req.validatedBody || {};
+        const user = await User.findOne({ telegramId: req.telegramId });
+        if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const cfg = (await EconomyConfig.findOne().sort({ createdAt: -1 })) || new EconomyConfig();
-    const fee = Number(cfg.assetMintFeeAiba || 0);
-    if (fee > 0 && user.aibaBalance < fee) return res.status(400).json({ error: 'Insufficient AIBA' });
+        const cfg = (await EconomyConfig.findOne().sort({ createdAt: -1 })) || new EconomyConfig();
+        const fee = Number(cfg.assetMintFeeAiba || 0);
+        if (fee > 0 && user.aibaBalance < fee) return res.status(400).json({ error: 'Insufficient AIBA' });
 
-    user.aibaBalance -= fee;
-    user.assetCount += 1;
-    await user.save();
+        user.aibaBalance -= fee;
+        user.assetCount += 1;
+        await user.save();
 
-    const asset = await Asset.create({
-        ownerId: user._id,
-        category,
-        name,
-        realmKey,
-        metadataUri,
-    });
+        const asset = await Asset.create({
+            ownerId: user._id,
+            category,
+            name,
+            realmKey,
+            metadataUri,
+        });
 
-    const splits = computeTokenSplits(fee, cfg);
-    for (const [type, amount] of Object.entries(splits)) {
-        if (!amount) continue;
-        await TreasuryOp.create({ type, amountAiba: amount, source: 'asset_mint', refId: String(asset._id) });
-    }
+        const splits = computeTokenSplits(fee, cfg);
+        for (const [type, amount] of Object.entries(splits)) {
+            if (!amount) continue;
+            await TreasuryOp.create({ type, amountAiba: amount, source: 'asset_mint', refId: String(asset._id) });
+        }
 
-    res.json({ asset });
+        res.json({ asset });
     },
 );
 
@@ -64,31 +64,31 @@ router.post(
         assetId: { type: 'objectId', required: true },
     }),
     async (req, res) => {
-    const assetId = req.validatedBody?.assetId;
-    const asset = await Asset.findById(assetId);
-    if (!asset) return res.status(404).json({ error: 'Asset not found' });
+        const assetId = req.validatedBody?.assetId;
+        const asset = await Asset.findById(assetId);
+        if (!asset) return res.status(404).json({ error: 'Asset not found' });
 
-    const user = await User.findOne({ telegramId: req.telegramId });
-    if (!user || String(asset.ownerId) !== String(user._id)) return res.status(403).json({ error: 'Not owner' });
+        const user = await User.findOne({ telegramId: req.telegramId });
+        if (!user || String(asset.ownerId) !== String(user._id)) return res.status(403).json({ error: 'Not owner' });
 
-    const cfg = (await EconomyConfig.findOne().sort({ createdAt: -1 })) || new EconomyConfig();
-    const fee = Number(cfg.assetUpgradeFeeAiba || 0);
-    if (fee > 0 && user.aibaBalance < fee) return res.status(400).json({ error: 'Insufficient AIBA' });
+        const cfg = (await EconomyConfig.findOne().sort({ createdAt: -1 })) || new EconomyConfig();
+        const fee = Number(cfg.assetUpgradeFeeAiba || 0);
+        if (fee > 0 && user.aibaBalance < fee) return res.status(400).json({ error: 'Insufficient AIBA' });
 
-    user.aibaBalance -= fee;
-    await user.save();
+        user.aibaBalance -= fee;
+        await user.save();
 
-    asset.level += 1;
-    asset.upgradeCount += 1;
-    await asset.save();
+        asset.level += 1;
+        asset.upgradeCount += 1;
+        await asset.save();
 
-    const splits = computeTokenSplits(fee, cfg);
-    for (const [type, amount] of Object.entries(splits)) {
-        if (!amount) continue;
-        await TreasuryOp.create({ type, amountAiba: amount, source: 'asset_upgrade', refId: String(asset._id) });
-    }
+        const splits = computeTokenSplits(fee, cfg);
+        for (const [type, amount] of Object.entries(splits)) {
+            if (!amount) continue;
+            await TreasuryOp.create({ type, amountAiba: amount, source: 'asset_upgrade', refId: String(asset._id) });
+        }
 
-    res.json({ asset });
+        res.json({ asset });
     },
 );
 

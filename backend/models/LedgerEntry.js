@@ -15,7 +15,7 @@ const LedgerEntrySchema = new mongoose.Schema(
         // Idempotency / provenance
         sourceType: { type: String, default: null, trim: true, index: true }, // e.g. "battle", "broker_train", "referral", "admin"
         sourceId: { type: String, default: null, trim: true, index: true }, // requestId, referralUseId, etc.
-        requestId: { type: String, default: null, trim: true, index: true },
+        requestId: { type: String, default: null, trim: true },
         battleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Battle', default: null, index: true },
 
         // Apply-state for crash-safe idempotency:

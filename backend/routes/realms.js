@@ -14,9 +14,9 @@ router.get(
     '/:key',
     validateParams({ key: { type: 'string', trim: true, minLength: 1, maxLength: 100, required: true } }),
     async (req, res) => {
-    const realm = await Realm.findOne({ key: req.validatedParams.key }).lean();
-    if (!realm) return res.status(404).json({ error: 'Realm not found' });
-    res.json({ realm });
+        const realm = await Realm.findOne({ key: req.validatedParams.key }).lean();
+        if (!realm) return res.status(404).json({ error: 'Realm not found' });
+        res.json({ realm });
     },
 );
 
@@ -28,16 +28,16 @@ router.post(
         realms: { type: 'array', itemType: 'object', required: true },
     }),
     async (req, res) => {
-    const realms = Array.isArray(req.validatedBody?.realms) ? req.validatedBody.realms : [];
-    const ops = realms.map((r) => ({
-        updateOne: {
-            filter: { key: r.key },
-            update: { $set: r },
-            upsert: true,
-        },
-    }));
-    if (ops.length) await Realm.bulkWrite(ops, { ordered: false });
-    res.json({ ok: true, count: ops.length });
+        const realms = Array.isArray(req.validatedBody?.realms) ? req.validatedBody.realms : [];
+        const ops = realms.map((r) => ({
+            updateOne: {
+                filter: { key: r.key },
+                update: { $set: r },
+                upsert: true,
+            },
+        }));
+        if (ops.length) await Realm.bulkWrite(ops, { ordered: false });
+        res.json({ ok: true, count: ops.length });
     },
 );
 

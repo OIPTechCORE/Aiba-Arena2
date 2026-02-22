@@ -105,278 +105,280 @@ router.patch(
         supportTelegramGroup: { type: 'string', trim: true, maxLength: 100 },
     }),
     async (req, res) => {
-    const update = {};
-    const body = req.validatedBody || {};
+        const update = {};
+        const body = req.validatedBody || {};
 
-    const maybeNum = (k) => {
-        if (body[k] === undefined) return;
-        const v = Number(body[k]);
-        if (!Number.isFinite(v) || v < 0) return;
-        update[k] = v;
-    };
+        const maybeNum = (k) => {
+            if (body[k] === undefined) return;
+            const v = Number(body[k]);
+            if (!Number.isFinite(v) || v < 0) return;
+            update[k] = v;
+        };
 
-    // In production, reject unknown fields to avoid silent config drift.
-    const allowedTopLevel = new Set([
-        'dailyCapAiba',
-        'dailyCapNeur',
-        'baseRewardAibaPerScore',
-        'baseRewardNeurPerScore',
-        'emissionStartHourUtc',
-        'emissionEndHourUtc',
-        'upgradeAibaCost',
-        'trainNeurCost',
-        'repairNeurCost',
-        'marketplaceFeeBps',
-        'marketplaceBurnBps',
-        'referralRewardNeurReferrer',
-        'referralRewardNeurReferee',
-        'battleMaxEnergy',
-        'battleEnergyRegenSecondsPerEnergy',
-        'battleAnomalyScoreMax',
-        'battleAutoBanBrokerAnomalyFlags',
-        'battleAutoBanUserAnomalyFlags',
-        'battleAutoBanUserMinutes',
-        'boostCostNeur',
-        'boostDurationHours',
-        'boostMultiplier',
-        'stakingApyPercent',
-        'stakingMinAiba',
-        'combineNeurCost',
-        'referralRewardAibaReferrer',
-        'referralRewardAibaReferee',
-        'dailyRewardNeur',
-        'mintAibaCost',
-        'boostCostTonNano',
-        'createGroupCostTonNano',
-        'boostGroupCostTonNano',
-        'leaderboardTopFreeCreate',
-        'createBrokerCostTonNano',
-        'boostProfileCostTonNano',
-        'giftCostTonNano',
-        'marketplaceDefaultNewBrokerPriceAIBA',
-        'boostProfileDurationDays',
-        'oracleAibaPerTon',
-        'oracleNeurPerAiba',
-        'oracleAutoUpdateEnabled',
-        'oracleAibaUsd',
-        'oracleMinAibaPerTon',
-        'oracleMaxAibaPerTon',
-        'oracleFallbackAibaPerTon',
-        'oracleUpdateIntervalMinutes',
-        'dailyCapAibaByArena',
-        'dailyCapNeurByArena',
-        'emissionWindowsUtc',
-        'starRewardPerBattle',
-        'diamondRewardFirstWin',
-        'topLeaderBadgeTopN',
-        'courseCompletionBadgeMintCostTonNano',
-        'fullCourseCompletionCertificateMintCostTonNano',
-        'nftStakingApyPercent',
-        'nftStakingRewardPerDayAiba',
-        'arenaLegendMintCostAiba',
-        'arenaLegendUnlockWins',
-        'starsStorePackStars',
-        'starsStorePackPriceAiba',
-        'starsStorePackPriceTonNano',
-        'createCarCostTonNano',
-        'createCarCostAiba',
-        'carEntryFeeAiba',
-        'carRacingFeeBps',
-        'createBikeCostTonNano',
-        'createBikeCostAiba',
-        'bikeEntryFeeAiba',
-        'bikeRacingFeeBps',
-        'referralUnlock3BonusBps',
-        'trainerRewardAibaPerUser',
-        'trainerRewardAibaPerRecruitedTrainer',
-        'p2pAibaSendFeeTonNano',
-        'aibaInGiftsFeeTonNano',
-        'buyAibaWithTonFeeBps',
-        'donateBrokerFeeTonNano',
-        'donateCarFeeTonNano',
-        'donateBikeFeeTonNano',
-        'donateGiftsFeeTonNano',
-        'creatorPercentBps',
-        'creatorTier100RefsBps',
-        'creatorTier1000RefsBps',
-        'creatorTier10000RefsBps',
-        'predictVigBps',
-        'predictMaxBetAiba',
-        'supportLink',
-        'supportTelegramGroup',
-    ]);
-    const bodyKeys = req.body && typeof req.body === 'object' ? Object.keys(req.body) : [];
-    const unknown = bodyKeys.filter((k) => !allowedTopLevel.has(k));
-    const strict = process.env.APP_ENV === 'prod' || process.env.NODE_ENV === 'production';
-    if (strict && unknown.length > 0) {
-        return res.status(400).json({ error: 'unknown_fields', fields: unknown });
-    }
-    if (!strict && unknown.length > 0) {
-        console.warn('adminEconomy/config ignored unknown fields:', unknown);
-    }
-
-    maybeNum('dailyCapAiba');
-    maybeNum('dailyCapNeur');
-    maybeNum('baseRewardAibaPerScore');
-    maybeNum('baseRewardNeurPerScore');
-    maybeNum('emissionStartHourUtc');
-    maybeNum('emissionEndHourUtc');
-    maybeNum('upgradeAibaCost');
-    maybeNum('trainNeurCost');
-    maybeNum('repairNeurCost');
-    maybeNum('marketplaceFeeBps');
-    maybeNum('marketplaceBurnBps');
-    maybeNum('referralRewardNeurReferrer');
-    maybeNum('referralRewardNeurReferee');
-    maybeNum('battleMaxEnergy');
-    maybeNum('battleEnergyRegenSecondsPerEnergy');
-    maybeNum('battleAnomalyScoreMax');
-    maybeNum('battleAutoBanBrokerAnomalyFlags');
-    maybeNum('battleAutoBanUserAnomalyFlags');
-    maybeNum('battleAutoBanUserMinutes');
-    maybeNum('boostCostNeur');
-    maybeNum('boostDurationHours');
-    maybeNum('boostMultiplier');
-    maybeNum('stakingApyPercent');
-    maybeNum('stakingMinAiba');
-    maybeNum('combineNeurCost');
-    maybeNum('referralRewardAibaReferrer');
-    maybeNum('referralRewardAibaReferee');
-    maybeNum('dailyRewardNeur');
-    maybeNum('mintAibaCost');
-    maybeNum('boostCostTonNano');
-    // Groups: 1–10 TON (1e9–10e9 nano) for create/boost; clamp to range so Super Admin stays within spec.
-    if (req.body?.createGroupCostTonNano !== undefined) {
-        const v = Number(req.body.createGroupCostTonNano);
-        if (Number.isFinite(v) && v >= 0)
-            update.createGroupCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
-    }
-    if (req.body?.boostGroupCostTonNano !== undefined) {
-        const v = Number(req.body.boostGroupCostTonNano);
-        if (Number.isFinite(v) && v >= 0)
-            update.boostGroupCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
-    }
-    maybeNum('leaderboardTopFreeCreate');
-    if (req.body?.createBrokerCostTonNano !== undefined) {
-        const v = Number(req.body.createBrokerCostTonNano);
-        if (Number.isFinite(v) && v >= 0)
-            update.createBrokerCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
-    }
-    if (req.body?.boostProfileCostTonNano !== undefined) {
-        const v = Number(req.body.boostProfileCostTonNano);
-        if (Number.isFinite(v) && v >= 0)
-            update.boostProfileCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
-    }
-    if (req.body?.giftCostTonNano !== undefined) {
-        const v = Number(req.body.giftCostTonNano);
-        if (Number.isFinite(v) && v >= 0)
-            update.giftCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
-    }
-    maybeNum('marketplaceDefaultNewBrokerPriceAIBA');
-    maybeNum('boostProfileDurationDays');
-    maybeNum('oracleAibaPerTon');
-    maybeNum('oracleNeurPerAiba');
-    if (body.oracleAutoUpdateEnabled !== undefined) update.oracleAutoUpdateEnabled = Boolean(body.oracleAutoUpdateEnabled);
-    maybeNum('oracleAibaUsd');
-    maybeNum('oracleMinAibaPerTon');
-    maybeNum('oracleMaxAibaPerTon');
-    maybeNum('oracleFallbackAibaPerTon');
-    if (body.oracleUpdateIntervalMinutes !== undefined) {
-        const v = Number(body.oracleUpdateIntervalMinutes);
-        if (Number.isFinite(v) && v >= 1 && v <= 1440) update.oracleUpdateIntervalMinutes = Math.floor(v);
-    }
-    maybeNum('starRewardPerBattle');
-    maybeNum('diamondRewardFirstWin');
-    maybeNum('topLeaderBadgeTopN');
-    maybeNum('courseCompletionBadgeMintCostTonNano');
-    maybeNum('fullCourseCompletionCertificateMintCostTonNano');
-    maybeNum('nftStakingApyPercent');
-    maybeNum('nftStakingRewardPerDayAiba');
-    maybeNum('arenaLegendMintCostAiba');
-    maybeNum('arenaLegendUnlockWins');
-    maybeNum('starsStorePackStars');
-    maybeNum('starsStorePackPriceAiba');
-    // Stars Store TON: 1–10 TON (1e9–10e9 nano) → STARS_STORE_WALLET
-    if (req.body?.starsStorePackPriceTonNano !== undefined) {
-        const v = Number(req.body.starsStorePackPriceTonNano);
-        if (Number.isFinite(v) && v >= 0)
-            update.starsStorePackPriceTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
-    }
-    maybeNum('createCarCostAiba');
-    maybeNum('carEntryFeeAiba');
-    maybeNum('carRacingFeeBps');
-    if (req.body?.createCarCostTonNano !== undefined) {
-        const v = Number(req.body.createCarCostTonNano);
-        if (Number.isFinite(v) && v >= 0)
-            update.createCarCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
-    }
-    maybeNum('createBikeCostAiba');
-    maybeNum('bikeEntryFeeAiba');
-    maybeNum('bikeRacingFeeBps');
-    maybeNum('referralUnlock3BonusBps');
-    maybeNum('trainerRewardAibaPerUser');
-    maybeNum('trainerRewardAibaPerRecruitedTrainer');
-    maybeNum('p2pAibaSendFeeTonNano');
-    maybeNum('aibaInGiftsFeeTonNano');
-    maybeNum('buyAibaWithTonFeeBps');
-    maybeNum('donateBrokerFeeTonNano');
-    maybeNum('donateCarFeeTonNano');
-    maybeNum('donateBikeFeeTonNano');
-    maybeNum('donateGiftsFeeTonNano');
-    maybeNum('creatorPercentBps');
-    maybeNum('creatorTier100RefsBps');
-    maybeNum('creatorTier1000RefsBps');
-    maybeNum('creatorTier10000RefsBps');
-    maybeNum('predictVigBps');
-    maybeNum('predictMaxBetAiba');
-    if (req.body?.supportLink !== undefined) update.supportLink = String(req.body.supportLink || '').trim();
-    if (req.body?.supportTelegramGroup !== undefined) update.supportTelegramGroup = String(req.body.supportTelegramGroup || '').trim();
-    if (req.body?.createBikeCostTonNano !== undefined) {
-        const v = Number(req.body.createBikeCostTonNano);
-        if (Number.isFinite(v) && v >= 0)
-            update.createBikeCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
-    }
-
-    const allowed = await getAllowedArenaKeys();
-
-    if (body.dailyCapAibaByArena && typeof body.dailyCapAibaByArena === 'object') {
-        for (const [k, v] of Object.entries(body.dailyCapAibaByArena)) {
-            const num = Number(v);
-            if (!Number.isFinite(num) || num < 0) {
-                return res.status(400).json({ error: 'invalid dailyCapAibaByArena', field: String(k) });
-            }
+        // In production, reject unknown fields to avoid silent config drift.
+        const allowedTopLevel = new Set([
+            'dailyCapAiba',
+            'dailyCapNeur',
+            'baseRewardAibaPerScore',
+            'baseRewardNeurPerScore',
+            'emissionStartHourUtc',
+            'emissionEndHourUtc',
+            'upgradeAibaCost',
+            'trainNeurCost',
+            'repairNeurCost',
+            'marketplaceFeeBps',
+            'marketplaceBurnBps',
+            'referralRewardNeurReferrer',
+            'referralRewardNeurReferee',
+            'battleMaxEnergy',
+            'battleEnergyRegenSecondsPerEnergy',
+            'battleAnomalyScoreMax',
+            'battleAutoBanBrokerAnomalyFlags',
+            'battleAutoBanUserAnomalyFlags',
+            'battleAutoBanUserMinutes',
+            'boostCostNeur',
+            'boostDurationHours',
+            'boostMultiplier',
+            'stakingApyPercent',
+            'stakingMinAiba',
+            'combineNeurCost',
+            'referralRewardAibaReferrer',
+            'referralRewardAibaReferee',
+            'dailyRewardNeur',
+            'mintAibaCost',
+            'boostCostTonNano',
+            'createGroupCostTonNano',
+            'boostGroupCostTonNano',
+            'leaderboardTopFreeCreate',
+            'createBrokerCostTonNano',
+            'boostProfileCostTonNano',
+            'giftCostTonNano',
+            'marketplaceDefaultNewBrokerPriceAIBA',
+            'boostProfileDurationDays',
+            'oracleAibaPerTon',
+            'oracleNeurPerAiba',
+            'oracleAutoUpdateEnabled',
+            'oracleAibaUsd',
+            'oracleMinAibaPerTon',
+            'oracleMaxAibaPerTon',
+            'oracleFallbackAibaPerTon',
+            'oracleUpdateIntervalMinutes',
+            'dailyCapAibaByArena',
+            'dailyCapNeurByArena',
+            'emissionWindowsUtc',
+            'starRewardPerBattle',
+            'diamondRewardFirstWin',
+            'topLeaderBadgeTopN',
+            'courseCompletionBadgeMintCostTonNano',
+            'fullCourseCompletionCertificateMintCostTonNano',
+            'nftStakingApyPercent',
+            'nftStakingRewardPerDayAiba',
+            'arenaLegendMintCostAiba',
+            'arenaLegendUnlockWins',
+            'starsStorePackStars',
+            'starsStorePackPriceAiba',
+            'starsStorePackPriceTonNano',
+            'createCarCostTonNano',
+            'createCarCostAiba',
+            'carEntryFeeAiba',
+            'carRacingFeeBps',
+            'createBikeCostTonNano',
+            'createBikeCostAiba',
+            'bikeEntryFeeAiba',
+            'bikeRacingFeeBps',
+            'referralUnlock3BonusBps',
+            'trainerRewardAibaPerUser',
+            'trainerRewardAibaPerRecruitedTrainer',
+            'p2pAibaSendFeeTonNano',
+            'aibaInGiftsFeeTonNano',
+            'buyAibaWithTonFeeBps',
+            'donateBrokerFeeTonNano',
+            'donateCarFeeTonNano',
+            'donateBikeFeeTonNano',
+            'donateGiftsFeeTonNano',
+            'creatorPercentBps',
+            'creatorTier100RefsBps',
+            'creatorTier1000RefsBps',
+            'creatorTier10000RefsBps',
+            'predictVigBps',
+            'predictMaxBetAiba',
+            'supportLink',
+            'supportTelegramGroup',
+        ]);
+        const bodyKeys = req.body && typeof req.body === 'object' ? Object.keys(req.body) : [];
+        const unknown = bodyKeys.filter((k) => !allowedTopLevel.has(k));
+        const strict = process.env.APP_ENV === 'prod' || process.env.NODE_ENV === 'production';
+        if (strict && unknown.length > 0) {
+            return res.status(400).json({ error: 'unknown_fields', fields: unknown });
         }
-        update.dailyCapAibaByArena = sanitizeCapMap(body.dailyCapAibaByArena, allowed.arenas);
-    }
-    if (body.dailyCapNeurByArena && typeof body.dailyCapNeurByArena === 'object') {
-        for (const [k, v] of Object.entries(body.dailyCapNeurByArena)) {
-            const num = Number(v);
-            if (!Number.isFinite(num) || num < 0) {
-                return res.status(400).json({ error: 'invalid dailyCapNeurByArena', field: String(k) });
-            }
+        if (!strict && unknown.length > 0) {
+            console.warn('adminEconomy/config ignored unknown fields:', unknown);
         }
-        update.dailyCapNeurByArena = sanitizeCapMap(body.dailyCapNeurByArena, allowed.arenas);
-    }
-    if (body.emissionWindowsUtc && typeof body.emissionWindowsUtc === 'object') {
-        for (const [k, v] of Object.entries(body.emissionWindowsUtc)) {
-            if (!v || typeof v !== 'object') {
-                return res.status(400).json({ error: 'invalid emissionWindowsUtc', field: String(k) });
-            }
-            const startHourUtc = Number(v.startHourUtc);
-            const endHourUtc = Number(v.endHourUtc);
-            if (!Number.isFinite(startHourUtc) || !Number.isFinite(endHourUtc)) {
-                return res.status(400).json({ error: 'invalid emissionWindowsUtc', field: String(k) });
-            }
-        }
-        update.emissionWindowsUtc = sanitizeEmissionWindowsUtc(body.emissionWindowsUtc, allowed);
-    }
 
-    const cfg = await EconomyConfig.findOneAndUpdate(
-        {},
-        { $set: update },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
-    ).lean();
-    res.json(cfg);
+        maybeNum('dailyCapAiba');
+        maybeNum('dailyCapNeur');
+        maybeNum('baseRewardAibaPerScore');
+        maybeNum('baseRewardNeurPerScore');
+        maybeNum('emissionStartHourUtc');
+        maybeNum('emissionEndHourUtc');
+        maybeNum('upgradeAibaCost');
+        maybeNum('trainNeurCost');
+        maybeNum('repairNeurCost');
+        maybeNum('marketplaceFeeBps');
+        maybeNum('marketplaceBurnBps');
+        maybeNum('referralRewardNeurReferrer');
+        maybeNum('referralRewardNeurReferee');
+        maybeNum('battleMaxEnergy');
+        maybeNum('battleEnergyRegenSecondsPerEnergy');
+        maybeNum('battleAnomalyScoreMax');
+        maybeNum('battleAutoBanBrokerAnomalyFlags');
+        maybeNum('battleAutoBanUserAnomalyFlags');
+        maybeNum('battleAutoBanUserMinutes');
+        maybeNum('boostCostNeur');
+        maybeNum('boostDurationHours');
+        maybeNum('boostMultiplier');
+        maybeNum('stakingApyPercent');
+        maybeNum('stakingMinAiba');
+        maybeNum('combineNeurCost');
+        maybeNum('referralRewardAibaReferrer');
+        maybeNum('referralRewardAibaReferee');
+        maybeNum('dailyRewardNeur');
+        maybeNum('mintAibaCost');
+        maybeNum('boostCostTonNano');
+        // Groups: 1–10 TON (1e9–10e9 nano) for create/boost; clamp to range so Super Admin stays within spec.
+        if (req.body?.createGroupCostTonNano !== undefined) {
+            const v = Number(req.body.createGroupCostTonNano);
+            if (Number.isFinite(v) && v >= 0)
+                update.createGroupCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+        }
+        if (req.body?.boostGroupCostTonNano !== undefined) {
+            const v = Number(req.body.boostGroupCostTonNano);
+            if (Number.isFinite(v) && v >= 0)
+                update.boostGroupCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+        }
+        maybeNum('leaderboardTopFreeCreate');
+        if (req.body?.createBrokerCostTonNano !== undefined) {
+            const v = Number(req.body.createBrokerCostTonNano);
+            if (Number.isFinite(v) && v >= 0)
+                update.createBrokerCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+        }
+        if (req.body?.boostProfileCostTonNano !== undefined) {
+            const v = Number(req.body.boostProfileCostTonNano);
+            if (Number.isFinite(v) && v >= 0)
+                update.boostProfileCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+        }
+        if (req.body?.giftCostTonNano !== undefined) {
+            const v = Number(req.body.giftCostTonNano);
+            if (Number.isFinite(v) && v >= 0)
+                update.giftCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+        }
+        maybeNum('marketplaceDefaultNewBrokerPriceAIBA');
+        maybeNum('boostProfileDurationDays');
+        maybeNum('oracleAibaPerTon');
+        maybeNum('oracleNeurPerAiba');
+        if (body.oracleAutoUpdateEnabled !== undefined)
+            update.oracleAutoUpdateEnabled = Boolean(body.oracleAutoUpdateEnabled);
+        maybeNum('oracleAibaUsd');
+        maybeNum('oracleMinAibaPerTon');
+        maybeNum('oracleMaxAibaPerTon');
+        maybeNum('oracleFallbackAibaPerTon');
+        if (body.oracleUpdateIntervalMinutes !== undefined) {
+            const v = Number(body.oracleUpdateIntervalMinutes);
+            if (Number.isFinite(v) && v >= 1 && v <= 1440) update.oracleUpdateIntervalMinutes = Math.floor(v);
+        }
+        maybeNum('starRewardPerBattle');
+        maybeNum('diamondRewardFirstWin');
+        maybeNum('topLeaderBadgeTopN');
+        maybeNum('courseCompletionBadgeMintCostTonNano');
+        maybeNum('fullCourseCompletionCertificateMintCostTonNano');
+        maybeNum('nftStakingApyPercent');
+        maybeNum('nftStakingRewardPerDayAiba');
+        maybeNum('arenaLegendMintCostAiba');
+        maybeNum('arenaLegendUnlockWins');
+        maybeNum('starsStorePackStars');
+        maybeNum('starsStorePackPriceAiba');
+        // Stars Store TON: 1–10 TON (1e9–10e9 nano) → STARS_STORE_WALLET
+        if (req.body?.starsStorePackPriceTonNano !== undefined) {
+            const v = Number(req.body.starsStorePackPriceTonNano);
+            if (Number.isFinite(v) && v >= 0)
+                update.starsStorePackPriceTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+        }
+        maybeNum('createCarCostAiba');
+        maybeNum('carEntryFeeAiba');
+        maybeNum('carRacingFeeBps');
+        if (req.body?.createCarCostTonNano !== undefined) {
+            const v = Number(req.body.createCarCostTonNano);
+            if (Number.isFinite(v) && v >= 0)
+                update.createCarCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+        }
+        maybeNum('createBikeCostAiba');
+        maybeNum('bikeEntryFeeAiba');
+        maybeNum('bikeRacingFeeBps');
+        maybeNum('referralUnlock3BonusBps');
+        maybeNum('trainerRewardAibaPerUser');
+        maybeNum('trainerRewardAibaPerRecruitedTrainer');
+        maybeNum('p2pAibaSendFeeTonNano');
+        maybeNum('aibaInGiftsFeeTonNano');
+        maybeNum('buyAibaWithTonFeeBps');
+        maybeNum('donateBrokerFeeTonNano');
+        maybeNum('donateCarFeeTonNano');
+        maybeNum('donateBikeFeeTonNano');
+        maybeNum('donateGiftsFeeTonNano');
+        maybeNum('creatorPercentBps');
+        maybeNum('creatorTier100RefsBps');
+        maybeNum('creatorTier1000RefsBps');
+        maybeNum('creatorTier10000RefsBps');
+        maybeNum('predictVigBps');
+        maybeNum('predictMaxBetAiba');
+        if (req.body?.supportLink !== undefined) update.supportLink = String(req.body.supportLink || '').trim();
+        if (req.body?.supportTelegramGroup !== undefined)
+            update.supportTelegramGroup = String(req.body.supportTelegramGroup || '').trim();
+        if (req.body?.createBikeCostTonNano !== undefined) {
+            const v = Number(req.body.createBikeCostTonNano);
+            if (Number.isFinite(v) && v >= 0)
+                update.createBikeCostTonNano = Math.max(1_000_000_000, Math.min(10_000_000_000, Math.round(v)));
+        }
+
+        const allowed = await getAllowedArenaKeys();
+
+        if (body.dailyCapAibaByArena && typeof body.dailyCapAibaByArena === 'object') {
+            for (const [k, v] of Object.entries(body.dailyCapAibaByArena)) {
+                const num = Number(v);
+                if (!Number.isFinite(num) || num < 0) {
+                    return res.status(400).json({ error: 'invalid dailyCapAibaByArena', field: String(k) });
+                }
+            }
+            update.dailyCapAibaByArena = sanitizeCapMap(body.dailyCapAibaByArena, allowed.arenas);
+        }
+        if (body.dailyCapNeurByArena && typeof body.dailyCapNeurByArena === 'object') {
+            for (const [k, v] of Object.entries(body.dailyCapNeurByArena)) {
+                const num = Number(v);
+                if (!Number.isFinite(num) || num < 0) {
+                    return res.status(400).json({ error: 'invalid dailyCapNeurByArena', field: String(k) });
+                }
+            }
+            update.dailyCapNeurByArena = sanitizeCapMap(body.dailyCapNeurByArena, allowed.arenas);
+        }
+        if (body.emissionWindowsUtc && typeof body.emissionWindowsUtc === 'object') {
+            for (const [k, v] of Object.entries(body.emissionWindowsUtc)) {
+                if (!v || typeof v !== 'object') {
+                    return res.status(400).json({ error: 'invalid emissionWindowsUtc', field: String(k) });
+                }
+                const startHourUtc = Number(v.startHourUtc);
+                const endHourUtc = Number(v.endHourUtc);
+                if (!Number.isFinite(startHourUtc) || !Number.isFinite(endHourUtc)) {
+                    return res.status(400).json({ error: 'invalid emissionWindowsUtc', field: String(k) });
+                }
+            }
+            update.emissionWindowsUtc = sanitizeEmissionWindowsUtc(body.emissionWindowsUtc, allowed);
+        }
+
+        const cfg = await EconomyConfig.findOneAndUpdate(
+            {},
+            { $set: update },
+            { upsert: true, new: true, setDefaultsOnInsert: true },
+        ).lean();
+        res.json(cfg);
     },
 );
 
@@ -387,11 +389,11 @@ router.get(
         day: { type: 'string', trim: true, minLength: 1, maxLength: 20, required: true },
     }),
     async (req, res) => {
-    const day = String(req.validatedQuery?.day || '').trim();
-    if (!day) return res.status(400).json({ error: 'day required (YYYY-MM-DD)' });
+        const day = String(req.validatedQuery?.day || '').trim();
+        if (!day) return res.status(400).json({ error: 'day required (YYYY-MM-DD)' });
 
-    const doc = await EconomyDay.findOne({ day }).lean();
-    res.json(doc || { day, emittedAiba: 0, emittedNeur: 0, burnedAiba: 0, spentNeur: 0 });
+        const doc = await EconomyDay.findOne({ day }).lean();
+        res.json(doc || { day, emittedAiba: 0, emittedNeur: 0, burnedAiba: 0, spentNeur: 0 });
     },
 );
 
@@ -407,76 +409,76 @@ router.post(
         reason: { type: 'string', trim: true, maxLength: 200 },
     }),
     async (req, res) => {
-    const requestId = req.validatedBody?.requestId ? String(req.validatedBody.requestId).trim() : '';
-    const headerRequestId = req.headers['x-request-id'] ? String(req.headers['x-request-id']).trim() : '';
-    const idempotencyKey = requestId || headerRequestId;
-    if (!idempotencyKey) return res.status(400).json({ error: 'requestId required' });
+        const requestId = req.validatedBody?.requestId ? String(req.validatedBody.requestId).trim() : '';
+        const headerRequestId = req.headers['x-request-id'] ? String(req.headers['x-request-id']).trim() : '';
+        const idempotencyKey = requestId || headerRequestId;
+        if (!idempotencyKey) return res.status(400).json({ error: 'requestId required' });
 
-    const telegramId = String(req.validatedBody?.telegramId || '').trim();
-    if (!telegramId) return res.status(400).json({ error: 'telegramId required' });
+        const telegramId = String(req.validatedBody?.telegramId || '').trim();
+        if (!telegramId) return res.status(400).json({ error: 'telegramId required' });
 
-    // Idempotency: if we already applied this requestId, return current user.
-    const existing = await LedgerEntry.findOne({
-        telegramId,
-        sourceType: 'admin_credit_user',
-        sourceId: idempotencyKey,
-    })
-        .select({ _id: 1 })
-        .lean();
-    if (existing) {
-        const user = await User.findOne({ telegramId }).lean();
-        return res.json({ ok: true, user, requestId: idempotencyKey, duplicate: true });
-    }
-
-    const aibaDelta = req.validatedBody?.aibaDelta === undefined ? 0 : Number(req.validatedBody.aibaDelta);
-    const neurDelta = req.validatedBody?.neurDelta === undefined ? 0 : Number(req.validatedBody.neurDelta);
-    const reason = String(req.validatedBody?.reason || 'admin_adjustment').trim();
-
-    if (!Number.isFinite(aibaDelta) || !Number.isFinite(neurDelta)) {
-        return res.status(400).json({ error: 'aibaDelta/neurDelta must be numbers' });
-    }
-
-    const incAiba = Math.floor(aibaDelta);
-    const incNeur = Math.floor(neurDelta);
-    const user = await User.findOneAndUpdate(
-        { telegramId },
-        { $inc: { aibaBalance: incAiba, neurBalance: incNeur }, $setOnInsert: { telegramId } },
-        { new: true, upsert: true, setDefaultsOnInsert: true },
-    ).lean();
-
-    const sourceId = idempotencyKey;
-    if (incNeur !== 0) {
-        await safeCreateLedgerEntry({
+        // Idempotency: if we already applied this requestId, return current user.
+        const existing = await LedgerEntry.findOne({
             telegramId,
-            currency: 'NEUR',
-            direction: incNeur > 0 ? 'credit' : 'debit',
-            amount: Math.abs(incNeur),
-            reason,
-            arena: 'admin',
-            league: 'global',
             sourceType: 'admin_credit_user',
-            sourceId,
-            requestId: sourceId,
-            meta: { raw: { aibaDelta, neurDelta } },
-        });
-    }
-    if (incAiba !== 0) {
-        await safeCreateLedgerEntry({
-            telegramId,
-            currency: 'AIBA',
-            direction: incAiba > 0 ? 'credit' : 'debit',
-            amount: Math.abs(incAiba),
-            reason,
-            arena: 'admin',
-            league: 'global',
-            sourceType: 'admin_credit_user',
-            sourceId,
-            requestId: sourceId,
-            meta: { raw: { aibaDelta, neurDelta } },
-        });
-    }
+            sourceId: idempotencyKey,
+        })
+            .select({ _id: 1 })
+            .lean();
+        if (existing) {
+            const user = await User.findOne({ telegramId }).lean();
+            return res.json({ ok: true, user, requestId: idempotencyKey, duplicate: true });
+        }
 
-    res.json({ ok: true, user, requestId: idempotencyKey });
+        const aibaDelta = req.validatedBody?.aibaDelta === undefined ? 0 : Number(req.validatedBody.aibaDelta);
+        const neurDelta = req.validatedBody?.neurDelta === undefined ? 0 : Number(req.validatedBody.neurDelta);
+        const reason = String(req.validatedBody?.reason || 'admin_adjustment').trim();
+
+        if (!Number.isFinite(aibaDelta) || !Number.isFinite(neurDelta)) {
+            return res.status(400).json({ error: 'aibaDelta/neurDelta must be numbers' });
+        }
+
+        const incAiba = Math.floor(aibaDelta);
+        const incNeur = Math.floor(neurDelta);
+        const user = await User.findOneAndUpdate(
+            { telegramId },
+            { $inc: { aibaBalance: incAiba, neurBalance: incNeur }, $setOnInsert: { telegramId } },
+            { new: true, upsert: true, setDefaultsOnInsert: true },
+        ).lean();
+
+        const sourceId = idempotencyKey;
+        if (incNeur !== 0) {
+            await safeCreateLedgerEntry({
+                telegramId,
+                currency: 'NEUR',
+                direction: incNeur > 0 ? 'credit' : 'debit',
+                amount: Math.abs(incNeur),
+                reason,
+                arena: 'admin',
+                league: 'global',
+                sourceType: 'admin_credit_user',
+                sourceId,
+                requestId: sourceId,
+                meta: { raw: { aibaDelta, neurDelta } },
+            });
+        }
+        if (incAiba !== 0) {
+            await safeCreateLedgerEntry({
+                telegramId,
+                currency: 'AIBA',
+                direction: incAiba > 0 ? 'credit' : 'debit',
+                amount: Math.abs(incAiba),
+                reason,
+                arena: 'admin',
+                league: 'global',
+                sourceType: 'admin_credit_user',
+                sourceId,
+                requestId: sourceId,
+                meta: { raw: { aibaDelta, neurDelta } },
+            });
+        }
+
+        res.json({ ok: true, user, requestId: idempotencyKey });
     },
 );
 
@@ -488,35 +490,29 @@ router.get(
         limit: { type: 'integer', min: 1, max: 500 },
     }),
     async (req, res) => {
-    try {
-        const telegramId = req.validatedQuery?.telegramId ? String(req.validatedQuery.telegramId).trim() : '';
-        const limit = getLimit(
-            { query: { limit: req.validatedQuery?.limit } },
-            { defaultLimit: 100, maxLimit: 500 },
-        );
+        try {
+            const telegramId = req.validatedQuery?.telegramId ? String(req.validatedQuery.telegramId).trim() : '';
+            const limit = getLimit(
+                { query: { limit: req.validatedQuery?.limit } },
+                { defaultLimit: 100, maxLimit: 500 },
+            );
 
-        const q = {};
-        if (telegramId) q.telegramId = telegramId;
+            const q = {};
+            if (telegramId) q.telegramId = telegramId;
 
-        const rows = await LedgerEntry.find(q).sort({ createdAt: -1 }).limit(limit).lean();
-        res.json(rows);
-    } catch (err) {
-        console.error('Error in /api/admin/economy/ledger:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
+            const rows = await LedgerEntry.find(q).sort({ createdAt: -1 }).limit(limit).lean();
+            res.json(rows);
+        } catch (err) {
+            console.error('Error in /api/admin/economy/ledger:', err);
+            res.status(500).json({ error: 'internal server error' });
+        }
     },
 );
 
 // GET /api/admin/economy/simulate?days=30 — token economy simulator
-router.get(
-    '/simulate',
-    validateQuery({ days: { type: 'integer', min: 1, max: 365 } }),
-    async (req, res) => {
+router.get('/simulate', validateQuery({ days: { type: 'integer', min: 1, max: 365 } }), async (req, res) => {
     try {
-        const days = getLimit(
-            { query: { limit: req.validatedQuery?.days } },
-            { defaultLimit: 30, maxLimit: 365 },
-        );
+        const days = getLimit({ query: { limit: req.validatedQuery?.days } }, { defaultLimit: 30, maxLimit: 365 });
         const cfg = await getConfig();
         const baseAiba = Number(cfg.baseRewardAibaPerScore ?? 0);
         const baseNeur = Number(cfg.baseRewardNeurPerScore ?? 0);
@@ -550,7 +546,6 @@ router.get(
         console.error('Economy simulate error:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-    },
-);
+});
 
 module.exports = router;

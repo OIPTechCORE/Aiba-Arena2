@@ -24,20 +24,20 @@ router.post(
         tracks: { type: 'array', itemType: 'string' },
     }),
     async (req, res) => {
-    const body = req.validatedBody || {};
-    if (!body.key) return res.status(400).json({ error: 'key required' });
-    const realm = {
-        key: body.key,
-        ...(body.name !== undefined ? { name: body.name } : {}),
-        ...(body.description !== undefined ? { description: body.description } : {}),
-        ...(body.level !== undefined ? { level: body.level } : {}),
-        ...(body.order !== undefined ? { order: body.order } : {}),
-        ...(body.active !== undefined ? { active: body.active } : {}),
-        ...(body.unlockCriteria !== undefined ? { unlockCriteria: body.unlockCriteria } : {}),
-        ...(body.tracks !== undefined ? { tracks: body.tracks } : {}),
-    };
-    const updated = await Realm.findOneAndUpdate({ key: realm.key }, { $set: realm }, { upsert: true, new: true });
-    res.json({ realm: updated });
+        const body = req.validatedBody || {};
+        if (!body.key) return res.status(400).json({ error: 'key required' });
+        const realm = {
+            key: body.key,
+            ...(body.name !== undefined ? { name: body.name } : {}),
+            ...(body.description !== undefined ? { description: body.description } : {}),
+            ...(body.level !== undefined ? { level: body.level } : {}),
+            ...(body.order !== undefined ? { order: body.order } : {}),
+            ...(body.active !== undefined ? { active: body.active } : {}),
+            ...(body.unlockCriteria !== undefined ? { unlockCriteria: body.unlockCriteria } : {}),
+            ...(body.tracks !== undefined ? { tracks: body.tracks } : {}),
+        };
+        const updated = await Realm.findOneAndUpdate({ key: realm.key }, { $set: realm }, { upsert: true, new: true });
+        res.json({ realm: updated });
     },
 );
 

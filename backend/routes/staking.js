@@ -48,47 +48,55 @@ router.post(
         amount: { type: 'integer', min: 1, required: true },
     }),
     async (req, res) => {
-    try {
-        const telegramId = req.telegramId ? String(req.telegramId) : '';
-        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const requestId = getIdempotencyKey(req);
-        if (!requestId) return res.status(400).json({ error: 'requestId required' });
-        const amount = Math.floor(Number(req.validatedBody?.amount ?? 0));
-        if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: 'amount must be positive' });
-        const cfg = await getConfig();
-        const minAiba = Math.max(1, Number(cfg.stakingMinAiba ?? 100) || 100);
-        if (amount < minAiba) return res.status(400).json({ error: 'min_stake_required', minAiba, message: `Minimum ${minAiba.toLocaleString()} AIBA to stake.` });
-        const debit = await debitAibaFromUser(amount, {
-            telegramId,
-            reason: 'staking_lock',
-            arena: 'staking',
-            league: 'global',
-            sourceType: 'staking',
-            sourceId: requestId,
-            requestId,
-            meta: { action: 'stake' },
-        });
-        if (!debit.ok) {
-            if (debit.duplicate) {
-                const summary = await getStakingSummary(telegramId);
-                return res.json({ ok: true, stakedAmount: summary.stakedAmount, summary });
+        try {
+            const telegramId = req.telegramId ? String(req.telegramId) : '';
+            if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+            const requestId = getIdempotencyKey(req);
+            if (!requestId) return res.status(400).json({ error: 'requestId required' });
+            const amount = Math.floor(Number(req.validatedBody?.amount ?? 0));
+            if (!Number.isFinite(amount) || amount <= 0)
+                return res.status(400).json({ error: 'amount must be positive' });
+            const cfg = await getConfig();
+            const minAiba = Math.max(1, Number(cfg.stakingMinAiba ?? 1000) || 1000);
+            if (amount < minAiba)
+                return res
+                    .status(400)
+                    .json({
+                        error: 'min_stake_required',
+                        minAiba,
+                        message: `Minimum ${minAiba.toLocaleString()} AIBA to stake.`,
+                    });
+            const debit = await debitAibaFromUser(amount, {
+                telegramId,
+                reason: 'staking_lock',
+                arena: 'staking',
+                league: 'global',
+                sourceType: 'staking',
+                sourceId: requestId,
+                requestId,
+                meta: { action: 'stake' },
+            });
+            if (!debit.ok) {
+                if (debit.duplicate) {
+                    const summary = await getStakingSummary(telegramId);
+                    return res.json({ ok: true, stakedAmount: summary.stakedAmount, summary });
+                }
+                return res.status(403).json({ error: 'insufficient AIBA' });
             }
-            return res.status(403).json({ error: 'insufficient AIBA' });
+            const staking = await Staking.findOneAndUpdate(
+                { telegramId },
+                {
+                    $inc: { amount },
+                    $setOnInsert: { telegramId, lockedAt: new Date(), lastClaimedAt: null },
+                },
+                { upsert: true, new: true, setDefaultsOnInsert: true },
+            );
+            const summary = await getStakingSummary(telegramId);
+            res.json({ ok: true, stakedAmount: staking.amount, summary });
+        } catch (err) {
+            console.error('Staking stake error:', err);
+            res.status(500).json({ error: 'internal server error' });
         }
-        const staking = await Staking.findOneAndUpdate(
-            { telegramId },
-            {
-                $inc: { amount },
-                $setOnInsert: { telegramId, lockedAt: new Date(), lastClaimedAt: null },
-            },
-            { upsert: true, new: true, setDefaultsOnInsert: true },
-        );
-        const summary = await getStakingSummary(telegramId);
-        res.json({ ok: true, stakedAmount: staking.amount, summary });
-    } catch (err) {
-        console.error('Staking stake error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
     },
 );
 
@@ -100,39 +108,40 @@ router.post(
         amount: { type: 'integer', min: 1, required: true },
     }),
     async (req, res) => {
-    try {
-        const telegramId = req.telegramId ? String(req.telegramId) : '';
-        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const requestId = getIdempotencyKey(req);
-        if (!requestId) return res.status(400).json({ error: 'requestId required' });
-        const amount = Math.floor(Number(req.validatedBody?.amount ?? 0));
-        if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: 'amount must be positive' });
-        const staking = await Staking.findOneAndUpdate(
-            { telegramId, amount: { $gte: amount } },
-            { $inc: { amount: -amount } },
-            { new: true },
-        );
-        if (!staking) return res.status(403).json({ error: 'insufficient staked amount' });
-        const credited = await creditAibaNoCap(amount, {
-            telegramId,
-            reason: 'staking_unlock',
-            arena: 'staking',
-            league: 'global',
-            sourceType: 'staking',
-            sourceId: requestId,
-            requestId,
-            meta: { action: 'unstake' },
-        });
-        if (!credited?.ok) {
-            await Staking.updateOne({ telegramId }, { $inc: { amount } }).catch(() => {});
-            return res.status(500).json({ error: 'unstake_credit_failed' });
+        try {
+            const telegramId = req.telegramId ? String(req.telegramId) : '';
+            if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+            const requestId = getIdempotencyKey(req);
+            if (!requestId) return res.status(400).json({ error: 'requestId required' });
+            const amount = Math.floor(Number(req.validatedBody?.amount ?? 0));
+            if (!Number.isFinite(amount) || amount <= 0)
+                return res.status(400).json({ error: 'amount must be positive' });
+            const staking = await Staking.findOneAndUpdate(
+                { telegramId, amount: { $gte: amount } },
+                { $inc: { amount: -amount } },
+                { new: true },
+            );
+            if (!staking) return res.status(403).json({ error: 'insufficient staked amount' });
+            const credited = await creditAibaNoCap(amount, {
+                telegramId,
+                reason: 'staking_unlock',
+                arena: 'staking',
+                league: 'global',
+                sourceType: 'staking',
+                sourceId: requestId,
+                requestId,
+                meta: { action: 'unstake' },
+            });
+            if (!credited?.ok) {
+                await Staking.updateOne({ telegramId }, { $inc: { amount } }).catch(() => {});
+                return res.status(500).json({ error: 'unstake_credit_failed' });
+            }
+            const summary = await getStakingSummary(telegramId);
+            res.json({ ok: true, unstakedAmount: amount, summary });
+        } catch (err) {
+            console.error('Staking unstake error:', err);
+            res.status(500).json({ error: 'internal server error' });
         }
-        const summary = await getStakingSummary(telegramId);
-        res.json({ ok: true, unstakedAmount: amount, summary });
-    } catch (err) {
-        console.error('Staking unstake error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
     },
 );
 
@@ -140,10 +149,16 @@ router.post(
 router.get('/periods', async (_req, res) => {
     try {
         const cfg = await getConfig();
-        const periods = Array.isArray(cfg.stakingPeriods) && cfg.stakingPeriods.length > 0
-            ? cfg.stakingPeriods
-            : [{ days: 30, apyPercent: 10 }, { days: 90, apyPercent: 12 }, { days: 180, apyPercent: 15 }, { days: 365, apyPercent: 18 }];
-        const minAiba = Math.max(1, Number(cfg.stakingMinAiba ?? 100) || 100);
+        const periods =
+            Array.isArray(cfg.stakingPeriods) && cfg.stakingPeriods.length > 0
+                ? cfg.stakingPeriods
+                : [
+                      { days: 30, apyPercent: 10 },
+                      { days: 90, apyPercent: 12 },
+                      { days: 180, apyPercent: 15 },
+                      { days: 365, apyPercent: 18 },
+                  ];
+        const minAiba = Math.max(1, Number(cfg.stakingMinAiba ?? 1000) || 1000);
         res.json({ periods, minAiba });
     } catch (err) {
         console.error('Staking periods error:', err);
@@ -174,66 +189,80 @@ router.post(
         requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128, required: true },
     }),
     async (req, res) => {
-    try {
-        const telegramId = String(req.telegramId || '');
-        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const amount = Math.floor(Number(req.validatedBody?.amount ?? 0));
-        const periodDays = Math.floor(Number(req.validatedBody?.periodDays ?? 0));
-        const requestId = req.validatedBody?.requestId || getIdempotencyKey(req);
-        if (!requestId) return res.status(400).json({ error: 'requestId required' });
-        if (amount <= 0 || periodDays <= 0) return res.status(400).json({ error: 'amount and periodDays must be positive' });
+        try {
+            const telegramId = String(req.telegramId || '');
+            if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+            const amount = Math.floor(Number(req.validatedBody?.amount ?? 0));
+            const periodDays = Math.floor(Number(req.validatedBody?.periodDays ?? 0));
+            const requestId = req.validatedBody?.requestId || getIdempotencyKey(req);
+            if (!requestId) return res.status(400).json({ error: 'requestId required' });
+            if (amount <= 0 || periodDays <= 0)
+                return res.status(400).json({ error: 'amount and periodDays must be positive' });
 
-        const cfg = await getConfig();
-        const minAiba = Math.max(1, Number(cfg.stakingMinAiba ?? 100) || 100);
-        if (amount < minAiba) return res.status(400).json({ error: 'min_stake_required', minAiba, message: `Minimum ${minAiba.toLocaleString()} AIBA to stake.` });
-        const periods = Array.isArray(cfg.stakingPeriods) && cfg.stakingPeriods.length > 0 ? cfg.stakingPeriods : [
-            { days: 30, apyPercent: 10 }, { days: 90, apyPercent: 12 }, { days: 180, apyPercent: 15 }, { days: 365, apyPercent: 18 },
-        ];
-        const period = periods.find((p) => Number(p.days) === periodDays);
-        if (!period) return res.status(400).json({ error: 'invalid_period_days' });
-        const apyPercent = Number(period.apyPercent);
+            const cfg = await getConfig();
+            const minAiba = Math.max(1, Number(cfg.stakingMinAiba ?? 1000) || 1000);
+            if (amount < minAiba)
+                return res
+                    .status(400)
+                    .json({
+                        error: 'min_stake_required',
+                        minAiba,
+                        message: `Minimum ${minAiba.toLocaleString()} AIBA to stake.`,
+                    });
+            const periods =
+                Array.isArray(cfg.stakingPeriods) && cfg.stakingPeriods.length > 0
+                    ? cfg.stakingPeriods
+                    : [
+                          { days: 30, apyPercent: 10 },
+                          { days: 90, apyPercent: 12 },
+                          { days: 180, apyPercent: 15 },
+                          { days: 365, apyPercent: 18 },
+                      ];
+            const period = periods.find((p) => Number(p.days) === periodDays);
+            if (!period) return res.status(400).json({ error: 'invalid_period_days' });
+            const apyPercent = Number(period.apyPercent);
 
-        const debit = await debitAibaFromUser(amount, {
-            telegramId,
-            reason: 'staking_lock_period',
-            arena: 'staking',
-            league: 'locked',
-            sourceType: 'staking_lock',
-            sourceId: requestId,
-            requestId,
-            meta: { periodDays, apyPercent },
-        });
-        if (!debit.ok) {
-            if (debit.duplicate) {
-                return res.status(201).json({
-                    ok: true,
-                    message: 'Stake already placed (idempotent).',
-                    expectedRewardAiba: Math.floor((amount * (apyPercent / 100) * periodDays) / 365),
-                });
+            const debit = await debitAibaFromUser(amount, {
+                telegramId,
+                reason: 'staking_lock_period',
+                arena: 'staking',
+                league: 'locked',
+                sourceType: 'staking_lock',
+                sourceId: requestId,
+                requestId,
+                meta: { periodDays, apyPercent },
+            });
+            if (!debit.ok) {
+                if (debit.duplicate) {
+                    return res.status(201).json({
+                        ok: true,
+                        message: 'Stake already placed (idempotent).',
+                        expectedRewardAiba: Math.floor((amount * (apyPercent / 100) * periodDays) / 365),
+                    });
+                }
+                return res.status(403).json({ error: debit.reason || 'insufficient AIBA' });
             }
-            return res.status(403).json({ error: debit.reason || 'insufficient AIBA' });
+
+            const lockedAt = new Date();
+            const unlocksAt = new Date(lockedAt.getTime() + periodDays * 24 * 60 * 60 * 1000);
+
+            const lock = await StakingLock.create({
+                telegramId,
+                amount,
+                periodDays,
+                apyPercent,
+                lockedAt,
+                unlocksAt,
+            });
+            res.status(201).json({
+                ok: true,
+                lock: lock.toObject(),
+                expectedRewardAiba: Math.floor((amount * (apyPercent / 100) * periodDays) / 365),
+            });
+        } catch (err) {
+            console.error('Staking stake-locked error:', err);
+            res.status(500).json({ error: 'internal server error' });
         }
-
-        const lockedAt = new Date();
-        const unlocksAt = new Date(lockedAt.getTime() + periodDays * 24 * 60 * 60 * 1000);
-
-        const lock = await StakingLock.create({
-            telegramId,
-            amount,
-            periodDays,
-            apyPercent,
-            lockedAt,
-            unlocksAt,
-        });
-        res.status(201).json({
-            ok: true,
-            lock: lock.toObject(),
-            expectedRewardAiba: Math.floor((amount * (apyPercent / 100) * periodDays) / 365),
-        });
-    } catch (err) {
-        console.error('Staking stake-locked error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
     },
 );
 
@@ -246,62 +275,62 @@ router.post(
         requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128, required: true },
     }),
     async (req, res) => {
-    try {
-        const telegramId = String(req.telegramId || '');
-        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const lockId = req.validatedBody?.lockId;
-        const requestId = req.validatedBody?.requestId || getIdempotencyKey(req);
-        if (!requestId) return res.status(400).json({ error: 'requestId required' });
+        try {
+            const telegramId = String(req.telegramId || '');
+            if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+            const lockId = req.validatedBody?.lockId;
+            const requestId = req.validatedBody?.requestId || getIdempotencyKey(req);
+            if (!requestId) return res.status(400).json({ error: 'requestId required' });
 
-        const lock = await StakingLock.findById(lockId);
-        if (!lock) return res.status(404).json({ error: 'lock not found' });
-        if (String(lock.telegramId) !== telegramId) return res.status(403).json({ error: 'not your lock' });
-        if (lock.status !== 'active') return res.status(400).json({ error: 'lock not active' });
+            const lock = await StakingLock.findById(lockId);
+            if (!lock) return res.status(404).json({ error: 'lock not found' });
+            if (String(lock.telegramId) !== telegramId) return res.status(403).json({ error: 'not your lock' });
+            if (lock.status !== 'active') return res.status(400).json({ error: 'lock not active' });
 
-        const amount = Number(lock.amount ?? 0);
-        if (amount <= 0) return res.status(400).json({ error: 'invalid amount' });
+            const amount = Number(lock.amount ?? 0);
+            if (amount <= 0) return res.status(400).json({ error: 'invalid amount' });
 
-        const cfg = await getConfig();
-        const feeBps = Math.min(10000, Math.max(0, Number(cfg.stakingCancelEarlyFeeBps ?? 500)));
-        const feeAiba = Math.floor((amount * feeBps) / 10000);
-        const returnAiba = amount - feeAiba;
+            const cfg = await getConfig();
+            const feeBps = Math.min(10000, Math.max(0, Number(cfg.stakingCancelEarlyFeeBps ?? 500)));
+            const feeAiba = Math.floor((amount * feeBps) / 10000);
+            const returnAiba = amount - feeAiba;
 
-        lock.status = 'cancelled_early';
-        await lock.save();
+            lock.status = 'cancelled_early';
+            await lock.save();
 
-        await creditAibaNoCap(returnAiba, {
-            telegramId,
-            reason: 'staking_cancel_early_return',
-            arena: 'staking',
-            league: 'locked',
-            sourceType: 'staking_cancel',
-            sourceId: String(lock._id),
-            requestId,
-            meta: { lockId: String(lock._id), feeAiba },
-        });
-
-        if (feeAiba > 0) {
-            let treasury = await Treasury.findOne();
-            if (!treasury) treasury = await Treasury.create({});
-            await Treasury.updateOne({}, { $inc: { balanceAiba: feeAiba, cancelledStakesAiba: feeAiba } });
-            await TreasuryOp.create({
-                type: 'staking_cancel_early_fee',
-                amountAiba: feeAiba,
-                source: 'staking',
-                refId: String(lock._id),
+            await creditAibaNoCap(returnAiba, {
+                telegramId,
+                reason: 'staking_cancel_early_return',
+                arena: 'staking',
+                league: 'locked',
+                sourceType: 'staking_cancel',
+                sourceId: String(lock._id),
+                requestId,
+                meta: { lockId: String(lock._id), feeAiba },
             });
-        }
 
-        res.json({
-            ok: true,
-            returnedAiba: returnAiba,
-            feeAiba,
-            message: `Returned ${returnAiba} AIBA. Fee ${feeAiba} AIBA → Super Admin (cancelled stakes).`,
-        });
-    } catch (err) {
-        console.error('Staking cancel-early error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
+            if (feeAiba > 0) {
+                let treasury = await Treasury.findOne();
+                if (!treasury) treasury = await Treasury.create({});
+                await Treasury.updateOne({}, { $inc: { balanceAiba: feeAiba, cancelledStakesAiba: feeAiba } });
+                await TreasuryOp.create({
+                    type: 'staking_cancel_early_fee',
+                    amountAiba: feeAiba,
+                    source: 'staking',
+                    refId: String(lock._id),
+                });
+            }
+
+            res.json({
+                ok: true,
+                returnedAiba: returnAiba,
+                feeAiba,
+                message: `Returned ${returnAiba} AIBA. Fee ${feeAiba} AIBA → Super Admin (cancelled stakes).`,
+            });
+        } catch (err) {
+            console.error('Staking cancel-early error:', err);
+            res.status(500).json({ error: 'internal server error' });
+        }
     },
 );
 
@@ -314,65 +343,68 @@ router.post(
         requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128, required: true },
     }),
     async (req, res) => {
-    try {
-        const telegramId = String(req.telegramId || '');
-        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const lockId = req.validatedBody?.lockId;
-        const requestId = req.validatedBody?.requestId || getIdempotencyKey(req);
-        if (!requestId) return res.status(400).json({ error: 'requestId required' });
+        try {
+            const telegramId = String(req.telegramId || '');
+            if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+            const lockId = req.validatedBody?.lockId;
+            const requestId = req.validatedBody?.requestId || getIdempotencyKey(req);
+            if (!requestId) return res.status(400).json({ error: 'requestId required' });
 
-        const lock = await StakingLock.findOneAndUpdate(
-            {
-                _id: lockId,
+            const lock = await StakingLock.findOneAndUpdate(
+                {
+                    _id: lockId,
+                    telegramId,
+                    status: 'active',
+                    unlocksAt: { $lte: new Date() },
+                },
+                { $set: { status: 'unlocked' } },
+                { new: true },
+            );
+            if (!lock) {
+                const exists = await StakingLock.findById(lockId).lean();
+                if (!exists) return res.status(404).json({ error: 'lock not found' });
+                if (String(exists.telegramId) !== telegramId) return res.status(403).json({ error: 'not your lock' });
+                if (exists.status !== 'active') return res.status(400).json({ error: 'lock not active' });
+                return res.status(400).json({ error: 'lock not yet matured' });
+            }
+
+            const amount = Number(lock.amount ?? 0);
+            const apyPercent = Number(lock.apyPercent ?? 15);
+            const daysLocked = (new Date(lock.unlocksAt) - new Date(lock.lockedAt)) / (24 * 60 * 60 * 1000);
+            const reward = Math.floor((amount * (apyPercent / 100) * daysLocked) / 365);
+            const total = amount + reward;
+
+            const credited = await creditAibaNoCap(total, {
                 telegramId,
-                status: 'active',
-                unlocksAt: { $lte: new Date() },
-            },
-            { $set: { status: 'unlocked' } },
-            { new: true },
-        );
-        if (!lock) {
-            const exists = await StakingLock.findById(lockId).lean();
-            if (!exists) return res.status(404).json({ error: 'lock not found' });
-            if (String(exists.telegramId) !== telegramId) return res.status(403).json({ error: 'not your lock' });
-            if (exists.status !== 'active') return res.status(400).json({ error: 'lock not active' });
-            return res.status(400).json({ error: 'lock not yet matured' });
-        }
+                reason: 'staking_lock_matured',
+                arena: 'staking',
+                league: 'locked',
+                sourceType: 'staking_claim_lock',
+                sourceId: String(lock._id),
+                requestId,
+                meta: { principal: amount, reward },
+            });
+            if (!credited?.ok) {
+                await StakingLock.updateOne(
+                    { _id: lock._id, status: 'unlocked' },
+                    { $set: { status: 'active' } },
+                ).catch(() => {});
+                return res.status(500).json({ error: 'claim_credit_failed' });
+            }
+            if (credited.duplicate) {
+                return res.json({ ok: true, principal: amount, reward, total });
+            }
 
-        const amount = Number(lock.amount ?? 0);
-        const apyPercent = Number(lock.apyPercent ?? 15);
-        const daysLocked = (new Date(lock.unlocksAt) - new Date(lock.lockedAt)) / (24 * 60 * 60 * 1000);
-        const reward = Math.floor((amount * (apyPercent / 100) * daysLocked) / 365);
-        const total = amount + reward;
-
-        const credited = await creditAibaNoCap(total, {
-            telegramId,
-            reason: 'staking_lock_matured',
-            arena: 'staking',
-            league: 'locked',
-            sourceType: 'staking_claim_lock',
-            sourceId: String(lock._id),
-            requestId,
-            meta: { principal: amount, reward },
-        });
-        if (!credited?.ok) {
-            await StakingLock.updateOne({ _id: lock._id, status: 'unlocked' }, { $set: { status: 'active' } }).catch(() => {});
-            return res.status(500).json({ error: 'claim_credit_failed' });
+            res.json({
+                ok: true,
+                principal: amount,
+                reward,
+                total,
+            });
+        } catch (err) {
+            console.error('Staking claim-lock error:', err);
+            res.status(500).json({ error: 'internal server error' });
         }
-        if (credited.duplicate) {
-            return res.json({ ok: true, principal: amount, reward, total });
-        }
-
-        res.json({
-            ok: true,
-            principal: amount,
-            reward,
-            total,
-        });
-    } catch (err) {
-        console.error('Staking claim-lock error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
     },
 );
 
@@ -383,39 +415,39 @@ router.post(
         requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128, required: true },
     }),
     async (req, res) => {
-    try {
-        const telegramId = req.telegramId ? String(req.telegramId) : '';
-        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const requestId = getIdempotencyKey(req);
-        if (!requestId) return res.status(400).json({ error: 'requestId required' });
-        const summary = await getStakingSummary(telegramId);
-        const reward = Math.floor(Number(summary.pendingReward ?? 0));
-        if (reward <= 0) return res.json({ ok: true, claimed: 0, summary });
-        const staking = await Staking.findOne({ telegramId });
-        if (!staking) return res.json({ ok: true, claimed: 0, summary });
-        const credited = await creditAibaNoCap(reward, {
-            telegramId,
-            reason: 'staking_reward',
-            arena: 'staking',
-            league: 'global',
-            sourceType: 'staking',
-            sourceId: requestId,
-            requestId,
-            meta: { stakedAmount: staking.amount },
-        });
-        if (!credited?.ok) return res.status(500).json({ error: 'claim_credit_failed' });
-        if (credited.duplicate) {
+        try {
+            const telegramId = req.telegramId ? String(req.telegramId) : '';
+            if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+            const requestId = getIdempotencyKey(req);
+            if (!requestId) return res.status(400).json({ error: 'requestId required' });
+            const summary = await getStakingSummary(telegramId);
+            const reward = Math.floor(Number(summary.pendingReward ?? 0));
+            if (reward <= 0) return res.json({ ok: true, claimed: 0, summary });
+            const staking = await Staking.findOne({ telegramId });
+            if (!staking) return res.json({ ok: true, claimed: 0, summary });
+            const credited = await creditAibaNoCap(reward, {
+                telegramId,
+                reason: 'staking_reward',
+                arena: 'staking',
+                league: 'global',
+                sourceType: 'staking',
+                sourceId: requestId,
+                requestId,
+                meta: { stakedAmount: staking.amount },
+            });
+            if (!credited?.ok) return res.status(500).json({ error: 'claim_credit_failed' });
+            if (credited.duplicate) {
+                const newSummary = await getStakingSummary(telegramId);
+                return res.json({ ok: true, claimed: reward, summary: newSummary });
+            }
+            staking.lastClaimedAt = new Date();
+            await staking.save();
             const newSummary = await getStakingSummary(telegramId);
-            return res.json({ ok: true, claimed: reward, summary: newSummary });
+            res.json({ ok: true, claimed: reward, summary: newSummary });
+        } catch (err) {
+            console.error('Staking claim error:', err);
+            res.status(500).json({ error: 'internal server error' });
         }
-        staking.lastClaimedAt = new Date();
-        await staking.save();
-        const newSummary = await getStakingSummary(telegramId);
-        res.json({ ok: true, claimed: reward, summary: newSummary });
-    } catch (err) {
-        console.error('Staking claim error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
     },
 );
 

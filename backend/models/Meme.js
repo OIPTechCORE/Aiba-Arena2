@@ -9,6 +9,11 @@ const MemeSchema = new mongoose.Schema(
         category: { type: String, default: 'general', trim: true, index: true },
         // LMS / education (Phase 4)
         educationCategory: { type: String, default: '', trim: true, index: true }, // study_humor, exam_tips, school_events, etc.
+        tags: { type: [String], default: [], trim: true },
+        status: { type: String, default: 'published', enum: ['draft', 'published'], index: true },
+        publishedAt: { type: Date, default: null },
+        schoolId: { type: mongoose.Schema.Types.ObjectId, ref: 'School', default: null, index: true },
+        courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', default: null, index: true },
         watermarkApplied: { type: Boolean, default: false },
 
         // Scoring (computed)
@@ -34,5 +39,8 @@ MemeSchema.index({ engagementScore: -1, createdAt: -1 });
 MemeSchema.index({ ownerTelegramId: 1, createdAt: -1 });
 MemeSchema.index({ category: 1, engagementScore: -1 });
 MemeSchema.index({ educationCategory: 1, engagementScore: -1 });
+MemeSchema.index({ tags: 1, engagementScore: -1 });
+MemeSchema.index({ status: 1, createdAt: -1 });
+MemeSchema.index({ schoolId: 1, engagementScore: -1 });
 
 module.exports = mongoose.model('Meme', MemeSchema);

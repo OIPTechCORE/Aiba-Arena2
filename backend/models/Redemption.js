@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const RedemptionSchema = new mongoose.Schema(
     {
         telegramId: { type: String, required: true, index: true },
-        productKey: { type: String, required: true, index: true },
+        productKey: { type: String, required: true },
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'RedemptionProduct', index: true },
         costAiba: { type: Number, default: 0 },
         costNeur: { type: Number, default: 0 },
@@ -12,11 +12,14 @@ const RedemptionSchema = new mongoose.Schema(
         status: { type: String, default: 'issued', enum: ['issued', 'consumed', 'expired', 'failed'], index: true },
         partnerResponse: { type: Object, default: {} },
         consumedAt: { type: Date, default: null },
+        expiresAt: { type: Date, default: null, index: true },
+        idempotencyKey: { type: String, default: '', trim: true },
     },
     { timestamps: true },
 );
 
 RedemptionSchema.index({ telegramId: 1, productKey: 1 });
 RedemptionSchema.index({ createdAt: -1 });
+RedemptionSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Redemption', RedemptionSchema);

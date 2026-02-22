@@ -29,45 +29,46 @@ router.post(
         rules: { type: 'object' },
     }),
     async (req, res) => {
-    const key = String(req.validatedBody?.key || '').trim();
-    const name = String(req.validatedBody?.name || '').trim();
-    const description = String(req.validatedBody?.description || '').trim();
-    const enabled = req.validatedBody?.enabled === undefined ? true : Boolean(req.validatedBody.enabled);
-    const arena = String(req.validatedBody?.arena || '').trim();
-    const league = String(req.validatedBody?.league || 'rookie').trim();
-    const energyCost = Number(req.validatedBody?.energyCost ?? 10);
-    const cooldownSeconds = Number(req.validatedBody?.cooldownSeconds ?? 30);
-    const entryNeurCost = Number(req.validatedBody?.entryNeurCost ?? 0);
-    const entryAibaCost = Number(req.validatedBody?.entryAibaCost ?? 0);
-    const rewardMultiplierAiba = Number(req.validatedBody?.rewardMultiplierAiba ?? 1);
-    const rewardMultiplierNeur = Number(req.validatedBody?.rewardMultiplierNeur ?? 1);
-    const rules = req.validatedBody?.rules && typeof req.validatedBody.rules === 'object' ? req.validatedBody.rules : {};
+        const key = String(req.validatedBody?.key || '').trim();
+        const name = String(req.validatedBody?.name || '').trim();
+        const description = String(req.validatedBody?.description || '').trim();
+        const enabled = req.validatedBody?.enabled === undefined ? true : Boolean(req.validatedBody.enabled);
+        const arena = String(req.validatedBody?.arena || '').trim();
+        const league = String(req.validatedBody?.league || 'rookie').trim();
+        const energyCost = Number(req.validatedBody?.energyCost ?? 10);
+        const cooldownSeconds = Number(req.validatedBody?.cooldownSeconds ?? 30);
+        const entryNeurCost = Number(req.validatedBody?.entryNeurCost ?? 0);
+        const entryAibaCost = Number(req.validatedBody?.entryAibaCost ?? 0);
+        const rewardMultiplierAiba = Number(req.validatedBody?.rewardMultiplierAiba ?? 1);
+        const rewardMultiplierNeur = Number(req.validatedBody?.rewardMultiplierNeur ?? 1);
+        const rules =
+            req.validatedBody?.rules && typeof req.validatedBody.rules === 'object' ? req.validatedBody.rules : {};
 
-    if (!key || !name || !arena) return res.status(400).json({ error: 'key, name, arena required' });
-    if (Number.isNaN(energyCost) || energyCost < 0) return res.status(400).json({ error: 'energyCost invalid' });
-    if (Number.isNaN(cooldownSeconds) || cooldownSeconds < 0)
-        return res.status(400).json({ error: 'cooldownSeconds invalid' });
-    if (Number.isNaN(entryNeurCost) || entryNeurCost < 0)
-        return res.status(400).json({ error: 'entryNeurCost invalid' });
-    if (Number.isNaN(entryAibaCost) || entryAibaCost < 0)
-        return res.status(400).json({ error: 'entryAibaCost invalid' });
+        if (!key || !name || !arena) return res.status(400).json({ error: 'key, name, arena required' });
+        if (Number.isNaN(energyCost) || energyCost < 0) return res.status(400).json({ error: 'energyCost invalid' });
+        if (Number.isNaN(cooldownSeconds) || cooldownSeconds < 0)
+            return res.status(400).json({ error: 'cooldownSeconds invalid' });
+        if (Number.isNaN(entryNeurCost) || entryNeurCost < 0)
+            return res.status(400).json({ error: 'entryNeurCost invalid' });
+        if (Number.isNaN(entryAibaCost) || entryAibaCost < 0)
+            return res.status(400).json({ error: 'entryAibaCost invalid' });
 
-    const mode = await GameMode.create({
-        key,
-        name,
-        description,
-        enabled,
-        arena,
-        league,
-        energyCost,
-        cooldownSeconds,
-        entryNeurCost,
-        entryAibaCost,
-        rewardMultiplierAiba,
-        rewardMultiplierNeur,
-        rules,
-    });
-    res.status(201).json(mode);
+        const mode = await GameMode.create({
+            key,
+            name,
+            description,
+            enabled,
+            arena,
+            league,
+            energyCost,
+            cooldownSeconds,
+            entryNeurCost,
+            entryAibaCost,
+            rewardMultiplierAiba,
+            rewardMultiplierNeur,
+            rules,
+        });
+        res.status(201).json(mode);
     },
 );
 
@@ -90,40 +91,40 @@ router.patch(
         rules: { type: 'object' },
     }),
     async (req, res) => {
-    const update = {};
-    const setStr = (k) => (update[k] = String(req.validatedBody[k] ?? '').trim());
+        const update = {};
+        const setStr = (k) => (update[k] = String(req.validatedBody[k] ?? '').trim());
 
-    if (req.validatedBody?.key !== undefined) setStr('key');
-    if (req.validatedBody?.name !== undefined) setStr('name');
-    if (req.validatedBody?.description !== undefined) setStr('description');
-    if (req.validatedBody?.enabled !== undefined) update.enabled = Boolean(req.validatedBody.enabled);
-    if (req.validatedBody?.arena !== undefined) setStr('arena');
-    if (req.validatedBody?.league !== undefined) setStr('league');
-    if (req.validatedBody?.energyCost !== undefined) update.energyCost = Number(req.validatedBody.energyCost);
-    if (req.validatedBody?.cooldownSeconds !== undefined) update.cooldownSeconds = Number(req.validatedBody.cooldownSeconds);
-    if (req.validatedBody?.entryNeurCost !== undefined) update.entryNeurCost = Number(req.validatedBody.entryNeurCost);
-    if (req.validatedBody?.entryAibaCost !== undefined) update.entryAibaCost = Number(req.validatedBody.entryAibaCost);
-    if (req.validatedBody?.rewardMultiplierAiba !== undefined)
-        update.rewardMultiplierAiba = Number(req.validatedBody.rewardMultiplierAiba);
-    if (req.validatedBody?.rewardMultiplierNeur !== undefined)
-        update.rewardMultiplierNeur = Number(req.validatedBody.rewardMultiplierNeur);
-    if (req.validatedBody?.rules !== undefined)
-        update.rules = req.validatedBody.rules && typeof req.validatedBody.rules === 'object' ? req.validatedBody.rules : {};
+        if (req.validatedBody?.key !== undefined) setStr('key');
+        if (req.validatedBody?.name !== undefined) setStr('name');
+        if (req.validatedBody?.description !== undefined) setStr('description');
+        if (req.validatedBody?.enabled !== undefined) update.enabled = Boolean(req.validatedBody.enabled);
+        if (req.validatedBody?.arena !== undefined) setStr('arena');
+        if (req.validatedBody?.league !== undefined) setStr('league');
+        if (req.validatedBody?.energyCost !== undefined) update.energyCost = Number(req.validatedBody.energyCost);
+        if (req.validatedBody?.cooldownSeconds !== undefined)
+            update.cooldownSeconds = Number(req.validatedBody.cooldownSeconds);
+        if (req.validatedBody?.entryNeurCost !== undefined)
+            update.entryNeurCost = Number(req.validatedBody.entryNeurCost);
+        if (req.validatedBody?.entryAibaCost !== undefined)
+            update.entryAibaCost = Number(req.validatedBody.entryAibaCost);
+        if (req.validatedBody?.rewardMultiplierAiba !== undefined)
+            update.rewardMultiplierAiba = Number(req.validatedBody.rewardMultiplierAiba);
+        if (req.validatedBody?.rewardMultiplierNeur !== undefined)
+            update.rewardMultiplierNeur = Number(req.validatedBody.rewardMultiplierNeur);
+        if (req.validatedBody?.rules !== undefined)
+            update.rules =
+                req.validatedBody.rules && typeof req.validatedBody.rules === 'object' ? req.validatedBody.rules : {};
 
-    const mode = await GameMode.findByIdAndUpdate(req.validatedParams.id, update, { new: true }).lean();
-    if (!mode) return res.status(404).json({ error: 'not found' });
-    res.json(mode);
+        const mode = await GameMode.findByIdAndUpdate(req.validatedParams.id, update, { new: true }).lean();
+        if (!mode) return res.status(404).json({ error: 'not found' });
+        res.json(mode);
     },
 );
 
-router.delete(
-    '/:id',
-    validateParams({ id: { type: 'objectId', required: true } }),
-    async (req, res) => {
+router.delete('/:id', validateParams({ id: { type: 'objectId', required: true } }), async (req, res) => {
     const deleted = await GameMode.findByIdAndDelete(req.validatedParams.id).lean();
     if (!deleted) return res.status(404).json({ error: 'not found' });
     res.json({ deleted: true });
-    },
-);
+});
 
 module.exports = router;

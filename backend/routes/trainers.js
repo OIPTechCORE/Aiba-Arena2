@@ -23,11 +23,18 @@ function startOfMonthUTC(d) {
 }
 
 function getTierMultiplierBps(referredCount, cfg) {
-    const map = cfg?.trainerTierBpsByReferred && typeof cfg.trainerTierBpsByReferred.get === 'function'
-        ? cfg.trainerTierBpsByReferred
-        : (cfg?.trainerTierBpsByReferred && typeof cfg.trainerTierBpsByReferred === 'object')
-            ? new Map(Object.entries(cfg.trainerTierBpsByReferred).map(([k, v]) => [Number(k), Number(v)]))
-            : new Map([[0, 100], [10, 110], [50, 150], [100, 200], [500, 250]]);
+    const map =
+        cfg?.trainerTierBpsByReferred && typeof cfg.trainerTierBpsByReferred.get === 'function'
+            ? cfg.trainerTierBpsByReferred
+            : cfg?.trainerTierBpsByReferred && typeof cfg.trainerTierBpsByReferred === 'object'
+              ? new Map(Object.entries(cfg.trainerTierBpsByReferred).map(([k, v]) => [Number(k), Number(v)]))
+              : new Map([
+                    [0, 100],
+                    [10, 110],
+                    [50, 150],
+                    [100, 200],
+                    [500, 250],
+                ]);
     const thresholds = [...map.keys()].filter((k) => Number.isFinite(k)).sort((a, b) => a - b);
     let bps = 100;
     for (const t of thresholds) {
@@ -36,7 +43,12 @@ function getTierMultiplierBps(referredCount, cfg) {
     return bps;
 }
 
-function computeMilestonesUnlocked(referred, recruited, milestoneReferred = [5, 10, 25, 50, 100, 250, 500], milestoneRecruited = [1, 3, 5, 10]) {
+function computeMilestonesUnlocked(
+    referred,
+    recruited,
+    milestoneReferred = [5, 10, 25, 50, 100, 250, 500],
+    milestoneRecruited = [1, 3, 5, 10],
+) {
     const unlocked = [];
     for (const m of milestoneReferred) if (referred >= m) unlocked.push(`ref_${m}`);
     for (const m of milestoneRecruited) if (recruited >= m) unlocked.push(`rec_${m}`);
@@ -48,11 +60,20 @@ router.get('/network', async (req, res) => {
     try {
         const sort = String(req.query.sort || 'impact').toLowerCase();
         const limit = Math.min(100, Math.max(10, parseInt(req.query.limit, 10) || 50));
-        const sortField = sort === 'referred' ? 'referredUserCount' : sort === 'rewards' ? 'rewardsEarnedAiba' : sort === 'recruited' ? 'recruitedTrainerCount' : 'totalImpactScore';
+        const sortField =
+            sort === 'referred'
+                ? 'referredUserCount'
+                : sort === 'rewards'
+                  ? 'rewardsEarnedAiba'
+                  : sort === 'recruited'
+                    ? 'recruitedTrainerCount'
+                    : 'totalImpactScore';
         const list = await Trainer.find({ status: 'approved' })
             .sort({ [sortField]: -1 })
             .limit(limit)
-            .select('code username displayName bio specialty region referredUserCount recruitedTrainerCount rewardsEarnedAiba totalImpactScore createdAt')
+            .select(
+                'code username displayName bio specialty region referredUserCount recruitedTrainerCount rewardsEarnedAiba totalImpactScore createdAt',
+            )
             .lean();
         res.json(list);
     } catch (err) {
@@ -76,7 +97,9 @@ router.get('/leaderboard', async (req, res) => {
             list = await Trainer.find({ status: 'approved' })
                 .sort({ [sortField]: -1 })
                 .limit(limit)
-                .select('code telegramId username displayName specialty region referredUserCount recruitedTrainerCount rewardsEarnedAiba totalImpactScore periodWeekReferred periodWeekRecruited')
+                .select(
+                    'code telegramId username displayName specialty region referredUserCount recruitedTrainerCount rewardsEarnedAiba totalImpactScore periodWeekReferred periodWeekRecruited',
+                )
                 .lean();
             list = list.map((t) => ({
                 ...t,
@@ -91,7 +114,9 @@ router.get('/leaderboard', async (req, res) => {
             list = await Trainer.find({ status: 'approved' })
                 .sort({ [sortField]: -1 })
                 .limit(limit)
-                .select('code telegramId username displayName specialty region referredUserCount recruitedTrainerCount rewardsEarnedAiba totalImpactScore periodMonthReferred periodMonthRecruited')
+                .select(
+                    'code telegramId username displayName specialty region referredUserCount recruitedTrainerCount rewardsEarnedAiba totalImpactScore periodMonthReferred periodMonthRecruited',
+                )
                 .lean();
             list = list.map((t) => ({
                 ...t,
@@ -101,11 +126,20 @@ router.get('/leaderboard', async (req, res) => {
             }));
             list.sort((a, b) => (b.periodImpact || 0) - (a.periodImpact || 0));
         } else {
-            sortField = by === 'referred' ? 'referredUserCount' : by === 'rewards' ? 'rewardsEarnedAiba' : by === 'recruited' ? 'recruitedTrainerCount' : 'totalImpactScore';
+            sortField =
+                by === 'referred'
+                    ? 'referredUserCount'
+                    : by === 'rewards'
+                      ? 'rewardsEarnedAiba'
+                      : by === 'recruited'
+                        ? 'recruitedTrainerCount'
+                        : 'totalImpactScore';
             list = await Trainer.find({ status: 'approved' })
                 .sort({ [sortField]: -1 })
                 .limit(limit)
-                .select('code telegramId username displayName specialty region referredUserCount recruitedTrainerCount rewardsEarnedAiba totalImpactScore')
+                .select(
+                    'code telegramId username displayName specialty region referredUserCount recruitedTrainerCount rewardsEarnedAiba totalImpactScore',
+                )
                 .lean();
         }
         const ranked = list.map((t, i) => ({ ...t, rank: i + 1 }));
@@ -125,7 +159,8 @@ router.patch('/profile', requireTelegram, async (req, res) => {
         const updates = {};
         if (req.body?.displayName != null) updates.displayName = String(req.body.displayName).trim().slice(0, 48);
         if (req.body?.bio != null) updates.bio = String(req.body.bio).trim().slice(0, 500);
-        if (req.body?.specialty != null) updates.specialty = String(req.body.specialty).trim().slice(0, 32) || 'general';
+        if (req.body?.specialty != null)
+            updates.specialty = String(req.body.specialty).trim().slice(0, 32) || 'general';
         if (req.body?.region != null) updates.region = String(req.body.region).trim().slice(0, 48);
         if (Object.keys(updates).length > 0) {
             await Trainer.updateOne({ _id: trainer._id }, { $set: updates });
@@ -141,7 +176,9 @@ router.patch('/profile', requireTelegram, async (req, res) => {
 // GET /api/trainers/recruit-link — get viral trainer signup link (public or with ref)
 router.get('/recruit-link', async (req, res) => {
     try {
-        const ref = String(req.query.ref || '').trim().toUpperCase();
+        const ref = String(req.query.ref || '')
+            .trim()
+            .toUpperCase();
         const base = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || 'https://aiba-arena2-miniapp.vercel.app';
         const path = '/trainer';
         const url = ref ? `${base}${path}?ref=${encodeURIComponent(ref)}` : `${base}${path}`;
@@ -156,7 +193,9 @@ router.get('/recruit-link', async (req, res) => {
 router.post('/apply', requireTelegram, async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
-        const ref = String(req.body?.ref || req.query?.ref || '').trim().toUpperCase();
+        const ref = String(req.body?.ref || req.query?.ref || '')
+            .trim()
+            .toUpperCase();
         const existing = await Trainer.findOne({ telegramId });
         if (existing) {
             return res.json({
@@ -225,14 +264,17 @@ router.get('/me', requireTelegram, async (req, res) => {
         const referred = trainer.referredUserCount ?? 0;
         const recruited = trainer.recruitedTrainerCount ?? 0;
         const tierBps = getTierMultiplierBps(referred, cfg);
-        const milestonesRef = Array.isArray(cfg?.trainerMilestonesReferred) ? cfg.trainerMilestonesReferred : [5, 10, 25, 50, 100, 250, 500];
-        const milestonesRec = Array.isArray(cfg?.trainerMilestonesRecruited) ? cfg.trainerMilestonesRecruited : [1, 3, 5, 10];
+        const milestonesRef = Array.isArray(cfg?.trainerMilestonesReferred)
+            ? cfg.trainerMilestonesReferred
+            : [5, 10, 25, 50, 100, 250, 500];
+        const milestonesRec = Array.isArray(cfg?.trainerMilestonesRecruited)
+            ? cfg.trainerMilestonesRecruited
+            : [1, 3, 5, 10];
         const milestonesUnlocked = computeMilestonesUnlocked(referred, recruited, milestonesRef, milestonesRec);
         const nextRef = milestonesRef.find((m) => m > referred);
         const nextRec = milestonesRec.find((m) => m > recruited);
-        const nextMilestone = nextRef != null || nextRec != null
-            ? { referred: nextRef ?? null, recruited: nextRec ?? null }
-            : null;
+        const nextMilestone =
+            nextRef != null || nextRec != null ? { referred: nextRef ?? null, recruited: nextRec ?? null } : null;
         let seasonRank = null;
         if (trainer.status === 'approved') {
             const period = 'monthly';
@@ -264,7 +306,9 @@ router.get('/me', requireTelegram, async (req, res) => {
 router.post('/register-use', requireTelegram, async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
-        const code = String(req.body?.code || '').trim().toUpperCase();
+        const code = String(req.body?.code || '')
+            .trim()
+            .toUpperCase();
         if (!code) return res.status(400).json({ error: 'code required' });
         const trainer = await Trainer.findOne({ code, status: 'approved' });
         if (!trainer) return res.status(404).json({ error: 'trainer not found' });
@@ -318,7 +362,8 @@ router.post('/claim-rewards', requireTelegram, async (req, res) => {
         let pendingAiba = Math.floor(newQualified * aibaPerUser);
         const tierBps = getTierMultiplierBps(trainer.referredUserCount ?? 0, cfg);
         pendingAiba = Math.floor((pendingAiba * tierBps) / 100);
-        if (pendingAiba <= 0) return res.json({ ok: true, claimedAiba: 0, message: 'No pending rewards.', tierMultiplierBps: tierBps });
+        if (pendingAiba <= 0)
+            return res.json({ ok: true, claimedAiba: 0, message: 'No pending rewards.', tierMultiplierBps: tierBps });
         await creditAibaNoCap(pendingAiba, {
             telegramId,
             reason: 'trainer_reward',
@@ -350,8 +395,12 @@ router.post('/claim-rewards', requireTelegram, async (req, res) => {
 router.get('/milestones', async (req, res) => {
     try {
         const cfg = await getConfig();
-        const referred = Array.isArray(cfg?.trainerMilestonesReferred) ? cfg.trainerMilestonesReferred : [5, 10, 25, 50, 100, 250, 500];
-        const recruited = Array.isArray(cfg?.trainerMilestonesRecruited) ? cfg.trainerMilestonesRecruited : [1, 3, 5, 10];
+        const referred = Array.isArray(cfg?.trainerMilestonesReferred)
+            ? cfg.trainerMilestonesReferred
+            : [5, 10, 25, 50, 100, 250, 500];
+        const recruited = Array.isArray(cfg?.trainerMilestonesRecruited)
+            ? cfg.trainerMilestonesRecruited
+            : [1, 3, 5, 10];
         res.json({
             referred,
             recruited,
@@ -375,8 +424,12 @@ router.post('/share-event', requireTelegram, async (req, res) => {
         const referred = trainer.referredUserCount ?? 0;
         const recruited = trainer.recruitedTrainerCount ?? 0;
         const cfg = await getConfig();
-        const milestonesRef = Array.isArray(cfg?.trainerMilestonesReferred) ? cfg.trainerMilestonesReferred : [5, 10, 25, 50, 100, 250, 500];
-        const milestonesRec = Array.isArray(cfg?.trainerMilestonesRecruited) ? cfg.trainerMilestonesRecruited : [1, 3, 5, 10];
+        const milestonesRef = Array.isArray(cfg?.trainerMilestonesReferred)
+            ? cfg.trainerMilestonesReferred
+            : [5, 10, 25, 50, 100, 250, 500];
+        const milestonesRec = Array.isArray(cfg?.trainerMilestonesRecruited)
+            ? cfg.trainerMilestonesRecruited
+            : [1, 3, 5, 10];
         const newUnlocked = computeMilestonesUnlocked(referred, recruited, milestonesRef, milestonesRec);
         const existing = trainer.milestonesUnlocked || [];
         const added = newUnlocked.filter((m) => !existing.includes(m));
@@ -390,7 +443,12 @@ router.post('/share-event', requireTelegram, async (req, res) => {
                 },
             },
         );
-        res.json({ ok: true, shareCount: (trainer.shareCount ?? 0) + 1, milestonesUnlocked: newUnlocked, newlyUnlocked: added });
+        res.json({
+            ok: true,
+            shareCount: (trainer.shareCount ?? 0) + 1,
+            milestonesUnlocked: newUnlocked,
+            newlyUnlocked: added,
+        });
     } catch (err) {
         console.error('Trainer share-event error:', err);
         res.status(500).json({ error: 'internal server error' });
@@ -415,7 +473,9 @@ router.get('/analytics', requireTelegram, async (req, res) => {
             const d = new Date(u.createdAt).toISOString().slice(0, 10);
             byDay[d] = (byDay[d] || 0) + 1;
         }
-        const series = Object.entries(byDay).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date));
+        const series = Object.entries(byDay)
+            .map(([date, count]) => ({ date, count }))
+            .sort((a, b) => a.date.localeCompare(b.date));
         res.json({ periodDays: days, totalReferred: uses.length, byDay: series });
     } catch (err) {
         console.error('Trainer analytics error:', err);

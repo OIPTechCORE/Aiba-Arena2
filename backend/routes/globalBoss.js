@@ -71,7 +71,7 @@ async function distributeBossRewards(bossId) {
     if (totalDmg <= 0) return;
     const pool = boss.rewardPoolAiba;
     for (let i = 0; i < Math.min(1000, top.length); i++) {
-        const share = Math.floor((pool * (top[i].totalDamage / totalDmg)));
+        const share = Math.floor(pool * (top[i].totalDamage / totalDmg));
         if (share > 0) {
             const emit = await tryEmitAiba(share, { arena: 'global_boss', league: 'raid' });
             if (emit.ok) {
@@ -84,21 +84,23 @@ async function distributeBossRewards(bossId) {
                     sourceId: String(bossId),
                     meta: { position: i + 1, damage: top[i].totalDamage },
                 });
-                getCreatorReferrerAndBps(top[i]._id, cfg).then(async (creator) => {
-                    if (!creator?.referrerTelegramId) return;
-                    const creatorAiba = Math.floor((share * creator.bps) / 10000);
-                    if (creatorAiba > 0) {
-                        await creditAibaNoCap(creatorAiba, {
-                            telegramId: creator.referrerTelegramId,
-                            reason: 'creator_earnings',
-                            arena: 'global_boss',
-                            league: 'raid',
-                            sourceType: 'creator_referee_boss',
-                            sourceId: String(bossId),
-                            meta: { refereeTelegramId: top[i]._id, bps: creator.bps, amountAiba: creatorAiba },
-                        });
-                    }
-                }).catch(() => {});
+                getCreatorReferrerAndBps(top[i]._id, cfg)
+                    .then(async (creator) => {
+                        if (!creator?.referrerTelegramId) return;
+                        const creatorAiba = Math.floor((share * creator.bps) / 10000);
+                        if (creatorAiba > 0) {
+                            await creditAibaNoCap(creatorAiba, {
+                                telegramId: creator.referrerTelegramId,
+                                reason: 'creator_earnings',
+                                arena: 'global_boss',
+                                league: 'raid',
+                                sourceType: 'creator_referee_boss',
+                                sourceId: String(bossId),
+                                meta: { refereeTelegramId: top[i]._id, bps: creator.bps, amountAiba: creatorAiba },
+                            });
+                        }
+                    })
+                    .catch(() => {});
             }
         }
     }

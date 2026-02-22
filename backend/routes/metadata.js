@@ -22,10 +22,7 @@ function svgEscape(s) {
 }
 
 // GET /api/metadata/brokers/:id
-router.get(
-    '/brokers/:id',
-    validateParams({ id: { type: 'objectId', required: true } }),
-    async (req, res) => {
+router.get('/brokers/:id', validateParams({ id: { type: 'objectId', required: true } }), async (req, res) => {
     try {
         const { id } = req.validatedParams;
         const broker = await Broker.findById(id).lean();
@@ -56,14 +53,10 @@ router.get(
         console.error('Error in /api/metadata/brokers/:id:', err);
         res.status(500).json({ error: 'internal server error' });
     }
-    },
-);
+});
 
 // GET /api/metadata/brokers/:id/image.svg
-router.get(
-    '/brokers/:id/image.svg',
-    validateParams({ id: { type: 'objectId', required: true } }),
-    async (req, res) => {
+router.get('/brokers/:id/image.svg', validateParams({ id: { type: 'objectId', required: true } }), async (req, res) => {
     try {
         const { id } = req.validatedParams;
         const broker = await Broker.findById(id).lean();
@@ -109,7 +102,6 @@ router.get(
         console.error('Error in /api/metadata/brokers/:id/image.svg:', err);
         res.status(500).send('error');
     }
-    },
-);
+});
 
 module.exports = router;

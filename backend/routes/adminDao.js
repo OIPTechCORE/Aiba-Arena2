@@ -20,12 +20,18 @@ router.get(
     }),
     async (req, res) => {
         try {
-            const limit = getLimit(
-                { query: { limit: req.validatedQuery?.limit } },
-                { defaultLimit: 20, maxLimit: 50 },
-            );
-            const status = String(req.validatedQuery?.status ?? '').trim().toLowerCase();
-            const match = status === 'active' ? { status: 'active' } : status === 'closed' ? { status: 'closed' } : status === 'executed' ? { status: 'executed' } : {};
+            const limit = getLimit({ query: { limit: req.validatedQuery?.limit } }, { defaultLimit: 20, maxLimit: 50 });
+            const status = String(req.validatedQuery?.status ?? '')
+                .trim()
+                .toLowerCase();
+            const match =
+                status === 'active'
+                    ? { status: 'active' }
+                    : status === 'closed'
+                      ? { status: 'closed' }
+                      : status === 'executed'
+                        ? { status: 'executed' }
+                        : {};
 
             const list = await Proposal.find(match).sort({ status: 1, createdAt: -1 }).limit(limit).lean();
 

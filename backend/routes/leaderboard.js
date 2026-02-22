@@ -15,56 +15,67 @@ router.get(
         limit: { type: 'integer', min: 1, max: 500 },
     }),
     async (req, res) => {
-    try {
-        const by = String(req.validatedQuery?.by || 'score').trim().toLowerCase();
-        const limit = getLimit(
-            { query: { limit: req.validatedQuery?.limit } },
-            { defaultLimit: 50, maxLimit: 500 },
-        );
+        try {
+            const by = String(req.validatedQuery?.by || 'score')
+                .trim()
+                .toLowerCase();
+            const limit = getLimit(
+                { query: { limit: req.validatedQuery?.limit } },
+                { defaultLimit: 50, maxLimit: 500 },
+            );
 
-        const allowed = ['score', 'aiba', 'neur', 'battles'];
-        if (!allowed.includes(by)) {
-            return res.status(400).json({ error: 'invalid by', allowed });
+            const allowed = ['score', 'aiba', 'neur', 'battles'];
+            if (!allowed.includes(by)) {
+                return res.status(400).json({ error: 'invalid by', allowed });
+            }
+
+            const agg = await Battle.aggregate([
+                { $match: {} },
+                {
+                    $group: {
+                        _id: '$ownerTelegramId',
+                        totalScore: { $sum: '$score' },
+                        totalAiba: { $sum: '$rewardAiba' },
+                        totalNeur: { $sum: '$rewardNeur' },
+                        battles: { $sum: 1 },
+                    },
+                },
+                {
+                    $sort:
+                        by === 'score'
+                            ? { totalScore: -1 }
+                            : by === 'aiba'
+                              ? { totalAiba: -1 }
+                              : by === 'neur'
+                                ? { totalNeur: -1 }
+                                : { battles: -1 },
+                },
+                { $limit: limit },
+                { $lookup: { from: 'users', localField: '_id', foreignField: 'telegramId', as: 'user' } },
+                { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+                {
+                    $project: {
+                        _id: 0,
+                        telegramId: '$_id',
+                        username: { $ifNull: ['$user.username', '$user.telegram.username', ''] },
+                        badges: { $ifNull: ['$user.badges', []] },
+                        totalScore: 1,
+                        totalAiba: 1,
+                        totalNeur: 1,
+                        battles: 1,
+                    },
+                },
+            ]);
+
+            agg.forEach((row, i) => {
+                row.rank = i + 1;
+            });
+
+            res.json(agg);
+        } catch (err) {
+            console.error('Leaderboard error:', err);
+            res.status(500).json({ error: 'internal server error' });
         }
-
-        const agg = await Battle.aggregate([
-            { $match: {} },
-            {
-                $group: {
-                    _id: '$ownerTelegramId',
-                    totalScore: { $sum: '$score' },
-                    totalAiba: { $sum: '$rewardAiba' },
-                    totalNeur: { $sum: '$rewardNeur' },
-                    battles: { $sum: 1 },
-                },
-            },
-            { $sort: by === 'score' ? { totalScore: -1 } : by === 'aiba' ? { totalAiba: -1 } : by === 'neur' ? { totalNeur: -1 } : { battles: -1 } },
-            { $limit: limit },
-            { $lookup: { from: 'users', localField: '_id', foreignField: 'telegramId', as: 'user' } },
-            { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
-            {
-                $project: {
-                    _id: 0,
-                    telegramId: '$_id',
-                    username: { $ifNull: ['$user.username', '$user.telegram.username', ''] },
-                    badges: { $ifNull: ['$user.badges', []] },
-                    totalScore: 1,
-                    totalAiba: 1,
-                    totalNeur: 1,
-                    battles: 1,
-                },
-            },
-        ]);
-
-        agg.forEach((row, i) => {
-            row.rank = i + 1;
-        });
-
-        res.json(agg);
-    } catch (err) {
-        console.error('Leaderboard error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
     },
 );
 
@@ -75,7 +86,15 @@ router.get('/my-rank', requireTelegram, async (req, res) => {
         const Battle = require('../models/Battle');
         const userScore = await Battle.aggregate([
             { $match: { ownerTelegramId: telegramId } },
-            { $group: { _id: null, totalScore: { $sum: '$score' }, totalAiba: { $sum: '$rewardAiba' }, totalNeur: { $sum: '$rewardNeur' }, battles: { $sum: 1 } } },
+            {
+                $group: {
+                    _id: null,
+                    totalScore: { $sum: '$score' },
+                    totalAiba: { $sum: '$rewardAiba' },
+                    totalNeur: { $sum: '$rewardNeur' },
+                    battles: { $sum: 1 },
+                },
+            },
         ]);
         const totalScore = userScore[0]?.totalScore ?? 0;
         const betterCount = await Battle.aggregate([

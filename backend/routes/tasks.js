@@ -40,7 +40,8 @@ function deriveUserKinds(profile) {
 
     if (profile.brokers <= 1 || profile.battles === 0) kinds.add('newcomer');
     if (profile.battles >= 3) kinds.add('fighter');
-    if (profile.listings + profile.carListings + profile.bikeListings > 0 || profile.aibaBalance >= 100) kinds.add('trader');
+    if (profile.listings + profile.carListings + profile.bikeListings > 0 || profile.aibaBalance >= 100)
+        kinds.add('trader');
     if (profile.cars + profile.bikes > 0) kinds.add('racer');
     if (profile.inGuild || profile.hasReferral) kinds.add('social');
     if (profile.universityCompleted > 0) kinds.add('scholar');
@@ -209,9 +210,7 @@ function makeSystemTasks(profile, userKinds) {
         },
     ];
 
-    return tasks
-        .filter((t) => taskVisibleForKinds(t.userKinds, userKinds))
-        .map((t) => ({ ...t, source: 'system' }));
+    return tasks.filter((t) => taskVisibleForKinds(t.userKinds, userKinds)).map((t) => ({ ...t, source: 'system' }));
 }
 
 function mapAdminTask(task) {
@@ -236,8 +235,7 @@ router.get('/', requireTelegram, async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
         const user =
-            (req.user && typeof req.user === 'object' ? req.user : null) ||
-            (await User.findOne({ telegramId }).lean());
+            (req.user && typeof req.user === 'object' ? req.user : null) || (await User.findOne({ telegramId }).lean());
 
         const [
             brokers,

@@ -1,8 +1,20 @@
 const mongoose = require('mongoose');
 
 const CAR_CLASSES = [
-    'formula1', 'lemans', 'canam', 'indycar', 'groupB', 'gt1', 'electric',
-    'drag', 'touring', 'hillclimb', 'nascar', 'historic', 'hypercar', 'extreme',
+    'formula1',
+    'lemans',
+    'canam',
+    'indycar',
+    'groupB',
+    'gt1',
+    'electric',
+    'drag',
+    'touring',
+    'hillclimb',
+    'nascar',
+    'historic',
+    'hypercar',
+    'extreme',
 ];
 
 const RacingCarSchema = new mongoose.Schema(

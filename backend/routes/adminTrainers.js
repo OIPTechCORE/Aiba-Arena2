@@ -43,10 +43,7 @@ router.patch('/:id', async (req, res) => {
                         sourceId: String(trainer._id),
                         meta: { recruitedTelegramId: trainer.telegramId },
                     });
-                    await Trainer.updateOne(
-                        { _id: inviter._id },
-                        { $inc: { rewardsEarnedAiba: aiba } },
-                    );
+                    await Trainer.updateOne({ _id: inviter._id }, { $inc: { rewardsEarnedAiba: aiba } });
                 }
             }
         }

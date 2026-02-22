@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema(
     {
-        telegramId: { type: String },
+        telegramId: { type: String, index: true },
         username: { type: String, default: '', trim: true },
         telegram: {
             username: { type: String, default: '', trim: true },
@@ -55,11 +55,15 @@ const UserSchema = new mongoose.Schema(
 
         // Unified Comms Phase 3: last seen announcement ID for read/unread
         lastSeenAnnouncementId: { type: mongoose.Schema.Types.ObjectId, ref: 'Announcement', default: null },
+
+        // MemeFi/LMS extensions
+        schoolId: { type: mongoose.Schema.Types.ObjectId, ref: 'School', default: null, index: true },
+        memefiTrusted: { type: Boolean, default: false },
+        educationCreatorBadge: { type: Boolean, default: false },
     },
     { timestamps: true },
 );
 
-UserSchema.index({ telegramId: 1 }, { unique: true, sparse: true });
 UserSchema.index({ wallet: 1 }, { sparse: true });
 
 module.exports = mongoose.model('User', UserSchema);

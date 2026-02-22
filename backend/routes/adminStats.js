@@ -5,7 +5,6 @@ const Battle = require('../models/Battle');
 const EconomyDay = require('../models/EconomyDay');
 const { adminAudit } = require('../middleware/adminAudit');
 
-
 router.use(requireAdmin(), adminAudit());
 
 function utcDayKey(date = new Date()) {
@@ -19,15 +18,17 @@ function utcDayKey(date = new Date()) {
 router.get('/', async (req, res) => {
     try {
         const today = utcDayKey();
-        const todayStart = new Date(Date.UTC(
-            parseInt(today.slice(0, 4), 10),
-            parseInt(today.slice(5, 7), 10) - 1,
-            parseInt(today.slice(8, 10), 10),
-            0,
-            0,
-            0,
-            0,
-        ));
+        const todayStart = new Date(
+            Date.UTC(
+                parseInt(today.slice(0, 4), 10),
+                parseInt(today.slice(5, 7), 10) - 1,
+                parseInt(today.slice(8, 10), 10),
+                0,
+                0,
+                0,
+                0,
+            ),
+        );
 
         const [dau, totalBattles, battlesToday, dayDoc] = await Promise.all([
             User.countDocuments({ lastSeenAt: { $gte: todayStart } }),

@@ -9,7 +9,7 @@ const BikeTrackSchema = new mongoose.Schema(
         league: { type: String, default: 'rookie', index: true },
         active: { type: Boolean, default: true },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 BikeTrackSchema.index({ league: 1, active: 1 });

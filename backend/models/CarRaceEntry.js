@@ -10,7 +10,7 @@ const CarRaceEntrySchema = new mongoose.Schema(
         points: { type: Number, default: 0 },
         aibaReward: { type: Number, default: 0 },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 CarRaceEntrySchema.index({ raceId: 1 });

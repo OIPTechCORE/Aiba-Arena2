@@ -15,20 +15,20 @@ router.post(
         entryCostAiba: { type: 'number', min: 0 },
     }),
     async (req, res) => {
-    try {
-        const t = await Tournament.create({
-            name: req.validatedBody?.name,
-            arena: req.validatedBody?.arena,
-            league: req.validatedBody?.league ?? 'rookie',
-            maxEntries: req.validatedBody?.maxEntries ?? 16,
-            entryCostAiba: Math.max(0, Math.floor(Number(req.validatedBody?.entryCostAiba ?? 0))),
-            status: 'open',
-        });
-        res.status(201).json(t);
-    } catch (err) {
-        console.error('Admin tournament create error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
+        try {
+            const t = await Tournament.create({
+                name: req.validatedBody?.name,
+                arena: req.validatedBody?.arena,
+                league: req.validatedBody?.league ?? 'rookie',
+                maxEntries: req.validatedBody?.maxEntries ?? 16,
+                entryCostAiba: Math.max(0, Math.floor(Number(req.validatedBody?.entryCostAiba ?? 0))),
+                status: 'open',
+            });
+            res.status(201).json(t);
+        } catch (err) {
+            console.error('Admin tournament create error:', err);
+            res.status(500).json({ error: 'internal server error' });
+        }
     },
 );
 

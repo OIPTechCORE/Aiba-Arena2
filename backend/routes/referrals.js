@@ -110,149 +110,149 @@ router.post(
         code: { type: 'string', trim: true, minLength: 1, maxLength: 32, required: true },
     }),
     async (req, res) => {
-    const telegramId = String(req.telegramId || ''); // referee
-    const code = String(req.validatedBody?.code || '')
-        .trim()
-        .toLowerCase();
-    if (!code) return res.status(400).json({ error: 'code required' });
+        const telegramId = String(req.telegramId || ''); // referee
+        const code = String(req.validatedBody?.code || '')
+            .trim()
+            .toLowerCase();
+        if (!code) return res.status(400).json({ error: 'code required' });
 
-    const ref = await Referral.findOne({ code, active: true });
-    if (!ref) return res.status(404).json({ error: 'invalid code' });
-    if (String(ref.ownerTelegramId) === telegramId) return res.status(400).json({ error: 'cannot refer yourself' });
-    if (ref.uses >= ref.maxUses) return res.status(400).json({ error: 'code exhausted' });
+        const ref = await Referral.findOne({ code, active: true });
+        if (!ref) return res.status(404).json({ error: 'invalid code' });
+        if (String(ref.ownerTelegramId) === telegramId) return res.status(400).json({ error: 'cannot refer yourself' });
+        if (ref.uses >= ref.maxUses) return res.status(400).json({ error: 'code exhausted' });
 
-    // Anti-sybil baseline: require the referee to have connected a wallet.
-    const me = req.user || (await User.findOne({ telegramId }).lean());
-    if (!me?.wallet) return res.status(403).json({ error: 'wallet_required' });
+        // Anti-sybil baseline: require the referee to have connected a wallet.
+        const me = req.user || (await User.findOne({ telegramId }).lean());
+        if (!me?.wallet) return res.status(403).json({ error: 'wallet_required' });
 
-    // One referral per referee (global)
-    let use = null;
-    try {
-        use = await ReferralUse.create({
-            code,
+        // One referral per referee (global)
+        let use = null;
+        try {
+            use = await ReferralUse.create({
+                code,
+                referrerTelegramId: ref.ownerTelegramId,
+                refereeTelegramId: telegramId,
+            });
+        } catch (err) {
+            if (String(err?.code) === '11000') return res.status(409).json({ error: 'already_referred' });
+            console.error('Error creating referral use:', err);
+            return res.status(500).json({ error: 'internal server error' });
+        }
+
+        // Increment usage (bounded)
+        const updated = await Referral.findOneAndUpdate(
+            { _id: ref._id, uses: { $lt: ref.maxUses }, active: true },
+            { $inc: { uses: 1 } },
+            { new: true },
+        ).lean();
+        if (!updated) {
+            await ReferralUse.deleteOne({ refereeTelegramId: telegramId }).catch(() => {});
+            return res.status(400).json({ error: 'code exhausted' });
+        }
+
+        // Reward attribution (NEUR; capped via economy emissions).
+        // Tiered multipliers (advisory): 10th referral = 2x, 100th = 5x
+        const cfg = await getConfig();
+        let rReferrer = Math.max(0, Math.floor(Number(cfg.referralRewardNeurReferrer ?? 0)));
+        let rReferee = Math.max(0, Math.floor(Number(cfg.referralRewardNeurReferee ?? 0)));
+        const newUses = updated?.uses ?? ref.uses + 1;
+        if (newUses >= 100) {
+            rReferrer = Math.floor(rReferrer * 5);
+            rReferee = Math.floor(rReferee * 2);
+        } else if (newUses >= 10) {
+            rReferrer = Math.floor(rReferrer * 2);
+            rReferee = Math.floor(rReferee * 1.5);
+        }
+
+        let creditedReferrer = 0;
+        let creditedReferee = 0;
+
+        const total = rReferrer + rReferee;
+        if (total > 0) {
+            const emit = await tryEmitNeur(total, { arena: 'referrals', league: 'global' });
+            if (emit.ok) {
+                creditedReferrer = rReferrer;
+                creditedReferee = rReferee;
+
+                if (creditedReferrer > 0) {
+                    await creditNeurNoCap(creditedReferrer, {
+                        telegramId: String(ref.ownerTelegramId),
+                        reason: 'referral_reward_referrer',
+                        arena: 'referrals',
+                        league: 'global',
+                        sourceType: 'referral',
+                        sourceId: use?._id ? String(use._id) : null,
+                        requestId: req.requestId ? String(req.requestId) : null,
+                        meta: { code },
+                    });
+                }
+                if (creditedReferee > 0) {
+                    await creditNeurNoCap(creditedReferee, {
+                        telegramId,
+                        reason: 'referral_reward_referee',
+                        arena: 'referrals',
+                        league: 'global',
+                        sourceType: 'referral',
+                        sourceId: use?._id ? String(use._id) : null,
+                        requestId: req.requestId ? String(req.requestId) : null,
+                        meta: { code },
+                    });
+                }
+            }
+        }
+
+        // AIBA referral bonuses (vision: Referrals → AIBA bonuses)
+        // Tiered: 10th = 2x, 100th = 5x for referrer
+        let aReferrer = Math.max(0, Math.floor(Number(cfg.referralRewardAibaReferrer ?? 0)));
+        let aReferee = Math.max(0, Math.floor(Number(cfg.referralRewardAibaReferee ?? 0)));
+        if (newUses >= 100) {
+            aReferrer = Math.floor(aReferrer * 5);
+            aReferee = Math.floor(aReferee * 2);
+        } else if (newUses >= 10) {
+            aReferrer = Math.floor(aReferrer * 2);
+            aReferee = Math.floor(aReferee * 1.5);
+        }
+        let creditedAibaReferrer = 0;
+        let creditedAibaReferee = 0;
+        const totalAiba = aReferrer + aReferee;
+        if (totalAiba > 0) {
+            const emitAiba = await tryEmitAiba(totalAiba, { arena: 'referrals', league: 'global' });
+            if (emitAiba.ok) {
+                creditedAibaReferrer = aReferrer;
+                creditedAibaReferee = aReferee;
+                if (creditedAibaReferrer > 0) {
+                    await creditAibaNoCap(creditedAibaReferrer, {
+                        telegramId: String(ref.ownerTelegramId),
+                        reason: 'referral_reward_referrer',
+                        arena: 'referrals',
+                        league: 'global',
+                        sourceType: 'referral',
+                        sourceId: use?._id ? String(use._id) : null,
+                        requestId: req.requestId ? String(req.requestId) : null,
+                        meta: { code },
+                    });
+                }
+                if (creditedAibaReferee > 0) {
+                    await creditAibaNoCap(creditedAibaReferee, {
+                        telegramId,
+                        reason: 'referral_reward_referee',
+                        arena: 'referrals',
+                        league: 'global',
+                        sourceType: 'referral',
+                        sourceId: use?._id ? String(use._id) : null,
+                        requestId: req.requestId ? String(req.requestId) : null,
+                        meta: { code },
+                    });
+                }
+            }
+        }
+
+        res.json({
+            ok: true,
             referrerTelegramId: ref.ownerTelegramId,
-            refereeTelegramId: telegramId,
+            neurReward: { referrer: creditedReferrer, referee: creditedReferee },
+            aibaReward: { referrer: creditedAibaReferrer, referee: creditedAibaReferee },
         });
-    } catch (err) {
-        if (String(err?.code) === '11000') return res.status(409).json({ error: 'already_referred' });
-        console.error('Error creating referral use:', err);
-        return res.status(500).json({ error: 'internal server error' });
-    }
-
-    // Increment usage (bounded)
-    const updated = await Referral.findOneAndUpdate(
-        { _id: ref._id, uses: { $lt: ref.maxUses }, active: true },
-        { $inc: { uses: 1 } },
-        { new: true },
-    ).lean();
-    if (!updated) {
-        await ReferralUse.deleteOne({ refereeTelegramId: telegramId }).catch(() => {});
-        return res.status(400).json({ error: 'code exhausted' });
-    }
-
-    // Reward attribution (NEUR; capped via economy emissions).
-    // Tiered multipliers (advisory): 10th referral = 2x, 100th = 5x
-    const cfg = await getConfig();
-    let rReferrer = Math.max(0, Math.floor(Number(cfg.referralRewardNeurReferrer ?? 0)));
-    let rReferee = Math.max(0, Math.floor(Number(cfg.referralRewardNeurReferee ?? 0)));
-    const newUses = updated?.uses ?? ref.uses + 1;
-    if (newUses >= 100) {
-        rReferrer = Math.floor(rReferrer * 5);
-        rReferee = Math.floor(rReferee * 2);
-    } else if (newUses >= 10) {
-        rReferrer = Math.floor(rReferrer * 2);
-        rReferee = Math.floor(rReferee * 1.5);
-    }
-
-    let creditedReferrer = 0;
-    let creditedReferee = 0;
-
-    const total = rReferrer + rReferee;
-    if (total > 0) {
-        const emit = await tryEmitNeur(total, { arena: 'referrals', league: 'global' });
-        if (emit.ok) {
-            creditedReferrer = rReferrer;
-            creditedReferee = rReferee;
-
-            if (creditedReferrer > 0) {
-                await creditNeurNoCap(creditedReferrer, {
-                    telegramId: String(ref.ownerTelegramId),
-                    reason: 'referral_reward_referrer',
-                    arena: 'referrals',
-                    league: 'global',
-                    sourceType: 'referral',
-                    sourceId: use?._id ? String(use._id) : null,
-                    requestId: req.requestId ? String(req.requestId) : null,
-                    meta: { code },
-                });
-            }
-            if (creditedReferee > 0) {
-                await creditNeurNoCap(creditedReferee, {
-                    telegramId,
-                    reason: 'referral_reward_referee',
-                    arena: 'referrals',
-                    league: 'global',
-                    sourceType: 'referral',
-                    sourceId: use?._id ? String(use._id) : null,
-                    requestId: req.requestId ? String(req.requestId) : null,
-                    meta: { code },
-                });
-            }
-        }
-    }
-
-    // AIBA referral bonuses (vision: Referrals → AIBA bonuses)
-    // Tiered: 10th = 2x, 100th = 5x for referrer
-    let aReferrer = Math.max(0, Math.floor(Number(cfg.referralRewardAibaReferrer ?? 0)));
-    let aReferee = Math.max(0, Math.floor(Number(cfg.referralRewardAibaReferee ?? 0)));
-    if (newUses >= 100) {
-        aReferrer = Math.floor(aReferrer * 5);
-        aReferee = Math.floor(aReferee * 2);
-    } else if (newUses >= 10) {
-        aReferrer = Math.floor(aReferrer * 2);
-        aReferee = Math.floor(aReferee * 1.5);
-    }
-    let creditedAibaReferrer = 0;
-    let creditedAibaReferee = 0;
-    const totalAiba = aReferrer + aReferee;
-    if (totalAiba > 0) {
-        const emitAiba = await tryEmitAiba(totalAiba, { arena: 'referrals', league: 'global' });
-        if (emitAiba.ok) {
-            creditedAibaReferrer = aReferrer;
-            creditedAibaReferee = aReferee;
-            if (creditedAibaReferrer > 0) {
-                await creditAibaNoCap(creditedAibaReferrer, {
-                    telegramId: String(ref.ownerTelegramId),
-                    reason: 'referral_reward_referrer',
-                    arena: 'referrals',
-                    league: 'global',
-                    sourceType: 'referral',
-                    sourceId: use?._id ? String(use._id) : null,
-                    requestId: req.requestId ? String(req.requestId) : null,
-                    meta: { code },
-                });
-            }
-            if (creditedAibaReferee > 0) {
-                await creditAibaNoCap(creditedAibaReferee, {
-                    telegramId,
-                    reason: 'referral_reward_referee',
-                    arena: 'referrals',
-                    league: 'global',
-                    sourceType: 'referral',
-                    sourceId: use?._id ? String(use._id) : null,
-                    requestId: req.requestId ? String(req.requestId) : null,
-                    meta: { code },
-                });
-            }
-        }
-    }
-
-    res.json({
-        ok: true,
-        referrerTelegramId: ref.ownerTelegramId,
-        neurReward: { referrer: creditedReferrer, referee: creditedReferee },
-        aibaReward: { referrer: creditedAibaReferrer, referee: creditedAibaReferee },
-    });
     },
 );
 

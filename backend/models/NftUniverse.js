@@ -5,7 +5,11 @@ const NftUniverseSchema = new mongoose.Schema(
         slug: { type: String, required: true, unique: true, trim: true, index: true },
         name: { type: String, required: true, trim: true },
         description: { type: String, default: '', trim: true },
-        type: { type: String, enum: ['broker', 'arena_legend', 'badge_course', 'badge_full_cert', 'land', 'art'], default: 'broker' },
+        type: {
+            type: String,
+            enum: ['broker', 'arena_legend', 'badge_course', 'badge_full_cert', 'land', 'art'],
+            default: 'broker',
+        },
         // Mint: AIBA cost (for broker, arena_legend); 0 if TON-only
         mintCostAiba: { type: Number, default: 0, min: 0 },
         // Mint: TON cost (nano); 0 if AIBA-only

@@ -52,11 +52,7 @@ router.get(
             }
 
             const [rows, total] = await Promise.all([
-                AdminAudit.find(q)
-                    .sort({ createdAt: -1 })
-                    .skip(offset)
-                    .limit(limit)
-                    .lean(),
+                AdminAudit.find(q).sort({ createdAt: -1 }).skip(offset).limit(limit).lean(),
                 AdminAudit.countDocuments(q),
             ]);
 

@@ -13,10 +13,7 @@ router.get('/my', requireTelegram, async (req, res) => {
     try {
         const telegramId = String(req.telegramId || '');
         if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const items = await SupportRequest.find({ telegramId })
-            .sort({ createdAt: -1 })
-            .limit(50)
-            .lean();
+        const items = await SupportRequest.find({ telegramId }).sort({ createdAt: -1 }).limit(50).lean();
         res.json(items);
     } catch (err) {
         console.error('Support my-list error:', err);
@@ -34,7 +31,9 @@ router.post(
     async (req, res) => {
         try {
             const telegramId = String(req.telegramId || '');
-            const subject = String(req.validatedBody?.subject ?? '').trim().toLowerCase();
+            const subject = String(req.validatedBody?.subject ?? '')
+                .trim()
+                .toLowerCase();
             const message = String(req.validatedBody?.message ?? '').trim();
 
             const doc = await SupportRequest.create({

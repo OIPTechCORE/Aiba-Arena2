@@ -49,10 +49,7 @@ router.post('/claim', requireTelegram, async (req, res) => {
         });
 
         const streak = await updateLoginStreak(telegramId);
-        await User.updateOne(
-            { telegramId },
-            { $set: { lastDailyClaimAt: new Date(), lastSeenAt: new Date() } },
-        );
+        await User.updateOne({ telegramId }, { $set: { lastDailyClaimAt: new Date(), lastSeenAt: new Date() } });
 
         const updated = await User.findOne({ telegramId }).lean();
         res.json({
@@ -81,7 +78,7 @@ router.post('/combo-claim', requireTelegram, async (req, res) => {
         const bonusAiba = Math.max(0, Number(cfg.dailyComboBonusAiba ?? 500));
         if (bonusAiba <= 0) return res.json({ ok: true, bonusAiba: 0, message: 'daily combo not configured' });
         const today = utcDayKey();
-        const spent = (user.dailyComboSpentDate === today) ? (user.dailyComboSpentTodayAiba ?? 0) : 0;
+        const spent = user.dailyComboSpentDate === today ? (user.dailyComboSpentTodayAiba ?? 0) : 0;
         if (user.dailyComboClaimedAt && utcDayKey(new Date(user.dailyComboClaimedAt)) === today) {
             return res.json({ ok: true, alreadyClaimed: true, bonusAiba: 0 });
         }
@@ -100,10 +97,7 @@ router.post('/combo-claim', requireTelegram, async (req, res) => {
             requestId: today,
             meta: { spent, required: reqAiba },
         });
-        await User.updateOne(
-            { telegramId },
-            { $set: { dailyComboClaimedAt: new Date() } },
-        );
+        await User.updateOne({ telegramId }, { $set: { dailyComboClaimedAt: new Date() } });
         const updated = await User.findOne({ telegramId }).lean();
         res.json({
             ok: true,
@@ -130,7 +124,7 @@ router.get('/status', requireTelegram, async (req, res) => {
         const reward = Math.max(0, Math.floor(Number(cfg.dailyRewardNeur ?? 0)));
         const reqAiba = Math.max(0, Number(cfg.dailyComboRequirementAiba ?? 100));
         const bonusAiba = Math.max(0, Number(cfg.dailyComboBonusAiba ?? 500));
-        const spent = (user?.dailyComboSpentDate === today) ? (user?.dailyComboSpentTodayAiba ?? 0) : 0;
+        const spent = user?.dailyComboSpentDate === today ? (user?.dailyComboSpentTodayAiba ?? 0) : 0;
         const comboClaimed = !!user?.dailyComboClaimedAt && utcDayKey(new Date(user.dailyComboClaimedAt)) === today;
         const canClaimCombo = !comboClaimed && spent >= reqAiba && bonusAiba > 0;
 

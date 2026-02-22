@@ -21,13 +21,13 @@ router.get(
     async (req, res) => {
         try {
             const status = String(req.validatedQuery?.status ?? '').trim();
-            const limit = getLimit({ query: { limit: req.validatedQuery?.limit } }, { defaultLimit: 50, maxLimit: 200 });
+            const limit = getLimit(
+                { query: { limit: req.validatedQuery?.limit } },
+                { defaultLimit: 50, maxLimit: 200 },
+            );
 
             const query = status ? { status } : {};
-            const items = await SupportRequest.find(query)
-                .sort({ createdAt: -1 })
-                .limit(limit)
-                .lean();
+            const items = await SupportRequest.find(query).sort({ createdAt: -1 }).limit(limit).lean();
             res.json(items);
         } catch (err) {
             console.error('Admin support list error:', err);
@@ -51,7 +51,8 @@ router.patch(
                 const s = String(req.validatedBody.status).trim();
                 if (['open', 'in_progress', 'resolved', 'closed'].includes(s)) update.status = s;
             }
-            if (req.validatedBody?.adminNote !== undefined) update.adminNote = String(req.validatedBody.adminNote).trim();
+            if (req.validatedBody?.adminNote !== undefined)
+                update.adminNote = String(req.validatedBody.adminNote).trim();
 
             const doc = await SupportRequest.findByIdAndUpdate(id, { $set: update }, { new: true }).lean();
             if (!doc) return res.status(404).json({ error: 'not found' });

@@ -6,8 +6,7 @@
 const router = require('express').Router();
 const { getConfig } = require('../engine/economy');
 
-router.get('/status', (_req, res) =>
-    res.json({ status: 'operational', updatedAt: new Date().toISOString() }));
+router.get('/status', (_req, res) => res.json({ status: 'operational', updatedAt: new Date().toISOString() }));
 
 router.get('/config', async (_req, res) => {
     try {

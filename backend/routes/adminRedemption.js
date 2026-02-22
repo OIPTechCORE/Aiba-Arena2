@@ -24,7 +24,21 @@ router.post(
         key: { type: 'string', trim: true, minLength: 1, maxLength: 100, required: true },
         name: { type: 'string', trim: true, minLength: 1, maxLength: 200, required: true },
         description: { type: 'string', trim: true, maxLength: 2000 },
-        type: { type: 'string', enum: ['school_fee_discount', 'lms_premium', 'exam_prep', 'merch', 'custom'], required: true },
+        type: {
+            type: 'string',
+            enum: [
+                'school_fee_discount',
+                'lms_premium',
+                'exam_prep',
+                'merch',
+                'custom',
+                'certificate',
+                'event_ticket',
+                'book',
+                'subscription',
+            ],
+            required: true,
+        },
         costAiba: { type: 'number', min: 0 },
         costNeur: { type: 'number', min: 0 },
         costStars: { type: 'number', min: 0 },
@@ -34,6 +48,13 @@ router.post(
         issueCodePrefix: { type: 'string', trim: true, maxLength: 50 },
         maxRedemptionsPerUser: { type: 'integer', min: 0 },
         maxRedemptionsTotal: { type: 'integer', min: 0 },
+        codeValidityDays: { type: 'number', min: 0 },
+        partnerWebhookSecret: { type: 'string', trim: true, maxLength: 256 },
+        eligibilityMinAiba: { type: 'number', min: 0 },
+        eligibilityMinNeur: { type: 'number', min: 0 },
+        eligibilityCourseId: { type: 'string', trim: true, maxLength: 100 },
+        schoolId: { type: 'objectId' },
+        partnerApiKey: { type: 'string', trim: true, maxLength: 128 },
         metadata: { type: 'object' },
     }),
     async (req, res) => {
@@ -49,10 +70,20 @@ router.post(
                 costStars: Math.max(0, Number(body.costStars) || 0),
                 enabled: body.enabled === undefined ? true : Boolean(body.enabled),
                 partnerWebhookUrl: (body.partnerWebhookUrl || '').trim(),
-                partnerPayloadTemplate: body.partnerPayloadTemplate && typeof body.partnerPayloadTemplate === 'object' ? body.partnerPayloadTemplate : {},
+                partnerPayloadTemplate:
+                    body.partnerPayloadTemplate && typeof body.partnerPayloadTemplate === 'object'
+                        ? body.partnerPayloadTemplate
+                        : {},
                 issueCodePrefix: (body.issueCodePrefix || 'REDEEM').trim(),
                 maxRedemptionsPerUser: Math.max(0, Number(body.maxRedemptionsPerUser) || 0),
                 maxRedemptionsTotal: Math.max(0, Number(body.maxRedemptionsTotal) || 0),
+                codeValidityDays: Math.max(0, Number(body.codeValidityDays) || 0),
+                partnerWebhookSecret: (body.partnerWebhookSecret || '').trim(),
+                eligibilityMinAiba: Math.max(0, Number(body.eligibilityMinAiba) || 0),
+                eligibilityMinNeur: Math.max(0, Number(body.eligibilityMinNeur) || 0),
+                eligibilityCourseId: (body.eligibilityCourseId || '').trim(),
+                schoolId: body.schoolId || null,
+                partnerApiKey: (body.partnerApiKey || '').trim(),
                 metadata: body.metadata && typeof body.metadata === 'object' ? body.metadata : {},
             });
             res.status(201).json(product);
@@ -71,7 +102,20 @@ router.patch(
     validateBody({
         name: { type: 'string', trim: true, maxLength: 200 },
         description: { type: 'string', trim: true, maxLength: 2000 },
-        type: { type: 'string', enum: ['school_fee_discount', 'lms_premium', 'exam_prep', 'merch', 'custom'] },
+        type: {
+            type: 'string',
+            enum: [
+                'school_fee_discount',
+                'lms_premium',
+                'exam_prep',
+                'merch',
+                'custom',
+                'certificate',
+                'event_ticket',
+                'book',
+                'subscription',
+            ],
+        },
         costAiba: { type: 'number', min: 0 },
         costNeur: { type: 'number', min: 0 },
         costStars: { type: 'number', min: 0 },
@@ -81,6 +125,13 @@ router.patch(
         issueCodePrefix: { type: 'string', trim: true, maxLength: 50 },
         maxRedemptionsPerUser: { type: 'integer', min: 0 },
         maxRedemptionsTotal: { type: 'integer', min: 0 },
+        codeValidityDays: { type: 'number', min: 0 },
+        partnerWebhookSecret: { type: 'string', trim: true, maxLength: 256 },
+        eligibilityMinAiba: { type: 'number', min: 0 },
+        eligibilityMinNeur: { type: 'number', min: 0 },
+        eligibilityCourseId: { type: 'string', trim: true, maxLength: 100 },
+        schoolId: { type: 'objectId' },
+        partnerApiKey: { type: 'string', trim: true, maxLength: 128 },
         metadata: { type: 'object' },
     }),
     async (req, res) => {
@@ -96,10 +147,24 @@ router.patch(
             if (body.costStars !== undefined) upd.costStars = Math.max(0, Number(body.costStars));
             if (body.enabled !== undefined) upd.enabled = Boolean(body.enabled);
             if (body.partnerWebhookUrl !== undefined) upd.partnerWebhookUrl = String(body.partnerWebhookUrl).trim();
-            if (body.partnerPayloadTemplate !== undefined && typeof body.partnerPayloadTemplate === 'object') upd.partnerPayloadTemplate = body.partnerPayloadTemplate;
+            if (body.partnerPayloadTemplate !== undefined && typeof body.partnerPayloadTemplate === 'object')
+                upd.partnerPayloadTemplate = body.partnerPayloadTemplate;
             if (body.issueCodePrefix !== undefined) upd.issueCodePrefix = String(body.issueCodePrefix).trim();
-            if (body.maxRedemptionsPerUser !== undefined) upd.maxRedemptionsPerUser = Math.max(0, Number(body.maxRedemptionsPerUser));
-            if (body.maxRedemptionsTotal !== undefined) upd.maxRedemptionsTotal = Math.max(0, Number(body.maxRedemptionsTotal));
+            if (body.maxRedemptionsPerUser !== undefined)
+                upd.maxRedemptionsPerUser = Math.max(0, Number(body.maxRedemptionsPerUser));
+            if (body.maxRedemptionsTotal !== undefined)
+                upd.maxRedemptionsTotal = Math.max(0, Number(body.maxRedemptionsTotal));
+            if (body.codeValidityDays !== undefined) upd.codeValidityDays = Math.max(0, Number(body.codeValidityDays));
+            if (body.partnerWebhookSecret !== undefined)
+                upd.partnerWebhookSecret = String(body.partnerWebhookSecret).trim();
+            if (body.eligibilityMinAiba !== undefined)
+                upd.eligibilityMinAiba = Math.max(0, Number(body.eligibilityMinAiba));
+            if (body.eligibilityMinNeur !== undefined)
+                upd.eligibilityMinNeur = Math.max(0, Number(body.eligibilityMinNeur));
+            if (body.eligibilityCourseId !== undefined)
+                upd.eligibilityCourseId = String(body.eligibilityCourseId).trim();
+            if (body.schoolId !== undefined) upd.schoolId = body.schoolId || null;
+            if (body.partnerApiKey !== undefined) upd.partnerApiKey = String(body.partnerApiKey).trim();
             if (body.metadata !== undefined && typeof body.metadata === 'object') upd.metadata = body.metadata;
 
             const product = await RedemptionProduct.findByIdAndUpdate(id, { $set: upd }, { new: true }).lean();
@@ -119,10 +184,42 @@ router.post('/seed', async (_req, res) => {
         if (count > 0) return res.json({ message: 'Products already exist', count });
 
         const defaults = [
-            { key: 'school_fee_discount_10', name: '10% School Fee Discount', description: 'Redeem for 10% off school fees.', type: 'school_fee_discount', costAiba: 500, costNeur: 0, costStars: 0 },
-            { key: 'lms_premium_1m', name: 'LMS Premium 1 Month', description: 'Unlock LMS premium features for 1 month.', type: 'lms_premium', costAiba: 200, costNeur: 1000, costStars: 0 },
-            { key: 'exam_prep_unlock', name: 'Exam Prep Unlock', description: 'Unlock exam prep materials.', type: 'exam_prep', costAiba: 100, costNeur: 500, costStars: 0 },
-            { key: 'merch_tee', name: 'Merch: T-Shirt', description: 'Redeem for branded T-shirt (while supplies last).', type: 'merch', costAiba: 300, costNeur: 0, costStars: 50 },
+            {
+                key: 'school_fee_discount_10',
+                name: '10% School Fee Discount',
+                description: 'Redeem for 10% off school fees.',
+                type: 'school_fee_discount',
+                costAiba: 500,
+                costNeur: 0,
+                costStars: 0,
+            },
+            {
+                key: 'lms_premium_1m',
+                name: 'LMS Premium 1 Month',
+                description: 'Unlock LMS premium features for 1 month.',
+                type: 'lms_premium',
+                costAiba: 200,
+                costNeur: 1000,
+                costStars: 0,
+            },
+            {
+                key: 'exam_prep_unlock',
+                name: 'Exam Prep Unlock',
+                description: 'Unlock exam prep materials.',
+                type: 'exam_prep',
+                costAiba: 100,
+                costNeur: 500,
+                costStars: 0,
+            },
+            {
+                key: 'merch_tee',
+                name: 'Merch: T-Shirt',
+                description: 'Redeem for branded T-shirt (while supplies last).',
+                type: 'merch',
+                costAiba: 300,
+                costNeur: 0,
+                costStars: 50,
+            },
         ];
         await RedemptionProduct.insertMany(defaults);
         res.status(201).json({ message: 'Default redemption products created', count: defaults.length });

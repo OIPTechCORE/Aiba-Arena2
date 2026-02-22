@@ -28,32 +28,28 @@ router.get(
                 .limit(20)
                 .lean();
             res.json(list);
-    } catch (err) {
-        console.error('Predict events list error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
-    },
-);
-
-// GET /api/predict/events/:id — single event with bets (aggregated)
-router.get(
-    '/events/:id',
-    validateParams({ id: { type: 'objectId', required: true } }),
-    async (req, res) => {
-        try {
-            const ev = await PredictEvent.findById(req.params.id)
-                .populate('brokerAId', 'intelligence speed risk ownerTelegramId')
-                .populate('brokerBId', 'intelligence speed risk ownerTelegramId')
-                .lean();
-            if (!ev) return res.status(404).json({ error: 'event not found' });
-            const betCount = await PredictBet.countDocuments({ eventId: ev._id });
-            res.json({ ...ev, betCount });
         } catch (err) {
-            console.error('Predict event get error:', err);
+            console.error('Predict events list error:', err);
             res.status(500).json({ error: 'internal server error' });
         }
     },
 );
+
+// GET /api/predict/events/:id — single event with bets (aggregated)
+router.get('/events/:id', validateParams({ id: { type: 'objectId', required: true } }), async (req, res) => {
+    try {
+        const ev = await PredictEvent.findById(req.params.id)
+            .populate('brokerAId', 'intelligence speed risk ownerTelegramId')
+            .populate('brokerBId', 'intelligence speed risk ownerTelegramId')
+            .lean();
+        if (!ev) return res.status(404).json({ error: 'event not found' });
+        const betCount = await PredictBet.countDocuments({ eventId: ev._id });
+        res.json({ ...ev, betCount });
+    } catch (err) {
+        console.error('Predict event get error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
 
 // POST /api/predict/events/:id/bet — place bet (authenticated)
 router.post(
@@ -77,7 +73,9 @@ router.post(
             // Idempotency: return existing bet if same requestId already processed
             const existing = await PredictBet.findOne({ requestId }).lean();
             if (existing) {
-                return res.status(201).json({ ok: true, amountAiba: existing.amountAiba, brokerId: String(existing.brokerId) });
+                return res
+                    .status(201)
+                    .json({ ok: true, amountAiba: existing.amountAiba, brokerId: String(existing.brokerId) });
             }
 
             const ev = await PredictEvent.findById(eventId);
@@ -122,7 +120,10 @@ router.post(
                 const session = await mongoose.startSession();
                 try {
                     await session.withTransaction(async () => {
-                        await PredictBet.create([{ eventId: ev._id, telegramId, brokerId, amountAiba: amt, requestId }], { session });
+                        await PredictBet.create(
+                            [{ eventId: ev._id, telegramId, brokerId, amountAiba: amt, requestId }],
+                            { session },
+                        );
                         const updated = await PredictEvent.updateOne(
                             {
                                 _id: ev._id,

@@ -12,7 +12,13 @@ const MemeSave = require('../models/MemeSave');
 const MemeAppeal = require('../models/MemeAppeal');
 const User = require('../models/User');
 const { recomputeMemeScore, getMemeFiConfig } = require('../engine/memefiScoring');
-const { getConfig, debitAibaFromUser, debitNeurFromUser, creditAibaNoCap, creditNeurNoCap } = require('../engine/economy');
+const {
+    getConfig,
+    debitAibaFromUser,
+    debitNeurFromUser,
+    creditAibaNoCap,
+    creditNeurNoCap,
+} = require('../engine/economy');
 const { rateLimit } = require('../middleware/rateLimit');
 
 async function ensureUser(telegramId) {
@@ -52,7 +58,12 @@ router.get(
             if (tag) q.tags = tag;
             if (window === '6h' || window === '24h' || window === '7d') {
                 const now = Date.now();
-                const ms = window === '6h' ? 6 * 60 * 60 * 1000 : window === '24h' ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+                const ms =
+                    window === '6h'
+                        ? 6 * 60 * 60 * 1000
+                        : window === '24h'
+                          ? 24 * 60 * 60 * 1000
+                          : 7 * 24 * 60 * 60 * 1000;
                 q.createdAt = { $gte: new Date(now - ms) };
             }
 
@@ -112,6 +123,21 @@ router.get('/memes/:id/comments', validateParams({ id: { type: 'objectId', requi
     }
 });
 
+// GET /api/memefi/templates — list enabled templates (public, for create picker)
+router.get('/templates', async (_req, res) => {
+    try {
+        const MemeTemplate = require('../models/MemeTemplate');
+        const list = await MemeTemplate.find({ enabled: true })
+            .sort({ sortOrder: 1, name: 1 })
+            .select('_id name imageUrl category')
+            .lean();
+        res.json(list);
+    } catch (err) {
+        console.error('Memefi templates error:', err);
+        res.status(500).json({ error: 'internal server error' });
+    }
+});
+
 router.use(requireTelegram);
 
 // POST /api/memefi/upload — create meme (imageUrl from client; client can upload to Telegram or external host)
@@ -126,19 +152,39 @@ router.post(
         educationCategory: { type: 'string', trim: true, maxLength: 50 },
         tags: { type: 'array', items: { type: 'string', trim: true, maxLength: 30 } },
         status: { type: 'string', enum: ['draft', 'published'] },
+        schoolId: { type: 'string', trim: true, maxLength: 30 },
     }),
     async (req, res) => {
         try {
             const telegramId = String(req.telegramId || '');
-            const { imageUrl, caption, templateId, category, educationCategory, tags: bodyTags, status: bodyStatus } = req.validatedBody;
+            const {
+                imageUrl,
+                caption,
+                templateId,
+                category,
+                educationCategory,
+                tags: bodyTags,
+                status: bodyStatus,
+                schoolId: bodySchoolId,
+            } = req.validatedBody;
             const captionStr = (caption || '').trim();
-            const parsedTags = (captionStr.match(/#(\w+)/g) || []).map((t) => t.slice(1).toLowerCase()).filter((t) => t.length <= 30);
-            const tags = Array.isArray(bodyTags) && bodyTags.length > 0
-                ? bodyTags.slice(0, 10).map((t) => String(t).trim().toLowerCase()).filter(Boolean)
-                : parsedTags;
+            const parsedTags = (captionStr.match(/#(\w+)/g) || [])
+                .map((t) => t.slice(1).toLowerCase())
+                .filter((t) => t.length <= 30);
+            const tags =
+                Array.isArray(bodyTags) && bodyTags.length > 0
+                    ? bodyTags
+                          .slice(0, 10)
+                          .map((t) => String(t).trim().toLowerCase())
+                          .filter(Boolean)
+                    : parsedTags;
             const status = bodyStatus === 'draft' ? 'draft' : 'published';
             const publishedAt = status === 'published' ? new Date() : null;
 
+            const schoolIdObj =
+                (bodySchoolId || '').trim() && /^[a-fA-F0-9]{24}$/.test(String(bodySchoolId).trim())
+                    ? String(bodySchoolId).trim()
+                    : null;
             const meme = await Meme.create({
                 ownerTelegramId: telegramId,
                 imageUrl: imageUrl.trim(),
@@ -149,6 +195,7 @@ router.post(
                 tags,
                 status,
                 publishedAt,
+                schoolId: schoolIdObj,
                 watermarkApplied: false,
                 engagementScore: 0,
                 likeCount: 0,
@@ -244,7 +291,12 @@ router.post(
             await recomputeMemeScore(memeId);
             const updated = await Meme.findById(memeId).select('commentCount engagementScore').lean();
             res.status(201).json({
-                comment: { _id: comment._id, text: comment.text, telegramId: comment.telegramId, createdAt: comment.createdAt },
+                comment: {
+                    _id: comment._id,
+                    text: comment.text,
+                    telegramId: comment.telegramId,
+                    createdAt: comment.createdAt,
+                },
                 commentCount: updated?.commentCount ?? meme.commentCount + 1,
             });
         } catch (err) {
@@ -277,7 +329,9 @@ router.post(
             const field = kind === 'internal' ? 'internalShareCount' : 'externalShareCount';
             await Meme.updateOne({ _id: memeId }, { $inc: { [field]: 1 } });
             await recomputeMemeScore(memeId);
-            const updated = await Meme.findById(memeId).select('internalShareCount externalShareCount engagementScore').lean();
+            const updated = await Meme.findById(memeId)
+                .select('internalShareCount externalShareCount engagementScore')
+                .lean();
             res.status(201).json({
                 shared: true,
                 kind,
@@ -307,7 +361,8 @@ router.post(
             let amountAiba = Math.floor(Number(req.validatedBody?.amountAiba) || 0);
             let amountNeur = Math.floor(Number(req.validatedBody?.amountNeur) || 0);
 
-            if (amountAiba <= 0 && amountNeur <= 0) return res.status(400).json({ error: 'amountAiba or amountNeur required' });
+            if (amountAiba <= 0 && amountNeur <= 0)
+                return res.status(400).json({ error: 'amountAiba or amountNeur required' });
 
             const meme = await Meme.findById(memeId);
             if (!meme) return res.status(404).json({ error: 'meme not found' });
@@ -315,7 +370,8 @@ router.post(
 
             const cfg = await getMemeFiConfig();
             const minAiba = Math.max(0, Number(cfg.boostMinAiba) || 0);
-            if (amountAiba > 0 && amountAiba < minAiba) return res.status(400).json({ error: 'amountAiba below minimum', min: minAiba });
+            if (amountAiba > 0 && amountAiba < minAiba)
+                return res.status(400).json({ error: 'amountAiba below minimum', min: minAiba });
 
             if (amountAiba > 0) {
                 const debit = await debitAibaFromUser(amountAiba, {
@@ -325,7 +381,8 @@ router.post(
                     sourceId: String(memeId),
                     meta: { memeId: String(memeId) },
                 });
-                if (!debit.ok) return res.status(403).json({ error: debit.error || 'insufficient AIBA', need: amountAiba });
+                if (!debit.ok)
+                    return res.status(403).json({ error: debit.error || 'insufficient AIBA', need: amountAiba });
             }
             if (amountNeur > 0) {
                 const debit = await debitNeurFromUser(amountNeur, {
@@ -336,7 +393,13 @@ router.post(
                     meta: { memeId: String(memeId) },
                 });
                 if (!debit.ok) {
-                    if (amountAiba > 0) await creditAibaNoCap(amountAiba, { telegramId, reason: 'memefi_boost_refund', sourceType: 'memefi_boost_refund', sourceId: String(memeId) });
+                    if (amountAiba > 0)
+                        await creditAibaNoCap(amountAiba, {
+                            telegramId,
+                            reason: 'memefi_boost_refund',
+                            sourceType: 'memefi_boost_refund',
+                            sourceId: String(memeId),
+                        });
                     return res.status(403).json({ error: debit.error || 'insufficient NEUR', need: amountNeur });
                 }
             }
@@ -433,11 +496,7 @@ router.post(
             if (!meme) return res.status(404).json({ error: 'meme not found' });
             if (meme.hidden) return res.status(403).json({ error: 'meme hidden' });
 
-            await MemeReaction.findOneAndUpdate(
-                { memeId, telegramId },
-                { $set: { reactionType } },
-                { upsert: true },
-            );
+            await MemeReaction.findOneAndUpdate({ memeId, telegramId }, { $set: { reactionType } }, { upsert: true });
             await recomputeMemeScore(memeId);
             const counts = await MemeReaction.aggregate([
                 { $match: { memeId: meme._id } },
@@ -498,7 +557,11 @@ router.get('/me/saved', async (req, res) => {
 // GET /api/memefi/me/memes — current user's memes (e.g. status=draft for "My drafts")
 router.get(
     '/me/memes',
-    validateQuery({ status: { type: 'string', enum: ['draft', 'published'] }, limit: { type: 'integer', min: 1, max: 50 }, offset: { type: 'integer', min: 0 } }),
+    validateQuery({
+        status: { type: 'string', enum: ['draft', 'published'] },
+        limit: { type: 'integer', min: 1, max: 50 },
+        offset: { type: 'integer', min: 0 },
+    }),
     async (req, res) => {
         try {
             const telegramId = String(req.telegramId || '');
@@ -547,7 +610,8 @@ router.post(
             if (!meme.hidden) return res.status(400).json({ error: 'meme is not hidden' });
 
             const existing = await MemeAppeal.findOne({ memeId }).sort({ createdAt: -1 }).lean();
-            if (existing && existing.status === 'pending') return res.status(400).json({ error: 'appeal already pending' });
+            if (existing && existing.status === 'pending')
+                return res.status(400).json({ error: 'appeal already pending' });
 
             const appeal = await MemeAppeal.create({ memeId, telegramId, reason, status: 'pending' });
             res.status(201).json({ appealId: appeal._id, status: 'pending' });
@@ -573,10 +637,7 @@ router.patch(
             if (meme.ownerTelegramId !== telegramId) return res.status(403).json({ error: 'not owner' });
             if (meme.status === 'published') return res.json({ published: true, publishedAt: meme.publishedAt });
 
-            await Meme.updateOne(
-                { _id: memeId },
-                { $set: { status: 'published', publishedAt: new Date() } },
-            );
+            await Meme.updateOne({ _id: memeId }, { $set: { status: 'published', publishedAt: new Date() } });
             await recomputeMemeScore(memeId);
             const updated = await Meme.findById(memeId).select('status publishedAt engagementScore').lean();
             res.json({ published: true, publishedAt: updated?.publishedAt, engagementScore: updated?.engagementScore });
@@ -590,14 +651,22 @@ router.patch(
 // GET /api/memefi/trending — top memes in time window (6h, 24h, 7d)
 router.get(
     '/trending',
-    validateQuery({ window: { type: 'string', enum: ['6h', '24h', '7d'] }, limit: { type: 'integer', min: 1, max: 50 } }),
+    validateQuery({
+        window: { type: 'string', enum: ['6h', '24h', '7d'] },
+        limit: { type: 'integer', min: 1, max: 50 },
+    }),
     async (req, res) => {
         try {
             const window = req.validatedQuery?.window || '24h';
             const limit = Math.min(50, Number(req.validatedQuery?.limit) || 20);
-            const ms = window === '6h' ? 6 * 60 * 60 * 1000 : window === '24h' ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+            const ms =
+                window === '6h' ? 6 * 60 * 60 * 1000 : window === '24h' ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
             const since = new Date(Date.now() - ms);
-            const q = { hidden: { $ne: true }, $or: [{ status: 'published' }, { status: { $exists: false } }], createdAt: { $gte: since } };
+            const q = {
+                hidden: { $ne: true },
+                $or: [{ status: 'published' }, { status: { $exists: false } }],
+                createdAt: { $gte: since },
+            };
             const memes = await Meme.find(q).sort({ engagementScore: -1, createdAt: -1 }).limit(limit).lean();
             res.json({ window, memes });
         } catch (err) {
@@ -639,7 +708,13 @@ router.get(
             if (educationCategory) q.push({ $match: { educationCategory } });
             if (schoolId) q.push({ $match: { schoolId } });
             q.push(
-                { $group: { _id: '$ownerTelegramId', totalScore: { $sum: '$engagementScore' }, memeCount: { $sum: 1 } } },
+                {
+                    $group: {
+                        _id: '$ownerTelegramId',
+                        totalScore: { $sum: '$engagementScore' },
+                        memeCount: { $sum: 1 },
+                    },
+                },
                 { $sort: { totalScore: -1 } },
                 { $limit: limit },
             );
@@ -677,11 +752,21 @@ router.get('/earn-summary', async (req, res) => {
         const earnedNeur = entries.find((e) => e._id === 'NEUR')?.total ?? 0;
         const myMemesCount = await Meme.countDocuments({ ownerTelegramId: telegramId });
         const myBoostsCount = await MemeBoost.countDocuments({ telegramId });
+        let creatorTier = 'bronze';
+        try {
+            const cfg = await getMemeFiConfig();
+            const { getCreatorTierForTelegram } = require('../jobs/memefiDailyRewards');
+            const tierInfo = await getCreatorTierForTelegram(telegramId, cfg);
+            creatorTier = tierInfo.tier || 'bronze';
+        } catch (_) {
+            /* ignore */
+        }
         res.json({
             earnedAiba,
             earnedNeur,
             myMemesCount,
             myBoostsCount,
+            creatorTier,
         });
     } catch (err) {
         console.error('Memefi earn-summary error:', err);

@@ -12,7 +12,7 @@ const CarRaceSchema = new mongoose.Schema(
         startedAt: Date,
         completedAt: Date,
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 CarRaceSchema.index({ status: 1, league: 1, createdAt: -1 });

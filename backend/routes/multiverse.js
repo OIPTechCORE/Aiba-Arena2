@@ -51,7 +51,11 @@ router.get('/universes', async (req, res) => {
             stakingEnabled: !!u.stakingEnabled,
             feeBps: u.feeBps ?? 300,
         }));
-        res.json({ universes: out, nftStakingRewardPerDayAiba: cfg.nftStakingRewardPerDayAiba ?? 5, nftStakingApyPercent: cfg.nftStakingApyPercent ?? 12 });
+        res.json({
+            universes: out,
+            nftStakingRewardPerDayAiba: cfg.nftStakingRewardPerDayAiba ?? 5,
+            nftStakingApyPercent: cfg.nftStakingApyPercent ?? 12,
+        });
     } catch (err) {
         console.error('Multiverse universes error:', err);
         res.status(500).json({ error: 'internal server error' });
@@ -99,36 +103,39 @@ router.post(
         brokerId: { type: 'objectId', required: true },
     }),
     async (req, res) => {
-    try {
-        const telegramId = req.telegramId ? String(req.telegramId) : '';
-        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+        try {
+            const telegramId = req.telegramId ? String(req.telegramId) : '';
+            if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
 
-        const brokerId = String(req.validatedBody?.brokerId ?? req.body?.brokerId ?? '').trim();
-        if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
+            const brokerId = String(req.validatedBody?.brokerId ?? req.body?.brokerId ?? '').trim();
+            if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
-        const broker = await Broker.findById(brokerId);
-        if (!broker) return res.status(404).json({ error: 'broker not found' });
-        if (String(broker.ownerTelegramId) !== telegramId) return res.status(403).json({ error: 'not your broker' });
-        if (!broker.nftItemAddress || !broker.nftItemAddress.trim()) return res.status(400).json({ error: 'broker has no NFT; mint NFT first' });
+            const broker = await Broker.findById(brokerId);
+            if (!broker) return res.status(404).json({ error: 'broker not found' });
+            if (String(broker.ownerTelegramId) !== telegramId)
+                return res.status(403).json({ error: 'not your broker' });
+            if (!broker.nftItemAddress || !broker.nftItemAddress.trim())
+                return res.status(400).json({ error: 'broker has no NFT; mint NFT first' });
 
-        const universe = await NftUniverse.findOne({ slug: 'broker', active: true }).lean();
-        if (!universe || !universe.stakingEnabled) return res.status(400).json({ error: 'NFT staking not available for this universe' });
+            const universe = await NftUniverse.findOne({ slug: 'broker', active: true }).lean();
+            if (!universe || !universe.stakingEnabled)
+                return res.status(400).json({ error: 'NFT staking not available for this universe' });
 
-        const existing = await NftStake.findOne({ brokerId: broker._id });
-        if (existing) return res.status(409).json({ error: 'this NFT is already staked' });
+            const existing = await NftStake.findOne({ brokerId: broker._id });
+            if (existing) return res.status(409).json({ error: 'this NFT is already staked' });
 
-        await NftStake.create({
-            telegramId,
-            universeSlug: 'broker',
-            brokerId: broker._id,
-            stakedAt: new Date(),
-            lastRewardAt: new Date(),
-        });
-        res.json({ ok: true, brokerId: broker._id, universeSlug: 'broker' });
-    } catch (err) {
-        console.error('Multiverse stake error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
+            await NftStake.create({
+                telegramId,
+                universeSlug: 'broker',
+                brokerId: broker._id,
+                stakedAt: new Date(),
+                lastRewardAt: new Date(),
+            });
+            res.json({ ok: true, brokerId: broker._id, universeSlug: 'broker' });
+        } catch (err) {
+            console.error('Multiverse stake error:', err);
+            res.status(500).json({ error: 'internal server error' });
+        }
     },
 );
 
@@ -140,22 +147,22 @@ router.post(
         brokerId: { type: 'objectId', required: true },
     }),
     async (req, res) => {
-    try {
-        const telegramId = req.telegramId ? String(req.telegramId) : '';
-        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+        try {
+            const telegramId = req.telegramId ? String(req.telegramId) : '';
+            if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
 
-        const brokerId = String(req.validatedBody?.brokerId ?? req.body?.brokerId ?? '').trim();
-        if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
+            const brokerId = String(req.validatedBody?.brokerId ?? req.body?.brokerId ?? '').trim();
+            if (!brokerId) return res.status(400).json({ error: 'brokerId required' });
 
-        const stake = await NftStake.findOne({ brokerId, telegramId });
-        if (!stake) return res.status(404).json({ error: 'stake not found or not your stake' });
+            const stake = await NftStake.findOne({ brokerId, telegramId });
+            if (!stake) return res.status(404).json({ error: 'stake not found or not your stake' });
 
-        await NftStake.deleteOne({ _id: stake._id });
-        res.json({ ok: true, brokerId: stake.brokerId });
-    } catch (err) {
-        console.error('Multiverse unstake error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
+            await NftStake.deleteOne({ _id: stake._id });
+            res.json({ ok: true, brokerId: stake.brokerId });
+        } catch (err) {
+            console.error('Multiverse unstake error:', err);
+            res.status(500).json({ error: 'internal server error' });
+        }
     },
 );
 
@@ -175,7 +182,9 @@ router.get('/staking/rewards', requireTelegram, async (req, res) => {
 
         const cfg = await getConfig();
         const rewardPerDay = Math.max(0, Number(cfg.nftStakingRewardPerDayAiba ?? 5));
-        const stakes = await NftStake.find({ telegramId }).populate('brokerId', 'level risk intelligence speed nftItemAddress').lean();
+        const stakes = await NftStake.find({ telegramId })
+            .populate('brokerId', 'level risk intelligence speed nftItemAddress')
+            .lean();
         let totalPending = 0;
         const items = stakes.map((s) => {
             const pending = pendingRewardForStake(s, rewardPerDay);
@@ -187,7 +196,12 @@ router.get('/staking/rewards', requireTelegram, async (req, res) => {
                 pendingRewardAiba: pending,
             };
         });
-        res.json({ rewardPerDayAiba: rewardPerDay, stakedCount: stakes.length, pendingRewardAiba: totalPending, items });
+        res.json({
+            rewardPerDayAiba: rewardPerDay,
+            stakedCount: stakes.length,
+            pendingRewardAiba: totalPending,
+            items,
+        });
     } catch (err) {
         console.error('Multiverse staking rewards error:', err);
         res.status(500).json({ error: 'internal server error' });
@@ -202,40 +216,40 @@ router.post(
         requestId: { type: 'string', trim: true, minLength: 1, maxLength: 128, required: true },
     }),
     async (req, res) => {
-    try {
-        const telegramId = req.telegramId ? String(req.telegramId) : '';
-        if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
-        const requestId = getIdempotencyKey(req);
-        if (!requestId) return res.status(400).json({ error: 'requestId required' });
+        try {
+            const telegramId = req.telegramId ? String(req.telegramId) : '';
+            if (!telegramId) return res.status(401).json({ error: 'telegram auth required' });
+            const requestId = getIdempotencyKey(req);
+            if (!requestId) return res.status(400).json({ error: 'requestId required' });
 
-        const cfg = await getConfig();
-        const rewardPerDay = Math.max(0, Number(cfg.nftStakingRewardPerDayAiba ?? 5));
-        const stakes = await NftStake.find({ telegramId });
-        let totalClaimed = 0;
-        const now = new Date();
-        for (const s of stakes) {
-            const pending = pendingRewardForStake(s, rewardPerDay);
-            if (pending > 0) {
-                await creditAibaNoCap(pending, {
-                    telegramId,
-                    reason: 'nft_staking_reward',
-                    arena: 'multiverse',
-                    league: 'global',
-                    sourceType: 'nft_stake',
-                    sourceId: String(s._id),
-                    requestId: `${requestId}-${s._id}`,
-                    meta: { brokerId: String(s.brokerId), universeSlug: s.universeSlug },
-                });
-                s.lastRewardAt = now;
-                await s.save();
-                totalClaimed += pending;
+            const cfg = await getConfig();
+            const rewardPerDay = Math.max(0, Number(cfg.nftStakingRewardPerDayAiba ?? 5));
+            const stakes = await NftStake.find({ telegramId });
+            let totalClaimed = 0;
+            const now = new Date();
+            for (const s of stakes) {
+                const pending = pendingRewardForStake(s, rewardPerDay);
+                if (pending > 0) {
+                    await creditAibaNoCap(pending, {
+                        telegramId,
+                        reason: 'nft_staking_reward',
+                        arena: 'multiverse',
+                        league: 'global',
+                        sourceType: 'nft_stake',
+                        sourceId: String(s._id),
+                        requestId: `${requestId}-${s._id}`,
+                        meta: { brokerId: String(s.brokerId), universeSlug: s.universeSlug },
+                    });
+                    s.lastRewardAt = now;
+                    await s.save();
+                    totalClaimed += pending;
+                }
             }
+            res.json({ ok: true, claimedAiba: totalClaimed });
+        } catch (err) {
+            console.error('Multiverse staking claim error:', err);
+            res.status(500).json({ error: 'internal server error' });
         }
-        res.json({ ok: true, claimedAiba: totalClaimed });
-    } catch (err) {
-        console.error('Multiverse staking claim error:', err);
-        res.status(500).json({ error: 'internal server error' });
-    }
     },
 );
 

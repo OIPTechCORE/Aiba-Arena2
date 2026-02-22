@@ -30,7 +30,12 @@ const { metrics } = require('../metrics');
 const { clampInt, applyEnergyRegen } = require('../engine/battleEnergy');
 const { buildBattleSeedMessage } = require('../engine/battleSeed');
 const { getBattleCooldownKey } = require('../engine/battleCooldown');
-const { getRewardMultiplier, updateBattleWinStreak, resetBattleWinStreak, getCreatorReferrerAndBps } = require('../engine/innovations');
+const {
+    getRewardMultiplier,
+    updateBattleWinStreak,
+    resetBattleWinStreak,
+    getCreatorReferrerAndBps,
+} = require('../engine/innovations');
 const { recordBossDamageFromBattle } = require('./globalBoss');
 
 function safeVaultClaimSeqno(user) {
@@ -248,19 +253,14 @@ router.post(
                 String(broker.rentedByTelegramId || '') === telegramId &&
                 broker.rentedUntil &&
                 new Date(broker.rentedUntil).getTime() > Date.now();
-            if (!isOwner && !isRenter)
-                return res.status(403).json({ error: 'not your broker' });
+            if (!isOwner && !isRenter) return res.status(403).json({ error: 'not your broker' });
             if (broker.banned)
                 return res.status(403).json({ error: 'broker banned', reason: broker.banReason || 'banned' });
 
             const cfg = await getConfig();
             const maxEnergy = clampInt(cfg?.battleMaxEnergy ?? 100, 1, 1_000);
 
-            const energyCost = clampInt(
-                mode?.energyCost ?? cfg?.battleEnergyCost ?? 1,
-                0,
-                maxEnergy,
-            );
+            const energyCost = clampInt(mode?.energyCost ?? cfg?.battleEnergyCost ?? 1, 0, maxEnergy);
             const cooldownSeconds = clampInt(mode?.cooldownSeconds ?? 30, 0, 24 * 3600);
             const entryNeurCost = clampInt(mode?.entryNeurCost ?? 0, 0, 1_000_000_000);
             const entryAibaCost = clampInt(mode?.entryAibaCost ?? 0, 0, 1_000_000_000);
@@ -448,7 +448,11 @@ router.post(
                                 league,
                                 sourceType: 'guild_war_member_earnings',
                                 sourceId: requestId,
-                                meta: { guildId: String(guild._id), memberTelegramId: telegramId, amountNeur: creatorShareNeur },
+                                meta: {
+                                    guildId: String(guild._id),
+                                    memberTelegramId: telegramId,
+                                    amountNeur: creatorShareNeur,
+                                },
                             });
                         }
 
@@ -649,9 +653,10 @@ router.post(
                                     validUntil,
                                     ...signed,
                                 };
-                                await User.updateOne({ telegramId }, { $max: { vaultClaimSeqno: Number(nextSeqno) } }).catch(
-                                    () => {},
-                                );
+                                await User.updateOne(
+                                    { telegramId },
+                                    { $max: { vaultClaimSeqno: Number(nextSeqno) } },
+                                ).catch(() => {});
                             }
                         }
                     } catch {
@@ -793,7 +798,11 @@ router.post(
                 }).catch(() => {});
             }
 
-            const battlePayload = { ...battle.toObject(), starsGranted: starReward, firstWinDiamond: firstWinDiamondAwarded };
+            const battlePayload = {
+                ...battle.toObject(),
+                starsGranted: starReward,
+                firstWinDiamond: firstWinDiamondAwarded,
+            };
             res.json(battlePayload);
         } catch (err) {
             console.error('Error in /api/battle/run:', err);
