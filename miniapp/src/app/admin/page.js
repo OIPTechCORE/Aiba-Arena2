@@ -20,7 +20,7 @@ function getAdminErrorMessage(error, fallback = 'Request failed.') {
 
 export default function AdminHome() {
     const [token, setToken] = useState('');
-    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod | stats | treasury | realms | marketplace | treasuryOps | governance | charity | comms | university | referrals | brokers | tournaments | globalBoss | trainers
+    const [tab, setTab] = useState('tasks'); // tasks | ads | modes | economy | mod | stats | treasury | realms | marketplace | treasuryOps | governance | charity | comms | university | referrals | brokers | tournaments | globalBoss | trainers | externalApps | introScreens
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -32,6 +32,39 @@ export default function AdminHome() {
     const [marketMetrics, setMarketMetrics] = useState(null);
     const [treasuryOpsSummary, setTreasuryOpsSummary] = useState(null);
     const [govProposals, setGovProposals] = useState([]);
+    
+    // External Apps state
+    const [externalApps, setExternalApps] = useState([]);
+    const [loadingExternalApps, setLoadingExternalApps] = useState(false);
+    const [externalAppsError, setExternalAppsError] = useState('');
+    const [newAppId, setNewAppId] = useState('');
+    const [newAppName, setNewAppName] = useState('');
+    const [newAppDescription, setNewAppDescription] = useState('');
+    const [newAppUrl, setNewAppUrl] = useState('');
+    const [newAppOrder, setNewAppOrder] = useState('0');
+    const [newAppIcon, setNewAppIcon] = useState('games');
+    const [newAppBadge, setNewAppBadge] = useState('');
+    const [newAppActive, setNewAppActive] = useState(true);
+    const [externalAppsMsg, setExternalAppsMsg] = useState('');
+
+    // Intro Screens state
+    const [introScreens, setIntroScreens] = useState([]);
+    const [loadingIntroScreens, setLoadingIntroScreens] = useState(false);
+    const [introScreensError, setIntroScreensError] = useState('');
+    const [newScreenType, setNewScreenType] = useState('welcome');
+    const [newScreenTitle, setNewScreenTitle] = useState('');
+    const [newScreenDescription, setNewScreenDescription] = useState('');
+    const [newScreenBackgroundUrl, setNewScreenBackgroundUrl] = useState('');
+    const [newScreenMobileBackgroundUrl, setNewScreenMobileBackgroundUrl] = useState('');
+    const [newScreenOverlayOpacity, setNewScreenOverlayOpacity] = useState('0.3');
+    const [newScreenTextColor, setNewScreenTextColor] = useState('#ffffff');
+    const [newScreenButtonColor, setNewScreenButtonColor] = useState('#007bff');
+    const [newScreenOrder, setNewScreenOrder] = useState('0');
+    const [newScreenDisplayDuration, setNewScreenDisplayDuration] = useState('5000');
+    const [newScreenShowSkipButton, setNewScreenShowSkipButton] = useState(true);
+    const [newScreenAutoAdvance, setNewScreenAutoAdvance] = useState(true);
+    const [newScreenActive, setNewScreenActive] = useState(true);
+    const [introScreensMsg, setIntroScreensMsg] = useState('');
 
     const api = useMemo(() => {
         const a = axios.create({ baseURL: BACKEND_URL });
@@ -328,7 +361,10 @@ export default function AdminHome() {
         setBadgeMsg('');
         const telegramId = badgeTelegramId.trim();
         if (!telegramId) return;
-        const badges = badgeList.split(/[\s,]+/).map((s) => s.trim()).filter(Boolean);
+        const badges = badgeList
+            .split(/[\s,]+/)
+            .map((s) => s.trim())
+            .filter(Boolean);
         try {
             await api.post('/api/admin/mod/user-badges', { telegramId, badges });
             setBadgeMsg('Badges updated.');
@@ -737,6 +773,153 @@ export default function AdminHome() {
         }
     };
 
+    // ----- External Apps -----
+    const fetchExternalApps = async () => {
+        setLoadingExternalApps(true);
+        setExternalAppsError('');
+        try {
+            const res = await api.get('/api/admin/external-apps');
+            setExternalApps(Array.isArray(res.data?.apps) ? res.data.apps : []);
+        } catch {
+            setExternalAppsError('Failed to load external apps (missing/invalid admin token?)');
+        } finally {
+            setLoadingExternalApps(false);
+        }
+    };
+
+    const createExternalApp = async () => {
+        if (!newAppId.trim() || !newAppName.trim() || !newAppUrl.trim()) {
+            setExternalAppsMsg('Please fill in all required fields (ID, Name, URL).');
+            return;
+        }
+        setExternalAppsMsg('');
+        try {
+            await api.post('/api/admin/external-apps', {
+                id: newAppId.trim(),
+                name: newAppName.trim(),
+                description: newAppDescription.trim(),
+                url: newAppUrl.trim(),
+                order: Number(newAppOrder) || 0,
+                icon: newAppIcon.trim() || 'games',
+                badge: newAppBadge.trim() || '',
+                active: newAppActive
+            });
+            setExternalAppsMsg('External app created successfully.');
+            setNewAppId('');
+            setNewAppName('');
+            setNewAppDescription('');
+            setNewAppUrl('');
+            setNewAppOrder('0');
+            setNewAppIcon('games');
+            setNewAppBadge('');
+            setNewAppActive(true);
+            await fetchExternalApps();
+        } catch (e) {
+            setExternalAppsMsg(getAdminErrorMessage(e, 'Create failed.'));
+        }
+    };
+
+    const toggleExternalApp = async (appId) => {
+        try {
+            const app = externalApps.find(a => a.id === appId);
+            if (!app) return;
+            
+            await api.patch(`/api/admin/external-apps/${appId}`, { active: !app.active });
+            await fetchExternalApps();
+        } catch {
+            // ignore
+        }
+    };
+
+    const deleteExternalApp = async (appId) => {
+        if (!confirm('Are you sure you want to delete this external app?')) return;
+        
+        try {
+            await api.delete(`/api/admin/external-apps/${appId}`);
+            setExternalAppsMsg('External app deleted successfully.');
+            await fetchExternalApps();
+        } catch (e) {
+            setExternalAppsMsg(getAdminErrorMessage(e, 'Delete failed.'));
+        }
+    };
+
+    // ----- Intro Screens -----
+    const fetchIntroScreens = async () => {
+        setLoadingIntroScreens(true);
+        setIntroScreensError('');
+        try {
+            const res = await api.get('/api/admin/intro-screens');
+            setIntroScreens(Array.isArray(res.data?.screens) ? res.data.screens : []);
+        } catch {
+            setIntroScreensError('Failed to load intro screens (missing/invalid admin token?)');
+        } finally {
+            setLoadingIntroScreens(false);
+        }
+    };
+
+    const createIntroScreen = async () => {
+        if (!newScreenTitle.trim() || !newScreenBackgroundUrl.trim()) {
+            setIntroScreensMsg('Please fill in all required fields (Title, Background Image URL).');
+            return;
+        }
+        setIntroScreensMsg('');
+        try {
+            await api.post('/api/admin/intro-screens', {
+                screenType: newScreenType,
+                title: newScreenTitle.trim(),
+                description: newScreenDescription.trim(),
+                backgroundImageUrl: newScreenBackgroundUrl.trim(),
+                mobileBackgroundImageUrl: newScreenMobileBackgroundUrl.trim() || '',
+                overlayOpacity: Number(newScreenOverlayOpacity) || 0.3,
+                textColor: newScreenTextColor.trim() || '#ffffff',
+                buttonColor: newScreenButtonColor.trim() || '#007bff',
+                order: Number(newScreenOrder) || 0,
+                displayDuration: Number(newScreenDisplayDuration) || 5000,
+                showSkipButton: newScreenShowSkipButton,
+                autoAdvance: newScreenAutoAdvance,
+                active: newScreenActive
+            });
+            setIntroScreensMsg('Intro screen created successfully.');
+            setNewScreenType('welcome');
+            setNewScreenTitle('');
+            setNewScreenDescription('');
+            setNewScreenBackgroundUrl('');
+            setNewScreenMobileBackgroundUrl('');
+            setNewScreenOverlayOpacity('0.3');
+            setNewScreenTextColor('#ffffff');
+            setNewScreenButtonColor('#007bff');
+            setNewScreenOrder('0');
+            setNewScreenDisplayDuration('5000');
+            setNewScreenShowSkipButton(true);
+            setNewScreenAutoAdvance(true);
+            setNewScreenActive(true);
+            await fetchIntroScreens();
+        } catch (e) {
+            setIntroScreensMsg(getAdminErrorMessage(e, 'Create failed.'));
+        }
+    };
+
+    const toggleIntroScreen = async (screenId) => {
+        try {
+            await api.post(`/api/admin/intro-screens/${screenId}/toggle`);
+            await fetchIntroScreens();
+        } catch {
+            // ignore
+        }
+    };
+
+    const deleteIntroScreen = async (screenId) => {
+        if (!confirm('Are you sure you want to delete this intro screen?')) return;
+        
+        try {
+            await api.delete(`/api/admin/intro-screens/${screenId}`);
+            setIntroScreensMsg('Intro screen deleted successfully.');
+            await fetchIntroScreens();
+        } catch (e) {
+            setIntroScreensMsg(getAdminErrorMessage(e, 'Delete failed.'));
+        }
+    };
+
     const fetchCharityCampaigns = async () => {
         try {
             const res = await api.get('/api/admin/charity/campaigns');
@@ -850,6 +1033,8 @@ export default function AdminHome() {
         if (tab === 'brokers') fetchMintJobs();
         if (tab === 'predict') fetchPredictEvents();
         if (tab === 'trainers') fetchTrainers();
+        if (tab === 'externalApps') fetchExternalApps();
+        if (tab === 'introScreens') fetchIntroScreens();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, tab]);
 
@@ -858,7 +1043,9 @@ export default function AdminHome() {
             <PageNav className="page-nav--admin" />
             <h1 style={{ marginTop: 0 }}>Super Admin</h1>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }}>
-                <a href="/trainer" style={{ color: 'var(--accent-gold)', fontSize: 14 }}>Trainer portal</a>
+                <a href="/trainer" style={{ color: 'var(--accent-gold)', fontSize: 14 }}>
+                    Trainer portal
+                </a>
                 <span style={{ color: '#666', fontSize: 12 }}>Backend: {BACKEND_URL}</span>
             </div>
 
@@ -866,7 +1053,8 @@ export default function AdminHome() {
                 <div style={{ maxWidth: 420, border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Admin login</div>
                     <p style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
-                        Backend must be running at {BACKEND_URL}. Use ADMIN_EMAIL and ADMIN_PASSWORD (or ADMIN_PASSWORD_HASH) from backend/.env.
+                        Backend must be running at {BACKEND_URL}. Use ADMIN_EMAIL and ADMIN_PASSWORD (or
+                        ADMIN_PASSWORD_HASH) from backend/.env.
                     </p>
                     <div style={{ display: 'grid', gap: 8 }}>
                         <input
@@ -950,6 +1138,12 @@ export default function AdminHome() {
                         </button>
                         <button onClick={() => setTab('trainers')} style={{ padding: '8px 12px' }}>
                             Trainers
+                        </button>
+                        <button onClick={() => setTab('externalApps')} style={{ padding: '8px 12px' }}>
+                            External Apps
+                        </button>
+                        <button onClick={() => setTab('introScreens')} style={{ padding: '8px 12px' }}>
+                            Intro Screens
                         </button>
                         <div style={{ flex: 1 }} />
                         <button onClick={logout} style={{ padding: '8px 12px' }}>
@@ -1130,7 +1324,8 @@ export default function AdminHome() {
                                     </button>
                                 </div>
                                 <p style={{ color: '#666', fontSize: 12, marginTop: 6 }}>
-                                    Arena <strong>arbitrage</strong> is available; defaults also seed arbitrage/rookie, arbitrage-pro, arbitrage-elite on first DB connect.
+                                    Arena <strong>arbitrage</strong> is available; defaults also seed arbitrage/rookie,
+                                    arbitrage-pro, arbitrage-elite on first DB connect.
                                 </p>
                                 {modesError ? <p style={{ color: 'crimson' }}>{modesError}</p> : null}
                                 <div style={{ marginTop: 12 }}>
@@ -1168,7 +1363,10 @@ export default function AdminHome() {
                             <>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                                     <button
-                                        onClick={() => { fetchEconomy(); fetchEconomyDay(); }}
+                                        onClick={() => {
+                                            fetchEconomy();
+                                            fetchEconomyDay();
+                                        }}
                                         disabled={loadingEconomy}
                                         style={{ padding: '8px 12px' }}
                                     >
@@ -1189,11 +1387,20 @@ export default function AdminHome() {
                                             background: '#fafafa',
                                         }}
                                     >
-                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Emission dashboard (today UTC)</div>
-                                        <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
-                                            Day: {economyDay.day} · Window: {economyConfigObj.emissionStartHourUtc ?? 0}:00–{economyConfigObj.emissionEndHourUtc ?? 24}:00 UTC
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>
+                                            Emission dashboard (today UTC)
                                         </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+                                        <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+                                            Day: {economyDay.day} · Window: {economyConfigObj.emissionStartHourUtc ?? 0}
+                                            :00–{economyConfigObj.emissionEndHourUtc ?? 24}:00 UTC
+                                        </div>
+                                        <div
+                                            style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                                                gap: 12,
+                                            }}
+                                        >
                                             <div>
                                                 <div style={{ fontWeight: 600 }}>AIBA</div>
                                                 <div style={{ fontSize: 13 }}>
@@ -1215,7 +1422,8 @@ export default function AdminHome() {
                                                 <div style={{ fontSize: 13 }}>{economyDay.spentNeur ?? 0}</div>
                                             </div>
                                         </div>
-                                        {economyDay.emittedAibaByArena && Object.keys(economyDay.emittedAibaByArena).length > 0 ? (
+                                        {economyDay.emittedAibaByArena &&
+                                        Object.keys(economyDay.emittedAibaByArena).length > 0 ? (
                                             <div style={{ marginTop: 10, fontSize: 12 }}>
                                                 <div style={{ fontWeight: 600 }}>AIBA by arena</div>
                                                 <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
@@ -1241,12 +1449,18 @@ export default function AdminHome() {
                                     }}
                                 />
                                 <div style={{ color: '#666', fontSize: 12, marginTop: 8 }}>
-                                    Tip: edit <code>baseRewardAibaPerScore</code>, <code>baseRewardNeurPerScore</code>, caps,
-                                    <code>dailyCap*ByArena</code> maps, <code>starRewardPerBattle</code> (Stars per battle),
+                                    Tip: edit <code>baseRewardAibaPerScore</code>, <code>baseRewardNeurPerScore</code>,
+                                    caps,
+                                    <code>dailyCap*ByArena</code> maps, <code>starRewardPerBattle</code> (Stars per
+                                    battle),
                                     <code>diamondRewardFirstWin</code> (Diamonds on first win),
-                                    <code>topLeaderBadgeTopN</code> (top N by score get &quot;top_leader&quot; badge; synced every 6h or via Moderation),
-                                    <code>courseCompletionBadgeMintCostTonNano</code> (Course completion badge mint cost in TON; value in nanoTON, e.g. 10000000000 = 10 TON; default 10 TON),
-                                    and <code>fullCourseCompletionCertificateMintCostTonNano</code> (Full course completion certificate mint cost in TON; value in nanoTON, e.g. 15000000000 = 15 TON; default 15 TON).
+                                    <code>topLeaderBadgeTopN</code> (top N by score get &quot;top_leader&quot; badge;
+                                    synced every 6h or via Moderation),
+                                    <code>courseCompletionBadgeMintCostTonNano</code> (Course completion badge mint cost
+                                    in TON; value in nanoTON, e.g. 10000000000 = 10 TON; default 10 TON), and{' '}
+                                    <code>fullCourseCompletionCertificateMintCostTonNano</code> (Full course completion
+                                    certificate mint cost in TON; value in nanoTON, e.g. 15000000000 = 15 TON; default
+                                    15 TON).
                                 </div>
                             </>
                         ) : null}
@@ -1310,7 +1524,9 @@ export default function AdminHome() {
 
                                     <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>User detail (lookup)</div>
-                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                        <div
+                                            style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}
+                                        >
                                             <input
                                                 value={userDetailTelegramId}
                                                 onChange={(e) => setUserDetailTelegramId(e.target.value)}
@@ -1321,21 +1537,55 @@ export default function AdminHome() {
                                                 Look up
                                             </button>
                                         </div>
-                                        {userDetailError ? <p style={{ marginTop: 8, color: 'crimson' }}>{userDetailError}</p> : null}
+                                        {userDetailError ? (
+                                            <p style={{ marginTop: 8, color: 'crimson' }}>{userDetailError}</p>
+                                        ) : null}
                                         {userDetail ? (
-                                            <div style={{ marginTop: 10, padding: 10, background: '#f9f9f9', borderRadius: 8, fontSize: 13 }}>
-                                                <div><strong>Username</strong>: {userDetail.username || '—'}</div>
-                                                <div><strong>Stars</strong>: {userDetail.starsBalance ?? 0} · <strong>Diamonds</strong>: {userDetail.diamondsBalance ?? 0}</div>
-                                                <div><strong>Badges</strong>: {Array.isArray(userDetail.badges) && userDetail.badges.length ? userDetail.badges.join(', ') : '—'}</div>
-                                                {userDetail.firstWinDiamondAwardedAt ? <div style={{ color: '#666' }}>First-win diamond awarded at: {new Date(userDetail.firstWinDiamondAwardedAt).toISOString()}</div> : null}
-                                                {userDetail.bannedUntil ? <div style={{ color: '#b45309' }}>Banned until: {new Date(userDetail.bannedUntil).toISOString()} — {userDetail.bannedReason || ''}</div> : null}
+                                            <div
+                                                style={{
+                                                    marginTop: 10,
+                                                    padding: 10,
+                                                    background: '#f9f9f9',
+                                                    borderRadius: 8,
+                                                    fontSize: 13,
+                                                }}
+                                            >
+                                                <div>
+                                                    <strong>Username</strong>: {userDetail.username || '—'}
+                                                </div>
+                                                <div>
+                                                    <strong>Stars</strong>: {userDetail.starsBalance ?? 0} ·{' '}
+                                                    <strong>Diamonds</strong>: {userDetail.diamondsBalance ?? 0}
+                                                </div>
+                                                <div>
+                                                    <strong>Badges</strong>:{' '}
+                                                    {Array.isArray(userDetail.badges) && userDetail.badges.length
+                                                        ? userDetail.badges.join(', ')
+                                                        : '—'}
+                                                </div>
+                                                {userDetail.firstWinDiamondAwardedAt ? (
+                                                    <div style={{ color: '#666' }}>
+                                                        First-win diamond awarded at:{' '}
+                                                        {new Date(userDetail.firstWinDiamondAwardedAt).toISOString()}
+                                                    </div>
+                                                ) : null}
+                                                {userDetail.bannedUntil ? (
+                                                    <div style={{ color: '#b45309' }}>
+                                                        Banned until: {new Date(userDetail.bannedUntil).toISOString()} —{' '}
+                                                        {userDetail.bannedReason || ''}
+                                                    </div>
+                                                ) : null}
                                             </div>
                                         ) : null}
                                     </div>
 
                                     <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
-                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>User profile badges (X-style)</div>
-                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>
+                                            User profile badges (X-style)
+                                        </div>
+                                        <div
+                                            style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}
+                                        >
                                             <input
                                                 value={badgeTelegramId}
                                                 onChange={(e) => setBadgeTelegramId(e.target.value)}
@@ -1352,18 +1602,34 @@ export default function AdminHome() {
                                                 Set badges
                                             </button>
                                         </div>
-                                        {badgeMsg ? <p style={{ marginTop: 8, color: badgeMsg.startsWith('Failed') ? 'crimson' : '#333' }}>{badgeMsg}</p> : null}
+                                        {badgeMsg ? (
+                                            <p
+                                                style={{
+                                                    marginTop: 8,
+                                                    color: badgeMsg.startsWith('Failed') ? 'crimson' : '#333',
+                                                }}
+                                            >
+                                                {badgeMsg}
+                                            </p>
+                                        ) : null}
                                     </div>
 
                                     <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Top leader badge sync</div>
                                         <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>
-                                            Awards &quot;top_leader&quot; badge to top N users by total score (N = economy config <code>topLeaderBadgeTopN</code>). Also runs every 6 hours.
+                                            Awards &quot;top_leader&quot; badge to top N users by total score (N =
+                                            economy config <code>topLeaderBadgeTopN</code>). Also runs every 6 hours.
                                         </p>
-                                        <button onClick={syncTopLeaderBadges} disabled={syncingTopLeader} style={{ padding: '8px 12px' }}>
+                                        <button
+                                            onClick={syncTopLeaderBadges}
+                                            disabled={syncingTopLeader}
+                                            style={{ padding: '8px 12px' }}
+                                        >
                                             {syncingTopLeader ? 'Syncing…' : 'Sync now'}
                                         </button>
-                                        {syncTopLeaderMsg ? <span style={{ marginLeft: 8, color: '#333' }}>{syncTopLeaderMsg}</span> : null}
+                                        {syncTopLeaderMsg ? (
+                                            <span style={{ marginLeft: 8, color: '#333' }}>{syncTopLeaderMsg}</span>
+                                        ) : null}
                                     </div>
 
                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -1452,17 +1718,39 @@ export default function AdminHome() {
 
                         {tab === 'stats' ? (
                             <>
-                                <button onClick={fetchAdminStats} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <button onClick={fetchAdminStats} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
                                 {adminStats ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8, maxWidth: 480 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                            maxWidth: 480,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Dashboard stats</div>
                                         <div style={{ display: 'grid', gap: 8, fontSize: 14 }}>
-                                            <div>DAU (today): <strong>{adminStats.dau ?? 0}</strong></div>
-                                            <div>Total users: <strong>{adminStats.totalUsers ?? 0}</strong></div>
-                                            <div>Total battles: <strong>{adminStats.totalBattles ?? 0}</strong></div>
-                                            <div>Battles today: <strong>{adminStats.battlesToday ?? 0}</strong></div>
-                                            <div>Today emitted AIBA: <strong>{adminStats.todayEmittedAiba ?? 0}</strong></div>
-                                            <div>Today emitted NEUR: <strong>{adminStats.todayEmittedNeur ?? 0}</strong></div>
+                                            <div>
+                                                DAU (today): <strong>{adminStats.dau ?? 0}</strong>
+                                            </div>
+                                            <div>
+                                                Total users: <strong>{adminStats.totalUsers ?? 0}</strong>
+                                            </div>
+                                            <div>
+                                                Total battles: <strong>{adminStats.totalBattles ?? 0}</strong>
+                                            </div>
+                                            <div>
+                                                Battles today: <strong>{adminStats.battlesToday ?? 0}</strong>
+                                            </div>
+                                            <div>
+                                                Today emitted AIBA: <strong>{adminStats.todayEmittedAiba ?? 0}</strong>
+                                            </div>
+                                            <div>
+                                                Today emitted NEUR: <strong>{adminStats.todayEmittedNeur ?? 0}</strong>
+                                            </div>
                                             <div style={{ color: '#666', fontSize: 12 }}>Day: {adminStats.day}</div>
                                         </div>
                                     </div>
@@ -1470,36 +1758,96 @@ export default function AdminHome() {
                                     <div style={{ marginTop: 12, color: '#666' }}>Load stats.</div>
                                 )}
                                 <div style={{ marginTop: 12, fontSize: 12 }}>
-                                    <a href={`${BACKEND_URL}/api/admin/economy/simulate?days=30`} target="_blank" rel="noopener noreferrer">Economy simulator (30 days)</a>
+                                    <a
+                                        href={`${BACKEND_URL}/api/admin/economy/simulate?days=30`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Economy simulator (30 days)
+                                    </a>
                                 </div>
                             </>
                         ) : null}
 
                         {tab === 'treasury' ? (
                             <>
-                                <button onClick={fetchTreasury} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <button onClick={fetchTreasury} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
                                 {treasuryData ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>DAO Treasury</div>
-                                        <div>Balance AIBA: {treasuryData.balanceAiba ?? 0} | NEUR: {treasuryData.balanceNeur ?? 0}</div>
-                                        <div style={{ fontSize: 12, color: '#666' }}>Paid out AIBA: {treasuryData.totalPaidOutAiba ?? 0} | NEUR: {treasuryData.totalPaidOutNeur ?? 0}</div>
+                                        <div>
+                                            Balance AIBA: {treasuryData.balanceAiba ?? 0} | NEUR:{' '}
+                                            {treasuryData.balanceNeur ?? 0}
+                                        </div>
+                                        <div style={{ fontSize: 12, color: '#666' }}>
+                                            Paid out AIBA: {treasuryData.totalPaidOutAiba ?? 0} | NEUR:{' '}
+                                            {treasuryData.totalPaidOutNeur ?? 0}
+                                        </div>
                                         <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-                                            <input type="number" id="treasury-aiba" placeholder="AIBA to add" style={{ padding: 8, width: 120 }} />
-                                            <input type="number" id="treasury-neur" placeholder="NEUR to add" style={{ padding: 8, width: 120 }} />
-                                            <button onClick={() => fundTreasury(Number(document.getElementById('treasury-aiba')?.value || 0), Number(document.getElementById('treasury-neur')?.value || 0))} style={{ padding: '8px 12px' }}>Fund</button>
+                                            <input
+                                                type="number"
+                                                id="treasury-aiba"
+                                                placeholder="AIBA to add"
+                                                style={{ padding: 8, width: 120 }}
+                                            />
+                                            <input
+                                                type="number"
+                                                id="treasury-neur"
+                                                placeholder="NEUR to add"
+                                                style={{ padding: 8, width: 120 }}
+                                            />
+                                            <button
+                                                onClick={() =>
+                                                    fundTreasury(
+                                                        Number(document.getElementById('treasury-aiba')?.value || 0),
+                                                        Number(document.getElementById('treasury-neur')?.value || 0),
+                                                    )
+                                                }
+                                                style={{ padding: '8px 12px' }}
+                                            >
+                                                Fund
+                                            </button>
                                         </div>
                                     </div>
                                 ) : null}
                                 {reserveData ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Stability reserve</div>
-                                        <div>AIBA: {reserveData.aibaBalance ?? 0} | NEUR: {reserveData.neurBalance ?? 0}</div>
+                                        <div>
+                                            AIBA: {reserveData.aibaBalance ?? 0} | NEUR: {reserveData.neurBalance ?? 0}
+                                        </div>
                                     </div>
                                 ) : null}
                                 {buybackData ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Buyback pool</div>
-                                        <div>AIBA: {buybackData.aibaBalance ?? 0} | NEUR: {buybackData.neurBalance ?? 0} | Total bought back: {buybackData.totalBoughtBackAiba ?? 0}</div>
+                                        <div>
+                                            AIBA: {buybackData.aibaBalance ?? 0} | NEUR: {buybackData.neurBalance ?? 0}{' '}
+                                            | Total bought back: {buybackData.totalBoughtBackAiba ?? 0}
+                                        </div>
                                     </div>
                                 ) : null}
                             </>
@@ -1507,21 +1855,50 @@ export default function AdminHome() {
 
                         {tab === 'realms' ? (
                             <>
-                                <button onClick={fetchRealms} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <button onClick={fetchRealms} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
                                 <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Create / Update Realm</div>
                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                        <input value={realmKey} onChange={(e) => setRealmKey(e.target.value)} placeholder="realm key" style={{ padding: 8 }} />
-                                        <input value={realmName} onChange={(e) => setRealmName(e.target.value)} placeholder="realm name" style={{ padding: 8 }} />
-                                        <input value={realmLevel} onChange={(e) => setRealmLevel(e.target.value)} type="number" min="1" max="3" placeholder="level" style={{ padding: 8, width: 80 }} />
-                                        <button onClick={upsertRealm} style={{ padding: '8px 12px' }}>Save</button>
+                                        <input
+                                            value={realmKey}
+                                            onChange={(e) => setRealmKey(e.target.value)}
+                                            placeholder="realm key"
+                                            style={{ padding: 8 }}
+                                        />
+                                        <input
+                                            value={realmName}
+                                            onChange={(e) => setRealmName(e.target.value)}
+                                            placeholder="realm name"
+                                            style={{ padding: 8 }}
+                                        />
+                                        <input
+                                            value={realmLevel}
+                                            onChange={(e) => setRealmLevel(e.target.value)}
+                                            type="number"
+                                            min="1"
+                                            max="3"
+                                            placeholder="level"
+                                            style={{ padding: 8, width: 80 }}
+                                        />
+                                        <button onClick={upsertRealm} style={{ padding: '8px 12px' }}>
+                                            Save
+                                        </button>
                                     </div>
                                 </div>
                                 <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
                                     {realms.map((r) => (
-                                        <div key={r.key} style={{ padding: 10, border: '1px solid #f2f2f2', borderRadius: 8 }}>
-                                            <div style={{ fontWeight: 600 }}>{r.name} ({r.key})</div>
-                                            <div style={{ color: '#666', fontSize: 12 }}>Level {r.level} · active {String(r.active)}</div>
+                                        <div
+                                            key={r.key}
+                                            style={{ padding: 10, border: '1px solid #f2f2f2', borderRadius: 8 }}
+                                        >
+                                            <div style={{ fontWeight: 600 }}>
+                                                {r.name} ({r.key})
+                                            </div>
+                                            <div style={{ color: '#666', fontSize: 12 }}>
+                                                Level {r.level} · active {String(r.active)}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -1530,8 +1907,18 @@ export default function AdminHome() {
 
                         {tab === 'marketplace' ? (
                             <>
-                                <button onClick={fetchMarketMetrics} style={{ padding: '8px 12px' }}>Refresh</button>
-                                <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8, maxWidth: 420 }}>
+                                <button onClick={fetchMarketMetrics} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
+                                <div
+                                    style={{
+                                        marginTop: 12,
+                                        padding: 12,
+                                        border: '1px solid #eee',
+                                        borderRadius: 8,
+                                        maxWidth: 420,
+                                    }}
+                                >
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Marketplace metrics</div>
                                     <div>Active listings: {marketMetrics?.activeListings ?? 0}</div>
                                     <div>Sold listings: {marketMetrics?.soldListings ?? 0}</div>
@@ -1542,8 +1929,18 @@ export default function AdminHome() {
 
                         {tab === 'treasuryOps' ? (
                             <>
-                                <button onClick={fetchTreasuryOpsMetrics} style={{ padding: '8px 12px' }}>Refresh</button>
-                                <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8, maxWidth: 420 }}>
+                                <button onClick={fetchTreasuryOpsMetrics} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
+                                <div
+                                    style={{
+                                        marginTop: 12,
+                                        padding: 12,
+                                        border: '1px solid #eee',
+                                        borderRadius: 8,
+                                        maxWidth: 420,
+                                    }}
+                                >
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Treasury ops summary</div>
                                     <div>Burn: {treasuryOpsSummary?.burn ?? 0}</div>
                                     <div>Treasury: {treasuryOpsSummary?.treasury ?? 0}</div>
@@ -1555,18 +1952,28 @@ export default function AdminHome() {
 
                         {tab === 'governance' ? (
                             <>
-                                <button onClick={fetchGovProposals} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <button onClick={fetchGovProposals} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
                                 <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
                                     {govProposals.length === 0 ? (
                                         <div style={{ color: '#666' }}>No proposals.</div>
                                     ) : (
                                         govProposals.map((p) => (
-                                            <div key={p._id} style={{ padding: 10, border: '1px solid #f2f2f2', borderRadius: 8 }}>
+                                            <div
+                                                key={p._id}
+                                                style={{ padding: 10, border: '1px solid #f2f2f2', borderRadius: 8 }}
+                                            >
                                                 <div style={{ fontWeight: 600 }}>{p.title}</div>
                                                 <div style={{ color: '#666', fontSize: 12 }}>{p.description}</div>
-                                                <div style={{ color: '#999', fontSize: 12, marginTop: 4 }}>status: {p.status}</div>
+                                                <div style={{ color: '#999', fontSize: 12, marginTop: 4 }}>
+                                                    status: {p.status}
+                                                </div>
                                                 {p.status === 'voting' ? (
-                                                    <button onClick={() => executeProposal(p._id)} style={{ padding: '6px 10px', marginTop: 8 }}>
+                                                    <button
+                                                        onClick={() => executeProposal(p._id)}
+                                                        style={{ padding: '6px 10px', marginTop: 8 }}
+                                                    >
                                                         Execute
                                                     </button>
                                                 ) : null}
@@ -1579,23 +1986,58 @@ export default function AdminHome() {
 
                         {tab === 'charity' ? (
                             <>
-                                <button onClick={fetchCharityCampaigns} style={{ padding: '8px 12px' }}>Refresh campaigns</button>
-                                <button onClick={fetchCharityStats} style={{ padding: '8px 12px' }}>Refresh stats</button>
-                                <button onClick={fetchCharityDonations} style={{ padding: '8px 12px' }}>List donations</button>
-                                {charityMsg ? <span style={{ marginLeft: 12, color: '#066' }}>{charityMsg}</span> : null}
+                                <button onClick={fetchCharityCampaigns} style={{ padding: '8px 12px' }}>
+                                    Refresh campaigns
+                                </button>
+                                <button onClick={fetchCharityStats} style={{ padding: '8px 12px' }}>
+                                    Refresh stats
+                                </button>
+                                <button onClick={fetchCharityDonations} style={{ padding: '8px 12px' }}>
+                                    List donations
+                                </button>
+                                {charityMsg ? (
+                                    <span style={{ marginLeft: 12, color: '#066' }}>{charityMsg}</span>
+                                ) : null}
                                 {charityStats ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Charity stats</div>
-                                        <div>Total raised NEUR: {charityStats.totalRaisedNeur ?? 0} | AIBA: {charityStats.totalRaisedAiba ?? 0}</div>
-                                        <div>Total donors: {charityStats.totalDonors ?? 0} | Campaigns: {charityStats.campaignCount ?? 0}</div>
+                                        <div>
+                                            Total raised NEUR: {charityStats.totalRaisedNeur ?? 0} | AIBA:{' '}
+                                            {charityStats.totalRaisedAiba ?? 0}
+                                        </div>
+                                        <div>
+                                            Total donors: {charityStats.totalDonors ?? 0} | Campaigns:{' '}
+                                            {charityStats.campaignCount ?? 0}
+                                        </div>
                                     </div>
                                 ) : null}
                                 <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Create campaign</div>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-                                        <input value={charityNewName} onChange={(e) => setCharityNewName(e.target.value)} placeholder="Name" style={{ padding: 8, minWidth: 160 }} />
-                                        <input value={charityNewDesc} onChange={(e) => setCharityNewDesc(e.target.value)} placeholder="Description" style={{ padding: 8, minWidth: 200 }} />
-                                        <select value={charityNewCause} onChange={(e) => setCharityNewCause(e.target.value)} style={{ padding: 8 }}>
+                                        <input
+                                            value={charityNewName}
+                                            onChange={(e) => setCharityNewName(e.target.value)}
+                                            placeholder="Name"
+                                            style={{ padding: 8, minWidth: 160 }}
+                                        />
+                                        <input
+                                            value={charityNewDesc}
+                                            onChange={(e) => setCharityNewDesc(e.target.value)}
+                                            placeholder="Description"
+                                            style={{ padding: 8, minWidth: 200 }}
+                                        />
+                                        <select
+                                            value={charityNewCause}
+                                            onChange={(e) => setCharityNewCause(e.target.value)}
+                                            style={{ padding: 8 }}
+                                        >
                                             <option value="education">education</option>
                                             <option value="environment">environment</option>
                                             <option value="health">health</option>
@@ -1603,44 +2045,108 @@ export default function AdminHome() {
                                             <option value="community">community</option>
                                             <option value="other">other</option>
                                         </select>
-                                        <input type="number" value={charityNewGoalNeur} onChange={(e) => setCharityNewGoalNeur(e.target.value)} placeholder="Goal NEUR" style={{ padding: 8, width: 100 }} />
-                                        <input type="number" value={charityNewGoalAiba} onChange={(e) => setCharityNewGoalAiba(e.target.value)} placeholder="Goal AIBA" style={{ padding: 8, width: 100 }} />
-                                        <select value={charityNewStatus} onChange={(e) => setCharityNewStatus(e.target.value)} style={{ padding: 8 }}>
+                                        <input
+                                            type="number"
+                                            value={charityNewGoalNeur}
+                                            onChange={(e) => setCharityNewGoalNeur(e.target.value)}
+                                            placeholder="Goal NEUR"
+                                            style={{ padding: 8, width: 100 }}
+                                        />
+                                        <input
+                                            type="number"
+                                            value={charityNewGoalAiba}
+                                            onChange={(e) => setCharityNewGoalAiba(e.target.value)}
+                                            placeholder="Goal AIBA"
+                                            style={{ padding: 8, width: 100 }}
+                                        />
+                                        <select
+                                            value={charityNewStatus}
+                                            onChange={(e) => setCharityNewStatus(e.target.value)}
+                                            style={{ padding: 8 }}
+                                        >
                                             <option value="draft">draft</option>
                                             <option value="active">active</option>
                                         </select>
-                                        <button onClick={createCharityCampaign} style={{ padding: '8px 12px' }}>Create</button>
+                                        <button onClick={createCharityCampaign} style={{ padding: '8px 12px' }}>
+                                            Create
+                                        </button>
                                     </div>
                                 </div>
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Campaigns</div>
                                     {charityCampaigns.map((c) => (
-                                        <div key={c._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8, marginTop: 8 }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                                        <div
+                                            key={c._id}
+                                            style={{
+                                                padding: 12,
+                                                border: '1px solid #eee',
+                                                borderRadius: 8,
+                                                marginTop: 8,
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    flexWrap: 'wrap',
+                                                    gap: 8,
+                                                }}
+                                            >
                                                 <div>
                                                     <strong>{c.name}</strong> — {c.cause} · status: {c.status}
-                                                    <div style={{ fontSize: 12, color: '#666' }}>Raised: {c.raisedNeur ?? 0} NEUR, {c.raisedAiba ?? 0} AIBA · {c.donorCount ?? 0} donors</div>
+                                                    <div style={{ fontSize: 12, color: '#666' }}>
+                                                        Raised: {c.raisedNeur ?? 0} NEUR, {c.raisedAiba ?? 0} AIBA ·{' '}
+                                                        {c.donorCount ?? 0} donors
+                                                    </div>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                                                     {c.status === 'active' ? (
-                                                        <button onClick={() => closeCharityCampaign(c._id)} style={{ padding: '6px 10px' }}>Close</button>
+                                                        <button
+                                                            onClick={() => closeCharityCampaign(c._id)}
+                                                            style={{ padding: '6px 10px' }}
+                                                        >
+                                                            Close
+                                                        </button>
                                                     ) : null}
                                                     {c.status === 'ended' || c.status === 'funded' ? (
-                                                        <button onClick={() => disburseCharityCampaign(c._id)} style={{ padding: '6px 10px' }}>Mark disbursed</button>
+                                                        <button
+                                                            onClick={() => disburseCharityCampaign(c._id)}
+                                                            style={{ padding: '6px 10px' }}
+                                                        >
+                                                            Mark disbursed
+                                                        </button>
                                                     ) : null}
-                                                    <button onClick={() => updateCharityCampaign(c._id, { status: 'active' })} style={{ padding: '6px 10px' }} disabled={c.status === 'active'}>Set active</button>
+                                                    <button
+                                                        onClick={() =>
+                                                            updateCharityCampaign(c._id, { status: 'active' })
+                                                        }
+                                                        style={{ padding: '6px 10px' }}
+                                                        disabled={c.status === 'active'}
+                                                    >
+                                                        Set active
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
-                                    {charityCampaigns.length === 0 ? <div style={{ color: '#666' }}>No campaigns. Create one above.</div> : null}
+                                    {charityCampaigns.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No campaigns. Create one above.</div>
+                                    ) : null}
                                 </div>
                                 {charityDonations.length > 0 ? (
                                     <div style={{ marginTop: 12 }}>
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Recent donations</div>
                                         {charityDonations.slice(0, 50).map((d) => (
-                                            <div key={d._id} style={{ fontSize: 12, padding: 6, borderBottom: '1px solid #eee' }}>
-                                                {d.telegramId} → {typeof d.campaignId === 'object' && d.campaignId?.name ? d.campaignId.name : d.campaignId} · {d.amountNeur ?? 0} NEUR, {d.amountAiba ?? 0} AIBA · {d.donatedAt ? new Date(d.donatedAt).toISOString().slice(0, 19) : ''}
+                                            <div
+                                                key={d._id}
+                                                style={{ fontSize: 12, padding: 6, borderBottom: '1px solid #eee' }}
+                                            >
+                                                {d.telegramId} →{' '}
+                                                {typeof d.campaignId === 'object' && d.campaignId?.name
+                                                    ? d.campaignId.name
+                                                    : d.campaignId}{' '}
+                                                · {d.amountNeur ?? 0} NEUR, {d.amountAiba ?? 0} AIBA ·{' '}
+                                                {d.donatedAt ? new Date(d.donatedAt).toISOString().slice(0, 19) : ''}
                                             </div>
                                         ))}
                                     </div>
@@ -1651,39 +2157,90 @@ export default function AdminHome() {
                         {tab === 'comms' ? (
                             <>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                    <button onClick={fetchAnnouncements} style={{ padding: '8px 12px' }}>Refresh</button>
+                                    <button onClick={fetchAnnouncements} style={{ padding: '8px 12px' }}>
+                                        Refresh
+                                    </button>
                                     {commsMsg ? <span style={{ color: '#066' }}>{commsMsg}</span> : null}
                                 </div>
                                 <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Create announcement</div>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-                                        <input value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} placeholder="Title" style={{ padding: 8, minWidth: 200 }} />
-                                        <select value={announcementType} onChange={(e) => setAnnouncementType(e.target.value)} style={{ padding: 8 }}>
+                                        <input
+                                            value={announcementTitle}
+                                            onChange={(e) => setAnnouncementTitle(e.target.value)}
+                                            placeholder="Title"
+                                            style={{ padding: 8, minWidth: 200 }}
+                                        />
+                                        <select
+                                            value={announcementType}
+                                            onChange={(e) => setAnnouncementType(e.target.value)}
+                                            style={{ padding: 8 }}
+                                        >
                                             <option value="announcement">announcement</option>
                                             <option value="maintenance">maintenance</option>
                                             <option value="status">status</option>
                                         </select>
-                                        <input value={announcementLink} onChange={(e) => setAnnouncementLink(e.target.value)} placeholder="Link (optional)" style={{ padding: 8, minWidth: 220 }} />
+                                        <input
+                                            value={announcementLink}
+                                            onChange={(e) => setAnnouncementLink(e.target.value)}
+                                            placeholder="Link (optional)"
+                                            style={{ padding: 8, minWidth: 220 }}
+                                        />
                                         <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                            <input type="checkbox" checked={announcementActive} onChange={(e) => setAnnouncementActive(e.target.checked)} />
+                                            <input
+                                                type="checkbox"
+                                                checked={announcementActive}
+                                                onChange={(e) => setAnnouncementActive(e.target.checked)}
+                                            />
                                             Active
                                         </label>
-                                        <button onClick={createAnnouncement} style={{ padding: '8px 12px' }} disabled={!announcementTitle.trim()}>Create</button>
+                                        <button
+                                            onClick={createAnnouncement}
+                                            style={{ padding: '8px 12px' }}
+                                            disabled={!announcementTitle.trim()}
+                                        >
+                                            Create
+                                        </button>
                                     </div>
-                                    <textarea value={announcementBody} onChange={(e) => setAnnouncementBody(e.target.value)} placeholder="Body (optional)" rows={3} style={{ marginTop: 8, width: '100%', padding: 8 }} />
+                                    <textarea
+                                        value={announcementBody}
+                                        onChange={(e) => setAnnouncementBody(e.target.value)}
+                                        placeholder="Body (optional)"
+                                        rows={3}
+                                        style={{ marginTop: 8, width: '100%', padding: 8 }}
+                                    />
                                 </div>
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Announcements</div>
-                                    {announcements.length === 0 ? <div style={{ color: '#666' }}>No announcements.</div> : (
+                                    {announcements.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No announcements.</div>
+                                    ) : (
                                         <div style={{ display: 'grid', gap: 8 }}>
                                             {announcements.map((a) => (
-                                                <div key={a._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                                <div
+                                                    key={a._id}
+                                                    style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}
+                                                >
                                                     <div style={{ fontWeight: 600 }}>{a.title}</div>
-                                                    <div style={{ fontSize: 12, color: '#666' }}>{a.type} · active: {String(a.active)} · {a.publishedAt ? new Date(a.publishedAt).toLocaleString() : '—'}</div>
-                                                    {a.body ? <div style={{ marginTop: 6, fontSize: 13 }}>{a.body.slice(0, 200)}{a.body.length > 200 ? '…' : ''}</div> : null}
+                                                    <div style={{ fontSize: 12, color: '#666' }}>
+                                                        {a.type} · active: {String(a.active)} ·{' '}
+                                                        {a.publishedAt ? new Date(a.publishedAt).toLocaleString() : '—'}
+                                                    </div>
+                                                    {a.body ? (
+                                                        <div style={{ marginTop: 6, fontSize: 13 }}>
+                                                            {a.body.slice(0, 200)}
+                                                            {a.body.length > 200 ? '…' : ''}
+                                                        </div>
+                                                    ) : null}
                                                     <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-                                                        <button onClick={() => broadcastAnnouncement(a._id)} disabled={!!broadcastingId} style={{ padding: '6px 10px' }}>
-                                                            {broadcastingId === a._id ? 'Sending…' : 'Broadcast to Telegram'}
+                                                        <button
+                                                            onClick={() => broadcastAnnouncement(a._id)}
+                                                            disabled={!!broadcastingId}
+                                                            style={{ padding: '6px 10px' }}
+                                                        >
+                                                            {broadcastingId === a._id
+                                                                ? 'Sending…'
+                                                                : 'Broadcast to Telegram'}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1697,38 +2254,76 @@ export default function AdminHome() {
                         {tab === 'university' ? (
                             <>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                    <button onClick={fetchUniversityAll} style={{ padding: '8px 12px' }}>Refresh</button>
+                                    <button onClick={fetchUniversityAll} style={{ padding: '8px 12px' }}>
+                                        Refresh
+                                    </button>
                                 </div>
                                 {universityStats ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>University stats</div>
-                                        <div>Total courses: {universityStats.totalCourses ?? 0} · Total modules: {universityStats.totalModules ?? 0}</div>
-                                        <div>Users with progress: {universityStats.usersWithProgress ?? 0} · Graduates (badge): {universityStats.graduates ?? 0}</div>
+                                        <div>
+                                            Total courses: {universityStats.totalCourses ?? 0} · Total modules:{' '}
+                                            {universityStats.totalModules ?? 0}
+                                        </div>
+                                        <div>
+                                            Users with progress: {universityStats.usersWithProgress ?? 0} · Graduates
+                                            (badge): {universityStats.graduates ?? 0}
+                                        </div>
                                     </div>
                                 ) : null}
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Courses (read-only)</div>
-                                    {universityCourses.length === 0 ? <div style={{ color: '#666' }}>No courses loaded.</div> : (
+                                    {universityCourses.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No courses loaded.</div>
+                                    ) : (
                                         <div style={{ display: 'grid', gap: 8 }}>
                                             {universityCourses.map((c) => (
-                                                <div key={c.id} style={{ padding: 10, border: '1px solid #eee', borderRadius: 8 }}>
+                                                <div
+                                                    key={c.id}
+                                                    style={{ padding: 10, border: '1px solid #eee', borderRadius: 8 }}
+                                                >
                                                     <strong>{c.title}</strong> — {c.moduleCount ?? 0} modules
-                                                    {Array.isArray(c.modules) ? <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{c.modules.map((m) => m.title).join(' · ')}</div> : null}
+                                                    {Array.isArray(c.modules) ? (
+                                                        <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
+                                                            {c.modules.map((m) => m.title).join(' · ')}
+                                                        </div>
+                                                    ) : null}
                                                 </div>
                                             ))}
                                         </div>
                                     )}
                                 </div>
                                 <div style={{ marginTop: 12 }}>
-                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Graduates (users with university_graduate badge)</div>
-                                    {universityGraduates.length === 0 ? <div style={{ color: '#666' }}>No graduates yet.</div> : (
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>
+                                        Graduates (users with university_graduate badge)
+                                    </div>
+                                    {universityGraduates.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No graduates yet.</div>
+                                    ) : (
                                         <div style={{ display: 'grid', gap: 6 }}>
                                             {universityGraduates.slice(0, 50).map((u, i) => (
-                                                <div key={u.telegramId || i} style={{ fontSize: 13, padding: 6, borderBottom: '1px solid #eee' }}>
-                                                    {u.telegramId} · {u.username || '—'} {u.graduatedAt ? ` · ${new Date(u.graduatedAt).toISOString().slice(0, 10)}` : ''}
+                                                <div
+                                                    key={u.telegramId || i}
+                                                    style={{ fontSize: 13, padding: 6, borderBottom: '1px solid #eee' }}
+                                                >
+                                                    {u.telegramId} · {u.username || '—'}{' '}
+                                                    {u.graduatedAt
+                                                        ? ` · ${new Date(u.graduatedAt).toISOString().slice(0, 10)}`
+                                                        : ''}
                                                 </div>
                                             ))}
-                                            {universityGraduates.length > 50 ? <div style={{ color: '#666', fontSize: 12 }}>… and {universityGraduates.length - 50} more</div> : null}
+                                            {universityGraduates.length > 50 ? (
+                                                <div style={{ color: '#666', fontSize: 12 }}>
+                                                    … and {universityGraduates.length - 50} more
+                                                </div>
+                                            ) : null}
                                         </div>
                                     )}
                                 </div>
@@ -1738,23 +2333,52 @@ export default function AdminHome() {
                         {tab === 'referrals' ? (
                             <>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                    <button onClick={() => { fetchReferralStats(); fetchReferralList(); fetchReferralUses(); }} style={{ padding: '8px 12px' }}>Refresh</button>
+                                    <button
+                                        onClick={() => {
+                                            fetchReferralStats();
+                                            fetchReferralList();
+                                            fetchReferralUses();
+                                        }}
+                                        style={{ padding: '8px 12px' }}
+                                    >
+                                        Refresh
+                                    </button>
                                 </div>
-                                {(referralStats || referralMetrics) ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
-                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Referral stats & K-factor</div>
-                                        <div>Active codes: {referralStats?.totalActiveCodes ?? 0} · Total uses: {referralStats?.totalReferralUses ?? 0}</div>
+                                {referralStats || referralMetrics ? (
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>
+                                            Referral stats & K-factor
+                                        </div>
+                                        <div>
+                                            Active codes: {referralStats?.totalActiveCodes ?? 0} · Total uses:{' '}
+                                            {referralStats?.totalReferralUses ?? 0}
+                                        </div>
                                         {referralMetrics ? (
                                             <div style={{ marginTop: 8, fontSize: 13 }}>
-                                                K-factor (est.): <strong>{referralMetrics.kFactorEstimate ?? '—'}</strong> · Avg refs/referrer: {referralMetrics.avgUsesPerReferrer ?? '—'} · Referrers with uses: {referralMetrics.referrersWithUses ?? 0}
-                                                <span style={{ color: '#666', fontSize: 11 }}> (K &gt; 0.3 = viral)</span>
+                                                K-factor (est.):{' '}
+                                                <strong>{referralMetrics.kFactorEstimate ?? '—'}</strong> · Avg
+                                                refs/referrer: {referralMetrics.avgUsesPerReferrer ?? '—'} · Referrers
+                                                with uses: {referralMetrics.referrersWithUses ?? 0}
+                                                <span style={{ color: '#666', fontSize: 11 }}>
+                                                    {' '}
+                                                    (K &gt; 0.3 = viral)
+                                                </span>
                                             </div>
                                         ) : null}
                                         {referralStats.topReferrers?.length > 0 ? (
                                             <div style={{ marginTop: 8, fontSize: 12 }}>
                                                 <div style={{ fontWeight: 600 }}>Top referrers</div>
                                                 {referralStats.topReferrers.map((r, i) => (
-                                                    <div key={r.ownerTelegramId} style={{ padding: 4 }}>#{i + 1} {r.username || r.ownerTelegramId} — {r.uses ?? 0} uses</div>
+                                                    <div key={r.ownerTelegramId} style={{ padding: 4 }}>
+                                                        #{i + 1} {r.username || r.ownerTelegramId} — {r.uses ?? 0} uses
+                                                    </div>
                                                 ))}
                                             </div>
                                         ) : null}
@@ -1762,12 +2386,28 @@ export default function AdminHome() {
                                 ) : null}
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>All referral codes</div>
-                                    {referralList.length === 0 ? <div style={{ color: '#666' }}>No codes.</div> : (
+                                    {referralList.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No codes.</div>
+                                    ) : (
                                         <div style={{ display: 'grid', gap: 8 }}>
                                             {referralList.map((r) => (
-                                                <div key={r._id} style={{ padding: 10, border: '1px solid #eee', borderRadius: 8 }}>
-                                                    <div><strong>{r.code}</strong> · owner: {r.ownerTelegramId} · uses: {r.uses ?? 0}/{r.maxUses ?? 1000} · {r.active ? 'active' : 'inactive'}</div>
-                                                    {r.active ? <button onClick={() => deactivateReferral(r._id)} style={{ padding: '4px 8px', marginTop: 4 }}>Deactivate</button> : null}
+                                                <div
+                                                    key={r._id}
+                                                    style={{ padding: 10, border: '1px solid #eee', borderRadius: 8 }}
+                                                >
+                                                    <div>
+                                                        <strong>{r.code}</strong> · owner: {r.ownerTelegramId} · uses:{' '}
+                                                        {r.uses ?? 0}/{r.maxUses ?? 1000} ·{' '}
+                                                        {r.active ? 'active' : 'inactive'}
+                                                    </div>
+                                                    {r.active ? (
+                                                        <button
+                                                            onClick={() => deactivateReferral(r._id)}
+                                                            style={{ padding: '4px 8px', marginTop: 4 }}
+                                                        >
+                                                            Deactivate
+                                                        </button>
+                                                    ) : null}
                                                 </div>
                                             ))}
                                         </div>
@@ -1775,11 +2415,17 @@ export default function AdminHome() {
                                 </div>
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Recent uses</div>
-                                    {referralUses.length === 0 ? <div style={{ color: '#666' }}>No uses.</div> : (
+                                    {referralUses.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No uses.</div>
+                                    ) : (
                                         <div style={{ fontSize: 12 }}>
                                             {referralUses.slice(0, 30).map((u) => (
                                                 <div key={u._id} style={{ padding: 4, borderBottom: '1px solid #eee' }}>
-                                                    {u.code} · referrer: {u.referrerTelegramId} → referee: {u.refereeTelegramId} · {u.createdAt ? new Date(u.createdAt).toISOString().slice(0, 19) : ''}
+                                                    {u.code} · referrer: {u.referrerTelegramId} → referee:{' '}
+                                                    {u.refereeTelegramId} ·{' '}
+                                                    {u.createdAt
+                                                        ? new Date(u.createdAt).toISOString().slice(0, 19)
+                                                        : ''}
                                                 </div>
                                             ))}
                                         </div>
@@ -1793,31 +2439,69 @@ export default function AdminHome() {
                                 <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Create tournament</div>
                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                        <input value={tournamentName} onChange={(e) => setTournamentName(e.target.value)} placeholder="Name" style={{ padding: 8, minWidth: 160 }} />
-                                        <select value={tournamentArena} onChange={(e) => setTournamentArena(e.target.value)} style={{ padding: 8 }}>
+                                        <input
+                                            value={tournamentName}
+                                            onChange={(e) => setTournamentName(e.target.value)}
+                                            placeholder="Name"
+                                            style={{ padding: 8, minWidth: 160 }}
+                                        />
+                                        <select
+                                            value={tournamentArena}
+                                            onChange={(e) => setTournamentArena(e.target.value)}
+                                            style={{ padding: 8 }}
+                                        >
                                             <option value="prediction">prediction</option>
                                             <option value="simulation">simulation</option>
                                             <option value="strategyWars">strategyWars</option>
                                             <option value="arbitrage">arbitrage</option>
                                             <option value="guildWars">guildWars</option>
                                         </select>
-                                        <select value={tournamentLeague} onChange={(e) => setTournamentLeague(e.target.value)} style={{ padding: 8 }}>
+                                        <select
+                                            value={tournamentLeague}
+                                            onChange={(e) => setTournamentLeague(e.target.value)}
+                                            style={{ padding: 8 }}
+                                        >
                                             <option value="rookie">rookie</option>
                                             <option value="pro">pro</option>
                                             <option value="elite">elite</option>
                                         </select>
-                                        <input type="number" value={tournamentMaxEntries} onChange={(e) => setTournamentMaxEntries(e.target.value)} placeholder="Max entries" style={{ padding: 8, width: 100 }} />
-                                        <input type="number" value={tournamentEntryCostAiba} onChange={(e) => setTournamentEntryCostAiba(e.target.value)} placeholder="Entry AIBA" style={{ padding: 8, width: 100 }} />
-                                        <button onClick={createTournament} style={{ padding: '8px 12px' }}>Create</button>
+                                        <input
+                                            type="number"
+                                            value={tournamentMaxEntries}
+                                            onChange={(e) => setTournamentMaxEntries(e.target.value)}
+                                            placeholder="Max entries"
+                                            style={{ padding: 8, width: 100 }}
+                                        />
+                                        <input
+                                            type="number"
+                                            value={tournamentEntryCostAiba}
+                                            onChange={(e) => setTournamentEntryCostAiba(e.target.value)}
+                                            placeholder="Entry AIBA"
+                                            style={{ padding: 8, width: 100 }}
+                                        />
+                                        <button onClick={createTournament} style={{ padding: '8px 12px' }}>
+                                            Create
+                                        </button>
                                     </div>
-                                    {tournamentMsg ? <p style={{ marginTop: 8, color: tournamentMsg.includes('created') ? '#066' : 'crimson' }}>{tournamentMsg}</p> : null}
+                                    {tournamentMsg ? (
+                                        <p
+                                            style={{
+                                                marginTop: 8,
+                                                color: tournamentMsg.includes('created') ? '#066' : 'crimson',
+                                            }}
+                                        >
+                                            {tournamentMsg}
+                                        </p>
+                                    ) : null}
                                 </div>
                             </>
                         ) : null}
 
                         {tab === 'trainers' ? (
                             <>
-                                <button onClick={fetchTrainers} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <button onClick={fetchTrainers} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Trainers (approve/suspend)</div>
                                     {trainers.length === 0 ? (
@@ -1825,15 +2509,414 @@ export default function AdminHome() {
                                     ) : (
                                         <div style={{ display: 'grid', gap: 8 }}>
                                             {trainers.map((t) => (
-                                                <div key={t._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
-                                                    <div style={{ fontWeight: 600 }}>{t.code} · {t.username || t.telegramId}</div>
+                                                <div
+                                                    key={t._id}
+                                                    style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}
+                                                >
+                                                    <div style={{ fontWeight: 600 }}>
+                                                        {t.code} · {t.username || t.telegramId}
+                                                    </div>
                                                     <div style={{ fontSize: 12, color: '#666' }}>
-                                                        Status: {t.status} · Referred: {t.referredUserCount ?? 0} · Recruited trainers: {t.recruitedTrainerCount ?? 0} · Earned: {t.rewardsEarnedAiba ?? 0} AIBA
+                                                        Status: {t.status} · Referred: {t.referredUserCount ?? 0} ·
+                                                        Recruited trainers: {t.recruitedTrainerCount ?? 0} · Earned:{' '}
+                                                        {t.rewardsEarnedAiba ?? 0} AIBA
                                                     </div>
                                                     <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-                                                        {t.status !== 'approved' ? <button onClick={() => updateTrainerStatus(t._id, 'approved')} style={{ padding: '6px 10px' }}>Approve</button> : null}
-                                                        {t.status !== 'suspended' ? <button onClick={() => updateTrainerStatus(t._id, 'suspended')} style={{ padding: '6px 10px' }}>Suspend</button> : null}
-                                                        {t.status !== 'pending' ? <button onClick={() => updateTrainerStatus(t._id, 'pending')} style={{ padding: '6px 10px' }}>Set pending</button> : null}
+                                                        {t.status !== 'approved' ? (
+                                                            <button
+                                                                onClick={() => updateTrainerStatus(t._id, 'approved')}
+                                                                style={{ padding: '6px 10px' }}
+                                                            >
+                                                                Approve
+                                                            </button>
+                                                        ) : null}
+                                                        {t.status !== 'suspended' ? (
+                                                            <button
+                                                                onClick={() => updateTrainerStatus(t._id, 'suspended')}
+                                                                style={{ padding: '6px 10px' }}
+                                                            >
+                                                                Suspend
+                                                            </button>
+                                                        ) : null}
+                                                        {t.status !== 'pending' ? (
+                                                            <button
+                                                                onClick={() => updateTrainerStatus(t._id, 'pending')}
+                                                                style={{ padding: '6px 10px' }}
+                                                            >
+                                                                Set pending
+                                                            </button>
+                                                        ) : null}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === 'externalApps' ? (
+                            <>
+                                <button onClick={fetchExternalApps} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
+                                <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>External Apps Management</div>
+                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>
+                                        Add and manage external games/apps that appear in the MORE GAMES tab.
+                                    </p>
+                                    
+                                    {/* Create new app form */}
+                                    <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8, marginBottom: 16 }}>
+                                        <div style={{ fontWeight: 600, marginBottom: 8 }}>Create New External App</div>
+                                        <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+                                            <input
+                                                value={newAppId}
+                                                onChange={(e) => setNewAppId(e.target.value)}
+                                                placeholder="App ID (unique, no spaces)"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                value={newAppName}
+                                                onChange={(e) => setNewAppName(e.target.value)}
+                                                placeholder="App Name"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                value={newAppDescription}
+                                                onChange={(e) => setNewAppDescription(e.target.value)}
+                                                placeholder="Description (optional)"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                value={newAppUrl}
+                                                onChange={(e) => setNewAppUrl(e.target.value)}
+                                                placeholder="URL (https://...)"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                type="number"
+                                                value={newAppOrder}
+                                                onChange={(e) => setNewAppOrder(e.target.value)}
+                                                placeholder="Order (0+)"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <select
+                                                value={newAppIcon}
+                                                onChange={(e) => setNewAppIcon(e.target.value)}
+                                                style={{ padding: 8 }}
+                                            >
+                                                <option value="games">Games</option>
+                                                <option value="star">Star</option>
+                                                <option value="heart">Heart</option>
+                                                <option value="world">World</option>
+                                            </select>
+                                            <input
+                                                value={newAppBadge}
+                                                onChange={(e) => setNewAppBadge(e.target.value)}
+                                                placeholder="Badge (NEW/HOT/UPDATED)"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={newAppActive}
+                                                    onChange={(e) => setNewAppActive(e.target.checked)}
+                                                />
+                                                Active
+                                            </label>
+                                            <button onClick={createExternalApp} style={{ padding: '8px 12px' }}>
+                                                Create App
+                                            </button>
+                                        </div>
+                                        {externalAppsMsg && (
+                                            <p style={{ 
+                                                color: externalAppsMsg.includes('success') ? '#066' : 'crimson',
+                                                fontSize: 12,
+                                                marginTop: 8
+                                            }}>
+                                                {externalAppsMsg}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Apps list */}
+                                    {externalApps.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No external apps configured.</div>
+                                    ) : (
+                                        <div style={{ display: 'grid', gap: 8 }}>
+                                            {externalApps.map((app) => (
+                                                <div
+                                                    key={app.id}
+                                                    style={{ 
+                                                        padding: 12, 
+                                                        border: '1px solid #eee', 
+                                                        borderRadius: 8,
+                                                        backgroundColor: app.active ? '#fff' : '#f5f5f5'
+                                                    }}
+                                                >
+                                                    <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                                                        {app.name}
+                                                        {app.badge && (
+                                                            <span style={{
+                                                                marginLeft: 8,
+                                                                padding: '2px 6px',
+                                                                fontSize: 10,
+                                                                backgroundColor: '#ff6b6b',
+                                                                color: 'white',
+                                                                borderRadius: 4
+                                                            }}>
+                                                                {app.badge}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+                                                        ID: {app.id}
+                                                    </div>
+                                                    {app.description && (
+                                                        <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+                                                            {app.description}
+                                                        </div>
+                                                    )}
+                                                    <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+                                                        URL: <a href={app.url} target="_blank" rel="noopener noreferrer" style={{ color: '#007bff' }}>{app.url}</a>
+                                                    </div>
+                                                    <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+                                                        Order: {app.order} · Icon: {app.icon}
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                                                        <button
+                                                            onClick={() => toggleExternalApp(app.id)}
+                                                            style={{ 
+                                                                padding: '6px 10px',
+                                                                backgroundColor: app.active ? '#ffc107' : '#28a745',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: 4
+                                                            }}
+                                                        >
+                                                            {app.active ? 'Disable' : 'Enable'}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => deleteExternalApp(app.id)}
+                                                            style={{ 
+                                                                padding: '6px 10px',
+                                                                backgroundColor: '#dc3545',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: 4
+                                                            }}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        ) : null}
+
+                        {tab === 'introScreens' ? (
+                            <>
+                                <button onClick={fetchIntroScreens} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
+                                <div style={{ marginTop: 12 }}>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Intro Screens Management</div>
+                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>
+                                        Manage background images and settings for app intro screens (welcome, onboarding, tutorial, loading).
+                                    </p>
+                                    
+                                    {/* Create new intro screen form */}
+                                    <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8, marginBottom: 16 }}>
+                                        <div style={{ fontWeight: 600, marginBottom: 8 }}>Create New Intro Screen</div>
+                                        <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+                                            <select
+                                                value={newScreenType}
+                                                onChange={(e) => setNewScreenType(e.target.value)}
+                                                style={{ padding: 8 }}
+                                            >
+                                                <option value="welcome">Welcome</option>
+                                                <option value="onboarding">Onboarding</option>
+                                                <option value="tutorial">Tutorial</option>
+                                                <option value="loading">Loading</option>
+                                            </select>
+                                            <input
+                                                value={newScreenTitle}
+                                                onChange={(e) => setNewScreenTitle(e.target.value)}
+                                                placeholder="Screen Title"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                value={newScreenDescription}
+                                                onChange={(e) => setNewScreenDescription(e.target.value)}
+                                                placeholder="Description (optional)"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                value={newScreenBackgroundUrl}
+                                                onChange={(e) => setNewScreenBackgroundUrl(e.target.value)}
+                                                placeholder="Background Image URL"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                value={newScreenMobileBackgroundUrl}
+                                                onChange={(e) => setNewScreenMobileBackgroundUrl(e.target.value)}
+                                                placeholder="Mobile Background URL (optional)"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                type="number"
+                                                value={newScreenOverlayOpacity}
+                                                onChange={(e) => setNewScreenOverlayOpacity(e.target.value)}
+                                                placeholder="Overlay Opacity (0-1)"
+                                                step="0.1"
+                                                min="0"
+                                                max="1"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                value={newScreenTextColor}
+                                                onChange={(e) => setNewScreenTextColor(e.target.value)}
+                                                placeholder="Text Color (#ffffff)"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                value={newScreenButtonColor}
+                                                onChange={(e) => setNewScreenButtonColor(e.target.value)}
+                                                placeholder="Button Color (#007bff)"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                type="number"
+                                                value={newScreenOrder}
+                                                onChange={(e) => setNewScreenOrder(e.target.value)}
+                                                placeholder="Order (0+)"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <input
+                                                type="number"
+                                                value={newScreenDisplayDuration}
+                                                onChange={(e) => setNewScreenDisplayDuration(e.target.value)}
+                                                placeholder="Display Duration (ms)"
+                                                style={{ padding: 8 }}
+                                            />
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={newScreenShowSkipButton}
+                                                    onChange={(e) => setNewScreenShowSkipButton(e.target.checked)}
+                                                />
+                                                Show Skip Button
+                                            </label>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={newScreenAutoAdvance}
+                                                    onChange={(e) => setNewScreenAutoAdvance(e.target.checked)}
+                                                />
+                                                Auto Advance
+                                            </label>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={newScreenActive}
+                                                    onChange={(e) => setNewScreenActive(e.target.checked)}
+                                                />
+                                                Active
+                                            </label>
+                                            <button onClick={createIntroScreen} style={{ padding: '8px 12px' }}>
+                                                Create Screen
+                                            </button>
+                                        </div>
+                                        {introScreensMsg && (
+                                            <p style={{ 
+                                                color: introScreensMsg.includes('success') ? '#066' : 'crimson',
+                                                fontSize: 12,
+                                                marginTop: 8
+                                            }}>
+                                                {introScreensMsg}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Screens list */}
+                                    {introScreens.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No intro screens configured.</div>
+                                    ) : (
+                                        <div style={{ display: 'grid', gap: 8 }}>
+                                            {introScreens.map((screen) => (
+                                                <div
+                                                    key={screen._id}
+                                                    style={{ 
+                                                        padding: 12, 
+                                                        border: '1px solid #eee', 
+                                                        borderRadius: 8,
+                                                        backgroundColor: screen.active ? '#fff' : '#f5f5f5'
+                                                    }}
+                                                >
+                                                    <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                                                        {screen.title}
+                                                        <span style={{
+                                                            marginLeft: 8,
+                                                            padding: '2px 6px',
+                                                            fontSize: 10,
+                                                            backgroundColor: '#6c757d',
+                                                            color: 'white',
+                                                            borderRadius: 4
+                                                        }}>
+                                                            {screen.screenType}
+                                                        </span>
+                                                    </div>
+                                                    <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+                                                        Type: {screen.screenType} · Order: {screen.order}
+                                                    </div>
+                                                    {screen.description && (
+                                                        <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+                                                            {screen.description}
+                                                        </div>
+                                                    )}
+                                                    <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+                                                        Background: <a href={screen.backgroundImageUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#007bff' }}>View Image</a>
+                                                    </div>
+                                                    {screen.mobileBackgroundImageUrl && (
+                                                        <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+                                                            Mobile: <a href={screen.mobileBackgroundImageUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#007bff' }}>View Mobile</a>
+                                                        </div>
+                                                    )}
+                                                    <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+                                                        Duration: {screen.displayDuration}ms · Opacity: {screen.overlayOpacity}
+                                                    </div>
+                                                    <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+                                                        Text: {screen.textColor} · Button: {screen.buttonColor}
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                                                        <button
+                                                            onClick={() => toggleIntroScreen(screen._id)}
+                                                            style={{ 
+                                                                padding: '6px 10px',
+                                                                backgroundColor: screen.active ? '#ffc107' : '#28a745',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: 4
+                                                            }}
+                                                        >
+                                                            {screen.active ? 'Disable' : 'Enable'}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => deleteIntroScreen(screen._id)}
+                                                            style={{ 
+                                                                padding: '6px 10px',
+                                                                backgroundColor: '#dc3545',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: 4
+                                                            }}
+                                                        >
+                                                            Delete
+                                                        </button>
                                                     </div>
                                                 </div>
                                             ))}
@@ -1847,14 +2930,44 @@ export default function AdminHome() {
                             <>
                                 <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Create global boss</div>
-                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>Deactivates any active boss. New boss receives full HP and reward pool.</p>
+                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>
+                                        Deactivates any active boss. New boss receives full HP and reward pool.
+                                    </p>
                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                        <input value={bossName} onChange={(e) => setBossName(e.target.value)} placeholder="Boss name" style={{ padding: 8, minWidth: 160 }} />
-                                        <input type="number" value={bossHp} onChange={(e) => setBossHp(e.target.value)} placeholder="Total HP" style={{ padding: 8, width: 120 }} />
-                                        <input type="number" value={bossRewardPool} onChange={(e) => setBossRewardPool(e.target.value)} placeholder="Reward pool AIBA" style={{ padding: 8, width: 140 }} />
-                                        <button onClick={createGlobalBoss} style={{ padding: '8px 12px' }}>Create boss</button>
+                                        <input
+                                            value={bossName}
+                                            onChange={(e) => setBossName(e.target.value)}
+                                            placeholder="Boss name"
+                                            style={{ padding: 8, minWidth: 160 }}
+                                        />
+                                        <input
+                                            type="number"
+                                            value={bossHp}
+                                            onChange={(e) => setBossHp(e.target.value)}
+                                            placeholder="Total HP"
+                                            style={{ padding: 8, width: 120 }}
+                                        />
+                                        <input
+                                            type="number"
+                                            value={bossRewardPool}
+                                            onChange={(e) => setBossRewardPool(e.target.value)}
+                                            placeholder="Reward pool AIBA"
+                                            style={{ padding: 8, width: 140 }}
+                                        />
+                                        <button onClick={createGlobalBoss} style={{ padding: '8px 12px' }}>
+                                            Create boss
+                                        </button>
                                     </div>
-                                    {bossMsg ? <p style={{ marginTop: 8, color: bossMsg.includes('created') ? '#066' : 'crimson' }}>{bossMsg}</p> : null}
+                                    {bossMsg ? (
+                                        <p
+                                            style={{
+                                                marginTop: 8,
+                                                color: bossMsg.includes('created') ? '#066' : 'crimson',
+                                            }}
+                                        >
+                                            {bossMsg}
+                                        </p>
+                                    ) : null}
                                 </div>
                             </>
                         ) : null}
@@ -1862,35 +2975,102 @@ export default function AdminHome() {
                         {tab === 'predict' ? (
                             <>
                                 <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
-                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Create predict event (Battle of the hour)</div>
-                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>Broker A vs Broker B. Users bet AIBA on winner. Vig (default 3%) → treasury. Config: Economy → predictVigBps, predictMaxBetAiba.</p>
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>
+                                        Create predict event (Battle of the hour)
+                                    </div>
+                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>
+                                        Broker A vs Broker B. Users bet AIBA on winner. Vig (default 3%) → treasury.
+                                        Config: Economy → predictVigBps, predictMaxBetAiba.
+                                    </p>
                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                        <input value={predictBrokerAId} onChange={(e) => setPredictBrokerAId(e.target.value)} placeholder="Broker A ID" style={{ padding: 8, minWidth: 200 }} />
-                                        <input value={predictBrokerBId} onChange={(e) => setPredictBrokerBId(e.target.value)} placeholder="Broker B ID" style={{ padding: 8, minWidth: 200 }} />
-                                        <select value={predictArena} onChange={(e) => setPredictArena(e.target.value)} style={{ padding: 8 }}>
+                                        <input
+                                            value={predictBrokerAId}
+                                            onChange={(e) => setPredictBrokerAId(e.target.value)}
+                                            placeholder="Broker A ID"
+                                            style={{ padding: 8, minWidth: 200 }}
+                                        />
+                                        <input
+                                            value={predictBrokerBId}
+                                            onChange={(e) => setPredictBrokerBId(e.target.value)}
+                                            placeholder="Broker B ID"
+                                            style={{ padding: 8, minWidth: 200 }}
+                                        />
+                                        <select
+                                            value={predictArena}
+                                            onChange={(e) => setPredictArena(e.target.value)}
+                                            style={{ padding: 8 }}
+                                        >
                                             <option value="prediction">prediction</option>
                                             <option value="simulation">simulation</option>
                                             <option value="arbitrage">arbitrage</option>
                                         </select>
-                                        <select value={predictLeague} onChange={(e) => setPredictLeague(e.target.value)} style={{ padding: 8 }}>
+                                        <select
+                                            value={predictLeague}
+                                            onChange={(e) => setPredictLeague(e.target.value)}
+                                            style={{ padding: 8 }}
+                                        >
                                             <option value="rookie">rookie</option>
                                             <option value="pro">pro</option>
                                             <option value="elite">elite</option>
                                         </select>
-                                        <button onClick={createPredictEvent} style={{ padding: '8px 12px' }}>Create event</button>
+                                        <button onClick={createPredictEvent} style={{ padding: '8px 12px' }}>
+                                            Create event
+                                        </button>
                                     </div>
-                                    {predictMsg ? <p style={{ marginTop: 8, color: predictMsg.includes('created') || predictMsg.includes('resolved') ? '#066' : 'crimson' }}>{predictMsg}</p> : null}
+                                    {predictMsg ? (
+                                        <p
+                                            style={{
+                                                marginTop: 8,
+                                                color:
+                                                    predictMsg.includes('created') || predictMsg.includes('resolved')
+                                                        ? '#066'
+                                                        : 'crimson',
+                                            }}
+                                        >
+                                            {predictMsg}
+                                        </p>
+                                    ) : null}
                                 </div>
                                 <div style={{ marginTop: 12 }}>
-                                    <button onClick={fetchPredictEvents} style={{ padding: '8px 12px' }}>Refresh</button>
-                                    <div style={{ fontWeight: 700, marginTop: 12, marginBottom: 8 }}>Predict events</div>
-                                    {predictEvents.length === 0 ? <div style={{ color: '#666' }}>No events.</div> : (
+                                    <button onClick={fetchPredictEvents} style={{ padding: '8px 12px' }}>
+                                        Refresh
+                                    </button>
+                                    <div style={{ fontWeight: 700, marginTop: 12, marginBottom: 8 }}>
+                                        Predict events
+                                    </div>
+                                    {predictEvents.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No events.</div>
+                                    ) : (
                                         <div style={{ display: 'grid', gap: 8 }}>
                                             {predictEvents.map((ev) => (
-                                                <div key={ev._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
-                                                    <div><strong>{ev.brokerAId?.intelligence ?? '?'}/{(ev.brokerAId?.speed ?? 0) + (ev.brokerAId?.risk ?? 0)}</strong> vs <strong>{ev.brokerBId?.intelligence ?? '?'}/{(ev.brokerBId?.speed ?? 0) + (ev.brokerBId?.risk ?? 0)}</strong> · {ev.arena} · {ev.league} · {ev.status}</div>
-                                                    <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>Pool A: {ev.poolAiba ?? 0} · Pool B: {ev.poolBiba ?? 0} · Max bet: {ev.maxBetAiba ?? 0} AIBA</div>
-                                                    {ev.status === 'open' ? <button onClick={() => resolvePredictEvent(ev._id)} style={{ padding: '6px 10px', marginTop: 8 }}>Resolve (run battle, pay winners, vig → treasury)</button> : null}
+                                                <div
+                                                    key={ev._id}
+                                                    style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}
+                                                >
+                                                    <div>
+                                                        <strong>
+                                                            {ev.brokerAId?.intelligence ?? '?'}/
+                                                            {(ev.brokerAId?.speed ?? 0) + (ev.brokerAId?.risk ?? 0)}
+                                                        </strong>{' '}
+                                                        vs{' '}
+                                                        <strong>
+                                                            {ev.brokerBId?.intelligence ?? '?'}/
+                                                            {(ev.brokerBId?.speed ?? 0) + (ev.brokerBId?.risk ?? 0)}
+                                                        </strong>{' '}
+                                                        · {ev.arena} · {ev.league} · {ev.status}
+                                                    </div>
+                                                    <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
+                                                        Pool A: {ev.poolAiba ?? 0} · Pool B: {ev.poolBiba ?? 0} · Max
+                                                        bet: {ev.maxBetAiba ?? 0} AIBA
+                                                    </div>
+                                                    {ev.status === 'open' ? (
+                                                        <button
+                                                            onClick={() => resolvePredictEvent(ev._id)}
+                                                            style={{ padding: '6px 10px', marginTop: 8 }}
+                                                        >
+                                                            Resolve (run battle, pay winners, vig → treasury)
+                                                        </button>
+                                                    ) : null}
                                                 </div>
                                             ))}
                                         </div>
@@ -1902,26 +3082,89 @@ export default function AdminHome() {
                         {tab === 'brokers' ? (
                             <>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                    <button onClick={fetchMintJobs} style={{ padding: '8px 12px' }}>Refresh</button>
+                                    <button onClick={fetchMintJobs} style={{ padding: '8px 12px' }}>
+                                        Refresh
+                                    </button>
                                 </div>
-                                {mintJobMsg ? <p style={{ marginTop: 8, color: mintJobMsg.startsWith('Job') ? '#066' : 'crimson' }}>{mintJobMsg}</p> : null}
+                                {mintJobMsg ? (
+                                    <p
+                                        style={{
+                                            marginTop: 8,
+                                            color: mintJobMsg.startsWith('Job') ? '#066' : 'crimson',
+                                        }}
+                                    >
+                                        {mintJobMsg}
+                                    </p>
+                                ) : null}
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Pending broker mint jobs</div>
-                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>Complete each job by entering the NFT collection and item address after minting on-chain.</p>
-                                    {mintJobs.length === 0 ? <div style={{ color: '#666' }}>No pending jobs.</div> : (
+                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>
+                                        Complete each job by entering the NFT collection and item address after minting
+                                        on-chain.
+                                    </p>
+                                    {mintJobs.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No pending jobs.</div>
+                                    ) : (
                                         <div style={{ display: 'grid', gap: 12 }}>
                                             {mintJobs.map((j) => (
-                                                <div key={j._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
-                                                    <div><strong>Broker:</strong> {j.brokerId} · created: {j.createdAt ? new Date(j.createdAt).toISOString().slice(0, 19) : ''}</div>
+                                                <div
+                                                    key={j._id}
+                                                    style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}
+                                                >
+                                                    <div>
+                                                        <strong>Broker:</strong> {j.brokerId} · created:{' '}
+                                                        {j.createdAt
+                                                            ? new Date(j.createdAt).toISOString().slice(0, 19)
+                                                            : ''}
+                                                    </div>
                                                     {mintJobCompleteId === j._id ? (
-                                                        <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                                            <input value={mintJobNftCollection} onChange={(e) => setMintJobNftCollection(e.target.value)} placeholder="NFT collection address" style={{ padding: 8, minWidth: 300 }} />
-                                                            <input value={mintJobNftItem} onChange={(e) => setMintJobNftItem(e.target.value)} placeholder="NFT item address" style={{ padding: 8, minWidth: 300 }} />
-                                                            <button onClick={() => completeMintJob(j._id)} style={{ padding: '8px 12px' }}>Complete</button>
-                                                            <button onClick={() => { setMintJobCompleteId(''); setMintJobNftCollection(''); setMintJobNftItem(''); }} style={{ padding: '8px 12px' }}>Cancel</button>
+                                                        <div
+                                                            style={{
+                                                                marginTop: 8,
+                                                                display: 'flex',
+                                                                gap: 8,
+                                                                flexWrap: 'wrap',
+                                                                alignItems: 'center',
+                                                            }}
+                                                        >
+                                                            <input
+                                                                value={mintJobNftCollection}
+                                                                onChange={(e) =>
+                                                                    setMintJobNftCollection(e.target.value)
+                                                                }
+                                                                placeholder="NFT collection address"
+                                                                style={{ padding: 8, minWidth: 300 }}
+                                                            />
+                                                            <input
+                                                                value={mintJobNftItem}
+                                                                onChange={(e) => setMintJobNftItem(e.target.value)}
+                                                                placeholder="NFT item address"
+                                                                style={{ padding: 8, minWidth: 300 }}
+                                                            />
+                                                            <button
+                                                                onClick={() => completeMintJob(j._id)}
+                                                                style={{ padding: '8px 12px' }}
+                                                            >
+                                                                Complete
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setMintJobCompleteId('');
+                                                                    setMintJobNftCollection('');
+                                                                    setMintJobNftItem('');
+                                                                }}
+                                                                style={{ padding: '8px 12px' }}
+                                                            >
+                                                                Cancel
+                                                            </button>
                                                         </div>
                                                     ) : (
-                                                        <button onClick={() => setMintJobCompleteId(j._id)} style={{ padding: '6px 10px', marginTop: 8 }}>Complete job</button>
+                                                        <button
+                                                            onClick={() => setMintJobCompleteId(j._id)}
+                                                            style={{ padding: '6px 10px', marginTop: 8 }}
+                                                        >
+                                                            Complete job
+                                                        </button>
                                                     )}
                                                 </div>
                                             ))}
