@@ -1,218 +1,314 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>README — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>README</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Docs index</h1>
-<p>Related docs have been merged so there are fewer, clearer files.</p>
-<h2>Android UI/UX rollout navigation (Phase 1–4)</h2>
-<table>
-<thead><tr>
-<th>Phase</th>
-<th>UI label</th>
-<th>Primary docs</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Phase 1</strong></td>
-<td><strong>Fast Win — Android UI/UX shell (top app bar + sticky bottom nav)</strong></td>
-<td><code>USER-GUIDE.md</code>, <code>TELEGRAM-MINI-APP-UI-UX-AUDIT.md</code></td>
-</tr>
-<tr>
-<td><strong>Phase 2</strong></td>
-<td><strong>Home + Tasks card redesign (spacing, typography, button sizing)</strong></td>
-<td><code>USER-GUIDE.md</code>, <code>TESTING.md</code></td>
-</tr>
-<tr>
-<td><strong>Phase 3</strong></td>
-<td><strong>Market + Racing flow redesign (sheet-style detail views)</strong></td>
-<td><code>FEATURE-PLANS.md</code>, <code>USER-GUIDE.md</code>, <code>TESTING.md</code></td>
-</tr>
-<tr>
-<td><strong>Phase 4</strong></td>
-<td><strong>Component system cleanup + theming + QA pass</strong></td>
-<td><code>AUDIT-AND-STATUS.md</code>, <code>TESTING.md</code>, <code>OPERATIONS.md</code></td>
-</tr>
-</tbody></table>
-<p>Use this phase table first, then open the detailed docs below.</p>
-<table>
-<thead><tr>
-<th>Doc</th>
-<th>Contents</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>DEPLOYMENT-AND-ENV.md</strong></td>
-<td>Localhost, Vercel, Telegram: env checklist, backend + miniapp + admin, security, mainnet readiness.</td>
-</tr>
-<tr>
-<td><strong>OPERATIONS.md</strong></td>
-<td>Runbook, key management, incident response, monitoring, production readiness status.</td>
-</tr>
-<tr>
-<td><strong>TESTING.md</strong></td>
-<td>Backend unit/API/integration tests, miniapp build, contracts, CI; extended test plan (Realms, Assets, Governance).</td>
-</tr>
-<tr>
-<td><strong>USER-GUIDE.md</strong></td>
-<td>How to play: tabs, wallet, brokers, battles, marketplace, guilds, referrals, racing, university, charity, multiverse, troubleshooting.</td>
-</tr>
-<tr>
-<td><strong>FEATURE-PLANS.md</strong></td>
-<td>University, autonomous racing, charity, marketplace &amp; payments, NFT multiverse, comms, economy (vision + key design).</td>
-</tr>
-<tr>
-<td><strong>STARS-BADGES-DIAMONDS.md</strong></td>
-<td>Stars, profile badges, diamonds: plan, vision, implementation gaps.</td>
-</tr>
-<tr>
-<td><strong>AUDIT-AND-STATUS.md</strong></td>
-<td>Project assessment, leaderboard &amp; groups, ecosystems audit (NFT, staking, CoE, Wall of Fame, Trainers), vision vs codebase.</td>
-</tr>
-<tr>
-<td><strong>WHAT-IS-AIBA-ARENA.md</strong></td>
-<td>Deep from-zero explainer: what AIBA Arena is, who it's for, core loop, tokens, features, where to play.</td>
-</tr>
-<tr>
-<td><strong>GAME-FUNCTIONALITY.md</strong></td>
-<td>Expanded game functionality: battle engine, brokers, economy config, trainers, automation, racing, security, data flows, API mapping.</td>
-</tr>
-<tr>
-<td><strong>GAP-AUDIT.md</strong></td>
-<td>Docs vs code gap investigation: privacy/terms, ads, brokers/cars/bikes, extensibility, recommendations.</td>
-</tr>
-<tr>
-<td><strong>ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md</strong></td>
-<td>Advisory: 1T AIBA mint, viral growth strategies, founder revenue calculations.</td>
-</tr>
-<tr>
-<td><strong>AIBA-SELF-AUTOMATION.md</strong></td>
-<td>Dynamic caps, allocation config, mint constraints, anti-inflation, referralUnlock3BonusBps.</td>
-</tr>
-<tr>
-<td><strong>REPORTS-MONITORING.md</strong></td>
-<td>Cross-validation of advisory/audit reports vs codebase; invite-3, K-factor, trainers.</td>
-</tr>
-<tr>
-<td><strong>TELEGRAM-APPS-MODERATION-ADVISORY.md</strong></td>
-<td>Telegram Apps Moderation Center: approval probability, position in Apps Center, submission checklist, implementation status.</td>
-</tr>
-<tr>
-<td><strong>PRIVACY-POLICY.md</strong></td>
-<td>Privacy policy: data collection, use, storage, rights. In-app at <code>/privacy</code>.</td>
-</tr>
-<tr>
-<td><strong>TERMS-OF-SERVICE.md</strong></td>
-<td>Terms of service: acceptance, no guaranteed profits, eligibility, conduct. In-app at <code>/terms</code>.</td>
-</tr>
-<tr>
-<td><strong>INNOVATIONS-100X-ADVISORY.md</strong></td>
-<td>Innovations to strike the game: tournaments, streaks, creator economy, predict/bet, subscription, rental, raid, breeding. 100× calculations for users, AIBA, founders.</td>
-</tr>
-<tr>
-<td><strong>API-CONTRACT.md</strong></td>
-<td>API contract: Core (Economy, Vault, Wallet, Battle), Realms, Missions, Mentors, Assets, DAO (staking requirement), Staking, Treasury, Trainers, Oracle, P2P AIBA, Gifts, Donate, Announcements, Support.</td>
-</tr>
-<tr>
-<td><strong>SUPER-ADMIN-WALLETS.md</strong></td>
-<td>Complete reference: all Super Admin wallets (P2P AIBA send, AIBA in gifts, Buy AIBA with TON, Donate broker/car/bike/gifts, <strong>CANCELLED_STAKES_WALLET</strong> for early stake cancel fee), env vars, config keys, APIs.</td>
-</tr>
-<tr>
-<td><strong>ORACLE-AIBA-TON.md</strong></td>
-<td>Holistic automated AIBA/TON oracle: formula, config, cron, admin API.</td>
-</tr>
-<tr>
-<td><strong>CONTRACT-DEPLOYMENT-ORDER.md</strong></td>
-<td>Contract deployment order.</td>
-</tr>
-<tr>
-<td><strong>UNIVERSAL-SPEC.md</strong></td>
-<td>Universal spec (if present).</td>
-</tr>
-<tr>
-<td><strong>CONNECT-WALLET-TON-SCAN.md</strong></td>
-<td>Connect wallet, TON Scan.</td>
-</tr>
-<tr>
-<td><strong>MIGRATIONS.md</strong></td>
-<td>Data migrations.</td>
-</tr>
-<tr>
-<td><strong>TELEGRAM-MINI-APP-UI-UX-AUDIT.md</strong></td>
-<td>Telegram miniapp UI/UX audit.</td>
-</tr>
-<tr>
-<td><strong>DOCS-STRUCTURE.md</strong></td>
-<td>Why <code>.html</code> vs <code>.md</code>; source of truth, build process, orphan HTML files.</td>
-</tr>
-<tr>
-<td><strong>UNIFIED-COMMS-ECOSYSTEM.md</strong></td>
-<td>Unified comms: announcements, status, support; Phases 1–4 (read/unread, support form) done.</td>
-</tr>
-<tr>
-<td><strong>PRINT.md</strong></td>
-<td>Print/export.</td>
-</tr>
-<tr>
-<td><strong>VISION-3D-ARENAS-STATUS.md</strong></td>
-<td>3D arenas: what exists vs vision. Can you see them? Roadmap.</td>
-</tr>
-<tr>
-<td><strong>TRAINERS-MANUAL.md</strong></td>
-<td>Exhaustive trainer guide: product, journeys, scripts, influencer angles.</td>
-</tr>
-<tr>
-<td><strong>marketing/</strong></td>
-<td>Marketing materials: influencer kit, ad templates, post bank, customizable HTML banners.</td>
-</tr>
-</tbody></table>
-<p><strong>Deep feature docs</strong> (per-feature deep dives):</p>
-<table>
-<thead><tr>
-<th>Doc</th>
-<th>Contents</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>BROKERS-DEEP-EXPLANATION.md</strong></td>
-<td>Brokers: stats, creation, listing, buying, system catalog.</td>
-</tr>
-<tr>
-<td><strong>ARENAS-DEEP-EXPLANATION.md</strong></td>
-<td>Arenas, leagues, battle flow, scoring.</td>
-</tr>
-<tr>
-<td><strong>CAR-RACING-DEEP-EXPLANATION.md</strong></td>
-<td>Car racing: config, tracks, cars, races, enter, buy, leaderboard.</td>
-</tr>
-<tr>
-<td><strong>MARKETPLACE-DEEP-EXPLANATION.md</strong></td>
-<td>Unified marketplace: brokers, assets, rentals, boosts, system shop.</td>
-</tr>
-</tbody></table>
-<p><strong>Gaps and audits:</strong> <a href="GAP-AUDIT.md">GAP-AUDIT.md</a>, <a href="GAPS-SCAN-REPORT.md">GAPS-SCAN-REPORT.md</a> (full app &amp; docs gap scan), <a href="APP-SCAN-REPORT.md">APP-SCAN-REPORT.md</a> (issues/errors scan).</p>
-<p><strong>UI &amp; updatedness:</strong> <a href="UI-DESIGN-PRINCIPLES.md">UI-DESIGN-PRINCIPLES.md</a> (nav, card-based, responsive). <a href="DOCS-UPDATEDNESS.md">DOCS-UPDATEDNESS.md</a> (code, .md, .html refresh status).</p>
-<p><strong>Print folder:</strong> <code>print/</code> contains HTML exports of docs. Run <code>npm run build:print-docs</code> to regenerate from <code>.md</code> sources. See <a href="DOCS-STRUCTURE.md">DOCS-STRUCTURE.md</a>.</p>
-<hr/>
-<h2>Recent documentation updates</h2>
-<ul>
-<li><strong>DAO:</strong> Added to Home grid; create-proposal staking requirement (e.g. ≥ 10,000 AIBA for ≥ 30 days). See <a href="API-CONTRACT.md">API-CONTRACT.md</a> §4.</li>
-<li><strong>Staking:</strong> Full locked staking UI (periods 30/90/180/365 days, APY, reward preview, countdown). Cancel early with 5% fee → CANCELLED_STAKES_WALLET / Treasury. See <a href="API-CONTRACT.md">API-CONTRACT.md</a> §5d, <a href="SUPER-ADMIN-WALLETS.md">SUPER-ADMIN-WALLETS.md</a>.</li>
-<li><strong>Charity:</strong> Max NEUR/AIBA, presets, optional message, anonymous toggle. See <a href="FEATURE-PLANS.md">FEATURE-PLANS.md</a> §3, <a href="USER-GUIDE.md">USER-GUIDE.md</a> §16.</li>
-<li><strong>Trainer button:</strong> Coloured styling on Home grid. See <code>miniapp/src/config/navigation.js</code> (<code>gridStyle: 'trainers'</code>).</li>
-<li><strong>API-CONTRACT audit:</strong> §0 Core (Economy, Vault, Wallet, Battle) added; duplicate §5e fixed (Predict → 5e.2); Trainers claim-rewards requestId documented.</li>
-<li><strong>Gaps scan:</strong> <a href="GAPS-SCAN-REPORT.md">GAPS-SCAN-REPORT.md</a> — full app &amp; docs gap scan; README deep-feature-docs index and GAME-FUNCTIONALITY §12 API mapping extended (broker-rental, predict, trainers, donate, premium, etc.).</li>
-<li><strong>Updatedness:</strong> Code, .md, and print HTML kept in sync. Run <code>npm run build:print-docs</code> after doc edits. See <a href="DOCS-UPDATEDNESS.md">DOCS-UPDATEDNESS.md</a>.</li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>README — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>README</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Docs index</h1>
+            <p>Related docs have been merged so there are fewer, clearer files.</p>
+            <h2>Android UI/UX rollout navigation (Phase 1–4)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Phase</th>
+                        <th>UI label</th>
+                        <th>Primary docs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Phase 1</strong></td>
+                        <td><strong>Fast Win — Android UI/UX shell (top app bar + sticky bottom nav)</strong></td>
+                        <td><code>USER-GUIDE.md</code>, <code>TELEGRAM-MINI-APP-UI-UX-AUDIT.md</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phase 2</strong></td>
+                        <td><strong>Home + Tasks card redesign (spacing, typography, button sizing)</strong></td>
+                        <td><code>USER-GUIDE.md</code>, <code>TESTING.md</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phase 3</strong></td>
+                        <td><strong>Market + Racing flow redesign (sheet-style detail views)</strong></td>
+                        <td><code>FEATURE-PLANS.md</code>, <code>USER-GUIDE.md</code>, <code>TESTING.md</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phase 4</strong></td>
+                        <td><strong>Component system cleanup + theming + QA pass</strong></td>
+                        <td><code>AUDIT-AND-STATUS.md</code>, <code>TESTING.md</code>, <code>OPERATIONS.md</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Use this phase table first, then open the detailed docs below.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Doc</th>
+                        <th>Contents</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>DEPLOYMENT-AND-ENV.md</strong></td>
+                        <td>
+                            Localhost, Vercel, Telegram: env checklist, backend + miniapp + admin, security, mainnet
+                            readiness.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>OPERATIONS.md</strong></td>
+                        <td>Runbook, key management, incident response, monitoring, production readiness status.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TESTING.md</strong></td>
+                        <td>
+                            Backend unit/API/integration tests, miniapp build, contracts, CI; extended test plan
+                            (Realms, Assets, Governance).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>USER-GUIDE.md</strong></td>
+                        <td>
+                            How to play: tabs, wallet, brokers, battles, marketplace, guilds, referrals, racing,
+                            university, charity, multiverse, troubleshooting.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>FEATURE-PLANS.md</strong></td>
+                        <td>
+                            University, autonomous racing, charity, marketplace &amp; payments, NFT multiverse, comms,
+                            economy (vision + key design).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>STARS-BADGES-DIAMONDS.md</strong></td>
+                        <td>Stars, profile badges, diamonds: plan, vision, implementation gaps.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AUDIT-AND-STATUS.md</strong></td>
+                        <td>
+                            Project assessment, leaderboard &amp; groups, ecosystems audit (NFT, staking, CoE, Wall of
+                            Fame, Trainers), vision vs codebase.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>WHAT-IS-AIBA-ARENA.md</strong></td>
+                        <td>
+                            Deep from-zero explainer: what AIBA Arena is, who it's for, core loop, tokens, features,
+                            where to play.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>GAME-FUNCTIONALITY.md</strong></td>
+                        <td>
+                            Expanded game functionality: battle engine, brokers, economy config, trainers, automation,
+                            racing, security, data flows, API mapping.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>GAP-AUDIT.md</strong></td>
+                        <td>
+                            Docs vs code gap investigation: privacy/terms, ads, brokers/cars/bikes, extensibility,
+                            recommendations.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md</strong></td>
+                        <td>Advisory: 1T AIBA mint, viral growth strategies, founder revenue calculations.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AIBA-SELF-AUTOMATION.md</strong></td>
+                        <td>
+                            Dynamic caps, allocation config, mint constraints, anti-inflation, referralUnlock3BonusBps.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>REPORTS-MONITORING.md</strong></td>
+                        <td>Cross-validation of advisory/audit reports vs codebase; invite-3, K-factor, trainers.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TELEGRAM-APPS-MODERATION-ADVISORY.md</strong></td>
+                        <td>
+                            Telegram Apps Moderation Center: approval probability, position in Apps Center, submission
+                            checklist, implementation status.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>PRIVACY-POLICY.md</strong></td>
+                        <td>Privacy policy: data collection, use, storage, rights. In-app at <code>/privacy</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TERMS-OF-SERVICE.md</strong></td>
+                        <td>
+                            Terms of service: acceptance, no guaranteed profits, eligibility, conduct. In-app at
+                            <code>/terms</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>INNOVATIONS-100X-ADVISORY.md</strong></td>
+                        <td>
+                            Innovations to strike the game: tournaments, streaks, creator economy, predict/bet,
+                            subscription, rental, raid, breeding. 100× calculations for users, AIBA, founders.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>API-CONTRACT.md</strong></td>
+                        <td>
+                            API contract: Core (Economy, Vault, Wallet, Battle), Realms, Missions, Mentors, Assets, DAO
+                            (staking requirement), Staking, Treasury, Trainers, Oracle, P2P AIBA, Gifts, Donate,
+                            Announcements, Support.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>SUPER-ADMIN-WALLETS.md</strong></td>
+                        <td>
+                            Complete reference: all Super Admin wallets (P2P AIBA send, AIBA in gifts, Buy AIBA with
+                            TON, Donate broker/car/bike/gifts, <strong>CANCELLED_STAKES_WALLET</strong> for early stake
+                            cancel fee), env vars, config keys, APIs.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>ORACLE-AIBA-TON.md</strong></td>
+                        <td>Holistic automated AIBA/TON oracle: formula, config, cron, admin API.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CONTRACT-DEPLOYMENT-ORDER.md</strong></td>
+                        <td>Contract deployment order.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UNIVERSAL-SPEC.md</strong></td>
+                        <td>Universal spec (if present).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CONNECT-WALLET-TON-SCAN.md</strong></td>
+                        <td>Connect wallet, TON Scan.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MIGRATIONS.md</strong></td>
+                        <td>Data migrations.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TELEGRAM-MINI-APP-UI-UX-AUDIT.md</strong></td>
+                        <td>Telegram miniapp UI/UX audit.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DOCS-STRUCTURE.md</strong></td>
+                        <td>
+                            Why <code>.html</code> vs <code>.md</code>; source of truth, build process, orphan HTML
+                            files.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>UNIFIED-COMMS-ECOSYSTEM.md</strong></td>
+                        <td>
+                            Unified comms: announcements, status, support; Phases 1–4 (read/unread, support form) done.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>PRINT.md</strong></td>
+                        <td>Print/export.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VISION-3D-ARENAS-STATUS.md</strong></td>
+                        <td>3D arenas: what exists vs vision. Can you see them? Roadmap.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TRAINERS-MANUAL.md</strong></td>
+                        <td>Exhaustive trainer guide: product, journeys, scripts, influencer angles.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>marketing/</strong></td>
+                        <td>
+                            Marketing materials: influencer kit, ad templates, post bank, customizable HTML banners.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>Deep feature docs</strong> (per-feature deep dives):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Doc</th>
+                        <th>Contents</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>BROKERS-DEEP-EXPLANATION.md</strong></td>
+                        <td>Brokers: stats, creation, listing, buying, system catalog.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ARENAS-DEEP-EXPLANATION.md</strong></td>
+                        <td>Arenas, leagues, battle flow, scoring.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CAR-RACING-DEEP-EXPLANATION.md</strong></td>
+                        <td>Car racing: config, tracks, cars, races, enter, buy, leaderboard.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MARKETPLACE-DEEP-EXPLANATION.md</strong></td>
+                        <td>Unified marketplace: brokers, assets, rentals, boosts, system shop.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Gaps and audits:</strong> <a href="GAP-AUDIT.md">GAP-AUDIT.md</a>,
+                <a href="GAPS-SCAN-REPORT.md">GAPS-SCAN-REPORT.md</a> (full app &amp; docs gap scan),
+                <a href="APP-SCAN-REPORT.md">APP-SCAN-REPORT.md</a> (issues/errors scan).
+            </p>
+            <p>
+                <strong>UI &amp; updatedness:</strong>
+                <a href="UI-DESIGN-PRINCIPLES.md">UI-DESIGN-PRINCIPLES.md</a> (nav, card-based, responsive).
+                <a href="DOCS-UPDATEDNESS.md">DOCS-UPDATEDNESS.md</a> (code, .md, .html refresh status).
+            </p>
+            <p>
+                <strong>Print folder:</strong> <code>print/</code> contains HTML exports of docs. Run
+                <code>npm run build:print-docs</code> to regenerate from <code>.md</code> sources. See
+                <a href="DOCS-STRUCTURE.md">DOCS-STRUCTURE.md</a>.
+            </p>
+            <hr />
+            <h2>Recent documentation updates</h2>
+            <ul>
+                <li>
+                    <strong>DAO:</strong> Added to Home grid; create-proposal staking requirement (e.g. ≥ 10,000 AIBA
+                    for ≥ 30 days). See <a href="API-CONTRACT.md">API-CONTRACT.md</a> §4.
+                </li>
+                <li>
+                    <strong>Staking:</strong> Full locked staking UI (periods 30/90/180/365 days, APY, reward preview,
+                    countdown). Cancel early with 5% fee → CANCELLED_STAKES_WALLET / Treasury. See
+                    <a href="API-CONTRACT.md">API-CONTRACT.md</a> §5d,
+                    <a href="SUPER-ADMIN-WALLETS.md">SUPER-ADMIN-WALLETS.md</a>.
+                </li>
+                <li>
+                    <strong>Charity:</strong> Max NEUR/AIBA, presets, optional message, anonymous toggle. See
+                    <a href="FEATURE-PLANS.md">FEATURE-PLANS.md</a> §3, <a href="USER-GUIDE.md">USER-GUIDE.md</a> §16.
+                </li>
+                <li>
+                    <strong>Trainer button:</strong> Coloured styling on Home grid. See
+                    <code>miniapp/src/config/navigation.js</code> (<code>gridStyle: 'trainers'</code>).
+                </li>
+                <li>
+                    <strong>API-CONTRACT audit:</strong> §0 Core (Economy, Vault, Wallet, Battle) added; duplicate §5e
+                    fixed (Predict → 5e.2); Trainers claim-rewards requestId documented.
+                </li>
+                <li>
+                    <strong>Gaps scan:</strong> <a href="GAPS-SCAN-REPORT.md">GAPS-SCAN-REPORT.md</a> — full app &amp;
+                    docs gap scan; README deep-feature-docs index and GAME-FUNCTIONALITY §12 API mapping extended
+                    (broker-rental, predict, trainers, donate, premium, etc.).
+                </li>
+                <li>
+                    <strong>Updatedness:</strong> Code, .md, and print HTML kept in sync. Run
+                    <code>npm run build:print-docs</code> after doc edits. See
+                    <a href="DOCS-UPDATEDNESS.md">DOCS-UPDATEDNESS.md</a>.
+                </li>
+            </ul>
+        </div>
+    </body>
 </html>

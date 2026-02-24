@@ -16,9 +16,9 @@
 2. Select your **backend** project (or create new)
 3. **Settings** → **Git**
 4. If not connected:
-   - Click **Connect Git Repository**
-   - Select **GitHub** → **OIPTechCORE/Aiba-Arena2**
-   - Authorize if needed
+    - Click **Connect Git Repository**
+    - Select **GitHub** → **OIPTechCORE/Aiba-Arena2**
+    - Authorize if needed
 5. **Production Branch:** Set to `main`
 6. **Root Directory:** Set to `backend`
 7. **Auto-deploy:** Ensure it's **enabled** (default)
@@ -30,8 +30,8 @@
 1. Select your **miniapp** project (or create new)
 2. **Settings** → **Git**
 3. If not connected:
-   - Click **Connect Git Repository**
-   - Select **GitHub** → **OIPTechCORE/Aiba-Arena2**
+    - Click **Connect Git Repository**
+    - Select **GitHub** → **OIPTechCORE/Aiba-Arena2**
 4. **Production Branch:** Set to `main`
 5. **Root Directory:** Set to `miniapp`
 6. **Auto-deploy:** Ensure it's **enabled**
@@ -43,8 +43,8 @@
 1. Select your **admin-panel** project (or create new)
 2. **Settings** → **Git**
 3. If not connected:
-   - Click **Connect Git Repository**
-   - Select **GitHub** → **OIPTechCORE/Aiba-Arena2`
+    - Click **Connect Git Repository**
+    - Select **GitHub** → \*\*OIPTechCORE/Aiba-Arena2`
 4. **Production Branch:** Set to `main`
 5. **Root Directory:** Set to `admin-panel`
 6. **Auto-deploy:** Ensure it's **enabled**
@@ -54,28 +54,29 @@
 ### Verification
 
 1. **Make a test commit:**
-   ```bash
-   git commit --allow-empty -m "Test auto-deploy"
-   git push origin main
-   ```
+
+    ```bash
+    git commit --allow-empty -m "Test auto-deploy"
+    git push origin main
+    ```
 
 2. **Check Vercel Dashboard:**
-   - Each project should show a new deployment starting automatically
-   - Wait 1-2 minutes for build to complete
-   - Status should be **Ready** (green)
+    - Each project should show a new deployment starting automatically
+    - Wait 1-2 minutes for build to complete
+    - Status should be **Ready** (green)
 
 3. **Check deployment logs:**
-   - Click on the deployment → **Build Logs**
-   - Should show successful build
+    - Click on the deployment → **Build Logs**
+    - Should show successful build
 
 ### Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| **No auto-deploy** | Check Settings → Git → Production Branch = `main`, Auto-deploy = enabled |
-| **Wrong root directory** | Settings → General → Root Directory (should be `backend`, `miniapp`, or `admin-panel`) |
-| **Build fails** | Check Build Logs for errors (env vars, dependencies, build script) |
-| **Not connected to repo** | Settings → Git → Connect Git Repository → Select your repo |
+| Issue                     | Solution                                                                               |
+| ------------------------- | -------------------------------------------------------------------------------------- |
+| **No auto-deploy**        | Check Settings → Git → Production Branch = `main`, Auto-deploy = enabled               |
+| **Wrong root directory**  | Settings → General → Root Directory (should be `backend`, `miniapp`, or `admin-panel`) |
+| **Build fails**           | Check Build Logs for errors (env vars, dependencies, build script)                     |
+| **Not connected to repo** | Settings → Git → Connect Git Repository → Select your repo                             |
 
 ---
 
@@ -95,12 +96,14 @@
 #### 2.2 Get Project IDs
 
 **Method A: From Vercel Dashboard**
+
 1. Go to your **miniapp** project in Vercel
 2. **Settings** → **General**
 3. Scroll to **Project ID** → Copy it
 4. **Team ID** (if in a team) → Copy it
 
 **Method B: From Vercel CLI**
+
 ```bash
 cd miniapp
 npm install -g vercel
@@ -114,10 +117,10 @@ vercel link
 2. Click **New repository secret**
 3. Add these three secrets:
 
-| Secret Name | Value | Where to get |
-|-------------|-------|--------------|
-| `VERCEL_TOKEN` | Your Vercel token | From step 2.1 |
-| `VERCEL_ORG_ID` | Your team/org ID | Vercel Dashboard → Team Settings → Team ID (or use your user ID) |
+| Secret Name         | Value                   | Where to get                                                         |
+| ------------------- | ----------------------- | -------------------------------------------------------------------- |
+| `VERCEL_TOKEN`      | Your Vercel token       | From step 2.1                                                        |
+| `VERCEL_ORG_ID`     | Your team/org ID        | Vercel Dashboard → Team Settings → Team ID (or use your user ID)     |
 | `VERCEL_PROJECT_ID` | Your miniapp project ID | Vercel Dashboard → Miniapp project → Settings → General → Project ID |
 
 **Note:** If you're not in a team, `VERCEL_ORG_ID` can be your user ID (found in Vercel account settings).
@@ -126,47 +129,48 @@ vercel link
 
 1. Check `.github/workflows/vercel-deploy.yml` exists (it does)
 2. Push to `main`:
-   ```bash
-   git commit --allow-empty -m "Test GitHub Actions deploy"
-   git push origin main
-   ```
+
+    ```bash
+    git commit --allow-empty -m "Test GitHub Actions deploy"
+    git push origin main
+    ```
 
 3. Check GitHub Actions:
-   - Go to [github.com/OIPTechCORE/Aiba-Arena2/actions](https://github.com/OIPTechCORE/Aiba-Arena2/actions)
-   - Should see "Deploy to Vercel" workflow running
-   - Wait for completion (green checkmark)
+    - Go to [github.com/OIPTechCORE/Aiba-Arena2/actions](https://github.com/OIPTechCORE/Aiba-Arena2/actions)
+    - Should see "Deploy to Vercel" workflow running
+    - Wait for completion (green checkmark)
 
 ### Verification
 
 1. **Check GitHub Actions:**
-   - Actions tab → "Deploy to Vercel" → Should show ✅ success
+    - Actions tab → "Deploy to Vercel" → Should show ✅ success
 
 2. **Check Vercel Dashboard:**
-   - Miniapp project → Deployments → Should show new deployment
+    - Miniapp project → Deployments → Should show new deployment
 
 3. **Check deployment:**
-   - Open your miniapp URL → Should reflect latest changes
+    - Open your miniapp URL → Should reflect latest changes
 
 ### Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| **Workflow fails: "secrets not found"** | Add `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` in GitHub Secrets |
-| **Workflow fails: "authentication failed"** | Regenerate `VERCEL_TOKEN` and update secret |
-| **Workflow fails: "project not found"** | Check `VERCEL_PROJECT_ID` matches your miniapp project ID |
-| **Workflow runs but no deploy** | Check workflow logs for specific error |
+| Issue                                       | Solution                                                                   |
+| ------------------------------------------- | -------------------------------------------------------------------------- |
+| **Workflow fails: "secrets not found"**     | Add `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` in GitHub Secrets |
+| **Workflow fails: "authentication failed"** | Regenerate `VERCEL_TOKEN` and update secret                                |
+| **Workflow fails: "project not found"**     | Check `VERCEL_PROJECT_ID` matches your miniapp project ID                  |
+| **Workflow runs but no deploy**             | Check workflow logs for specific error                                     |
 
 ---
 
 ## Comparison: Which Option to Choose?
 
-| Aspect | Vercel Git Integration | GitHub Actions |
-|--------|------------------------|----------------|
-| **Setup complexity** | ⭐ Easy (just connect repo) | ⚠️ Medium (need secrets) |
-| **Projects covered** | ✅ All 3 (backend, miniapp, admin) | ⚠️ Only miniapp |
-| **Deployment speed** | ✅ Fast (direct) | ⚠️ Slower (via GitHub Actions) |
-| **Customization** | ⚠️ Limited | ✅ Full control |
-| **CI/CD integration** | ⚠️ Basic | ✅ Advanced |
+| Aspect                | Vercel Git Integration             | GitHub Actions                 |
+| --------------------- | ---------------------------------- | ------------------------------ |
+| **Setup complexity**  | ⭐ Easy (just connect repo)        | ⚠️ Medium (need secrets)       |
+| **Projects covered**  | ✅ All 3 (backend, miniapp, admin) | ⚠️ Only miniapp                |
+| **Deployment speed**  | ✅ Fast (direct)                   | ⚠️ Slower (via GitHub Actions) |
+| **Customization**     | ⚠️ Limited                         | ✅ Full control                |
+| **CI/CD integration** | ⚠️ Basic                           | ✅ Advanced                    |
 
 **Recommendation:** Use **Option 1 (Vercel Git Integration)** for simplicity and coverage of all projects. Use **Option 2 (GitHub Actions)** only if you need custom deployment logic or Vercel Git integration isn't working.
 

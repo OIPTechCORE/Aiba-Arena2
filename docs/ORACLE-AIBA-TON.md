@@ -17,14 +17,14 @@ Example: TON = $5, AIBA = $0.001 → **5,000 AIBA per TON**.
 
 ## Configuration
 
-| Config | Description | Default |
-|--------|-------------|---------|
-| `oracleAutoUpdateEnabled` | Enable cron-based auto-updates | `false` |
-| `oracleAibaUsd` | Price of 1 AIBA in USD (used in formula) | `0` |
-| `oracleMinAibaPerTon` | Clamp minimum rate (0 = no min) | `0` |
-| `oracleMaxAibaPerTon` | Clamp maximum rate (0 = no max) | `0` |
-| `oracleFallbackAibaPerTon` | Use when TON fetch fails | `0` |
-| `oracleUpdateIntervalMinutes` | Cron interval (min 5) | `15` |
+| Config                        | Description                              | Default |
+| ----------------------------- | ---------------------------------------- | ------- |
+| `oracleAutoUpdateEnabled`     | Enable cron-based auto-updates           | `false` |
+| `oracleAibaUsd`               | Price of 1 AIBA in USD (used in formula) | `0`     |
+| `oracleMinAibaPerTon`         | Clamp minimum rate (0 = no min)          | `0`     |
+| `oracleMaxAibaPerTon`         | Clamp maximum rate (0 = no max)          | `0`     |
+| `oracleFallbackAibaPerTon`    | Use when TON fetch fails                 | `0`     |
+| `oracleUpdateIntervalMinutes` | Cron interval (min 5)                    | `15`    |
 
 ### Env Overrides
 

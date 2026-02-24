@@ -63,7 +63,7 @@ Returns `{ ok: true, costAiba }`
 
 ## 2a) Guilds (Groups)
 
-*Route order:* `/list`, `/mine`, `/top` must be defined before `/:guildId` routes (otherwise `GET /list` matches `/:guildId` with guildId=`list`).
+_Route order:_ `/list`, `/mine`, `/top` must be defined before `/:guildId` routes (otherwise `GET /list` matches `/:guildId` with guildId=`list`).
 
 **GET** `/api/guilds/list` — Query: `limit`. All active guilds (sorted by boost count).  
 **GET** `/api/guilds/mine` — Auth. User's guilds.  
@@ -179,6 +179,7 @@ Returns `{ rental }`
 ## 4) Governance & DAO
 
 There are two governance systems:
+
 - **DAO** (`/api/dao`): Community proposals with staking requirement; used in DAO tab.
 - **Governance** (`/api/governance`): Realm/Mentor proposals (GovernanceProposal); used in Realms/Assets tab.
 
@@ -193,7 +194,7 @@ Returns single proposal with vote counts and myVote.
 
 **POST** `/api/dao/proposals`  
 Body: `{ title, description?, type?, recipientTelegramId?, payoutAiba?, payoutNeur? }`  
-Returns `{ proposal }`  
+Returns `{ proposal }`
 
 **Staking requirement:** User must have staked ≥ `daoProposalMinStakedAiba` (default 10,000 AIBA) for ≥ `daoProposalMinStakeDays` (default 30 days) to create proposals. Configure in Admin → Economy. If not met: 403 `staking_required`.
 
@@ -278,16 +279,16 @@ All transaction charges (TON) go to Super Admin wallets. Use any TON-supported w
 ## 5e) Staking
 
 **GET** `/api/staking/summary` — Auth. Returns `{ stakedAmount, apyPercent, lastClaimedAt, lockedAt, pendingReward }`  
-**GET** `/api/staking/periods` — Returns `{ periods: [{ days, apyPercent }], minAiba }` (configurable; default min 100 AIBA, 30/90/180/365 days). `minAiba` = minimum stake (flexible + locked); ecosystem-aligned: Admin → Economy.  
+**GET** `/api/staking/periods` — Returns `{ periods: [{ days, apyPercent }], minAiba }` (configurable; default min 1000 AIBA, 30/90/180/365 days). `minAiba` = minimum stake (flexible + locked); **Super Admin sets in Admin → Economy**.  
 **GET** `/api/staking/locks` — Auth. Returns user's period-based locks (StakingLock[])  
-**POST** `/api/staking/stake` — Body: `{ amount, requestId? }` (or `X-Request-Id` header). Flexible staking (no lock period). Min: `stakingMinAiba` (default 100 AIBA). If below min: 400 `min_stake_required`. `requestId` required for idempotency.  
+**POST** `/api/staking/stake` — Body: `{ amount, requestId? }` (or `X-Request-Id` header). Flexible staking (no lock period). Min: `stakingMinAiba` (default 1000 AIBA; Super Admin sets in Admin → Economy). If below min: 400 `min_stake_required`. `requestId` required for idempotency.  
 **POST** `/api/staking/unstake` — Body: `{ amount, requestId }`. Unstake flexible amount.  
-**POST** `/api/staking/stake-locked` — Body: `{ amount, periodDays, requestId }`. Lock AIBA for period; returns `{ lock, expectedRewardAiba }`. Min: `stakingMinAiba` (default 100 AIBA). If below min: 400 `min_stake_required`.  
+**POST** `/api/staking/stake-locked` — Body: `{ amount, periodDays, requestId }`. Lock AIBA for period; returns `{ lock, expectedRewardAiba }`. Min: `stakingMinAiba` (default 1000 AIBA; Super Admin sets in Admin → Economy). If below min: 400 `min_stake_required`.  
 **POST** `/api/staking/cancel-early` — Body: `{ lockId, requestId }`. Cancel lock before period ends; fee (default 5% = 500 bps) → Treasury (CANCELLED_STAKES_WALLET). Returns `{ returnedAiba, feeAiba }`.  
 **POST** `/api/staking/claim-lock` — Body: `{ lockId, requestId }`. When lock matured, claim principal + rewards.  
 **POST** `/api/staking/claim` — Body: `{ requestId }`. Claim flexible-staking pending rewards.
 
-Config: `stakingApyPercent`, `stakingMinAiba`, `stakingPeriods`, `stakingCancelEarlyFeeBps` (Admin → Economy; PATCH `/api/admin/economy/config`). `stakingMinAiba` = min AIBA to stake (flexible + locked; default 100, ecosystem-aligned: 1T AIBA, broker mint cost). Min displayed in Yield Vault hero, locked/flexible staking, and Wallet tab staking flow. See [SUPER-ADMIN-WALLETS.md](SUPER-ADMIN-WALLETS.md) for CANCELLED_STAKES_WALLET.
+Config: `stakingApyPercent`, `stakingMinAiba`, `stakingPeriods`, `stakingCancelEarlyFeeBps` (Admin → Economy; PATCH `/api/admin/economy/config`). `stakingMinAiba` = min AIBA to stake (flexible + locked; **default 1000**; **Super Admin sets in Admin → Economy**). Min displayed in Yield Vault hero, locked/flexible staking, and Wallet tab staking flow. See [SUPER-ADMIN-WALLETS.md](SUPER-ADMIN-WALLETS.md) for CANCELLED_STAKES_WALLET.
 
 ---
 
@@ -331,6 +332,7 @@ Tx charge (TON) → Super Admin wallet per type. **See [SUPER-ADMIN-WALLETS.md](
 ## 5h) Charity, Daily, Premium, Broker Rental, Tasks
 
 ### Charity
+
 **GET** `/api/charity/campaigns` — Query: `featured`, `cause`, `status`, `limit`. Active/ended campaigns.  
 **GET** `/api/charity/campaigns/:id` — Single campaign + recent donations.  
 **GET** `/api/charity/stats` — Aggregate stats.  
@@ -339,24 +341,29 @@ Tx charge (TON) → Super Admin wallet per type. **See [SUPER-ADMIN-WALLETS.md](
 **POST** `/api/charity/donate` — Auth. Body: `{ campaignId, amountNeur?, amountAiba?, message?, anonymous? }`.
 
 ### Daily
+
 **GET** `/api/daily/status` — Auth. Daily reward and combo eligibility.  
 **POST** `/api/daily/claim` — Auth. Claim daily NEUR.  
 **POST** `/api/daily/combo-claim` — Auth. Claim combo bonus (dailyComboRequirementAiba + dailyComboBonusAiba).
 
 ### Premium
+
 **GET** `/api/premium/status` — Auth. Premium status (active, premiumUntil).  
 **POST** `/api/premium/buy` — Body: `{ txHash }` — Pay TON → BOOST_PROFILE_WALLET; activate premium.
 
 ### Broker Rental
+
 **GET** `/api/broker-rental` — List available rentals (status=listed).  
 **POST** `/api/broker-rental/list` — Auth. Body: `{ brokerId, priceAibaPerHour }`. List broker for rent.  
 **POST** `/api/broker-rental/:id/rent` — Auth. Rent broker (pay AIBA, 1 hour; fee → treasury).  
 **POST** `/api/broker-rental/:id/unlist` — Auth. Unlist your broker.
 
 ### Tasks
+
 **GET** `/api/tasks` — Auth. Personalized task feed + profile.
 
 ### Tours, Global Boss, Stars Store
+
 **GET** `/api/tournaments` — Query: `status`. List tournaments.  
 **GET** `/api/tournaments/:id` — Single tournament.  
 **POST** `/api/tournaments/:id/enter` — Auth. Body: `{ brokerId }`. Enter tournament.  

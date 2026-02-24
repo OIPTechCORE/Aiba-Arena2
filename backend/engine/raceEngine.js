@@ -14,7 +14,10 @@ function clamp01(x) {
  * @returns {Array<{ entryId: string, position: number, finishTime: number, points: number }>} ordered by position 1, 2, 3...
  */
 function simulateRace({ vehicles, trackLength = 1, trackDifficulty = 50, seed = '' }) {
-    const seedHex = typeof seed === 'string' && /^[0-9a-fA-F]+$/.test(seed) ? seed : require('crypto').createHash('sha256').update(String(seed)).digest('hex');
+    const seedHex =
+        typeof seed === 'string' && /^[0-9a-fA-F]+$/.test(seed)
+            ? seed
+            : require('crypto').createHash('sha256').update(String(seed)).digest('hex');
     const seedNum = seedFromHex(seedHex);
     const rand = mulberry32(seedNum);
 
@@ -36,7 +39,10 @@ function simulateRace({ vehicles, trackLength = 1, trackDifficulty = 50, seed = 
         const levelBonus = 1 + (level - 1) * 0.01; // +1% per level, cap implicit
 
         const base =
-            (speedWeight * topSpeed + accelWeight * acceleration + handlingWeight * handling + durabilityWeight * durability) *
+            (speedWeight * topSpeed +
+                accelWeight * acceleration +
+                handlingWeight * handling +
+                durabilityWeight * durability) *
             levelBonus *
             length;
 

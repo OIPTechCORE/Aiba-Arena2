@@ -1,106 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>VISION 3D ARENAS STATUS — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>VISION 3D ARENAS STATUS</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>AIBA Arena — 3D Arenas: Vision vs Current Status</h1>
-<p><strong>Last updated:</strong> 2025 <strong>Scope:</strong> Clarification of &quot;3D super power futuristic arenas&quot; — what exists, what doesn't, and how to see them.</p>
-<hr/>
-<h2>1. Direct Answer</h2>
-<h3>Do we already have 3D super power futuristic arenas?</h3>
-<p><strong>Yes (CSS visuals).</strong> The app has <strong>arena modes as game logic</strong> (prediction, simulation, strategyWars, arbitrage, guildWars) and <strong>futuristic arena visuals</strong> (CSS gradient/glow, labeled &quot;3D Super Power Arena&quot;).</p>
-<h3>Can I see them?</h3>
-<p><strong>Yes.</strong> You can see them in:</p>
-<ol>
-<li><strong>Arenas tab</strong> — Main arena visual with &quot;3D Super Power Arena&quot; label</li>
-<li><strong>Brokers tab</strong> — Victory and &quot;Battle Complete&quot; visuals after a battle</li>
-</ol>
-<p>These are <strong>CSS-based</strong> (gradients, glow, grid patterns) — not WebGL/Three.js. Battles are still server-simulated + text result. The visuals provide a futuristic &quot;super power&quot; aesthetic.</p>
-<hr/>
-<h2>2. What Exists Today</h2>
-<table>
-<thead><tr>
-<th>Component</th>
-<th>Status</th>
-<th>Location</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Arena modes (prediction, simulation, etc.)</td>
-<td>✅ Implemented</td>
-<td><code>backend/engine/battleEngine.js</code>, miniapp arena select</td>
-</tr>
-<tr>
-<td>Battle simulation (deterministic formula)</td>
-<td>✅ Implemented</td>
-<td><code>simulateBattle()</code></td>
-</tr>
-<tr>
-<td>Victory card (score + rewards)</td>
-<td>✅ Implemented</td>
-<td><code>page.js</code> victory-card</td>
-</tr>
-<tr>
-<td>Futuristic arena visuals (CSS gradient/glow)</td>
-<td>✅ Implemented</td>
-<td><code>miniapp/globals.css</code> <code>.arena-visual</code>, <code>page.js</code> Home + Arenas + Brokers</td>
-</tr>
-<tr>
-<td>Home hero &quot;3D Super Power Futuristic Arenas&quot;</td>
-<td>✅ Implemented</td>
-<td><code>page.js</code> Home tab (tappable → Arenas)</td>
-</tr>
-<tr>
-<td>3D/WebGL/Three.js arena visualization</td>
-<td>❌ Not implemented</td>
-<td>—</td>
-</tr>
-<tr>
-<td>Real-time battle animation</td>
-<td>❌ Not implemented</td>
-<td>—</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>3. Roadmap: Adding 3D Arenas</h2>
-<p>To deliver &quot;3D super power futuristic arenas&quot; you can:</p>
-<ol>
-<li>- Add a static or animated 2D/Canvas hero image per arena (prediction, simulation, etc.) in the Arenas tab.</li>
-<li>- File: <code>miniapp/public/arenas/</code> — SVG or PNG per arena.</li>
-</ol>
-<ol>
-<li>- CSS animations, particle effects, or Lottie on battle result.</li>
-<li>- Gives &quot;futuristic&quot; feel without full 3D.</li>
-</ol>
-<ol>
-<li>- Integrate Three.js or React Three Fiber.</li>
-<li>- Render a simple 3D arena (platform, lights, broker as shape).</li>
-<li>- Run on battle start; animate briefly on result.</li>
-</ol>
-<ol>
-<li>- Dedicated arena scenes per mode.</li>
-<li>- Broker avatars, environment, visual score reveal.</li>
-</ol>
-<hr/>
-<h2>4. Where the Copy Lives</h2>
-<ul>
-<li>These are <strong>marketing/positioning</strong> statements. The product does not yet render 3D.</li>
-</ul>
-<hr/>
-<h2>5. Recommendation</h2>
-<ul>
-<li><strong>Medium term:</strong> Add Phase B or C for a &quot;see it&quot; experience.</li>
-<li><strong>Long term:</strong> Full 3D (Phase D) if the roadmap prioritizes it.</li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>VISION 3D ARENAS STATUS — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>VISION 3D ARENAS STATUS</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>AIBA Arena — 3D Arenas: Vision vs Current Status</h1>
+            <p>
+                <strong>Last updated:</strong> 2025 <strong>Scope:</strong> Clarification of &quot;3D super power
+                futuristic arenas&quot; — what exists, what doesn't, and how to see them.
+            </p>
+            <hr />
+            <h2>1. Direct Answer</h2>
+            <h3>Do we already have 3D super power futuristic arenas?</h3>
+            <p>
+                <strong>Yes (CSS visuals).</strong> The app has <strong>arena modes as game logic</strong> (prediction,
+                simulation, strategyWars, arbitrage, guildWars) and <strong>futuristic arena visuals</strong> (CSS
+                gradient/glow, labeled &quot;3D Super Power Arena&quot;).
+            </p>
+            <h3>Can I see them?</h3>
+            <p><strong>Yes.</strong> You can see them in:</p>
+            <ol>
+                <li><strong>Arenas tab</strong> — Main arena visual with &quot;3D Super Power Arena&quot; label</li>
+                <li><strong>Brokers tab</strong> — Victory and &quot;Battle Complete&quot; visuals after a battle</li>
+            </ol>
+            <p>
+                These are <strong>CSS-based</strong> (gradients, glow, grid patterns) — not WebGL/Three.js. Battles are
+                still server-simulated + text result. The visuals provide a futuristic &quot;super power&quot;
+                aesthetic.
+            </p>
+            <hr />
+            <h2>2. What Exists Today</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Arena modes (prediction, simulation, etc.)</td>
+                        <td>✅ Implemented</td>
+                        <td><code>backend/engine/battleEngine.js</code>, miniapp arena select</td>
+                    </tr>
+                    <tr>
+                        <td>Battle simulation (deterministic formula)</td>
+                        <td>✅ Implemented</td>
+                        <td><code>simulateBattle()</code></td>
+                    </tr>
+                    <tr>
+                        <td>Victory card (score + rewards)</td>
+                        <td>✅ Implemented</td>
+                        <td><code>page.js</code> victory-card</td>
+                    </tr>
+                    <tr>
+                        <td>Futuristic arena visuals (CSS gradient/glow)</td>
+                        <td>✅ Implemented</td>
+                        <td>
+                            <code>miniapp/globals.css</code> <code>.arena-visual</code>, <code>page.js</code> Home +
+                            Arenas + Brokers
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Home hero &quot;3D Super Power Futuristic Arenas&quot;</td>
+                        <td>✅ Implemented</td>
+                        <td><code>page.js</code> Home tab (tappable → Arenas)</td>
+                    </tr>
+                    <tr>
+                        <td>3D/WebGL/Three.js arena visualization</td>
+                        <td>❌ Not implemented</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Real-time battle animation</td>
+                        <td>❌ Not implemented</td>
+                        <td>—</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>3. Roadmap: Adding 3D Arenas</h2>
+            <p>To deliver &quot;3D super power futuristic arenas&quot; you can:</p>
+            <ol>
+                <li>
+                    - Add a static or animated 2D/Canvas hero image per arena (prediction, simulation, etc.) in the
+                    Arenas tab.
+                </li>
+                <li>- File: <code>miniapp/public/arenas/</code> — SVG or PNG per arena.</li>
+            </ol>
+            <ol>
+                <li>- CSS animations, particle effects, or Lottie on battle result.</li>
+                <li>- Gives &quot;futuristic&quot; feel without full 3D.</li>
+            </ol>
+            <ol>
+                <li>- Integrate Three.js or React Three Fiber.</li>
+                <li>- Render a simple 3D arena (platform, lights, broker as shape).</li>
+                <li>- Run on battle start; animate briefly on result.</li>
+            </ol>
+            <ol>
+                <li>- Dedicated arena scenes per mode.</li>
+                <li>- Broker avatars, environment, visual score reveal.</li>
+            </ol>
+            <hr />
+            <h2>4. Where the Copy Lives</h2>
+            <ul>
+                <li>
+                    These are <strong>marketing/positioning</strong> statements. The product does not yet render 3D.
+                </li>
+            </ul>
+            <hr />
+            <h2>5. Recommendation</h2>
+            <ul>
+                <li><strong>Medium term:</strong> Add Phase B or C for a &quot;see it&quot; experience.</li>
+                <li><strong>Long term:</strong> Full 3D (Phase D) if the roadmap prioritizes it.</li>
+            </ul>
+        </div>
+    </body>
 </html>

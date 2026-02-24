@@ -1,392 +1,500 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>CAR RACING DEEP EXPLANATION — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>CAR RACING DEEP EXPLANATION</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Car Racing — Deep Explanation &amp; Readiness Audit</h1>
-<p>A full technical and product explanation of <strong>Car Racing</strong> in AIBA Arena: create or buy a car, enter open races, earn AIBA by finish position. Inspired by Formula 1, Le Mans, Can-Am, IndyCar, Group B, GT1, Electric, Drag, Touring/DTM, Hillclimb, NASCAR, Historic, Hypercar, Extreme prototypes.</p>
-<hr/>
-<h2>1. Spec vs implementation (practically ready?)</h2>
-<table>
-<thead><tr>
-<th>Requirement</th>
-<th>Status</th>
-<th>Notes</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Create or buy a car</strong></td>
-<td>✅</td>
-<td>Create with AIBA or TON; buy from system shop (4 cars) or player marketplace (list/buy).</td>
-</tr>
-<tr>
-<td><strong>Enter open races</strong></td>
-<td>✅</td>
-<td>Open races per track (seeded on startup); replenished when a race completes. Entry fee in AIBA.</td>
-</tr>
-<tr>
-<td><strong>Earn AIBA by finish position</strong></td>
-<td>✅</td>
-<td>Race runs when ≥2 entries; deterministic simulation; reward pool (entry fees) distributed by position; AIBA credited.</td>
-</tr>
-<tr>
-<td><strong>Inspired by (classes)</strong></td>
-<td>✅</td>
-<td>14 car classes with labels in model and config; system shop offers Touring, GT1, Formula 1, Le Mans.</td>
-</tr>
-</tbody></table>
-<p><strong>Verdict: Practically ready.</strong> All core flows are implemented. One critical bug was fixed during this audit: reward distribution now stays within the pool (see §5).</p>
-<hr/>
-<h2>2. Models</h2>
-<h3>2.1 RacingCar (<code>backend/models/RacingCar.js</code>)</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Type</th>
-<th>Default</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>ownerTelegramId</strong></td>
-<td>String</td>
-<td>required</td>
-<td>Owner’s Telegram user ID.</td>
-</tr>
-<tr>
-<td><strong>carClass</strong></td>
-<td>String</td>
-<td>'formula1'</td>
-<td>One of 14 classes (formula1, lemans, canam, indycar, groupB, gt1, electric, drag, touring, hillclimb, nascar, historic, hypercar, extreme).</td>
-</tr>
-<tr>
-<td><strong>topSpeed</strong>, <strong>acceleration</strong>, <strong>handling</strong>, <strong>durability</strong></td>
-<td>Number</td>
-<td>50</td>
-<td>Stats 0–100; used in race simulation.</td>
-</tr>
-<tr>
-<td><strong>level</strong></td>
-<td>Number</td>
-<td>1</td>
-<td>Level bonus in simulation (+1% per level).</td>
-</tr>
-<tr>
-<td><strong>xp</strong>, <strong>energy</strong>, <strong>energyUpdatedAt</strong>, <strong>cooldowns</strong>, <strong>lastRaceAt</strong></td>
-<td>—</td>
-<td>—</td>
-<td>Reserved for future use.</td>
-</tr>
-<tr>
-<td><strong>nftItemAddress</strong>, <strong>createdWithTonTxHash</strong></td>
-<td>String</td>
-<td>''</td>
-<td>Optional on-chain / TON creation.</td>
-</tr>
-</tbody></table>
-<h3>2.2 CarTrack (<code>backend/models/CarTrack.js</code>)</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>trackId</strong></td>
-<td>Unique id (e.g. circuit-rookie, circuit-pro, circuit-elite).</td>
-</tr>
-<tr>
-<td><strong>name</strong>, <strong>length</strong>, <strong>difficulty</strong></td>
-<td>Used by race engine (trackLength, trackDifficulty).</td>
-</tr>
-<tr>
-<td><strong>league</strong></td>
-<td>rookie</td>
-<td>pro</td>
-<td>elite.</td>
-</tr>
-<tr>
-<td><strong>active</strong></td>
-<td>If true, track appears in GET /tracks.</td>
-</tr>
-</tbody></table>
-<p>Seeded in <code>backend/jobs/seedRacingTracks.js</code>: 3 default car tracks (rookie, pro, elite).</p>
-<h3>2.3 CarRace (<code>backend/models/CarRace.js</code>)</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>trackId</strong></td>
-<td>required</td>
-<td>Which track.</td>
-</tr>
-<tr>
-<td><strong>league</strong></td>
-<td>'rookie'</td>
-<td>rookie / pro / elite.</td>
-</tr>
-<tr>
-<td><strong>status</strong></td>
-<td>'open'</td>
-<td>open → running → completed.</td>
-</tr>
-<tr>
-<td><strong>entryFeeAiba</strong></td>
-<td>0</td>
-<td>Fee per entry (config: carEntryFeeAiba, e.g. 10).</td>
-</tr>
-<tr>
-<td><strong>rewardPool</strong></td>
-<td>0</td>
-<td>Sum of entry fees; distributed after race.</td>
-</tr>
-<tr>
-<td><strong>maxEntries</strong></td>
-<td>16</td>
-<td>Cap entries; race can still run with 2+ (see below).</td>
-</tr>
-<tr>
-<td><strong>seed</strong></td>
-<td>''</td>
-<td>Set when race runs; used for deterministic simulation.</td>
-</tr>
-<tr>
-<td><strong>startedAt</strong>, <strong>completedAt</strong></td>
-<td>Date</td>
-<td>Set when status changes.</td>
-</tr>
-</tbody></table>
-<h3>2.4 CarRaceEntry (<code>backend/models/CarRaceEntry.js</code>)</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>raceId</strong>, <strong>carId</strong></td>
-<td>References to CarRace and RacingCar.</td>
-</tr>
-<tr>
-<td><strong>telegramId</strong></td>
-<td>Entrant; used to credit AIBA and enforce one entry per user per race.</td>
-</tr>
-<tr>
-<td><strong>position</strong>, <strong>finishTime</strong>, <strong>points</strong>, <strong>aibaReward</strong></td>
-<td>Set when race completes.</td>
-</tr>
-</tbody></table>
-<p>Unique index: (telegramId, raceId) — one entry per user per race.</p>
-<h3>2.5 CarListing (<code>backend/models/CarListing.js</code>)</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>carId</strong>, <strong>sellerTelegramId</strong>, <strong>priceAIBA</strong></td>
-<td>Listing details.</td>
-</tr>
-<tr>
-<td><strong>status</strong></td>
-<td>'active' \</td>
-<td>'sold' \</td>
-<td>'cancelled'.</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>3. API (backend routes)</h2>
-<p>Mounted at <code>/api/car-racing</code> in <code>backend/app.js</code>.</p>
-<table>
-<thead><tr>
-<th>Method</th>
-<th>Path</th>
-<th>Auth</th>
-<th>Purpose</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>GET</td>
-<td>/config</td>
-<td>—</td>
-<td>createCarCostAiba, createCarCostTonNano, entryFeeAiba, walletForTon, carClasses.</td>
-</tr>
-<tr>
-<td>GET</td>
-<td>/tracks</td>
-<td>—</td>
-<td>Active tracks (optional ?league=).</td>
-</tr>
-<tr>
-<td>GET</td>
-<td>/races</td>
-<td>—</td>
-<td>Open races with entryCount.</td>
-</tr>
-<tr>
-<td>GET</td>
-<td>/cars</td>
-<td>Telegram</td>
-<td>Current user’s cars.</td>
-</tr>
-<tr>
-<td>GET</td>
-<td>/system-cars</td>
-<td>—</td>
-<td>System shop catalog (SYSTEM_CARS) with class labels.</td>
-</tr>
-<tr>
-<td>GET</td>
-<td>/listings</td>
-<td>Telegram</td>
-<td>Active car listings (for market buy).</td>
-</tr>
-<tr>
-<td>GET</td>
-<td>/leaderboard</td>
-<td>—</td>
-<td>Top by total points, wins, aibaEarned.</td>
-</tr>
-<tr>
-<td>GET</td>
-<td>/race/:id</td>
-<td>—</td>
-<td>Single race + entries (for result view).</td>
-</tr>
-<tr>
-<td>GET</td>
-<td>/classes</td>
-<td>—</td>
-<td>Car class id + label list.</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/create</td>
-<td>Telegram</td>
-<td>Create car with AIBA (idempotent via requestId).</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/create-with-ton</td>
-<td>Telegram</td>
-<td>Create car with TON (txHash verified, one-time).</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/buy-system-car</td>
-<td>Telegram</td>
-<td>Buy from system shop (debit AIBA, create RacingCar).</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/list</td>
-<td>Telegram</td>
-<td>List own car for sale (priceAIBA).</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/buy-car</td>
-<td>Telegram</td>
-<td>Buy from listing (debit buyer, credit seller minus fee, transfer car).</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/enter</td>
-<td>Telegram</td>
-<td>Enter race (raceId, carId); debit entry fee; add to rewardPool; create entry; if ≥2 entries, run race.</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>4. Race flow (run when 2+ entries)</h2>
-<ol>
-<li><strong>Run:</strong> Load race (must be open), entries (with carId populated). Build vehicles from car stats + level. Call <code>simulateRace({ vehicles, trackLength, trackDifficulty, seed })</code> from <code>backend/engine/raceEngine.js</code>. Results are ordered by position (1, 2, 3, …).</li>
-<li><strong>Rewards:</strong> Pool = race.rewardPool; fee = pool × carRacingFeeBps/10000; toDistribute = pool − fee. Position weights (positionBonus) = [1.5, 1.2, 1.0, 0.9, …]. <strong>Normalized:</strong> each position gets <code>floor((toDistribute * bonus_i) / sumBonuses)</code> so total payout ≤ toDistribute.</li>
-<li><strong>Credit:</strong> For each entry, set position, finishTime, points, aibaReward; credit AIBA to entry.telegramId (and optional creator referrer).</li>
-<li><strong>Complete:</strong> Race status → completed; new open race created for same track (replenish).</li>
-</ol>
-<hr/>
-<h2>5. Reward distribution (bug fix in audit)</h2>
-<p><strong>Before:</strong> <code>positionShare = toDistribute / totalPositions</code>, then <code>aibaReward = floor(positionShare <em> bonus)</code>. Sum of (positionShare </em> bonus) could exceed toDistribute (e.g. 2 players: 1.5 + 1.2 = 2.7× share), so the game could credit more AIBA than the pool.</p>
-<p><strong>After:</strong> <code>sumBonuses = sum of positionBonus[i] for i in 0..n-1</code>; then <code>aibaReward = floor((toDistribute * bonus) / sumBonuses)</code>. Payouts sum to ≤ toDistribute (with possible dust from flooring).</p>
-<hr/>
-<h2>6. System shop cars</h2>
-<p>In <code>backend/config/systemShop.js</code>, <strong>SYSTEM_CARS</strong>:</p>
-<table>
-<thead><tr>
-<th>id</th>
-<th>name</th>
-<th>carClass</th>
-<th>priceAiba</th>
-<th>Stats (SPD/ACC/HND/DUR)</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>touring</td>
-<td>Touring Pro</td>
-<td>touring</td>
-<td>80</td>
-<td>55/52/58/55</td>
-</tr>
-<tr>
-<td>gt1</td>
-<td>GT1 Racer</td>
-<td>gt1</td>
-<td>150</td>
-<td>62/58/60/55</td>
-</tr>
-<tr>
-<td>formula1</td>
-<td>Formula 1</td>
-<td>formula1</td>
-<td>300</td>
-<td>70/68/72/50</td>
-</tr>
-<tr>
-<td>lemans</td>
-<td>Le Mans Hypercar</td>
-<td>lemans</td>
-<td>400</td>
-<td>72/70/70/58</td>
-</tr>
-</tbody></table>
-<p>Create-with-AIBA gives a <strong>random</strong> car class; buy-from-system gives a chosen catalog car with fixed class and stats.</p>
-<hr/>
-<h2>7. Miniapp (Car Racing tab)</h2>
-<ul>
-<li><strong>Flow switches:</strong> Garage | System | Market | Race | Leaderboard.</li>
-<li><strong>Garage:</strong> Create car (AIBA or TON tx hash), list “My cars” with class label and stats.</li>
-<li><strong>System:</strong> Buy from SYSTEM_CARS (name, class, stats, price, Buy).</li>
-<li><strong>Market:</strong> List your car (select + price) → List; buy from listings (Buy) → refresh + refreshEconomy.</li>
-<li><strong>Race:</strong> Select open race (trackId, league, entry count, fee), select car, “Enter race” → entry fee debit, enter, then race runs if ≥2; refreshCarRacing + refreshEconomy.</li>
-<li><strong>Leaderboard:</strong> Top by totalPoints, wins, aibaEarned.</li>
-</ul>
-<p>Config drives: create costs (AIBA/TON), entry fee, carClasses for labels. UI copy updated to: “When 2+ have entered, the race runs and rewards are paid by finish position.”</p>
-<hr/>
-<h2>8. Seed and replenish</h2>
-<ul>
-<li><strong>Replenish:</strong> When a car race completes, <code>runCarRaceIfFull</code> creates a new open race for the same track (same league, entryFeeAiba, maxEntries, rewardPool 0). So open races stay available without a cron.</li>
-</ul>
-<hr/>
-<h2>9. Optional improvements (not blocking)</h2>
-<ul>
-<li><strong>Track names in race dropdown:</strong> Currently shows trackId (e.g. circuit-rookie); could resolve to track name from /tracks for friendlier labels.</li>
-</ul>
-<hr/>
-<p><strong>Conclusion:</strong> Car Racing is <strong>in place and practically ready</strong>. Create/buy car, enter open races, and earn AIBA by finish position are implemented end-to-end; reward math is corrected; UI copy matches behavior (2+ entries); open races are replenished; all 14 “inspired by” classes are present in the model and config.</p>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>CAR RACING DEEP EXPLANATION — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>CAR RACING DEEP EXPLANATION</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Car Racing — Deep Explanation &amp; Readiness Audit</h1>
+            <p>
+                A full technical and product explanation of <strong>Car Racing</strong> in AIBA Arena: create or buy a
+                car, enter open races, earn AIBA by finish position. Inspired by Formula 1, Le Mans, Can-Am, IndyCar,
+                Group B, GT1, Electric, Drag, Touring/DTM, Hillclimb, NASCAR, Historic, Hypercar, Extreme prototypes.
+            </p>
+            <hr />
+            <h2>1. Spec vs implementation (practically ready?)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Requirement</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Create or buy a car</strong></td>
+                        <td>✅</td>
+                        <td>
+                            Create with AIBA or TON; buy from system shop (4 cars) or player marketplace (list/buy).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Enter open races</strong></td>
+                        <td>✅</td>
+                        <td>
+                            Open races per track (seeded on startup); replenished when a race completes. Entry fee in
+                            AIBA.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Earn AIBA by finish position</strong></td>
+                        <td>✅</td>
+                        <td>
+                            Race runs when ≥2 entries; deterministic simulation; reward pool (entry fees) distributed by
+                            position; AIBA credited.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Inspired by (classes)</strong></td>
+                        <td>✅</td>
+                        <td>
+                            14 car classes with labels in model and config; system shop offers Touring, GT1, Formula 1,
+                            Le Mans.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Verdict: Practically ready.</strong> All core flows are implemented. One critical bug was fixed
+                during this audit: reward distribution now stays within the pool (see §5).
+            </p>
+            <hr />
+            <h2>2. Models</h2>
+            <h3>2.1 RacingCar (<code>backend/models/RacingCar.js</code>)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Default</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>ownerTelegramId</strong></td>
+                        <td>String</td>
+                        <td>required</td>
+                        <td>Owner’s Telegram user ID.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>carClass</strong></td>
+                        <td>String</td>
+                        <td>'formula1'</td>
+                        <td>
+                            One of 14 classes (formula1, lemans, canam, indycar, groupB, gt1, electric, drag, touring,
+                            hillclimb, nascar, historic, hypercar, extreme).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>topSpeed</strong>, <strong>acceleration</strong>, <strong>handling</strong>,
+                            <strong>durability</strong>
+                        </td>
+                        <td>Number</td>
+                        <td>50</td>
+                        <td>Stats 0–100; used in race simulation.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>level</strong></td>
+                        <td>Number</td>
+                        <td>1</td>
+                        <td>Level bonus in simulation (+1% per level).</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>xp</strong>, <strong>energy</strong>, <strong>energyUpdatedAt</strong>,
+                            <strong>cooldowns</strong>, <strong>lastRaceAt</strong>
+                        </td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>Reserved for future use.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>nftItemAddress</strong>, <strong>createdWithTonTxHash</strong></td>
+                        <td>String</td>
+                        <td>''</td>
+                        <td>Optional on-chain / TON creation.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.2 CarTrack (<code>backend/models/CarTrack.js</code>)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>trackId</strong></td>
+                        <td>Unique id (e.g. circuit-rookie, circuit-pro, circuit-elite).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>name</strong>, <strong>length</strong>, <strong>difficulty</strong></td>
+                        <td>Used by race engine (trackLength, trackDifficulty).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>league</strong></td>
+                        <td>rookie</td>
+                        <td>pro</td>
+                        <td>elite.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>active</strong></td>
+                        <td>If true, track appears in GET /tracks.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Seeded in <code>backend/jobs/seedRacingTracks.js</code>: 3 default car tracks (rookie, pro, elite).</p>
+            <h3>2.3 CarRace (<code>backend/models/CarRace.js</code>)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>trackId</strong></td>
+                        <td>required</td>
+                        <td>Which track.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>league</strong></td>
+                        <td>'rookie'</td>
+                        <td>rookie / pro / elite.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>status</strong></td>
+                        <td>'open'</td>
+                        <td>open → running → completed.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>entryFeeAiba</strong></td>
+                        <td>0</td>
+                        <td>Fee per entry (config: carEntryFeeAiba, e.g. 10).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>rewardPool</strong></td>
+                        <td>0</td>
+                        <td>Sum of entry fees; distributed after race.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>maxEntries</strong></td>
+                        <td>16</td>
+                        <td>Cap entries; race can still run with 2+ (see below).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>seed</strong></td>
+                        <td>''</td>
+                        <td>Set when race runs; used for deterministic simulation.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>startedAt</strong>, <strong>completedAt</strong></td>
+                        <td>Date</td>
+                        <td>Set when status changes.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.4 CarRaceEntry (<code>backend/models/CarRaceEntry.js</code>)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>raceId</strong>, <strong>carId</strong></td>
+                        <td>References to CarRace and RacingCar.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>telegramId</strong></td>
+                        <td>Entrant; used to credit AIBA and enforce one entry per user per race.</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>position</strong>, <strong>finishTime</strong>, <strong>points</strong>,
+                            <strong>aibaReward</strong>
+                        </td>
+                        <td>Set when race completes.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Unique index: (telegramId, raceId) — one entry per user per race.</p>
+            <h3>2.5 CarListing (<code>backend/models/CarListing.js</code>)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>carId</strong>, <strong>sellerTelegramId</strong>, <strong>priceAIBA</strong></td>
+                        <td>Listing details.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>status</strong></td>
+                        <td>'active' \</td>
+                        <td>'sold' \</td>
+                        <td>'cancelled'.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>3. API (backend routes)</h2>
+            <p>Mounted at <code>/api/car-racing</code> in <code>backend/app.js</code>.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Path</th>
+                        <th>Auth</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GET</td>
+                        <td>/config</td>
+                        <td>—</td>
+                        <td>createCarCostAiba, createCarCostTonNano, entryFeeAiba, walletForTon, carClasses.</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/tracks</td>
+                        <td>—</td>
+                        <td>Active tracks (optional ?league=).</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/races</td>
+                        <td>—</td>
+                        <td>Open races with entryCount.</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/cars</td>
+                        <td>Telegram</td>
+                        <td>Current user’s cars.</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/system-cars</td>
+                        <td>—</td>
+                        <td>System shop catalog (SYSTEM_CARS) with class labels.</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/listings</td>
+                        <td>Telegram</td>
+                        <td>Active car listings (for market buy).</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/leaderboard</td>
+                        <td>—</td>
+                        <td>Top by total points, wins, aibaEarned.</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/race/:id</td>
+                        <td>—</td>
+                        <td>Single race + entries (for result view).</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/classes</td>
+                        <td>—</td>
+                        <td>Car class id + label list.</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/create</td>
+                        <td>Telegram</td>
+                        <td>Create car with AIBA (idempotent via requestId).</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/create-with-ton</td>
+                        <td>Telegram</td>
+                        <td>Create car with TON (txHash verified, one-time).</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/buy-system-car</td>
+                        <td>Telegram</td>
+                        <td>Buy from system shop (debit AIBA, create RacingCar).</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/list</td>
+                        <td>Telegram</td>
+                        <td>List own car for sale (priceAIBA).</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/buy-car</td>
+                        <td>Telegram</td>
+                        <td>Buy from listing (debit buyer, credit seller minus fee, transfer car).</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/enter</td>
+                        <td>Telegram</td>
+                        <td>
+                            Enter race (raceId, carId); debit entry fee; add to rewardPool; create entry; if ≥2 entries,
+                            run race.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>4. Race flow (run when 2+ entries)</h2>
+            <ol>
+                <li>
+                    <strong>Run:</strong> Load race (must be open), entries (with carId populated). Build vehicles from
+                    car stats + level. Call
+                    <code>simulateRace({ vehicles, trackLength, trackDifficulty, seed })</code> from
+                    <code>backend/engine/raceEngine.js</code>. Results are ordered by position (1, 2, 3, …).
+                </li>
+                <li>
+                    <strong>Rewards:</strong> Pool = race.rewardPool; fee = pool × carRacingFeeBps/10000; toDistribute =
+                    pool − fee. Position weights (positionBonus) = [1.5, 1.2, 1.0, 0.9, …].
+                    <strong>Normalized:</strong> each position gets
+                    <code>floor((toDistribute * bonus_i) / sumBonuses)</code> so total payout ≤ toDistribute.
+                </li>
+                <li>
+                    <strong>Credit:</strong> For each entry, set position, finishTime, points, aibaReward; credit AIBA
+                    to entry.telegramId (and optional creator referrer).
+                </li>
+                <li>
+                    <strong>Complete:</strong> Race status → completed; new open race created for same track
+                    (replenish).
+                </li>
+            </ol>
+            <hr />
+            <h2>5. Reward distribution (bug fix in audit)</h2>
+            <p>
+                <strong>Before:</strong> <code>positionShare = toDistribute / totalPositions</code>, then
+                <code>aibaReward = floor(positionShare * bonus)</code>. Sum of (positionShare * bonus) could exceed
+                toDistribute (e.g. 2 players: 1.5 + 1.2 = 2.7× share), so the game could credit more AIBA than the pool.
+            </p>
+            <p>
+                <strong>After:</strong> <code>sumBonuses = sum of positionBonus[i] for i in 0..n-1</code>; then
+                <code>aibaReward = floor((toDistribute * bonus) / sumBonuses)</code>. Payouts sum to ≤ toDistribute
+                (with possible dust from flooring).
+            </p>
+            <hr />
+            <h2>6. System shop cars</h2>
+            <p>In <code>backend/config/systemShop.js</code>, <strong>SYSTEM_CARS</strong>:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>name</th>
+                        <th>carClass</th>
+                        <th>priceAiba</th>
+                        <th>Stats (SPD/ACC/HND/DUR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>touring</td>
+                        <td>Touring Pro</td>
+                        <td>touring</td>
+                        <td>80</td>
+                        <td>55/52/58/55</td>
+                    </tr>
+                    <tr>
+                        <td>gt1</td>
+                        <td>GT1 Racer</td>
+                        <td>gt1</td>
+                        <td>150</td>
+                        <td>62/58/60/55</td>
+                    </tr>
+                    <tr>
+                        <td>formula1</td>
+                        <td>Formula 1</td>
+                        <td>formula1</td>
+                        <td>300</td>
+                        <td>70/68/72/50</td>
+                    </tr>
+                    <tr>
+                        <td>lemans</td>
+                        <td>Le Mans Hypercar</td>
+                        <td>lemans</td>
+                        <td>400</td>
+                        <td>72/70/70/58</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                Create-with-AIBA gives a <strong>random</strong> car class; buy-from-system gives a chosen catalog car
+                with fixed class and stats.
+            </p>
+            <hr />
+            <h2>7. Miniapp (Car Racing tab)</h2>
+            <ul>
+                <li><strong>Flow switches:</strong> Garage | System | Market | Race | Leaderboard.</li>
+                <li>
+                    <strong>Garage:</strong> Create car (AIBA or TON tx hash), list “My cars” with class label and
+                    stats.
+                </li>
+                <li><strong>System:</strong> Buy from SYSTEM_CARS (name, class, stats, price, Buy).</li>
+                <li>
+                    <strong>Market:</strong> List your car (select + price) → List; buy from listings (Buy) → refresh +
+                    refreshEconomy.
+                </li>
+                <li>
+                    <strong>Race:</strong> Select open race (trackId, league, entry count, fee), select car, “Enter
+                    race” → entry fee debit, enter, then race runs if ≥2; refreshCarRacing + refreshEconomy.
+                </li>
+                <li><strong>Leaderboard:</strong> Top by totalPoints, wins, aibaEarned.</li>
+            </ul>
+            <p>
+                Config drives: create costs (AIBA/TON), entry fee, carClasses for labels. UI copy updated to: “When 2+
+                have entered, the race runs and rewards are paid by finish position.”
+            </p>
+            <hr />
+            <h2>8. Seed and replenish</h2>
+            <ul>
+                <li>
+                    <strong>Replenish:</strong> When a car race completes, <code>runCarRaceIfFull</code> creates a new
+                    open race for the same track (same league, entryFeeAiba, maxEntries, rewardPool 0). So open races
+                    stay available without a cron.
+                </li>
+            </ul>
+            <hr />
+            <h2>9. Optional improvements (not blocking)</h2>
+            <ul>
+                <li>
+                    <strong>Track names in race dropdown:</strong> Currently shows trackId (e.g. circuit-rookie); could
+                    resolve to track name from /tracks for friendlier labels.
+                </li>
+            </ul>
+            <hr />
+            <p>
+                <strong>Conclusion:</strong> Car Racing is <strong>in place and practically ready</strong>. Create/buy
+                car, enter open races, and earn AIBA by finish position are implemented end-to-end; reward math is
+                corrected; UI copy matches behavior (2+ entries); open races are replenished; all 14 “inspired by”
+                classes are present in the model and config.
+            </p>
+        </div>
+    </body>
 </html>

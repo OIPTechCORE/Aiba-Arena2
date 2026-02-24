@@ -1,151 +1,532 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>API CONTRACT — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>API CONTRACT</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>API Contract — Multiverse Expansion</h1>
-<p><strong>Version:</strong> Feb 2026 <strong>Status:</strong> Phase 1 baseline (schemas + endpoints for new systems).</p>
-<p>This document defines the <strong>API surface</strong> for core flows, Realms, Missions, Mentors, Assets, Marketplace, Governance, and Treasury telemetry.</p>
-<h2>0) Core (Economy, Vault, Wallet, Battle)</h2>
-<p><strong>GET</strong> <code>/api/economy/me</code> — Auth. User balances (NEUR, AIBA, Stars, Diamonds), wallet, badges, economy config snapshot. <strong>POST</strong> <code>/api/economy/claim-aiba</code> — Auth. Body: <code>{ requestId, amount? }</code>. Create signed claim for on-chain withdrawal. Idempotent.</p>
-<p><strong>GET</strong> <code>/api/vault/claim-status</code> — Query: <code>to</code>, <code>seqno</code>, <code>validUntil</code>, <code>amount</code>. Returns <code>{ status: &quot;pending&quot;|&quot;confirmed&quot;|&quot;expired&quot;|... }</code>. <strong>GET</strong> <code>/api/vault/last-seqno</code> — Query: <code>to</code>. Vault last seqno for claim tracking. <strong>GET</strong> <code>/api/vault/inventory</code> — Vault inventory (for display).</p>
-<p><strong>POST</strong> <code>/api/wallet/connect</code> — Auth. Body: <code>{ address }</code>. Link TON wallet to user.</p>
-<p><strong>POST</strong> <code>/api/battle/run</code> — Auth. Body: <code>{ brokerId, arena, league? }</code>. Run battle; returns score, rewards.</p>
-<p><strong>Health &amp; Monitoring:</strong> <code>GET /health</code> (root, not under <code>/api</code>) returns <code>{ ok: true }</code> for uptime checks. System status (operational/maintenance) is <code>GET /api/comms/status</code>. Prometheus: <code>GET /metrics</code>.</p>
-<p><strong>Idempotency:</strong> Many POST endpoints (staking, marketplace buy, etc.) accept <code>requestId</code> in the request body or <code>X-Request-Id</code> header to ensure idempotency. Include it when retrying to avoid double-spending.</p>
-<hr/>
-<h2>1) Realms &amp; Missions</h2>
-<p><strong>GET</strong> <code>/api/realms</code> Returns <code>{ realms: Realm[] }</code></p>
-<p><strong>GET</strong> <code>/api/realms/:key</code> Returns <code>{ realm: Realm }</code></p>
-<p><strong>GET</strong> <code>/api/missions?realmKey=...</code> Returns <code>{ missions: Mission[] }</code></p>
-<p><strong>POST</strong> <code>/api/missions/complete</code> Body: <code>{ missionId }</code> Returns <code>{ ok: true, rewardAiba, rewardNeur, xp }</code></p>
-<hr/>
-<h2>2) Mentors</h2>
-<p><strong>GET</strong> <code>/api/mentors</code> Returns <code>{ mentors: Mentor[] }</code></p>
-<p><strong>POST</strong> <code>/api/mentors/assign</code> Body: <code>{ mentorId }</code> Returns <code>{ ok: true }</code></p>
-<p><strong>POST</strong> <code>/api/mentors/upgrade</code> Body: <code>{ mentorId }</code> Returns <code>{ ok: true, costAiba }</code></p>
-<p><strong>POST</strong> <code>/api/mentors/stake</code> — Body: <code>{ mentorId, amountAiba }</code>. Stake AIBA to mentor. <strong>POST</strong> <code>/api/mentors/unstake</code> — Body: <code>{ stakeId }</code>. Unstake. <strong>GET</strong> <code>/api/mentors/stakes</code> — Auth. User's mentor stakes. <strong>GET</strong> <code>/api/mentors/stake-info</code> — Public. Mentor vault/stake info.</p>
-<hr/>
-<h2>2a) Guilds (Groups)</h2>
-<p><em>Route order:</em> <code>/list</code>, <code>/mine</code>, <code>/top</code> must be defined before <code>/:guildId</code> routes (otherwise <code>GET /list</code> matches <code>/:guildId</code> with guildId=<code>list</code>).</p>
-<p><strong>GET</strong> <code>/api/guilds/list</code> — Query: <code>limit</code>. All active guilds (sorted by boost count). <strong>GET</strong> <code>/api/guilds/mine</code> — Auth. User's guilds. <strong>GET</strong> <code>/api/guilds/top</code> — Alias for list (limit 50). <strong>POST</strong> <code>/api/guilds/create</code> — Body: <code>{ name, bio?, txHash? }</code>. Top N by score create free; others pay TON. <strong>POST</strong> <code>/api/guilds/join</code> — Body: <code>{ guildId }</code> <strong>POST</strong> <code>/api/guilds/leave</code> — Body: <code>{ guildId }</code>. Leave a guild. <strong>POST</strong> <code>/api/guilds/:guildId/boost</code> — Body: <code>{ txHash }</code> — Pay TON to boost group <strong>POST</strong> <code>/api/guilds/deposit-broker</code> — Body: <code>{ guildId, brokerId }</code> <strong>POST</strong> <code>/api/guilds/withdraw-broker</code> — Body: <code>{ guildId, brokerId }</code> <strong>GET</strong> <code>/api/guilds/:guildId/pool</code> — Auth. Guild's pooled brokers.</p>
-<hr/>
-<h2>2b) Breeding (Brokers)</h2>
-<p><strong>POST</strong> <code>/api/breeding/breed</code> — Body: <code>{ brokerIdA, brokerIdB }</code>. Combines two brokers into one (burns both + AIBA cost from Economy config <code>breedCostAiba</code>). Returns <code>{ ok: true, child }</code>.</p>
-<hr/>
-<h2>3) Assets &amp; Marketplace</h2>
-<p><strong>POST</strong> <code>/api/assets/mint</code> Body: <code>{ category, name, realmKey, metadataUri }</code> Returns <code>{ asset }</code></p>
-<p><strong>POST</strong> <code>/api/assets/upgrade</code> Body: <code>{ assetId }</code> Returns <code>{ asset }</code></p>
-<p><strong>GET</strong> <code>/api/assets/mine</code> Returns <code>{ assets: Asset[] }</code></p>
-<h3>3a) Broker Marketplace (Brokers)</h3>
-<p><strong>GET</strong> <code>/api/marketplace/listings</code> Query: <code>limit</code> Returns <code>Listing[]</code></p>
-<p><strong>POST</strong> <code>/api/marketplace/list</code> Body: <code>{ brokerId, priceAIBA, priceNEUR }</code> Returns <code>Listing</code></p>
-<p><strong>POST</strong> <code>/api/marketplace/delist</code> Body: <code>{ listingId }</code> Returns <code>{ ok: true, listing }</code></p>
-<p><strong>POST</strong> <code>/api/marketplace/buy</code> Body: <code>{ listingId, requestId }</code> Returns <code>{ ok: true, broker, listingId }</code></p>
-<p><strong>GET</strong> <code>/api/marketplace/system-brokers</code> — Catalog of brokers sold by system (AIBA). <strong>POST</strong> <code>/api/marketplace/buy-system-broker</code> — Body: <code>{ catalogId }</code>. Purchase broker from system.</p>
-<h3>3b) Car Racing (full API)</h3>
-<p><strong>GET</strong> <code>/api/car-racing/config</code> — Racing config, wallet, car classes. <strong>GET</strong> <code>/api/car-racing/tracks</code> — Query: <code>league</code>. Active tracks. <strong>GET</strong> <code>/api/car-racing/races</code> — Query: <code>status</code>, <code>limit</code>. Open races with entry count. <strong>GET</strong> <code>/api/car-racing/cars</code> — Auth. User's cars. <strong>GET</strong> <code>/api/car-racing/listings</code> — Auth. Active car listings from players. <strong>GET</strong> <code>/api/car-racing/leaderboard</code> — Query: <code>limit</code>. Top racers. <strong>GET</strong> <code>/api/car-racing/system-cars</code> — Catalog of cars sold by system (AIBA). <strong>GET</strong> <code>/api/car-racing/race/:id</code> — Single race with entries. <strong>POST</strong> <code>/api/car-racing/create</code> — Body: <code>{ requestId }</code>. Create car with AIBA. <strong>POST</strong> <code>/api/car-racing/create-with-ton</code> — Body: <code>{ txHash }</code>. Create car with TON → CAR_RACING_WALLET. <strong>POST</strong> <code>/api/car-racing/enter</code> — Body: <code>{ requestId, raceId, carId }</code>. Enter race. <strong>POST</strong> <code>/api/car-racing/list</code> — Body: <code>{ carId, priceAIBA }</code>. List your car for sale. <strong>POST</strong> <code>/api/car-racing/buy-car</code> — Body: <code>{ listingId, requestId }</code>. Buy car from player listing. <strong>POST</strong> <code>/api/car-racing/buy-system-car</code> — Body: <code>{ catalogId }</code>. Purchase car from system.</p>
-<h3>3c) Bike Racing (full API)</h3>
-<p><strong>GET</strong> <code>/api/bike-racing/config</code> — Racing config, wallet, bike classes. <strong>GET</strong> <code>/api/bike-racing/tracks</code> — Query: <code>league</code>. Active tracks. <strong>GET</strong> <code>/api/bike-racing/races</code> — Query: <code>status</code>, <code>limit</code>. Open races with entry count. <strong>GET</strong> <code>/api/bike-racing/bikes</code> — Auth. User's bikes. <strong>GET</strong> <code>/api/bike-racing/listings</code> — Auth. Active bike listings from players. <strong>GET</strong> <code>/api/bike-racing/leaderboard</code> — Query: <code>limit</code>. Top racers. <strong>GET</strong> <code>/api/bike-racing/system-bikes</code> — Catalog of bikes sold by system (AIBA). <strong>GET</strong> <code>/api/bike-racing/race/:id</code> — Single race with entries. <strong>POST</strong> <code>/api/bike-racing/create</code> — Body: <code>{ requestId }</code>. Create bike with AIBA. <strong>POST</strong> <code>/api/bike-racing/create-with-ton</code> — Body: <code>{ txHash }</code>. Create bike with TON → MOTORCYCLE_RACING_WALLET. <strong>POST</strong> <code>/api/bike-racing/enter</code> — Body: <code>{ requestId, raceId, bikeId }</code>. Enter race. <strong>POST</strong> <code>/api/bike-racing/list</code> — Body: <code>{ bikeId, priceAIBA }</code>. List your bike for sale. <strong>POST</strong> <code>/api/bike-racing/buy-bike</code> — Body: <code>{ listingId, requestId }</code>. Buy bike from player listing. <strong>POST</strong> <code>/api/bike-racing/buy-system-bike</code> — Body: <code>{ catalogId }</code>. Purchase bike from system.</p>
-<h3>3d) Asset Marketplace (NFT Assets)</h3>
-<p><strong>GET</strong> <code>/api/asset-marketplace/listings</code> Query: <code>listingType</code> Returns <code>{ listings: AssetListing[] }</code></p>
-<p><strong>GET</strong> <code>/api/asset-marketplace/onchain-info</code> Query: <code>listingId</code> Returns <code>{ listingId, priceAiba, escrowAddress, escrowJettonWallet, jettonMaster }</code></p>
-<p><strong>POST</strong> <code>/api/asset-marketplace/list</code> Body: <code>{ assetId, priceAiba, listingType }</code> Returns <code>{ listing }</code></p>
-<p><strong>POST</strong> <code>/api/asset-marketplace/buy</code> Body: <code>{ listingId }</code> Returns <code>{ ok: true, asset }</code></p>
-<p><strong>POST</strong> <code>/api/asset-marketplace/rent</code> Body: <code>{ listingId, durationHours }</code> Returns <code>{ rental }</code></p>
-<hr/>
-<h2>4) Governance &amp; DAO</h2>
-<p>There are two governance systems:</p>
-<ul>
-<li><strong>Governance</strong> (<code>/api/governance</code>): Realm/Mentor proposals (GovernanceProposal); used in Realms/Assets tab.</li>
-</ul>
-<h3>4a) DAO (Community proposals)</h3>
-<p><strong>GET</strong> <code>/api/dao/proposals</code> Query: <code>limit</code>, <code>status</code> (active|closed) Returns proposals with votesFor, votesAgainst.</p>
-<p><strong>GET</strong> <code>/api/dao/proposals/:id</code> Returns single proposal with vote counts and myVote.</p>
-<p><strong>POST</strong> <code>/api/dao/proposals</code> Body: <code>{ title, description?, type?, recipientTelegramId?, payoutAiba?, payoutNeur? }</code> Returns <code>{ proposal }</code></p>
-<p><strong>Staking requirement:</strong> User must have staked ≥ <code>daoProposalMinStakedAiba</code> (default 10,000 AIBA) for ≥ <code>daoProposalMinStakeDays</code> (default 30 days) to create proposals. Configure in Admin → Economy. If not met: 403 <code>staking_required</code>.</p>
-<p><strong>POST</strong> <code>/api/dao/vote</code> Body: <code>{ proposalId, support: true|false }</code> Returns <code>{ ok: true }</code>. One vote per user per proposal; can change vote.</p>
-<p><strong>PATCH</strong> <code>/api/dao/proposals/:id/close</code> — Admin: close proposal <strong>POST</strong> <code>/api/dao/proposals/:id/execute</code> — Admin: execute treasury_payout</p>
-<h3>4b) Governance (Realm proposals)</h3>
-<p><strong>GET</strong> <code>/api/governance/proposals</code> — Returns <code>{ proposals }</code> (GovernanceProposal[]) <strong>POST</strong> <code>/api/governance/propose</code> — Body: <code>{ title, description?, actions? }</code> <strong>POST</strong> <code>/api/governance/vote</code> — Body: <code>{ proposalId, vote: 'for'|'against' }</code></p>
-<hr/>
-<h2>5) Treasury &amp; Telemetry</h2>
-<p><strong>GET</strong> <code>/api/treasury/summary</code> Returns <code>{ balanceAiba, balanceNeur, totalPaidOutAiba, totalPaidOutNeur }</code></p>
-<p><strong>GET</strong> <code>/api/treasury/ops</code> Returns <code>{ ops: TreasuryOp[] }</code></p>
-<p><strong>GET</strong> <code>/api/comms/status</code> — Returns <code>{ status: &quot;operational&quot;, updatedAt }</code> <strong>GET</strong> <code>/api/comms/config</code> — Returns <code>{ supportLink, supportTelegramGroup }</code> (Admin → Economy)</p>
-<h3>Announcements &amp; Support (Unified Comms)</h3>
-<p><strong>GET</strong> <code>/api/announcements</code> — Auth. Query: <code>limit</code>. Returns <code>{ items: Announcement[], unreadCount }</code> (items = announcements; unreadCount = count newer than user's lastSeenAnnouncementId). <strong>POST</strong> <code>/api/announcements/seen</code> — Body: <code>{ announcementId }</code>. Mark as read; updates lastSeenAnnouncementId. <strong>POST</strong> <code>/api/support/request</code> — Body: <code>{ subject, message }</code>. Submit support request; admins view in Admin → Support. <code>subject</code> must be one of: <code>question</code>, <code>bug</code>, <code>feature</code>, <code>account</code>, <code>other</code> (case-insensitive; invalid → <code>other</code>).</p>
-<hr/>
-<h2>5a) Multiverse (NFT Universes, Staking)</h2>
-<p><strong>GET</strong> <code>/api/multiverse/universes</code> — List active NFT universes (mint costs, staking enabled). Returns <code>{ universes, nftStakingRewardPerDayAiba, nftStakingApyPercent }</code>. <strong>GET</strong> <code>/api/multiverse/me</code> — Auth. User's NFTs (brokers with on-chain NFT; staked flag). Returns <code>{ nfts }</code>. <strong>POST</strong> <code>/api/multiverse/stake</code> — Auth. Body: <code>{ brokerId }</code>. Stake broker NFT to earn AIBA. <strong>POST</strong> <code>/api/multiverse/unstake</code> — Auth. Body: <code>{ brokerId }</code>. Unstake. <strong>GET</strong> <code>/api/multiverse/staking/rewards</code> — Auth. Pending staking rewards. <strong>POST</strong> <code>/api/multiverse/staking/claim</code> — Auth. Body: <code>{ requestId }</code>. Claim pending NFT staking rewards.</p>
-<hr/>
-<h2>5b) Trainers (Global Network, Dashboard, Leaderboard)</h2>
-<p><strong>GET</strong> <code>/api/trainers/me</code> — My trainer stats (auth) <strong>POST</strong> <code>/api/trainers/apply</code> — Apply to become trainer; body <code>{ ref? }</code> <strong>GET</strong> <code>/api/trainers/network</code> — Public; query <code>sort</code>, <code>limit</code> <strong>GET</strong> <code>/api/trainers/leaderboard</code> — Public; query <code>by</code>, <code>limit</code> <strong>PATCH</strong> <code>/api/trainers/profile</code> — Update displayName, bio, specialty, region (auth) <strong>POST</strong> <code>/api/trainers/claim-rewards</code> — Auth. Body: <code>{ requestId }</code>. Claim pending AIBA. <strong>POST</strong> <code>/api/trainers/register-use</code> — Record referee (auth) <strong>GET</strong> <code>/api/trainers/recruit-link</code> — Query <code>ref</code>; returns <code>{ url, ref }</code> <strong>Admin:</strong> <code>GET /api/admin/trainers</code>, <code>PATCH /api/admin/trainers/:id</code> (status: approve/suspend)</p>
-<hr/>
-<h2>5c) P2P AIBA &amp; Buy AIBA with TON</h2>
-<p>All transaction charges (TON) go to Super Admin wallets. Use any TON-supported wallet.</p>
-<p><strong>See <a href="SUPER-ADMIN-WALLETS.md">SUPER-ADMIN-WALLETS.md</a> for complete reference (all flows, env vars, config keys).</strong></p>
-<p><strong>GET</strong> <code>/api/oracle/price</code> — Returns <code>{ aibaPerTon, neurPerAiba, updatedAt }</code> (AIBA per TON from automated oracle or manual config) <strong>GET</strong> <code>/api/p2p-aiba/config</code> — Fees (p2pSendFeeTonNano, buyFeeBps, aibaInGiftsFeeTonNano), oracle, wallet presence <strong>POST</strong> <code>/api/p2p-aiba/send</code> — Body: <code>{ toTelegramId?, toUsername?, amountAiba, txHash }</code> — Tx charge → <strong>P2P AIBA send</strong> (P2P_AIBA_SEND_WALLET); send AIBA to recipient <strong>POST</strong> <code>/api/p2p-aiba/buy</code> — Body: <code>{ txHash }</code> — Tx charge → <strong>Buy AIBA with TON</strong> (BUY_AIBA_WITH_TON_WALLET); receive AIBA at oracle rate minus fee</p>
-<hr/>
-<h2>5d) Gifts (extended)</h2>
-<p><strong>POST</strong> <code>/api/gifts/send-aiba</code> — Body: <code>{ txHash, toTelegramId?, toUsername?, amountAiba, message? }</code> — Pay TON + fee → <strong>AIBA in gifts</strong> (AIBA_IN_GIFTS_WALLET); recipient receives AIBA. Tx charge to Super Admin.</p>
-<hr/>
-<h2>5e) Staking</h2>
-<p><strong>GET</strong> <code>/api/staking/summary</code> — Auth. Returns <code>{ stakedAmount, apyPercent, lastClaimedAt, lockedAt, pendingReward }</code> <strong>GET</strong> <code>/api/staking/periods</code> — Returns <code>{ periods: [{ days, apyPercent }], minAiba }</code> (configurable; default min 100 AIBA, 30/90/180/365 days). <code>minAiba</code> = minimum stake (flexible + locked); ecosystem-aligned: Admin → Economy. <strong>GET</strong> <code>/api/staking/locks</code> — Auth. Returns user's period-based locks (StakingLock[]) <strong>POST</strong> <code>/api/staking/stake</code> — Body: <code>{ amount, requestId? }</code> (or <code>X-Request-Id</code> header). Flexible staking (no lock period). Min: <code>stakingMinAiba</code> (default 100 AIBA). If below min: 400 <code>min_stake_required</code>. <code>requestId</code> required for idempotency. <strong>POST</strong> <code>/api/staking/unstake</code> — Body: <code>{ amount, requestId }</code>. Unstake flexible amount. <strong>POST</strong> <code>/api/staking/stake-locked</code> — Body: <code>{ amount, periodDays, requestId }</code>. Lock AIBA for period; returns <code>{ lock, expectedRewardAiba }</code>. Min: <code>stakingMinAiba</code> (default 100 AIBA). If below min: 400 <code>min_stake_required</code>. <strong>POST</strong> <code>/api/staking/cancel-early</code> — Body: <code>{ lockId, requestId }</code>. Cancel lock before period ends; fee (default 5% = 500 bps) → Treasury (CANCELLED_STAKES_WALLET). Returns <code>{ returnedAiba, feeAiba }</code>. <strong>POST</strong> <code>/api/staking/claim-lock</code> — Body: <code>{ lockId, requestId }</code>. When lock matured, claim principal + rewards. <strong>POST</strong> <code>/api/staking/claim</code> — Body: <code>{ requestId }</code>. Claim flexible-staking pending rewards.</p>
-<p>Config: <code>stakingApyPercent</code>, <code>stakingMinAiba</code>, <code>stakingPeriods</code>, <code>stakingCancelEarlyFeeBps</code> (Admin → Economy; PATCH <code>/api/admin/economy/config</code>). <code>stakingMinAiba</code> = min AIBA to stake (flexible + locked; default 100, ecosystem-aligned: 1T AIBA, broker mint cost). Min displayed in Yield Vault hero, locked/flexible staking, and Wallet tab staking flow. See <a href="SUPER-ADMIN-WALLETS.md">SUPER-ADMIN-WALLETS.md</a> for CANCELLED_STAKES_WALLET.</p>
-<hr/>
-<h2>5e.2) Predict / Bet (Battle of the hour)</h2>
-<p>Users bet AIBA on which broker scores higher. Vig (default 3%) → treasury.</p>
-<p><strong>GET</strong> <code>/api/predict/events</code> — List open (or resolved) events <strong>GET</strong> <code>/api/predict/events/:id</code> — Single event with bet count <strong>POST</strong> <code>/api/predict/events/:id/bet</code> — Body: <code>{ brokerId, amountAiba }</code> — Place bet (max per Economy config) <strong>Admin:</strong> <code>POST /api/admin/predict/events</code> (create), <code>POST /api/admin/predict/events/:id/resolve</code> (run battle, pay winners, vig → TreasuryOp)</p>
-<p>Config: <code>predictVigBps</code>, <code>predictMaxBetAiba</code> (Admin → Economy).</p>
-<hr/>
-<h2>5f) Referrals &amp; Creator Economy</h2>
-<p><strong>GET</strong> <code>/api/referrals/top</code> — Public. Top referrers by uses. <strong>GET</strong> <code>/api/referrals/me</code> — Auth. User's referral code (if any). <strong>GET</strong> <code>/api/referrals/me/stats</code> — Auth. Total NEUR &amp; AIBA earned from referrals. <strong>POST</strong> <code>/api/referrals/create</code> — Auth. Create referral code (returns existing if any). <strong>POST</strong> <code>/api/referrals/use</code> — Body: <code>{ code }</code>. Apply a friend's code. Referee must have wallet connected (anti-sybil); if not: 403 <code>wallet_required</code>.</p>
-<p>Referrers earn % of their referrals' battle, race, tournament, and global boss rewards. Tier-based: 100 refs = 3%, 1k = 5%, 10k = 7% (configurable). Config: <code>creatorPercentBps</code>, <code>creatorTier100RefsBps</code>, <code>creatorTier1000RefsBps</code>, <code>creatorTier10000RefsBps</code>.</p>
-<hr/>
-<h2>5g) Donate (broker, car, bike, gifts)</h2>
-<p>Tx charge (TON) → Super Admin wallet per type. <strong>See <a href="SUPER-ADMIN-WALLETS.md">SUPER-ADMIN-WALLETS.md</a> for env vars and config.</strong></p>
-<p><strong>GET</strong> <code>/api/donate/config</code> — Fee amounts (donateBrokerFeeTonNano, etc.), wallet presence <strong>POST</strong> <code>/api/donate/broker</code> — Body: <code>{ brokerId, txHash }</code> — Tx charge → <strong>DONATE A BROKER</strong> (DONATE_BROKER_WALLET) <strong>POST</strong> <code>/api/donate/car</code> — Body: <code>{ carId, txHash }</code> — Tx charge → <strong>DONATE A CAR</strong> (DONATE_CAR_WALLET) <strong>POST</strong> <code>/api/donate/bike</code> — Body: <code>{ bikeId, txHash }</code> — Tx charge → <strong>DONATE A BIKE</strong> (DONATE_BIKE_WALLET) <strong>POST</strong> <code>/api/donate/gifts</code> — Body: <code>{ txHash }</code> — Tx charge → <strong>DONATE GIFTS</strong> (DONATE_GIFTS_WALLET)</p>
-<hr/>
-<h2>5h) Charity, Daily, Premium, Broker Rental, Tasks</h2>
-<h3>Charity</h3>
-<p><strong>GET</strong> <code>/api/charity/campaigns</code> — Query: <code>featured</code>, <code>cause</code>, <code>status</code>, <code>limit</code>. Active/ended campaigns. <strong>GET</strong> <code>/api/charity/campaigns/:id</code> — Single campaign + recent donations. <strong>GET</strong> <code>/api/charity/stats</code> — Aggregate stats. <strong>GET</strong> <code>/api/charity/my-impact</code> — Auth. User's donation impact. <strong>GET</strong> <code>/api/charity/leaderboard</code> — Query: <code>by</code> (impact|neur|aiba|count), <code>limit</code>. <strong>POST</strong> <code>/api/charity/donate</code> — Auth. Body: <code>{ campaignId, amountNeur?, amountAiba?, message?, anonymous? }</code>.</p>
-<h3>Daily</h3>
-<p><strong>GET</strong> <code>/api/daily/status</code> — Auth. Daily reward and combo eligibility. <strong>POST</strong> <code>/api/daily/claim</code> — Auth. Claim daily NEUR. <strong>POST</strong> <code>/api/daily/combo-claim</code> — Auth. Claim combo bonus (dailyComboRequirementAiba + dailyComboBonusAiba).</p>
-<h3>Premium</h3>
-<p><strong>GET</strong> <code>/api/premium/status</code> — Auth. Premium status (active, premiumUntil). <strong>POST</strong> <code>/api/premium/buy</code> — Body: <code>{ txHash }</code> — Pay TON → BOOST_PROFILE_WALLET; activate premium.</p>
-<h3>Broker Rental</h3>
-<p><strong>GET</strong> <code>/api/broker-rental</code> — List available rentals (status=listed). <strong>POST</strong> <code>/api/broker-rental/list</code> — Auth. Body: <code>{ brokerId, priceAibaPerHour }</code>. List broker for rent. <strong>POST</strong> <code>/api/broker-rental/:id/rent</code> — Auth. Rent broker (pay AIBA, 1 hour; fee → treasury). <strong>POST</strong> <code>/api/broker-rental/:id/unlist</code> — Auth. Unlist your broker.</p>
-<h3>Tasks</h3>
-<p><strong>GET</strong> <code>/api/tasks</code> — Auth. Personalized task feed + profile.</p>
-<h3>Tours, Global Boss, Stars Store</h3>
-<p><strong>GET</strong> <code>/api/tournaments</code> — Query: <code>status</code>. List tournaments. <strong>GET</strong> <code>/api/tournaments/:id</code> — Single tournament. <strong>POST</strong> <code>/api/tournaments/:id/enter</code> — Auth. Body: <code>{ brokerId }</code>. Enter tournament. <strong>GET</strong> <code>/api/global-boss</code> — Current boss state (HP, status). <strong>POST</strong> <code>/api/global-boss/record-damage</code> — Auth. Body: <code>{ brokerId, score }</code>. Record damage. <strong>GET</strong> <code>/api/stars-store/config</code> — Pack sizes, prices (AIBA, TON). <strong>POST</strong> <code>/api/stars-store/buy-with-aiba</code> — Body: <code>{ requestId }</code>. Buy Stars with AIBA. <strong>POST</strong> <code>/api/stars-store/buy-with-ton</code> — Body: <code>{ txHash }</code>. Buy Stars with TON → STARS_STORE_WALLET.</p>
-<hr/>
-<h2>6) Admin (ops tuning)</h2>
-<p><strong>GET</strong> <code>/api/admin/realms</code> <strong>POST</strong> <code>/api/admin/realms</code> (create/update)</p>
-<p><strong>GET/POST/PATCH/DELETE</strong> <code>/api/admin/announcements</code> — Announcements CRUD; <code>POST /api/admin/announcements/:id/broadcast</code> — Send to all users via Telegram. <strong>GET</strong> <code>/api/admin/support</code> — Support requests; <strong>PATCH</strong> <code>/api/admin/support/:id</code> — Update status.</p>
-<p><strong>GET</strong> <code>/api/admin/economy/config</code> <strong>PATCH</strong> <code>/api/admin/economy/config</code> <strong>GET</strong> <code>/api/admin/economy/day</code> <strong>GET</strong> <code>/api/admin/economy/ledger</code> <strong>GET</strong> <code>/api/admin/economy/simulate</code> <strong>POST</strong> <code>/api/admin/economy/credit-user</code></p>
-<p><strong>GET</strong> <code>/api/admin/marketplace/metrics</code> <strong>GET</strong> <code>/api/admin/treasury</code> <strong>POST</strong> <code>/api/admin/treasury/fund</code> <strong>GET</strong> <code>/api/admin/treasury/reserve</code> <strong>POST</strong> <code>/api/admin/treasury/reserve/fund</code> <strong>GET</strong> <code>/api/admin/treasury/buyback</code> <strong>POST</strong> <code>/api/admin/treasury/buyback/fund</code> <strong>PATCH</strong> <code>/api/admin/treasury/oracle</code> — Manual oracleAibaPerTon / oracleNeurPerAiba (one-off override) <strong>GET</strong> <code>/api/admin/oracle/status</code> — Oracle config (auto-update, aibaUsd, min/max/fallback, lastUpdatedAt) <strong>POST</strong> <code>/api/admin/oracle/update</code> — Trigger one oracle update cycle (fetches TON price, computes AIBA/TON, persists) <strong>GET</strong> <code>/api/admin/treasury-ops/metrics</code></p>
-<hr/>
-<h2>Types (summary)</h2>
-<ul>
-<li><strong>Mission</strong>: <code>{ realmKey, title, description, type, rewardAiba, rewardNeur, xp, order, requirements, active }</code></li>
-<li><strong>Mentor</strong>: <code>{ key, name, realmKey, tier, description, perks[], stakingRequiredAiba, active }</code></li>
-<li><strong>Asset</strong>: <code>{ ownerId, category, name, realmKey, rarity, level, upgradeCount, status, metadataUri, stats }</code></li>
-<li><strong>AssetListing</strong>: <code>{ assetId, sellerId, priceAiba, listingType, status, feeBps, expiresAt }</code></li>
-<li><strong>Rental</strong>: <code>{ assetId, ownerId, renterId, priceAiba, durationHours, status, startedAt, endsAt }</code></li>
-<li><strong>GovernanceProposal</strong>: <code>{ title, description, status, votesFor, votesAgainst, startAt, endAt, actions[] }</code></li>
-<li><strong>TreasuryOp</strong>: <code>{ type, amountAiba, source, refId }</code></li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>API CONTRACT — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>API CONTRACT</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>API Contract — Multiverse Expansion</h1>
+            <p>
+                <strong>Version:</strong> Feb 2026 <strong>Status:</strong> Phase 1 baseline (schemas + endpoints for
+                new systems).
+            </p>
+            <p>
+                This document defines the <strong>API surface</strong> for core flows, Realms, Missions, Mentors,
+                Assets, Marketplace, Governance, and Treasury telemetry.
+            </p>
+            <h2>0) Core (Economy, Vault, Wallet, Battle)</h2>
+            <p>
+                <strong>GET</strong> <code>/api/economy/me</code> — Auth. User balances (NEUR, AIBA, Stars, Diamonds),
+                wallet, badges, economy config snapshot. <strong>POST</strong> <code>/api/economy/claim-aiba</code> —
+                Auth. Body: <code>{ requestId, amount? }</code>. Create signed claim for on-chain withdrawal.
+                Idempotent.
+            </p>
+            <p>
+                <strong>GET</strong> <code>/api/vault/claim-status</code> — Query: <code>to</code>, <code>seqno</code>,
+                <code>validUntil</code>, <code>amount</code>. Returns
+                <code>{ status: &quot;pending&quot;|&quot;confirmed&quot;|&quot;expired&quot;|... }</code>.
+                <strong>GET</strong> <code>/api/vault/last-seqno</code> — Query: <code>to</code>. Vault last seqno for
+                claim tracking. <strong>GET</strong> <code>/api/vault/inventory</code> — Vault inventory (for display).
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/wallet/connect</code> — Auth. Body: <code>{ address }</code>. Link TON
+                wallet to user.
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/battle/run</code> — Auth. Body:
+                <code>{ brokerId, arena, league? }</code>. Run battle; returns score, rewards.
+            </p>
+            <p>
+                <strong>Health &amp; Monitoring:</strong> <code>GET /health</code> (root, not under <code>/api</code>)
+                returns <code>{ ok: true }</code> for uptime checks. System status (operational/maintenance) is
+                <code>GET /api/comms/status</code>. Prometheus: <code>GET /metrics</code>.
+            </p>
+            <p>
+                <strong>Idempotency:</strong> Many POST endpoints (staking, marketplace buy, etc.) accept
+                <code>requestId</code> in the request body or <code>X-Request-Id</code> header to ensure idempotency.
+                Include it when retrying to avoid double-spending.
+            </p>
+            <hr />
+            <h2>1) Realms &amp; Missions</h2>
+            <p><strong>GET</strong> <code>/api/realms</code> Returns <code>{ realms: Realm[] }</code></p>
+            <p><strong>GET</strong> <code>/api/realms/:key</code> Returns <code>{ realm: Realm }</code></p>
+            <p>
+                <strong>GET</strong> <code>/api/missions?realmKey=...</code> Returns
+                <code>{ missions: Mission[] }</code>
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/missions/complete</code> Body: <code>{ missionId }</code> Returns
+                <code>{ ok: true, rewardAiba, rewardNeur, xp }</code>
+            </p>
+            <hr />
+            <h2>2) Mentors</h2>
+            <p><strong>GET</strong> <code>/api/mentors</code> Returns <code>{ mentors: Mentor[] }</code></p>
+            <p>
+                <strong>POST</strong> <code>/api/mentors/assign</code> Body: <code>{ mentorId }</code> Returns
+                <code>{ ok: true }</code>
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/mentors/upgrade</code> Body: <code>{ mentorId }</code> Returns
+                <code>{ ok: true, costAiba }</code>
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/mentors/stake</code> — Body: <code>{ mentorId, amountAiba }</code>.
+                Stake AIBA to mentor. <strong>POST</strong> <code>/api/mentors/unstake</code> — Body:
+                <code>{ stakeId }</code>. Unstake. <strong>GET</strong> <code>/api/mentors/stakes</code> — Auth. User's
+                mentor stakes. <strong>GET</strong> <code>/api/mentors/stake-info</code> — Public. Mentor vault/stake
+                info.
+            </p>
+            <hr />
+            <h2>2a) Guilds (Groups)</h2>
+            <p>
+                <em>Route order:</em> <code>/list</code>, <code>/mine</code>, <code>/top</code> must be defined before
+                <code>/:guildId</code> routes (otherwise <code>GET /list</code> matches <code>/:guildId</code> with
+                guildId=<code>list</code>).
+            </p>
+            <p>
+                <strong>GET</strong> <code>/api/guilds/list</code> — Query: <code>limit</code>. All active guilds
+                (sorted by boost count). <strong>GET</strong> <code>/api/guilds/mine</code> — Auth. User's guilds.
+                <strong>GET</strong> <code>/api/guilds/top</code> — Alias for list (limit 50). <strong>POST</strong>
+                <code>/api/guilds/create</code> — Body: <code>{ name, bio?, txHash? }</code>. Top N by score create
+                free; others pay TON. <strong>POST</strong> <code>/api/guilds/join</code> — Body:
+                <code>{ guildId }</code> <strong>POST</strong> <code>/api/guilds/leave</code> — Body:
+                <code>{ guildId }</code>. Leave a guild. <strong>POST</strong> <code>/api/guilds/:guildId/boost</code> —
+                Body: <code>{ txHash }</code> — Pay TON to boost group <strong>POST</strong>
+                <code>/api/guilds/deposit-broker</code> — Body: <code>{ guildId, brokerId }</code> <strong>POST</strong>
+                <code>/api/guilds/withdraw-broker</code> — Body: <code>{ guildId, brokerId }</code> <strong>GET</strong>
+                <code>/api/guilds/:guildId/pool</code> — Auth. Guild's pooled brokers.
+            </p>
+            <hr />
+            <h2>2b) Breeding (Brokers)</h2>
+            <p>
+                <strong>POST</strong> <code>/api/breeding/breed</code> — Body: <code>{ brokerIdA, brokerIdB }</code>.
+                Combines two brokers into one (burns both + AIBA cost from Economy config <code>breedCostAiba</code>).
+                Returns <code>{ ok: true, child }</code>.
+            </p>
+            <hr />
+            <h2>3) Assets &amp; Marketplace</h2>
+            <p>
+                <strong>POST</strong> <code>/api/assets/mint</code> Body:
+                <code>{ category, name, realmKey, metadataUri }</code> Returns <code>{ asset }</code>
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/assets/upgrade</code> Body: <code>{ assetId }</code> Returns
+                <code>{ asset }</code>
+            </p>
+            <p><strong>GET</strong> <code>/api/assets/mine</code> Returns <code>{ assets: Asset[] }</code></p>
+            <h3>3a) Broker Marketplace (Brokers)</h3>
+            <p>
+                <strong>GET</strong> <code>/api/marketplace/listings</code> Query: <code>limit</code> Returns
+                <code>Listing[]</code>
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/marketplace/list</code> Body:
+                <code>{ brokerId, priceAIBA, priceNEUR }</code> Returns <code>Listing</code>
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/marketplace/delist</code> Body: <code>{ listingId }</code> Returns
+                <code>{ ok: true, listing }</code>
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/marketplace/buy</code> Body:
+                <code>{ listingId, requestId }</code> Returns <code>{ ok: true, broker, listingId }</code>
+            </p>
+            <p>
+                <strong>GET</strong> <code>/api/marketplace/system-brokers</code> — Catalog of brokers sold by system
+                (AIBA). <strong>POST</strong> <code>/api/marketplace/buy-system-broker</code> — Body:
+                <code>{ catalogId }</code>. Purchase broker from system.
+            </p>
+            <h3>3b) Car Racing (full API)</h3>
+            <p>
+                <strong>GET</strong> <code>/api/car-racing/config</code> — Racing config, wallet, car classes.
+                <strong>GET</strong> <code>/api/car-racing/tracks</code> — Query: <code>league</code>. Active tracks.
+                <strong>GET</strong> <code>/api/car-racing/races</code> — Query: <code>status</code>,
+                <code>limit</code>. Open races with entry count. <strong>GET</strong>
+                <code>/api/car-racing/cars</code> — Auth. User's cars. <strong>GET</strong>
+                <code>/api/car-racing/listings</code> — Auth. Active car listings from players. <strong>GET</strong>
+                <code>/api/car-racing/leaderboard</code> — Query: <code>limit</code>. Top racers. <strong>GET</strong>
+                <code>/api/car-racing/system-cars</code> — Catalog of cars sold by system (AIBA). <strong>GET</strong>
+                <code>/api/car-racing/race/:id</code> — Single race with entries. <strong>POST</strong>
+                <code>/api/car-racing/create</code> — Body: <code>{ requestId }</code>. Create car with AIBA.
+                <strong>POST</strong> <code>/api/car-racing/create-with-ton</code> — Body: <code>{ txHash }</code>.
+                Create car with TON → CAR_RACING_WALLET. <strong>POST</strong> <code>/api/car-racing/enter</code> —
+                Body: <code>{ requestId, raceId, carId }</code>. Enter race. <strong>POST</strong>
+                <code>/api/car-racing/list</code> — Body: <code>{ carId, priceAIBA }</code>. List your car for sale.
+                <strong>POST</strong> <code>/api/car-racing/buy-car</code> — Body:
+                <code>{ listingId, requestId }</code>. Buy car from player listing. <strong>POST</strong>
+                <code>/api/car-racing/buy-system-car</code> — Body: <code>{ catalogId }</code>. Purchase car from
+                system.
+            </p>
+            <h3>3c) Bike Racing (full API)</h3>
+            <p>
+                <strong>GET</strong> <code>/api/bike-racing/config</code> — Racing config, wallet, bike classes.
+                <strong>GET</strong> <code>/api/bike-racing/tracks</code> — Query: <code>league</code>. Active tracks.
+                <strong>GET</strong> <code>/api/bike-racing/races</code> — Query: <code>status</code>,
+                <code>limit</code>. Open races with entry count. <strong>GET</strong>
+                <code>/api/bike-racing/bikes</code> — Auth. User's bikes. <strong>GET</strong>
+                <code>/api/bike-racing/listings</code> — Auth. Active bike listings from players. <strong>GET</strong>
+                <code>/api/bike-racing/leaderboard</code> — Query: <code>limit</code>. Top racers. <strong>GET</strong>
+                <code>/api/bike-racing/system-bikes</code> — Catalog of bikes sold by system (AIBA).
+                <strong>GET</strong> <code>/api/bike-racing/race/:id</code> — Single race with entries.
+                <strong>POST</strong> <code>/api/bike-racing/create</code> — Body: <code>{ requestId }</code>. Create
+                bike with AIBA. <strong>POST</strong> <code>/api/bike-racing/create-with-ton</code> — Body:
+                <code>{ txHash }</code>. Create bike with TON → MOTORCYCLE_RACING_WALLET. <strong>POST</strong>
+                <code>/api/bike-racing/enter</code> — Body: <code>{ requestId, raceId, bikeId }</code>. Enter race.
+                <strong>POST</strong> <code>/api/bike-racing/list</code> — Body: <code>{ bikeId, priceAIBA }</code>.
+                List your bike for sale. <strong>POST</strong> <code>/api/bike-racing/buy-bike</code> — Body:
+                <code>{ listingId, requestId }</code>. Buy bike from player listing. <strong>POST</strong>
+                <code>/api/bike-racing/buy-system-bike</code> — Body: <code>{ catalogId }</code>. Purchase bike from
+                system.
+            </p>
+            <h3>3d) Asset Marketplace (NFT Assets)</h3>
+            <p>
+                <strong>GET</strong> <code>/api/asset-marketplace/listings</code> Query:
+                <code>listingType</code> Returns <code>{ listings: AssetListing[] }</code>
+            </p>
+            <p>
+                <strong>GET</strong> <code>/api/asset-marketplace/onchain-info</code> Query:
+                <code>listingId</code> Returns
+                <code>{ listingId, priceAiba, escrowAddress, escrowJettonWallet, jettonMaster }</code>
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/asset-marketplace/list</code> Body:
+                <code>{ assetId, priceAiba, listingType }</code> Returns <code>{ listing }</code>
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/asset-marketplace/buy</code> Body: <code>{ listingId }</code> Returns
+                <code>{ ok: true, asset }</code>
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/asset-marketplace/rent</code> Body:
+                <code>{ listingId, durationHours }</code> Returns <code>{ rental }</code>
+            </p>
+            <hr />
+            <h2>4) Governance &amp; DAO</h2>
+            <p>There are two governance systems:</p>
+            <ul>
+                <li>
+                    <strong>Governance</strong> (<code>/api/governance</code>): Realm/Mentor proposals
+                    (GovernanceProposal); used in Realms/Assets tab.
+                </li>
+            </ul>
+            <h3>4a) DAO (Community proposals)</h3>
+            <p>
+                <strong>GET</strong> <code>/api/dao/proposals</code> Query: <code>limit</code>,
+                <code>status</code> (active|closed) Returns proposals with votesFor, votesAgainst.
+            </p>
+            <p>
+                <strong>GET</strong> <code>/api/dao/proposals/:id</code> Returns single proposal with vote counts and
+                myVote.
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/dao/proposals</code> Body:
+                <code>{ title, description?, type?, recipientTelegramId?, payoutAiba?, payoutNeur? }</code> Returns
+                <code>{ proposal }</code>
+            </p>
+            <p>
+                <strong>Staking requirement:</strong> User must have staked ≥
+                <code>daoProposalMinStakedAiba</code> (default 10,000 AIBA) for ≥
+                <code>daoProposalMinStakeDays</code> (default 30 days) to create proposals. Configure in Admin →
+                Economy. If not met: 403 <code>staking_required</code>.
+            </p>
+            <p>
+                <strong>POST</strong> <code>/api/dao/vote</code> Body:
+                <code>{ proposalId, support: true|false }</code> Returns <code>{ ok: true }</code>. One vote per user
+                per proposal; can change vote.
+            </p>
+            <p>
+                <strong>PATCH</strong> <code>/api/dao/proposals/:id/close</code> — Admin: close proposal
+                <strong>POST</strong> <code>/api/dao/proposals/:id/execute</code> — Admin: execute treasury_payout
+            </p>
+            <h3>4b) Governance (Realm proposals)</h3>
+            <p>
+                <strong>GET</strong> <code>/api/governance/proposals</code> — Returns
+                <code>{ proposals }</code> (GovernanceProposal[]) <strong>POST</strong>
+                <code>/api/governance/propose</code> — Body: <code>{ title, description?, actions? }</code>
+                <strong>POST</strong> <code>/api/governance/vote</code> — Body:
+                <code>{ proposalId, vote: 'for'|'against' }</code>
+            </p>
+            <hr />
+            <h2>5) Treasury &amp; Telemetry</h2>
+            <p>
+                <strong>GET</strong> <code>/api/treasury/summary</code> Returns
+                <code>{ balanceAiba, balanceNeur, totalPaidOutAiba, totalPaidOutNeur }</code>
+            </p>
+            <p><strong>GET</strong> <code>/api/treasury/ops</code> Returns <code>{ ops: TreasuryOp[] }</code></p>
+            <p>
+                <strong>GET</strong> <code>/api/comms/status</code> — Returns
+                <code>{ status: &quot;operational&quot;, updatedAt }</code> <strong>GET</strong>
+                <code>/api/comms/config</code> — Returns <code>{ supportLink, supportTelegramGroup }</code> (Admin →
+                Economy)
+            </p>
+            <h3>Announcements &amp; Support (Unified Comms)</h3>
+            <p>
+                <strong>GET</strong> <code>/api/announcements</code> — Auth. Query: <code>limit</code>. Returns
+                <code>{ items: Announcement[], unreadCount }</code> (items = announcements; unreadCount = count newer
+                than user's lastSeenAnnouncementId). <strong>POST</strong> <code>/api/announcements/seen</code> — Body:
+                <code>{ announcementId }</code>. Mark as read; updates lastSeenAnnouncementId. <strong>POST</strong>
+                <code>/api/support/request</code> — Body: <code>{ subject, message }</code>. Submit support request;
+                admins view in Admin → Support. <code>subject</code> must be one of: <code>question</code>,
+                <code>bug</code>, <code>feature</code>, <code>account</code>, <code>other</code> (case-insensitive;
+                invalid → <code>other</code>).
+            </p>
+            <hr />
+            <h2>5a) Multiverse (NFT Universes, Staking)</h2>
+            <p>
+                <strong>GET</strong> <code>/api/multiverse/universes</code> — List active NFT universes (mint costs,
+                staking enabled). Returns <code>{ universes, nftStakingRewardPerDayAiba, nftStakingApyPercent }</code>.
+                <strong>GET</strong> <code>/api/multiverse/me</code> — Auth. User's NFTs (brokers with on-chain NFT;
+                staked flag). Returns <code>{ nfts }</code>. <strong>POST</strong> <code>/api/multiverse/stake</code> —
+                Auth. Body: <code>{ brokerId }</code>. Stake broker NFT to earn AIBA. <strong>POST</strong>
+                <code>/api/multiverse/unstake</code> — Auth. Body: <code>{ brokerId }</code>. Unstake.
+                <strong>GET</strong> <code>/api/multiverse/staking/rewards</code> — Auth. Pending staking rewards.
+                <strong>POST</strong> <code>/api/multiverse/staking/claim</code> — Auth. Body:
+                <code>{ requestId }</code>. Claim pending NFT staking rewards.
+            </p>
+            <hr />
+            <h2>5b) Trainers (Global Network, Dashboard, Leaderboard)</h2>
+            <p>
+                <strong>GET</strong> <code>/api/trainers/me</code> — My trainer stats (auth) <strong>POST</strong>
+                <code>/api/trainers/apply</code> — Apply to become trainer; body <code>{ ref? }</code>
+                <strong>GET</strong> <code>/api/trainers/network</code> — Public; query <code>sort</code>,
+                <code>limit</code> <strong>GET</strong> <code>/api/trainers/leaderboard</code> — Public; query
+                <code>by</code>, <code>limit</code> <strong>PATCH</strong> <code>/api/trainers/profile</code> — Update
+                displayName, bio, specialty, region (auth) <strong>POST</strong>
+                <code>/api/trainers/claim-rewards</code> — Auth. Body: <code>{ requestId }</code>. Claim pending AIBA.
+                <strong>POST</strong> <code>/api/trainers/register-use</code> — Record referee (auth)
+                <strong>GET</strong> <code>/api/trainers/recruit-link</code> — Query <code>ref</code>; returns
+                <code>{ url, ref }</code> <strong>Admin:</strong> <code>GET /api/admin/trainers</code>,
+                <code>PATCH /api/admin/trainers/:id</code> (status: approve/suspend)
+            </p>
+            <hr />
+            <h2>5c) P2P AIBA &amp; Buy AIBA with TON</h2>
+            <p>All transaction charges (TON) go to Super Admin wallets. Use any TON-supported wallet.</p>
+            <p>
+                <strong
+                    >See <a href="SUPER-ADMIN-WALLETS.md">SUPER-ADMIN-WALLETS.md</a> for complete reference (all flows,
+                    env vars, config keys).</strong
+                >
+            </p>
+            <p>
+                <strong>GET</strong> <code>/api/oracle/price</code> — Returns
+                <code>{ aibaPerTon, neurPerAiba, updatedAt }</code> (AIBA per TON from automated oracle or manual
+                config) <strong>GET</strong> <code>/api/p2p-aiba/config</code> — Fees (p2pSendFeeTonNano, buyFeeBps,
+                aibaInGiftsFeeTonNano), oracle, wallet presence <strong>POST</strong> <code>/api/p2p-aiba/send</code> —
+                Body: <code>{ toTelegramId?, toUsername?, amountAiba, txHash }</code> — Tx charge →
+                <strong>P2P AIBA send</strong> (P2P_AIBA_SEND_WALLET); send AIBA to recipient <strong>POST</strong>
+                <code>/api/p2p-aiba/buy</code> — Body: <code>{ txHash }</code> — Tx charge →
+                <strong>Buy AIBA with TON</strong> (BUY_AIBA_WITH_TON_WALLET); receive AIBA at oracle rate minus fee
+            </p>
+            <hr />
+            <h2>5d) Gifts (extended)</h2>
+            <p>
+                <strong>POST</strong> <code>/api/gifts/send-aiba</code> — Body:
+                <code>{ txHash, toTelegramId?, toUsername?, amountAiba, message? }</code> — Pay TON + fee →
+                <strong>AIBA in gifts</strong> (AIBA_IN_GIFTS_WALLET); recipient receives AIBA. Tx charge to Super
+                Admin.
+            </p>
+            <hr />
+            <h2>5e) Staking</h2>
+            <p>
+                <strong>GET</strong> <code>/api/staking/summary</code> — Auth. Returns
+                <code>{ stakedAmount, apyPercent, lastClaimedAt, lockedAt, pendingReward }</code> <strong>GET</strong>
+                <code>/api/staking/periods</code> — Returns
+                <code>{ periods: [{ days, apyPercent }], minAiba }</code> (configurable; default min 100 AIBA,
+                30/90/180/365 days). <code>minAiba</code> = minimum stake (flexible + locked); ecosystem-aligned: Admin
+                → Economy. <strong>GET</strong> <code>/api/staking/locks</code> — Auth. Returns user's period-based
+                locks (StakingLock[]) <strong>POST</strong> <code>/api/staking/stake</code> — Body:
+                <code>{ amount, requestId? }</code> (or <code>X-Request-Id</code> header). Flexible staking (no lock
+                period). Min: <code>stakingMinAiba</code> (default 100 AIBA). If below min: 400
+                <code>min_stake_required</code>. <code>requestId</code> required for idempotency. <strong>POST</strong>
+                <code>/api/staking/unstake</code> — Body: <code>{ amount, requestId }</code>. Unstake flexible amount.
+                <strong>POST</strong> <code>/api/staking/stake-locked</code> — Body:
+                <code>{ amount, periodDays, requestId }</code>. Lock AIBA for period; returns
+                <code>{ lock, expectedRewardAiba }</code>. Min: <code>stakingMinAiba</code> (default 100 AIBA). If below
+                min: 400 <code>min_stake_required</code>. <strong>POST</strong> <code>/api/staking/cancel-early</code> —
+                Body: <code>{ lockId, requestId }</code>. Cancel lock before period ends; fee (default 5% = 500 bps) →
+                Treasury (CANCELLED_STAKES_WALLET). Returns <code>{ returnedAiba, feeAiba }</code>.
+                <strong>POST</strong> <code>/api/staking/claim-lock</code> — Body: <code>{ lockId, requestId }</code>.
+                When lock matured, claim principal + rewards. <strong>POST</strong> <code>/api/staking/claim</code> —
+                Body: <code>{ requestId }</code>. Claim flexible-staking pending rewards.
+            </p>
+            <p>
+                Config: <code>stakingApyPercent</code>, <code>stakingMinAiba</code>, <code>stakingPeriods</code>,
+                <code>stakingCancelEarlyFeeBps</code> (Admin → Economy; PATCH <code>/api/admin/economy/config</code>).
+                <code>stakingMinAiba</code> = min AIBA to stake (flexible + locked; default 100, ecosystem-aligned: 1T
+                AIBA, broker mint cost). Min displayed in Yield Vault hero, locked/flexible staking, and Wallet tab
+                staking flow. See <a href="SUPER-ADMIN-WALLETS.md">SUPER-ADMIN-WALLETS.md</a> for
+                CANCELLED_STAKES_WALLET.
+            </p>
+            <hr />
+            <h2>5e.2) Predict / Bet (Battle of the hour)</h2>
+            <p>Users bet AIBA on which broker scores higher. Vig (default 3%) → treasury.</p>
+            <p>
+                <strong>GET</strong> <code>/api/predict/events</code> — List open (or resolved) events
+                <strong>GET</strong> <code>/api/predict/events/:id</code> — Single event with bet count
+                <strong>POST</strong> <code>/api/predict/events/:id/bet</code> — Body:
+                <code>{ brokerId, amountAiba }</code> — Place bet (max per Economy config) <strong>Admin:</strong>
+                <code>POST /api/admin/predict/events</code> (create),
+                <code>POST /api/admin/predict/events/:id/resolve</code> (run battle, pay winners, vig → TreasuryOp)
+            </p>
+            <p>Config: <code>predictVigBps</code>, <code>predictMaxBetAiba</code> (Admin → Economy).</p>
+            <hr />
+            <h2>5f) Referrals &amp; Creator Economy</h2>
+            <p>
+                <strong>GET</strong> <code>/api/referrals/top</code> — Public. Top referrers by uses.
+                <strong>GET</strong> <code>/api/referrals/me</code> — Auth. User's referral code (if any).
+                <strong>GET</strong> <code>/api/referrals/me/stats</code> — Auth. Total NEUR &amp; AIBA earned from
+                referrals. <strong>POST</strong> <code>/api/referrals/create</code> — Auth. Create referral code
+                (returns existing if any). <strong>POST</strong> <code>/api/referrals/use</code> — Body:
+                <code>{ code }</code>. Apply a friend's code. Referee must have wallet connected (anti-sybil); if not:
+                403 <code>wallet_required</code>.
+            </p>
+            <p>
+                Referrers earn % of their referrals' battle, race, tournament, and global boss rewards. Tier-based: 100
+                refs = 3%, 1k = 5%, 10k = 7% (configurable). Config: <code>creatorPercentBps</code>,
+                <code>creatorTier100RefsBps</code>, <code>creatorTier1000RefsBps</code>,
+                <code>creatorTier10000RefsBps</code>.
+            </p>
+            <hr />
+            <h2>5g) Donate (broker, car, bike, gifts)</h2>
+            <p>
+                Tx charge (TON) → Super Admin wallet per type.
+                <strong
+                    >See <a href="SUPER-ADMIN-WALLETS.md">SUPER-ADMIN-WALLETS.md</a> for env vars and config.</strong
+                >
+            </p>
+            <p>
+                <strong>GET</strong> <code>/api/donate/config</code> — Fee amounts (donateBrokerFeeTonNano, etc.),
+                wallet presence <strong>POST</strong> <code>/api/donate/broker</code> — Body:
+                <code>{ brokerId, txHash }</code> — Tx charge → <strong>DONATE A BROKER</strong> (DONATE_BROKER_WALLET)
+                <strong>POST</strong> <code>/api/donate/car</code> — Body: <code>{ carId, txHash }</code> — Tx charge →
+                <strong>DONATE A CAR</strong> (DONATE_CAR_WALLET) <strong>POST</strong> <code>/api/donate/bike</code> —
+                Body: <code>{ bikeId, txHash }</code> — Tx charge → <strong>DONATE A BIKE</strong> (DONATE_BIKE_WALLET)
+                <strong>POST</strong> <code>/api/donate/gifts</code> — Body: <code>{ txHash }</code> — Tx charge →
+                <strong>DONATE GIFTS</strong> (DONATE_GIFTS_WALLET)
+            </p>
+            <hr />
+            <h2>5h) Charity, Daily, Premium, Broker Rental, Tasks</h2>
+            <h3>Charity</h3>
+            <p>
+                <strong>GET</strong> <code>/api/charity/campaigns</code> — Query: <code>featured</code>,
+                <code>cause</code>, <code>status</code>, <code>limit</code>. Active/ended campaigns.
+                <strong>GET</strong> <code>/api/charity/campaigns/:id</code> — Single campaign + recent donations.
+                <strong>GET</strong> <code>/api/charity/stats</code> — Aggregate stats. <strong>GET</strong>
+                <code>/api/charity/my-impact</code> — Auth. User's donation impact. <strong>GET</strong>
+                <code>/api/charity/leaderboard</code> — Query: <code>by</code> (impact|neur|aiba|count),
+                <code>limit</code>. <strong>POST</strong> <code>/api/charity/donate</code> — Auth. Body:
+                <code>{ campaignId, amountNeur?, amountAiba?, message?, anonymous? }</code>.
+            </p>
+            <h3>Daily</h3>
+            <p>
+                <strong>GET</strong> <code>/api/daily/status</code> — Auth. Daily reward and combo eligibility.
+                <strong>POST</strong> <code>/api/daily/claim</code> — Auth. Claim daily NEUR. <strong>POST</strong>
+                <code>/api/daily/combo-claim</code> — Auth. Claim combo bonus (dailyComboRequirementAiba +
+                dailyComboBonusAiba).
+            </p>
+            <h3>Premium</h3>
+            <p>
+                <strong>GET</strong> <code>/api/premium/status</code> — Auth. Premium status (active, premiumUntil).
+                <strong>POST</strong> <code>/api/premium/buy</code> — Body: <code>{ txHash }</code> — Pay TON →
+                BOOST_PROFILE_WALLET; activate premium.
+            </p>
+            <h3>Broker Rental</h3>
+            <p>
+                <strong>GET</strong> <code>/api/broker-rental</code> — List available rentals (status=listed).
+                <strong>POST</strong> <code>/api/broker-rental/list</code> — Auth. Body:
+                <code>{ brokerId, priceAibaPerHour }</code>. List broker for rent. <strong>POST</strong>
+                <code>/api/broker-rental/:id/rent</code> — Auth. Rent broker (pay AIBA, 1 hour; fee → treasury).
+                <strong>POST</strong> <code>/api/broker-rental/:id/unlist</code> — Auth. Unlist your broker.
+            </p>
+            <h3>Tasks</h3>
+            <p><strong>GET</strong> <code>/api/tasks</code> — Auth. Personalized task feed + profile.</p>
+            <h3>Tours, Global Boss, Stars Store</h3>
+            <p>
+                <strong>GET</strong> <code>/api/tournaments</code> — Query: <code>status</code>. List tournaments.
+                <strong>GET</strong> <code>/api/tournaments/:id</code> — Single tournament. <strong>POST</strong>
+                <code>/api/tournaments/:id/enter</code> — Auth. Body: <code>{ brokerId }</code>. Enter tournament.
+                <strong>GET</strong> <code>/api/global-boss</code> — Current boss state (HP, status).
+                <strong>POST</strong> <code>/api/global-boss/record-damage</code> — Auth. Body:
+                <code>{ brokerId, score }</code>. Record damage. <strong>GET</strong>
+                <code>/api/stars-store/config</code> — Pack sizes, prices (AIBA, TON). <strong>POST</strong>
+                <code>/api/stars-store/buy-with-aiba</code> — Body: <code>{ requestId }</code>. Buy Stars with AIBA.
+                <strong>POST</strong> <code>/api/stars-store/buy-with-ton</code> — Body: <code>{ txHash }</code>. Buy
+                Stars with TON → STARS_STORE_WALLET.
+            </p>
+            <hr />
+            <h2>6) Admin (ops tuning)</h2>
+            <p>
+                <strong>GET</strong> <code>/api/admin/realms</code> <strong>POST</strong>
+                <code>/api/admin/realms</code> (create/update)
+            </p>
+            <p>
+                <strong>GET/POST/PATCH/DELETE</strong> <code>/api/admin/announcements</code> — Announcements CRUD;
+                <code>POST /api/admin/announcements/:id/broadcast</code> — Send to all users via Telegram.
+                <strong>GET</strong> <code>/api/admin/support</code> — Support requests; <strong>PATCH</strong>
+                <code>/api/admin/support/:id</code> — Update status.
+            </p>
+            <p>
+                <strong>GET</strong> <code>/api/admin/economy/config</code> <strong>PATCH</strong>
+                <code>/api/admin/economy/config</code> <strong>GET</strong> <code>/api/admin/economy/day</code>
+                <strong>GET</strong> <code>/api/admin/economy/ledger</code> <strong>GET</strong>
+                <code>/api/admin/economy/simulate</code> <strong>POST</strong>
+                <code>/api/admin/economy/credit-user</code>
+            </p>
+            <p>
+                <strong>GET</strong> <code>/api/admin/marketplace/metrics</code> <strong>GET</strong>
+                <code>/api/admin/treasury</code> <strong>POST</strong> <code>/api/admin/treasury/fund</code>
+                <strong>GET</strong> <code>/api/admin/treasury/reserve</code> <strong>POST</strong>
+                <code>/api/admin/treasury/reserve/fund</code> <strong>GET</strong>
+                <code>/api/admin/treasury/buyback</code> <strong>POST</strong>
+                <code>/api/admin/treasury/buyback/fund</code> <strong>PATCH</strong>
+                <code>/api/admin/treasury/oracle</code> — Manual oracleAibaPerTon / oracleNeurPerAiba (one-off override)
+                <strong>GET</strong> <code>/api/admin/oracle/status</code> — Oracle config (auto-update, aibaUsd,
+                min/max/fallback, lastUpdatedAt) <strong>POST</strong> <code>/api/admin/oracle/update</code> — Trigger
+                one oracle update cycle (fetches TON price, computes AIBA/TON, persists) <strong>GET</strong>
+                <code>/api/admin/treasury-ops/metrics</code>
+            </p>
+            <hr />
+            <h2>Types (summary)</h2>
+            <ul>
+                <li>
+                    <strong>Mission</strong>:
+                    <code
+                        >{ realmKey, title, description, type, rewardAiba, rewardNeur, xp, order, requirements, active
+                        }</code
+                    >
+                </li>
+                <li>
+                    <strong>Mentor</strong>:
+                    <code>{ key, name, realmKey, tier, description, perks[], stakingRequiredAiba, active }</code>
+                </li>
+                <li>
+                    <strong>Asset</strong>:
+                    <code
+                        >{ ownerId, category, name, realmKey, rarity, level, upgradeCount, status, metadataUri, stats
+                        }</code
+                    >
+                </li>
+                <li>
+                    <strong>AssetListing</strong>:
+                    <code>{ assetId, sellerId, priceAiba, listingType, status, feeBps, expiresAt }</code>
+                </li>
+                <li>
+                    <strong>Rental</strong>:
+                    <code>{ assetId, ownerId, renterId, priceAiba, durationHours, status, startedAt, endsAt }</code>
+                </li>
+                <li>
+                    <strong>GovernanceProposal</strong>:
+                    <code>{ title, description, status, votesFor, votesAgainst, startAt, endAt, actions[] }</code>
+                </li>
+                <li><strong>TreasuryOp</strong>: <code>{ type, amountAiba, source, refId }</code></li>
+            </ul>
+        </div>
+    </body>
 </html>

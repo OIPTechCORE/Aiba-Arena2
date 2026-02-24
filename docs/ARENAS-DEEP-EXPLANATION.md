@@ -23,40 +23,40 @@ Arenas and leagues are represented as **GameMode** documents (`backend/models/Ga
 
 ### 2.1 Fields
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| **key** | String | required, unique | e.g. `prediction`, `prediction-pro`, `guildWars-elite`. Used for idempotency and cooldowns. |
-| **name** | String | required | Display name, e.g. "Prediction (pro)". |
-| **description** | String | '' | Optional description. |
-| **enabled** | Boolean | true | If false, the mode cannot be used for battle. |
-| **arena** | String | required | Arena bucket: `prediction`, `simulation`, `strategyWars`, `guildWars`, `arbitrage`. |
-| **league** | String | 'rookie' | League: `rookie`, `pro`, `elite`. Affects score multiplier and min broker level. |
+| Field           | Type    | Default          | Description                                                                                 |
+| --------------- | ------- | ---------------- | ------------------------------------------------------------------------------------------- |
+| **key**         | String  | required, unique | e.g. `prediction`, `prediction-pro`, `guildWars-elite`. Used for idempotency and cooldowns. |
+| **name**        | String  | required         | Display name, e.g. "Prediction (pro)".                                                      |
+| **description** | String  | ''               | Optional description.                                                                       |
+| **enabled**     | Boolean | true             | If false, the mode cannot be used for battle.                                               |
+| **arena**       | String  | required         | Arena bucket: `prediction`, `simulation`, `strategyWars`, `guildWars`, `arbitrage`.         |
+| **league**      | String  | 'rookie'         | League: `rookie`, `pro`, `elite`. Affects score multiplier and min broker level.            |
 
 ### 2.2 Per-battle costs and limits
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| **energyCost** | 10 | Energy consumed per battle (broker must have ≥ this). |
-| **cooldownSeconds** | 30 | Minimum seconds before the same broker can run this mode again. |
-| **entryNeurCost** | 0 | Optional NEUR fee to enter (debited before battle). |
-| **entryAibaCost** | 0 | Optional AIBA fee to enter (debited before battle). |
+| Field               | Default | Description                                                     |
+| ------------------- | ------- | --------------------------------------------------------------- |
+| **energyCost**      | 10      | Energy consumed per battle (broker must have ≥ this).           |
+| **cooldownSeconds** | 30      | Minimum seconds before the same broker can run this mode again. |
+| **entryNeurCost**   | 0       | Optional NEUR fee to enter (debited before battle).             |
+| **entryAibaCost**   | 0       | Optional AIBA fee to enter (debited before battle).             |
 
 ### 2.3 Rewards
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| **rewardMultiplierAiba** | 1.0 | Multiply proposed AIBA by this (after base score × config). |
-| **rewardMultiplierNeur** | 1.0 | Multiply proposed NEUR by this. |
+| Field                    | Default | Description                                                 |
+| ------------------------ | ------- | ----------------------------------------------------------- |
+| **rewardMultiplierAiba** | 1.0     | Multiply proposed AIBA by this (after base score × config). |
+| **rewardMultiplierNeur** | 1.0     | Multiply proposed NEUR by this.                             |
 
 ### 2.4 Rules (object)
 
-| Key | Description |
-|-----|-------------|
-| **requiresGuild** | If true, user must be in a guild (e.g. guild wars). |
-| **minBrokerLevel** | Override default min level for this league (rookie 1, pro 5, elite 10). |
-| **arenaWeights** | Override default INT/SPD/RISK weights for the score formula. |
-| **leagueMultiplier** | Override default league multiplier (rookie 1.0, pro 1.1, elite 1.2). |
-| **varianceBase** | Override default variance base (30) for score noise. |
+| Key                  | Description                                                             |
+| -------------------- | ----------------------------------------------------------------------- |
+| **requiresGuild**    | If true, user must be in a guild (e.g. guild wars).                     |
+| **minBrokerLevel**   | Override default min level for this league (rookie 1, pro 5, elite 10). |
+| **arenaWeights**     | Override default INT/SPD/RISK weights for the score formula.            |
+| **leagueMultiplier** | Override default league multiplier (rookie 1.0, pro 1.1, elite 1.2).    |
+| **varianceBase**     | Override default variance base (30) for score noise.                    |
 
 ---
 
@@ -98,12 +98,12 @@ Admins can add or edit modes via **Admin → Game Modes** (key, name, arena, lea
 
 - **Seed message:** `telegramId:brokerId:modeKey:arena:league:requestId:opponentId` (see `backend/engine/battleSeed.js`). Same inputs ⇒ same score.
 - **Score:** `simulateBattle({ broker, seed, arena, league, rules })` in `backend/engine/battleEngine.js`:
-  - **Arena weights** (defaults): prediction (INT 0.7, SPD 0.2, RISK 0.1), simulation (0.5, 0.3, 0.2), strategyWars (0.6, 0.1, 0.3), guildWars (0.4, 0.3, 0.3), arbitrage (0.5, 0.3, 0.2). Overridable via `rules.arenaWeights`.
-  - **League multiplier:** rookie 1.0, pro 1.1, elite 1.2 (or `rules.leagueMultiplier`).
-  - **Level multiplier:** +2% per broker level, cap +50%.
-  - **Base score** = 100 × leagueMul × levelMul × (weighted sum of INT/SPD/RISK).
-  - **Variance** = varianceBase × leagueMul × (0.2 + risk); **noise** from deterministic RNG.
-  - **score** = max(0, round(base + noise)).
+    - **Arena weights** (defaults): prediction (INT 0.7, SPD 0.2, RISK 0.1), simulation (0.5, 0.3, 0.2), strategyWars (0.6, 0.1, 0.3), guildWars (0.4, 0.3, 0.3), arbitrage (0.5, 0.3, 0.2). Overridable via `rules.arenaWeights`.
+    - **League multiplier:** rookie 1.0, pro 1.1, elite 1.2 (or `rules.leagueMultiplier`).
+    - **Level multiplier:** +2% per broker level, cap +50%.
+    - **Base score** = 100 × leagueMul × levelMul × (weighted sum of INT/SPD/RISK).
+    - **Variance** = varianceBase × leagueMul × (0.2 + risk); **noise** from deterministic RNG.
+    - **score** = max(0, round(base + noise)).
 
 ### 4.4 Guild wars adjustment
 
@@ -121,13 +121,13 @@ If guild wars and both guilds exist: **bonus** = clamp(-15, 15, (myPoolCount −
 
 Default weights by arena (INT, SPD, RISK):
 
-| Arena | Intelligence | Speed | Risk |
-|-------|--------------|-------|------|
-| prediction | 0.7 | 0.2 | 0.1 |
-| simulation | 0.5 | 0.3 | 0.2 |
-| strategyWars | 0.6 | 0.1 | 0.3 |
-| guildWars | 0.4 | 0.3 | 0.3 |
-| arbitrage (default) | 0.5 | 0.3 | 0.2 |
+| Arena               | Intelligence | Speed | Risk |
+| ------------------- | ------------ | ----- | ---- |
+| prediction          | 0.7          | 0.2   | 0.1  |
+| simulation          | 0.5          | 0.3   | 0.2  |
+| strategyWars        | 0.6          | 0.1   | 0.3  |
+| guildWars           | 0.4          | 0.3   | 0.3  |
+| arbitrage (default) | 0.5          | 0.3   | 0.2  |
 
 Override per mode via `mode.rules.arenaWeights` (e.g. `{ intelligence: 0.8, speed: 0.1, risk: 0.1 }`).
 
@@ -136,10 +136,10 @@ Override per mode via `mode.rules.arenaWeights` (e.g. `{ intelligence: 0.8, spee
 ## 6. Leagues
 
 | League | Min broker level (default) | Score multiplier |
-|--------|----------------------------|------------------|
-| rookie | 1 | 1.0 |
-| pro | 5 | 1.1 |
-| elite | 10 | 1.2 |
+| ------ | -------------------------- | ---------------- |
+| rookie | 1                          | 1.0              |
+| pro    | 5                          | 1.1              |
+| elite  | 10                         | 1.2              |
 
 Higher league = higher rewards and stricter level gate. Override min level per mode with `rules.minBrokerLevel`.
 
@@ -175,12 +175,12 @@ Higher league = higher rewards and stricter level gate. Override min level per m
 
 ## 9. Summary
 
-| Concept | Short answer |
-|----------|---------------|
-| **What is an arena?** | A battle mode: arena + league, with weights, energy, cooldown, optional fees and guild requirement. |
-| **How is the mode chosen?** | By `arena` + `league` or by `modeKey`. Stored as GameMode; defaults created on DB init. |
+| Concept                              | Short answer                                                                                               |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| **What is an arena?**                | A battle mode: arena + league, with weights, energy, cooldown, optional fees and guild requirement.        |
+| **How is the mode chosen?**          | By `arena` + `league` or by `modeKey`. Stored as GameMode; defaults created on DB init.                    |
 | **How does the arena affect score?** | Via arena weights (INT/SPD/RISK), league multiplier, and optional rules overrides. Same seed ⇒ same score. |
-| **What are leagues?** | rookie (1.0×, level 1+), pro (1.1×, level 5+), elite (1.2×, level 10+). |
-| **Guild wars?** | Requires guild; NEUR split 80% player / 20% guild; small pool-size bonus/penalty to score. |
+| **What are leagues?**                | rookie (1.0×, level 1+), pro (1.1×, level 5+), elite (1.2×, level 10+).                                    |
+| **Guild wars?**                      | Requires guild; NEUR split 80% player / 20% guild; small pool-size bonus/penalty to score.                 |
 
 For broker stats and the full score formula, see **BROKERS-DEEP-EXPLANATION.md** and **GAME-FUNCTIONALITY.md**.

@@ -1,265 +1,316 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>SUPER ADMIN WALLETS — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>SUPER ADMIN WALLETS</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Super Admin Wallets — Complete Reference</h1>
-<p>All TON transaction charges in AIBA Arena go to <strong>Super Admin wallets</strong>. Each flow has a dedicated env var. Configure these in <code>.env</code> (or your hosting provider’s env) before enabling the corresponding features.</p>
-<hr/>
-<h2>Quick reference table</h2>
-<table>
-<thead><tr>
-<th>Super Admin name</th>
-<th>Env var</th>
-<th>Config (Admin → Economy)</th>
-<th>API</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>P2P AIBA send</strong></td>
-<td><code>P2P_AIBA_SEND_WALLET</code></td>
-<td><code>p2pAibaSendFeeTonNano</code> (default 0.1 TON)</td>
-<td><code>POST /api/p2p-aiba/send</code></td>
-</tr>
-<tr>
-<td><strong>AIBA in gifts</strong></td>
-<td><code>AIBA_IN_GIFTS_WALLET</code></td>
-<td><code>aibaInGiftsFeeTonNano</code> (default 0.1 TON)</td>
-<td><code>POST /api/gifts/send-aiba</code></td>
-</tr>
-<tr>
-<td><strong>Buy AIBA with TON</strong></td>
-<td><code>BUY_AIBA_WITH_TON_WALLET</code></td>
-<td><code>buyAibaWithTonFeeBps</code> (default 5%)</td>
-<td><code>POST /api/p2p-aiba/buy</code></td>
-</tr>
-<tr>
-<td><strong>Donate a broker</strong></td>
-<td><code>DONATE_BROKER_WALLET</code></td>
-<td><code>donateBrokerFeeTonNano</code> (default 0.5 TON)</td>
-<td><code>POST /api/donate/broker</code></td>
-</tr>
-<tr>
-<td><strong>Donate a car</strong></td>
-<td><code>DONATE_CAR_WALLET</code></td>
-<td><code>donateCarFeeTonNano</code> (default 0.5 TON)</td>
-<td><code>POST /api/donate/car</code></td>
-</tr>
-<tr>
-<td><strong>Donate a bike</strong></td>
-<td><code>DONATE_BIKE_WALLET</code></td>
-<td><code>donateBikeFeeTonNano</code> (default 0.5 TON)</td>
-<td><code>POST /api/donate/bike</code></td>
-</tr>
-<tr>
-<td><strong>Donate gifts</strong></td>
-<td><code>DONATE_GIFTS_WALLET</code></td>
-<td><code>donateGiftsFeeTonNano</code> (default 0.1 TON)</td>
-<td><code>POST /api/donate/gifts</code></td>
-</tr>
-<tr>
-<td><strong>Cancelled stakes</strong></td>
-<td><code>CANCELLED_STAKES_WALLET</code></td>
-<td>AIBA fee (5% default) from early stake cancel → Treasury model (<code>staking_cancel_early_fee</code>). Env reserved for future TON-based fee.</td>
-<td><code>POST /api/staking/cancel-early</code></td>
-</tr>
-<tr>
-<td>Create broker (TON)</td>
-<td><code>CREATED_BROKERS_WALLET</code></td>
-<td><code>createBrokerCostTonNano</code> (1–10 TON)</td>
-<td><code>POST /api/brokers/create-with-ton</code></td>
-</tr>
-<tr>
-<td>Boost profile</td>
-<td><code>BOOST_PROFILE_WALLET</code></td>
-<td><code>boostProfileCostTonNano</code> (1–10 TON)</td>
-<td><code>POST /api/boosts/buy-profile-with-ton</code></td>
-</tr>
-<tr>
-<td>Gifts (basic)</td>
-<td><code>GIFTS_WALLET</code></td>
-<td><code>giftCostTonNano</code> (1–10 TON)</td>
-<td><code>POST /api/gifts/send</code></td>
-</tr>
-<tr>
-<td>Stars Store</td>
-<td><code>STARS_STORE_WALLET</code></td>
-<td><code>starsStorePackPriceTonNano</code></td>
-<td><code>POST /api/stars-store/buy-with-ton</code></td>
-</tr>
-<tr>
-<td>Car Racing</td>
-<td><code>CAR_RACING_WALLET</code></td>
-<td><code>createCarCostTonNano</code> (1–10 TON)</td>
-<td><code>POST /api/car-racing/create-with-ton</code></td>
-</tr>
-<tr>
-<td>Bike Racing</td>
-<td><code>MOTORCYCLE_RACING_WALLET</code></td>
-<td><code>createBikeCostTonNano</code> (1–10 TON)</td>
-<td><code>POST /api/bike-racing/create-with-ton</code></td>
-</tr>
-<tr>
-<td>Create group</td>
-<td><code>LEADER_BOARD_WALLET</code></td>
-<td><code>createGroupCostTonNano</code> (1–10 TON)</td>
-<td><code>POST /api/guilds/create</code></td>
-</tr>
-<tr>
-<td>Boost group</td>
-<td><code>BOOST_GROUP_WALLET</code></td>
-<td><code>boostGroupCostTonNano</code> (1–10 TON)</td>
-<td><code>POST /api/guilds/:guildId/boost</code></td>
-</tr>
-<tr>
-<td>Premium</td>
-<td><code>PREMIUM_WALLET</code></td>
-<td><code>premiumCostTonNano</code> (e.g. 5 TON)</td>
-<td><code>POST /api/premium/buy</code></td>
-</tr>
-<tr>
-<td>Battle boost</td>
-<td><code>BOOST_TON_WALLET</code></td>
-<td><code>boostCostTonNano</code></td>
-<td><code>POST /api/boosts/buy-with-ton</code></td>
-</tr>
-<tr>
-<td>University badge</td>
-<td><code>UNIVERSITY_BADGE_TON_WALLET</code></td>
-<td><code>courseCompletionBadgeMintCostTonNano</code>, <code>fullCourseCompletionCertificateMintCostTonNano</code></td>
-<td><code>POST /api/university/mint-*</code></td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>1. P2P AIBA send</h2>
-<p><strong>Super Admin name:</strong> P2P AIBA send <strong>Env:</strong> <code>P2P_AIBA_SEND_WALLET</code> <strong>Config:</strong> <code>p2pAibaSendFeeTonNano</code> (default 0.1 TON = 100_000_000 nano)</p>
-<p>User pays a TON fee, then sends AIBA to another user. TON goes to this wallet.</p>
-<ul>
-<li><strong>Body:</strong> <code>{ toTelegramId?, toUsername?, amountAiba, txHash }</code></li>
-<li><strong>UI:</strong> Wallet tab → P2P AIBA send</li>
-<li><strong>Requires:</strong> <code>oracleAibaPerTon</code> for rate display; user must have sufficient AIBA balance</li>
-</ul>
-<hr/>
-<h2>2. AIBA in gifts</h2>
-<p><strong>Super Admin name:</strong> AIBA in gifts <strong>Env:</strong> <code>AIBA_IN_GIFTS_WALLET</code> <strong>Config:</strong> <code>aibaInGiftsFeeTonNano</code> (default 0.1 TON)</p>
-<p>User pays TON (amount/rate + fee) and sends AIBA to a recipient. TON goes to this wallet.</p>
-<ul>
-<li><strong>Body:</strong> <code>{ txHash, toTelegramId?, toUsername?, amountAiba, message? }</code></li>
-<li><strong>UI:</strong> Wallet tab → AIBA in gifts</li>
-<li><strong>Requires:</strong> <code>oracleAibaPerTon</code> for cost calculation</li>
-</ul>
-<hr/>
-<h2>3. Buy AIBA with TON</h2>
-<p><strong>Super Admin name:</strong> Buy AIBA with TON <strong>Env:</strong> <code>BUY_AIBA_WITH_TON_WALLET</code> <strong>Config:</strong> <code>buyAibaWithTonFeeBps</code> (default 500 = 5%)</p>
-<p>User sends TON to purchase AIBA. Full TON goes to this wallet; user receives AIBA at <code>oracle rate × (1 - feeBps/10000)</code>.</p>
-<ul>
-<li><strong>Body:</strong> <code>{ txHash }</code></li>
-<li><strong>UI:</strong> Wallet tab → Buy AIBA with TON</li>
-<li><strong>Requires:</strong> <code>oracleAibaPerTon</code>; any TON-supported wallet</li>
-</ul>
-<hr/>
-<h2>4. Donate (broker, car, bike, gifts)</h2>
-<p>All four flows use a TON fee paid to the corresponding Super Admin wallet.</p>
-<h3>4a. Donate a broker</h3>
-<p><strong>Env:</strong> <code>DONATE_BROKER_WALLET</code> <strong>Config:</strong> <code>donateBrokerFeeTonNano</code> (default 0.5 TON) <strong>API:</strong> <code>POST /api/donate/broker</code> — Body: <code>{ brokerId, txHash }</code> <strong>Note:</strong> Broker must not be in a guild; it moves to donation pool.</p>
-<h3>4b. Donate a car</h3>
-<p><strong>Env:</strong> <code>DONATE_CAR_WALLET</code> <strong>Config:</strong> <code>donateCarFeeTonNano</code> (default 0.5 TON) <strong>API:</strong> <code>POST /api/donate/car</code> — Body: <code>{ carId, txHash }</code></p>
-<h3>4c. Donate a bike</h3>
-<p><strong>Env:</strong> <code>DONATE_BIKE_WALLET</code> <strong>Config:</strong> <code>donateBikeFeeTonNano</code> (default 0.5 TON) <strong>API:</strong> <code>POST /api/donate/bike</code> — Body: <code>{ bikeId, txHash }</code></p>
-<h3>4d. Donate gifts</h3>
-<p><strong>Env:</strong> <code>DONATE_GIFTS_WALLET</code> <strong>Config:</strong> <code>donateGiftsFeeTonNano</code> (default 0.1 TON) <strong>API:</strong> <code>POST /api/donate/gifts</code> — Body: <code>{ txHash }</code></p>
-<hr/>
-<h2>5. Other TON flows</h2>
-<table>
-<thead><tr>
-<th>Flow</th>
-<th>Env</th>
-<th>Economy config key</th>
-<th>Notes</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Create broker with TON</td>
-<td><code>CREATED_BROKERS_WALLET</code></td>
-<td><code>createBrokerCostTonNano</code></td>
-<td>Auto-lists on marketplace</td>
-</tr>
-<tr>
-<td>Boost profile</td>
-<td><code>BOOST_PROFILE_WALLET</code></td>
-<td><code>boostProfileCostTonNano</code></td>
-<td>Profile visibility</td>
-</tr>
-<tr>
-<td>Basic gift</td>
-<td><code>GIFTS_WALLET</code></td>
-<td><code>giftCostTonNano</code></td>
-<td>Fixed TON gift</td>
-</tr>
-<tr>
-<td>Stars Store</td>
-<td><code>STARS_STORE_WALLET</code></td>
-<td><code>starsStorePackPriceTonNano</code></td>
-<td>Buy Stars with TON</td>
-</tr>
-<tr>
-<td>Car Racing create</td>
-<td><code>CAR_RACING_WALLET</code></td>
-<td><code>createCarCostTonNano</code></td>
-<td>Create car with TON</td>
-</tr>
-<tr>
-<td>Bike Racing create</td>
-<td><code>MOTORCYCLE_RACING_WALLET</code></td>
-<td><code>createBikeCostTonNano</code></td>
-<td>Create bike with TON</td>
-</tr>
-<tr>
-<td>Create guild</td>
-<td><code>LEADER_BOARD_WALLET</code></td>
-<td><code>createGroupCostTonNano</code></td>
-<td>Top leaders create free</td>
-</tr>
-<tr>
-<td>Boost guild</td>
-<td><code>BOOST_GROUP_WALLET</code></td>
-<td><code>boostGroupCostTonNano</code></td>
-<td>Boost group with TON</td>
-</tr>
-<tr>
-<td>Premium</td>
-<td><code>PREMIUM_WALLET</code></td>
-<td><code>premiumCostTonNano</code></td>
-<td>Subscription</td>
-</tr>
-<tr>
-<td>Battle boost</td>
-<td><code>BOOST_TON_WALLET</code></td>
-<td><code>boostCostTonNano</code></td>
-<td>Battle reward multiplier</td>
-</tr>
-<tr>
-<td>University mint</td>
-<td><code>UNIVERSITY_BADGE_TON_WALLET</code></td>
-<td><code>courseCompletionBadgeMintCostTonNano</code>, etc.</td>
-<td>Course badges, certificates</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>Setup checklist</h2>
-<ol>
-<li><strong>Add env vars</strong> in <code>.env</code> (or hosting env, e.g. Vercel, Railway):</li>
-</ol>
-<pre><code>   P2P_AIBA_SEND_WALLET=UQ...
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>SUPER ADMIN WALLETS — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>SUPER ADMIN WALLETS</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Super Admin Wallets — Complete Reference</h1>
+            <p>
+                All TON transaction charges in AIBA Arena go to <strong>Super Admin wallets</strong>. Each flow has a
+                dedicated env var. Configure these in <code>.env</code> (or your hosting provider’s env) before enabling
+                the corresponding features.
+            </p>
+            <hr />
+            <h2>Quick reference table</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Super Admin name</th>
+                        <th>Env var</th>
+                        <th>Config (Admin → Economy)</th>
+                        <th>API</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>P2P AIBA send</strong></td>
+                        <td><code>P2P_AIBA_SEND_WALLET</code></td>
+                        <td><code>p2pAibaSendFeeTonNano</code> (default 0.1 TON)</td>
+                        <td><code>POST /api/p2p-aiba/send</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>AIBA in gifts</strong></td>
+                        <td><code>AIBA_IN_GIFTS_WALLET</code></td>
+                        <td><code>aibaInGiftsFeeTonNano</code> (default 0.1 TON)</td>
+                        <td><code>POST /api/gifts/send-aiba</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Buy AIBA with TON</strong></td>
+                        <td><code>BUY_AIBA_WITH_TON_WALLET</code></td>
+                        <td><code>buyAibaWithTonFeeBps</code> (default 5%)</td>
+                        <td><code>POST /api/p2p-aiba/buy</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Donate a broker</strong></td>
+                        <td><code>DONATE_BROKER_WALLET</code></td>
+                        <td><code>donateBrokerFeeTonNano</code> (default 0.5 TON)</td>
+                        <td><code>POST /api/donate/broker</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Donate a car</strong></td>
+                        <td><code>DONATE_CAR_WALLET</code></td>
+                        <td><code>donateCarFeeTonNano</code> (default 0.5 TON)</td>
+                        <td><code>POST /api/donate/car</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Donate a bike</strong></td>
+                        <td><code>DONATE_BIKE_WALLET</code></td>
+                        <td><code>donateBikeFeeTonNano</code> (default 0.5 TON)</td>
+                        <td><code>POST /api/donate/bike</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Donate gifts</strong></td>
+                        <td><code>DONATE_GIFTS_WALLET</code></td>
+                        <td><code>donateGiftsFeeTonNano</code> (default 0.1 TON)</td>
+                        <td><code>POST /api/donate/gifts</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cancelled stakes</strong></td>
+                        <td><code>CANCELLED_STAKES_WALLET</code></td>
+                        <td>
+                            AIBA fee (5% default) from early stake cancel → Treasury model
+                            (<code>staking_cancel_early_fee</code>). Env reserved for future TON-based fee.
+                        </td>
+                        <td><code>POST /api/staking/cancel-early</code></td>
+                    </tr>
+                    <tr>
+                        <td>Create broker (TON)</td>
+                        <td><code>CREATED_BROKERS_WALLET</code></td>
+                        <td><code>createBrokerCostTonNano</code> (1–10 TON)</td>
+                        <td><code>POST /api/brokers/create-with-ton</code></td>
+                    </tr>
+                    <tr>
+                        <td>Boost profile</td>
+                        <td><code>BOOST_PROFILE_WALLET</code></td>
+                        <td><code>boostProfileCostTonNano</code> (1–10 TON)</td>
+                        <td><code>POST /api/boosts/buy-profile-with-ton</code></td>
+                    </tr>
+                    <tr>
+                        <td>Gifts (basic)</td>
+                        <td><code>GIFTS_WALLET</code></td>
+                        <td><code>giftCostTonNano</code> (1–10 TON)</td>
+                        <td><code>POST /api/gifts/send</code></td>
+                    </tr>
+                    <tr>
+                        <td>Stars Store</td>
+                        <td><code>STARS_STORE_WALLET</code></td>
+                        <td><code>starsStorePackPriceTonNano</code></td>
+                        <td><code>POST /api/stars-store/buy-with-ton</code></td>
+                    </tr>
+                    <tr>
+                        <td>Car Racing</td>
+                        <td><code>CAR_RACING_WALLET</code></td>
+                        <td><code>createCarCostTonNano</code> (1–10 TON)</td>
+                        <td><code>POST /api/car-racing/create-with-ton</code></td>
+                    </tr>
+                    <tr>
+                        <td>Bike Racing</td>
+                        <td><code>MOTORCYCLE_RACING_WALLET</code></td>
+                        <td><code>createBikeCostTonNano</code> (1–10 TON)</td>
+                        <td><code>POST /api/bike-racing/create-with-ton</code></td>
+                    </tr>
+                    <tr>
+                        <td>Create group</td>
+                        <td><code>LEADER_BOARD_WALLET</code></td>
+                        <td><code>createGroupCostTonNano</code> (1–10 TON)</td>
+                        <td><code>POST /api/guilds/create</code></td>
+                    </tr>
+                    <tr>
+                        <td>Boost group</td>
+                        <td><code>BOOST_GROUP_WALLET</code></td>
+                        <td><code>boostGroupCostTonNano</code> (1–10 TON)</td>
+                        <td><code>POST /api/guilds/:guildId/boost</code></td>
+                    </tr>
+                    <tr>
+                        <td>Premium</td>
+                        <td><code>PREMIUM_WALLET</code></td>
+                        <td><code>premiumCostTonNano</code> (e.g. 5 TON)</td>
+                        <td><code>POST /api/premium/buy</code></td>
+                    </tr>
+                    <tr>
+                        <td>Battle boost</td>
+                        <td><code>BOOST_TON_WALLET</code></td>
+                        <td><code>boostCostTonNano</code></td>
+                        <td><code>POST /api/boosts/buy-with-ton</code></td>
+                    </tr>
+                    <tr>
+                        <td>University badge</td>
+                        <td><code>UNIVERSITY_BADGE_TON_WALLET</code></td>
+                        <td>
+                            <code>courseCompletionBadgeMintCostTonNano</code>,
+                            <code>fullCourseCompletionCertificateMintCostTonNano</code>
+                        </td>
+                        <td><code>POST /api/university/mint-*</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>1. P2P AIBA send</h2>
+            <p>
+                <strong>Super Admin name:</strong> P2P AIBA send <strong>Env:</strong> <code>P2P_AIBA_SEND_WALLET</code>
+                <strong>Config:</strong> <code>p2pAibaSendFeeTonNano</code> (default 0.1 TON = 100_000_000 nano)
+            </p>
+            <p>User pays a TON fee, then sends AIBA to another user. TON goes to this wallet.</p>
+            <ul>
+                <li><strong>Body:</strong> <code>{ toTelegramId?, toUsername?, amountAiba, txHash }</code></li>
+                <li><strong>UI:</strong> Wallet tab → P2P AIBA send</li>
+                <li>
+                    <strong>Requires:</strong> <code>oracleAibaPerTon</code> for rate display; user must have sufficient
+                    AIBA balance
+                </li>
+            </ul>
+            <hr />
+            <h2>2. AIBA in gifts</h2>
+            <p>
+                <strong>Super Admin name:</strong> AIBA in gifts <strong>Env:</strong> <code>AIBA_IN_GIFTS_WALLET</code>
+                <strong>Config:</strong> <code>aibaInGiftsFeeTonNano</code> (default 0.1 TON)
+            </p>
+            <p>User pays TON (amount/rate + fee) and sends AIBA to a recipient. TON goes to this wallet.</p>
+            <ul>
+                <li>
+                    <strong>Body:</strong> <code>{ txHash, toTelegramId?, toUsername?, amountAiba, message? }</code>
+                </li>
+                <li><strong>UI:</strong> Wallet tab → AIBA in gifts</li>
+                <li><strong>Requires:</strong> <code>oracleAibaPerTon</code> for cost calculation</li>
+            </ul>
+            <hr />
+            <h2>3. Buy AIBA with TON</h2>
+            <p>
+                <strong>Super Admin name:</strong> Buy AIBA with TON <strong>Env:</strong>
+                <code>BUY_AIBA_WITH_TON_WALLET</code> <strong>Config:</strong>
+                <code>buyAibaWithTonFeeBps</code> (default 500 = 5%)
+            </p>
+            <p>
+                User sends TON to purchase AIBA. Full TON goes to this wallet; user receives AIBA at
+                <code>oracle rate × (1 - feeBps/10000)</code>.
+            </p>
+            <ul>
+                <li><strong>Body:</strong> <code>{ txHash }</code></li>
+                <li><strong>UI:</strong> Wallet tab → Buy AIBA with TON</li>
+                <li><strong>Requires:</strong> <code>oracleAibaPerTon</code>; any TON-supported wallet</li>
+            </ul>
+            <hr />
+            <h2>4. Donate (broker, car, bike, gifts)</h2>
+            <p>All four flows use a TON fee paid to the corresponding Super Admin wallet.</p>
+            <h3>4a. Donate a broker</h3>
+            <p>
+                <strong>Env:</strong> <code>DONATE_BROKER_WALLET</code> <strong>Config:</strong>
+                <code>donateBrokerFeeTonNano</code> (default 0.5 TON) <strong>API:</strong>
+                <code>POST /api/donate/broker</code> — Body: <code>{ brokerId, txHash }</code>
+                <strong>Note:</strong> Broker must not be in a guild; it moves to donation pool.
+            </p>
+            <h3>4b. Donate a car</h3>
+            <p>
+                <strong>Env:</strong> <code>DONATE_CAR_WALLET</code> <strong>Config:</strong>
+                <code>donateCarFeeTonNano</code> (default 0.5 TON) <strong>API:</strong>
+                <code>POST /api/donate/car</code> — Body: <code>{ carId, txHash }</code>
+            </p>
+            <h3>4c. Donate a bike</h3>
+            <p>
+                <strong>Env:</strong> <code>DONATE_BIKE_WALLET</code> <strong>Config:</strong>
+                <code>donateBikeFeeTonNano</code> (default 0.5 TON) <strong>API:</strong>
+                <code>POST /api/donate/bike</code> — Body: <code>{ bikeId, txHash }</code>
+            </p>
+            <h3>4d. Donate gifts</h3>
+            <p>
+                <strong>Env:</strong> <code>DONATE_GIFTS_WALLET</code> <strong>Config:</strong>
+                <code>donateGiftsFeeTonNano</code> (default 0.1 TON) <strong>API:</strong>
+                <code>POST /api/donate/gifts</code> — Body: <code>{ txHash }</code>
+            </p>
+            <hr />
+            <h2>5. Other TON flows</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Flow</th>
+                        <th>Env</th>
+                        <th>Economy config key</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Create broker with TON</td>
+                        <td><code>CREATED_BROKERS_WALLET</code></td>
+                        <td><code>createBrokerCostTonNano</code></td>
+                        <td>Auto-lists on marketplace</td>
+                    </tr>
+                    <tr>
+                        <td>Boost profile</td>
+                        <td><code>BOOST_PROFILE_WALLET</code></td>
+                        <td><code>boostProfileCostTonNano</code></td>
+                        <td>Profile visibility</td>
+                    </tr>
+                    <tr>
+                        <td>Basic gift</td>
+                        <td><code>GIFTS_WALLET</code></td>
+                        <td><code>giftCostTonNano</code></td>
+                        <td>Fixed TON gift</td>
+                    </tr>
+                    <tr>
+                        <td>Stars Store</td>
+                        <td><code>STARS_STORE_WALLET</code></td>
+                        <td><code>starsStorePackPriceTonNano</code></td>
+                        <td>Buy Stars with TON</td>
+                    </tr>
+                    <tr>
+                        <td>Car Racing create</td>
+                        <td><code>CAR_RACING_WALLET</code></td>
+                        <td><code>createCarCostTonNano</code></td>
+                        <td>Create car with TON</td>
+                    </tr>
+                    <tr>
+                        <td>Bike Racing create</td>
+                        <td><code>MOTORCYCLE_RACING_WALLET</code></td>
+                        <td><code>createBikeCostTonNano</code></td>
+                        <td>Create bike with TON</td>
+                    </tr>
+                    <tr>
+                        <td>Create guild</td>
+                        <td><code>LEADER_BOARD_WALLET</code></td>
+                        <td><code>createGroupCostTonNano</code></td>
+                        <td>Top leaders create free</td>
+                    </tr>
+                    <tr>
+                        <td>Boost guild</td>
+                        <td><code>BOOST_GROUP_WALLET</code></td>
+                        <td><code>boostGroupCostTonNano</code></td>
+                        <td>Boost group with TON</td>
+                    </tr>
+                    <tr>
+                        <td>Premium</td>
+                        <td><code>PREMIUM_WALLET</code></td>
+                        <td><code>premiumCostTonNano</code></td>
+                        <td>Subscription</td>
+                    </tr>
+                    <tr>
+                        <td>Battle boost</td>
+                        <td><code>BOOST_TON_WALLET</code></td>
+                        <td><code>boostCostTonNano</code></td>
+                        <td>Battle reward multiplier</td>
+                    </tr>
+                    <tr>
+                        <td>University mint</td>
+                        <td><code>UNIVERSITY_BADGE_TON_WALLET</code></td>
+                        <td><code>courseCompletionBadgeMintCostTonNano</code>, etc.</td>
+                        <td>Course badges, certificates</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>Setup checklist</h2>
+            <ol>
+                <li><strong>Add env vars</strong> in <code>.env</code> (or hosting env, e.g. Vercel, Railway):</li>
+            </ol>
+            <pre><code>   P2P_AIBA_SEND_WALLET=UQ...
    AIBA_IN_GIFTS_WALLET=UQ...
    BUY_AIBA_WITH_TON_WALLET=UQ...
    DONATE_BROKER_WALLET=UQ...
@@ -267,15 +318,18 @@
    DONATE_BIKE_WALLET=UQ...
    DONATE_GIFTS_WALLET=UQ...
    # ... etc.</code></pre>
-<ol>
-<li><strong>Adjust fees</strong> (optional): Admin → Economy → update fee config keys (e.g. <code>p2pAibaSendFeeTonNano</code>, <code>donateBrokerFeeTonNano</code>).</li>
-</ol>
-<hr/>
-<h2>Related docs</h2>
-<ul>
-<li><strong>backend/.env.example</strong> — All env vars with comments</li>
-<li><strong>MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</strong> — TON + AIBA payment design</li>
-</ul>
-  </div>
-</body>
+            <ol>
+                <li>
+                    <strong>Adjust fees</strong> (optional): Admin → Economy → update fee config keys (e.g.
+                    <code>p2pAibaSendFeeTonNano</code>, <code>donateBrokerFeeTonNano</code>).
+                </li>
+            </ol>
+            <hr />
+            <h2>Related docs</h2>
+            <ul>
+                <li><strong>backend/.env.example</strong> — All env vars with comments</li>
+                <li><strong>MARKETPLACE-AND-PAYMENTS-MASTER-PLAN.md</strong> — TON + AIBA payment design</li>
+            </ul>
+        </div>
+    </body>
 </html>

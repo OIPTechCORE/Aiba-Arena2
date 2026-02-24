@@ -1,507 +1,570 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>REPORTS MONITORING — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>REPORTS MONITORING</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Reports Deep Monitoring — Codebase vs Documentation</h1>
-<p><strong>Purpose:</strong> Cross-validate advisory and audit reports against the live codebase. Single reference for &quot;are the reports accurate?&quot;</p>
-<p><strong>Last verified:</strong> Generated from codebase scan. Re-run verification when economy, referrals, or automation logic changes.</p>
-<hr/>
-<h2>1. Report Inventory</h2>
-<table>
-<thead><tr>
-<th>Report</th>
-<th>Path</th>
-<th>Scope</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE</strong></td>
-<td><code>docs/ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md</code></td>
-<td>1T AIBA, viral mechanics, user/founder revenue</td>
-</tr>
-<tr>
-<td><strong>AIBA-SELF-AUTOMATION</strong></td>
-<td><code>docs/AIBA-SELF-AUTOMATION.md</code></td>
-<td>Caps, allocation, minting, anti-inflation automation</td>
-</tr>
-<tr>
-<td><strong>OPERATIONS</strong></td>
-<td><code>docs/OPERATIONS.md</code></td>
-<td>Runbook, keys, incident response, monitoring</td>
-</tr>
-<tr>
-<td><strong>API-AND-READINESS-AUDIT</strong></td>
-<td><code>docs/API-AND-READINESS-AUDIT.md</code></td>
-<td>API mapping, production readiness</td>
-</tr>
-<tr>
-<td><strong>AUDIT-AND-STATUS</strong></td>
-<td><code>docs/AUDIT-AND-STATUS.md</code></td>
-<td>Project assessment, ecosystems, vision vs codebase</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>2. ADVISORY-TOKENOMICS — Verification</h2>
-<h3>2.1 Economy Config (from <code>EconomyConfig.js</code>)</h3>
-<table>
-<thead><tr>
-<th>Advisory Claims</th>
-<th>Codebase</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>dailyCapAiba 1M</td>
-<td><code>default: 1_000_000</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>baseRewardAibaPerScore 2</td>
-<td><code>default: 2</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>referralRewardAibaReferrer 10</td>
-<td><code>default: 10</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>referralRewardAibaReferee 5</td>
-<td><code>default: 5</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>marketplaceFeeBps 3%</td>
-<td><code>default: 300</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>Token splits: Burn 15%, Treasury 25%, Rewards 50%, Staking 10%</td>
-<td><code>tokenSplitBurnBps: 1500</code>, <code>tokenSplitTreasuryBps: 2500</code>, <code>tokenSplitRewardsBps: 5000</code>, <code>tokenSplitStakingBps: 1000</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>stakingApyPercent 15</td>
-<td><code>default: 15</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>nftStakingApyPercent 12</td>
-<td><code>default: 12</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>carEntryFeeAiba 10, carRacingFeeBps 3%</td>
-<td><code>10</code>, <code>300</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>createBrokerCostTonNano 1 TON</td>
-<td><code>1_000_000_000</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>University badge 10 TON, cert 15 TON</td>
-<td><code>10e9</code>, <code>15e9</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>referralUnlock3BonusBps 100 (1%)</td>
-<td><code>default: 100</code></td>
-<td>✅ Match</td>
-</tr>
-</tbody></table>
-<h3>2.2 Referral Tiered Rewards</h3>
-<table>
-<thead><tr>
-<th>Advisory</th>
-<th>Code (<code>referrals.js</code>)</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>10th = 2× referrer, 1.5× referee</td>
-<td><code>newUses &gt;= 10</code> → ×2, ×1.5</td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>100th = 5× referrer, 2× referee</td>
-<td><code>newUses &gt;= 100</code> → ×5, ×2</td>
-<td>✅ Match</td>
-</tr>
-</tbody></table>
-<h3>2.3 Token Splits Implementation</h3>
-<table>
-<thead><tr>
-<th>Advisory</th>
-<th>Code (<code>tokenSplits.js</code>, EconomyConfig)</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Burn 15%, Treasury 25%, Rewards 50%, Staking 10%</td>
-<td><code>computeTokenSplits</code> uses BPS from config; defaults as above</td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>Marketplace 3% fee → splits</td>
-<td><code>marketplaceFeeBps: 300</code>; <code>computeTokenSplits</code> on fee amount</td>
-<td>✅ Match</td>
-</tr>
-</tbody></table>
-<h3>2.4 Trainer Rewards (TRAINERS-MANUAL / economy)</h3>
-<table>
-<thead><tr>
-<th>Claim</th>
-<th>Code</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>5 AIBA per referred user (3+ battles)</td>
-<td><code>trainerRewardAibaPerUser: 5</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>20 AIBA per recruited trainer (on approval)</td>
-<td><code>trainerRewardAibaPerRecruitedTrainer: 20</code></td>
-<td>✅ Match</td>
-</tr>
-</tbody></table>
-<h3>2.5 Invite-3 Unlock &amp; K-Factor (Implemented)</h3>
-<table>
-<thead><tr>
-<th>Feature</th>
-<th>Code</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Invite 3 — 1% battle bonus</td>
-<td><code>referralUnlock3BonusBps: 100</code>; <code>innovations.js</code> getRewardMultiplier checks Referral.uses &gt;= 3</td>
-<td>Match</td>
-</tr>
-<tr>
-<td>K-factor metrics</td>
-<td><code>GET /api/admin/referrals/metrics</code> — kFactorEstimate, avgUsesPerReferrer</td>
-<td>Match</td>
-</tr>
-<tr>
-<td>Referral leaderboard</td>
-<td><code>/api/referrals/top</code>; top 3 styled in Referrals tab</td>
-<td>Match</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>3. AIBA-SELF-AUTOMATION — Verification</h2>
-<table>
-<thead><tr>
-<th>Advisory Claim</th>
-<th>Codebase</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Dynamic caps in economyAutomation.js</td>
-<td><code>engine/economyAutomation.js</code> exists; <code>automationEnabled</code>, <code>automationTargetEmissionPercentPerYear</code></td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>POST /api/admin/economy-automation/run</td>
-<td><code>routes/economyAutomation.js</code> (or admin routes)</td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>automationMinCapAiba / automationMaxCapAiba</td>
-<td><code>EconomyConfig</code>: 500k, 5M defaults</td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>Allocation config: Vault 40%, Treasury 15%, etc.</td>
-<td><code>allocationVaultPct: 40</code>, <code>allocationTreasuryPct: 15</code>, etc.</td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>Actual minting needs owner key (scripts/mintAibaToVault.ts)</td>
-<td>On-chain constraint; doc correct</td>
-<td>✅ Match</td>
-</tr>
-<tr>
-<td>Burns tracked in EconomyDay; on-chain burns need key</td>
-<td>Doc correct</td>
-<td>✅ Match</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>4. OPERATIONS — Verification</h2>
-<table>
-<thead><tr>
-<th>Claim</th>
-<th>Verification</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>GET /health</td>
-<td>Backend health route exists</td>
-</tr>
-<tr>
-<td>GET /metrics</td>
-<td>Prometheus metrics endpoint</td>
-</tr>
-<tr>
-<td>GET /api/comms/status</td>
-<td>Comms route</td>
-</tr>
-<tr>
-<td>Keys: ORACLE_PRIVATE_KEY_HEX, ADMIN_JWT_SECRET, etc.</td>
-<td>DEPLOYMENT-AND-ENV.md + enforceProductionReadiness</td>
-</tr>
-<tr>
-<td>Incident playbooks: oracle, admin, Telegram</td>
-<td>Documented in OPERATIONS.md</td>
-</tr>
-</tbody></table>
-<p><strong>Action:</strong> Ensure OPERATIONS.md env list stays in sync with <code>enforceProductionReadiness()</code> and DEPLOYMENT-AND-ENV.md.</p>
-<hr/>
-<h2>5. API-AND-READINESS-AUDIT — Verification</h2>
-<table>
-<thead><tr>
-<th>Area</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>API categories mapped</td>
-<td>✅ 48+ categories; Trainers, Premium, Economy Automation, Referrals metrics</td>
-</tr>
-<tr>
-<td>Trainers API</td>
-<td>✅ <code>/api/trainers/*</code> (me, apply, network, leaderboard, profile, claim-rewards, register-use, recruit-link)</td>
-</tr>
-<tr>
-<td>Vault/Claims config-dependent</td>
-<td>✅ Documented</td>
-</tr>
-<tr>
-<td>Production checklist (env, CORS)</td>
-<td>✅ Documented</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>6. AUDIT-AND-STATUS — Verification</h2>
-<table>
-<thead><tr>
-<th>Claim</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Contracts Tact/Blueprint</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>Backend Express, Mongoose</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>Miniapp Next.js 14, TonConnect</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>Admin panel</td>
-<td>✅ (admin-panel/ + miniapp /admin)</td>
-</tr>
-<tr>
-<td>CI (.github/workflows/ci.yml)</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>Leaderboard top N free guild create</td>
-<td><code>leaderboardTopFreeCreate: 50</code></td>
-<td>✅</td>
-</tr>
-<tr>
-<td>CoE absent; University is learning hub</td>
-<td>✅</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>7. Monitoring Checklist (When to Re-verify)</h2>
-<p>Run this when:</p>
-<ul>
-<li>[ ] Referral tier logic changes</li>
-<li>[ ] Token splits (Burn, Treasury, Rewards, Staking) change</li>
-<li>[ ] New revenue streams (TON wallets, fees) added</li>
-<li>[ ] Automation (economyAutomation, allocation) changes</li>
-<li>[ ] New API routes (trainers, admin, etc.) added</li>
-<li>[ ] OPERATIONS or DEPLOYMENT-AND-ENV updated</li>
-</ul>
-<hr/>
-<h2>8. Summary</h2>
-<table>
-<thead><tr>
-<th>Report</th>
-<th>Overall</th>
-<th>Notes</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>ADVISORY-TOKENOMICS</td>
-<td>✅ Aligned</td>
-<td>Economy, referrals, splits, trainers, invite-3, K-factor verified</td>
-</tr>
-<tr>
-<td>AIBA-SELF-AUTOMATION</td>
-<td>✅ Aligned</td>
-<td>Automation, allocation, mint constraints, related config (referralUnlock3BonusBps)</td>
-</tr>
-<tr>
-<td>OPERATIONS</td>
-<td>✅ Aligned</td>
-<td>Runbook consistent with codebase</td>
-</tr>
-<tr>
-<td>API-AND-READINESS-AUDIT</td>
-<td>✅ Aligned</td>
-<td>Trainers, Premium, Economy Automation, Referrals metrics documented</td>
-</tr>
-<tr>
-<td>AUDIT-AND-STATUS</td>
-<td>✅ Aligned</td>
-<td>Project assessment accurate</td>
-</tr>
-</tbody></table>
-<p><strong>Conclusion:</strong> All reports aligned with codebase. Invite-3 unlock (1% battle bonus) and K-factor metrics (<code>/api/admin/referrals/metrics</code>) implemented.</p>
-<hr/>
-<h2>9. Docs Cross-Reference Matrix</h2>
-<table>
-<thead><tr>
-<th>Doc</th>
-<th>References</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>ADVISORY-TOKENOMICS</td>
-<td>TRAINERS-MANUAL, REPORTS-MONITORING, INNOVATIONS-100X, GAME-FUNCTIONALITY</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>AIBA-SELF-AUTOMATION</td>
-<td>EconomyConfig, referralUnlock3BonusBps, trainer rewards</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>API-AND-READINESS-AUDIT</td>
-<td>Trainers (8 routes), Premium, Economy Automation, Referrals metrics, Invite-3</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>AUDIT-AND-STATUS</td>
-<td>Trainers ecosystem, vision alignment</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>TRAINERS-MANUAL</td>
-<td>ADVISORY, REPORTS-MONITORING, USER-GUIDE, API-AND-READINESS-AUDIT</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>OPERATIONS</td>
-<td>Keys, incident response, monitoring (no trainer-specific section needed)</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>docs/README</td>
-<td>All docs indexed including REPORTS-MONITORING, TRAINERS-MANUAL, ORACLE-AIBA-TON</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>ORACLE-AIBA-TON</td>
-<td>API-CONTRACT, ADVISORY-TOKENOMICS</td>
-<td>✅</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>10. Implementation Inventory (Systematic)</h2>
-<table>
-<thead><tr>
-<th>Component</th>
-<th>Implementation</th>
-<th>Doc</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Tiered referrals (10th=2×, 100th=5×)</td>
-<td><code>referrals.js</code></td>
-<td>ADVISORY</td>
-</tr>
-<tr>
-<td>Invite-3 unlock (1% bonus)</td>
-<td><code>innovations.js</code>, <code>referralUnlock3BonusBps</code></td>
-<td>ADVISORY, AIBA-SELF-AUTOMATION</td>
-</tr>
-<tr>
-<td>K-factor metrics</td>
-<td><code>GET /api/admin/referrals/metrics</code></td>
-<td>ADVISORY, API-AND-READINESS-AUDIT</td>
-</tr>
-<tr>
-<td>Referral leaderboard + badges</td>
-<td><code>/api/referrals/top</code></td>
-<td>ADVISORY</td>
-</tr>
-<tr>
-<td>Share via Telegram</td>
-<td><code>telegram.js</code> shareViaTelegram</td>
-<td>ADVISORY</td>
-</tr>
-<tr>
-<td>Trainers network/dashboard/leaderboard</td>
-<td><code>trainers.js</code>, <code>/trainer</code></td>
-<td>TRAINERS-MANUAL, AUDIT-AND-STATUS</td>
-</tr>
-<tr>
-<td>Trainer viral recruitment</td>
-<td><code>?ref=CODE</code>, admin approval → 20 AIBA</td>
-<td>TRAINERS-MANUAL</td>
-</tr>
-<tr>
-<td>Economy automation</td>
-<td><code>economyAutomation.js</code>, allocation</td>
-<td>AIBA-SELF-AUTOMATION</td>
-</tr>
-<tr>
-<td>Token splits (15/25/50/10)</td>
-<td><code>tokenSplits.js</code>, EconomyConfig</td>
-<td>ADVISORY</td>
-</tr>
-<tr>
-<td>Oracle AIBA/TON (automated)</td>
-<td><code>aibaTonOracle.js</code>, cron, GET /api/oracle/price, admin oracle</td>
-<td>ORACLE-AIBA-TON</td>
-</tr>
-<tr>
-<td>Treasury ops</td>
-<td>GET /api/treasury/ops</td>
-<td>API-CONTRACT</td>
-</tr>
-<tr>
-<td>Miniapp backend alignment</td>
-<td>Treasury ops, Mentors upgrade, Trainers enrichment, 3D arena visuals</td>
-<td>USER-GUIDE, VISION-3D-ARENAS-STATUS</td>
-</tr>
-</tbody></table>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>REPORTS MONITORING — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>REPORTS MONITORING</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Reports Deep Monitoring — Codebase vs Documentation</h1>
+            <p>
+                <strong>Purpose:</strong> Cross-validate advisory and audit reports against the live codebase. Single
+                reference for &quot;are the reports accurate?&quot;
+            </p>
+            <p>
+                <strong>Last verified:</strong> Generated from codebase scan. Re-run verification when economy,
+                referrals, or automation logic changes.
+            </p>
+            <hr />
+            <h2>1. Report Inventory</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Report</th>
+                        <th>Path</th>
+                        <th>Scope</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE</strong></td>
+                        <td><code>docs/ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md</code></td>
+                        <td>1T AIBA, viral mechanics, user/founder revenue</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AIBA-SELF-AUTOMATION</strong></td>
+                        <td><code>docs/AIBA-SELF-AUTOMATION.md</code></td>
+                        <td>Caps, allocation, minting, anti-inflation automation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OPERATIONS</strong></td>
+                        <td><code>docs/OPERATIONS.md</code></td>
+                        <td>Runbook, keys, incident response, monitoring</td>
+                    </tr>
+                    <tr>
+                        <td><strong>API-AND-READINESS-AUDIT</strong></td>
+                        <td><code>docs/API-AND-READINESS-AUDIT.md</code></td>
+                        <td>API mapping, production readiness</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AUDIT-AND-STATUS</strong></td>
+                        <td><code>docs/AUDIT-AND-STATUS.md</code></td>
+                        <td>Project assessment, ecosystems, vision vs codebase</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>2. ADVISORY-TOKENOMICS — Verification</h2>
+            <h3>2.1 Economy Config (from <code>EconomyConfig.js</code>)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Advisory Claims</th>
+                        <th>Codebase</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>dailyCapAiba 1M</td>
+                        <td><code>default: 1_000_000</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>baseRewardAibaPerScore 2</td>
+                        <td><code>default: 2</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>referralRewardAibaReferrer 10</td>
+                        <td><code>default: 10</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>referralRewardAibaReferee 5</td>
+                        <td><code>default: 5</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>marketplaceFeeBps 3%</td>
+                        <td><code>default: 300</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>Token splits: Burn 15%, Treasury 25%, Rewards 50%, Staking 10%</td>
+                        <td>
+                            <code>tokenSplitBurnBps: 1500</code>, <code>tokenSplitTreasuryBps: 2500</code>,
+                            <code>tokenSplitRewardsBps: 5000</code>, <code>tokenSplitStakingBps: 1000</code>
+                        </td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>stakingApyPercent 15</td>
+                        <td><code>default: 15</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>nftStakingApyPercent 12</td>
+                        <td><code>default: 12</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>carEntryFeeAiba 10, carRacingFeeBps 3%</td>
+                        <td><code>10</code>, <code>300</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>createBrokerCostTonNano 1 TON</td>
+                        <td><code>1_000_000_000</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>University badge 10 TON, cert 15 TON</td>
+                        <td><code>10e9</code>, <code>15e9</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>referralUnlock3BonusBps 100 (1%)</td>
+                        <td><code>default: 100</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.2 Referral Tiered Rewards</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Advisory</th>
+                        <th>Code (<code>referrals.js</code>)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>10th = 2× referrer, 1.5× referee</td>
+                        <td><code>newUses &gt;= 10</code> → ×2, ×1.5</td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>100th = 5× referrer, 2× referee</td>
+                        <td><code>newUses &gt;= 100</code> → ×5, ×2</td>
+                        <td>✅ Match</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.3 Token Splits Implementation</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Advisory</th>
+                        <th>Code (<code>tokenSplits.js</code>, EconomyConfig)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Burn 15%, Treasury 25%, Rewards 50%, Staking 10%</td>
+                        <td><code>computeTokenSplits</code> uses BPS from config; defaults as above</td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>Marketplace 3% fee → splits</td>
+                        <td><code>marketplaceFeeBps: 300</code>; <code>computeTokenSplits</code> on fee amount</td>
+                        <td>✅ Match</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.4 Trainer Rewards (TRAINERS-MANUAL / economy)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Claim</th>
+                        <th>Code</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>5 AIBA per referred user (3+ battles)</td>
+                        <td><code>trainerRewardAibaPerUser: 5</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>20 AIBA per recruited trainer (on approval)</td>
+                        <td><code>trainerRewardAibaPerRecruitedTrainer: 20</code></td>
+                        <td>✅ Match</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.5 Invite-3 Unlock &amp; K-Factor (Implemented)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Code</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Invite 3 — 1% battle bonus</td>
+                        <td>
+                            <code>referralUnlock3BonusBps: 100</code>; <code>innovations.js</code> getRewardMultiplier
+                            checks Referral.uses &gt;= 3
+                        </td>
+                        <td>Match</td>
+                    </tr>
+                    <tr>
+                        <td>K-factor metrics</td>
+                        <td><code>GET /api/admin/referrals/metrics</code> — kFactorEstimate, avgUsesPerReferrer</td>
+                        <td>Match</td>
+                    </tr>
+                    <tr>
+                        <td>Referral leaderboard</td>
+                        <td><code>/api/referrals/top</code>; top 3 styled in Referrals tab</td>
+                        <td>Match</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>3. AIBA-SELF-AUTOMATION — Verification</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Advisory Claim</th>
+                        <th>Codebase</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Dynamic caps in economyAutomation.js</td>
+                        <td>
+                            <code>engine/economyAutomation.js</code> exists; <code>automationEnabled</code>,
+                            <code>automationTargetEmissionPercentPerYear</code>
+                        </td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>POST /api/admin/economy-automation/run</td>
+                        <td><code>routes/economyAutomation.js</code> (or admin routes)</td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>automationMinCapAiba / automationMaxCapAiba</td>
+                        <td><code>EconomyConfig</code>: 500k, 5M defaults</td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>Allocation config: Vault 40%, Treasury 15%, etc.</td>
+                        <td><code>allocationVaultPct: 40</code>, <code>allocationTreasuryPct: 15</code>, etc.</td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>Actual minting needs owner key (scripts/mintAibaToVault.ts)</td>
+                        <td>On-chain constraint; doc correct</td>
+                        <td>✅ Match</td>
+                    </tr>
+                    <tr>
+                        <td>Burns tracked in EconomyDay; on-chain burns need key</td>
+                        <td>Doc correct</td>
+                        <td>✅ Match</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>4. OPERATIONS — Verification</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Claim</th>
+                        <th>Verification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GET /health</td>
+                        <td>Backend health route exists</td>
+                    </tr>
+                    <tr>
+                        <td>GET /metrics</td>
+                        <td>Prometheus metrics endpoint</td>
+                    </tr>
+                    <tr>
+                        <td>GET /api/comms/status</td>
+                        <td>Comms route</td>
+                    </tr>
+                    <tr>
+                        <td>Keys: ORACLE_PRIVATE_KEY_HEX, ADMIN_JWT_SECRET, etc.</td>
+                        <td>DEPLOYMENT-AND-ENV.md + enforceProductionReadiness</td>
+                    </tr>
+                    <tr>
+                        <td>Incident playbooks: oracle, admin, Telegram</td>
+                        <td>Documented in OPERATIONS.md</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Action:</strong> Ensure OPERATIONS.md env list stays in sync with
+                <code>enforceProductionReadiness()</code> and DEPLOYMENT-AND-ENV.md.
+            </p>
+            <hr />
+            <h2>5. API-AND-READINESS-AUDIT — Verification</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>API categories mapped</td>
+                        <td>✅ 48+ categories; Trainers, Premium, Economy Automation, Referrals metrics</td>
+                    </tr>
+                    <tr>
+                        <td>Trainers API</td>
+                        <td>
+                            ✅ <code>/api/trainers/*</code> (me, apply, network, leaderboard, profile, claim-rewards,
+                            register-use, recruit-link)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Vault/Claims config-dependent</td>
+                        <td>✅ Documented</td>
+                    </tr>
+                    <tr>
+                        <td>Production checklist (env, CORS)</td>
+                        <td>✅ Documented</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>6. AUDIT-AND-STATUS — Verification</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Claim</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Contracts Tact/Blueprint</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>Backend Express, Mongoose</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>Miniapp Next.js 14, TonConnect</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>Admin panel</td>
+                        <td>✅ (admin-panel/ + miniapp /admin)</td>
+                    </tr>
+                    <tr>
+                        <td>CI (.github/workflows/ci.yml)</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>Leaderboard top N free guild create</td>
+                        <td><code>leaderboardTopFreeCreate: 50</code></td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>CoE absent; University is learning hub</td>
+                        <td>✅</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>7. Monitoring Checklist (When to Re-verify)</h2>
+            <p>Run this when:</p>
+            <ul>
+                <li>[ ] Referral tier logic changes</li>
+                <li>[ ] Token splits (Burn, Treasury, Rewards, Staking) change</li>
+                <li>[ ] New revenue streams (TON wallets, fees) added</li>
+                <li>[ ] Automation (economyAutomation, allocation) changes</li>
+                <li>[ ] New API routes (trainers, admin, etc.) added</li>
+                <li>[ ] OPERATIONS or DEPLOYMENT-AND-ENV updated</li>
+            </ul>
+            <hr />
+            <h2>8. Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Report</th>
+                        <th>Overall</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ADVISORY-TOKENOMICS</td>
+                        <td>✅ Aligned</td>
+                        <td>Economy, referrals, splits, trainers, invite-3, K-factor verified</td>
+                    </tr>
+                    <tr>
+                        <td>AIBA-SELF-AUTOMATION</td>
+                        <td>✅ Aligned</td>
+                        <td>Automation, allocation, mint constraints, related config (referralUnlock3BonusBps)</td>
+                    </tr>
+                    <tr>
+                        <td>OPERATIONS</td>
+                        <td>✅ Aligned</td>
+                        <td>Runbook consistent with codebase</td>
+                    </tr>
+                    <tr>
+                        <td>API-AND-READINESS-AUDIT</td>
+                        <td>✅ Aligned</td>
+                        <td>Trainers, Premium, Economy Automation, Referrals metrics documented</td>
+                    </tr>
+                    <tr>
+                        <td>AUDIT-AND-STATUS</td>
+                        <td>✅ Aligned</td>
+                        <td>Project assessment accurate</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Conclusion:</strong> All reports aligned with codebase. Invite-3 unlock (1% battle bonus) and
+                K-factor metrics (<code>/api/admin/referrals/metrics</code>) implemented.
+            </p>
+            <hr />
+            <h2>9. Docs Cross-Reference Matrix</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Doc</th>
+                        <th>References</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ADVISORY-TOKENOMICS</td>
+                        <td>TRAINERS-MANUAL, REPORTS-MONITORING, INNOVATIONS-100X, GAME-FUNCTIONALITY</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>AIBA-SELF-AUTOMATION</td>
+                        <td>EconomyConfig, referralUnlock3BonusBps, trainer rewards</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>API-AND-READINESS-AUDIT</td>
+                        <td>Trainers (8 routes), Premium, Economy Automation, Referrals metrics, Invite-3</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>AUDIT-AND-STATUS</td>
+                        <td>Trainers ecosystem, vision alignment</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>TRAINERS-MANUAL</td>
+                        <td>ADVISORY, REPORTS-MONITORING, USER-GUIDE, API-AND-READINESS-AUDIT</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>OPERATIONS</td>
+                        <td>Keys, incident response, monitoring (no trainer-specific section needed)</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>docs/README</td>
+                        <td>All docs indexed including REPORTS-MONITORING, TRAINERS-MANUAL, ORACLE-AIBA-TON</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>ORACLE-AIBA-TON</td>
+                        <td>API-CONTRACT, ADVISORY-TOKENOMICS</td>
+                        <td>✅</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>10. Implementation Inventory (Systematic)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Implementation</th>
+                        <th>Doc</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tiered referrals (10th=2×, 100th=5×)</td>
+                        <td><code>referrals.js</code></td>
+                        <td>ADVISORY</td>
+                    </tr>
+                    <tr>
+                        <td>Invite-3 unlock (1% bonus)</td>
+                        <td><code>innovations.js</code>, <code>referralUnlock3BonusBps</code></td>
+                        <td>ADVISORY, AIBA-SELF-AUTOMATION</td>
+                    </tr>
+                    <tr>
+                        <td>K-factor metrics</td>
+                        <td><code>GET /api/admin/referrals/metrics</code></td>
+                        <td>ADVISORY, API-AND-READINESS-AUDIT</td>
+                    </tr>
+                    <tr>
+                        <td>Referral leaderboard + badges</td>
+                        <td><code>/api/referrals/top</code></td>
+                        <td>ADVISORY</td>
+                    </tr>
+                    <tr>
+                        <td>Share via Telegram</td>
+                        <td><code>telegram.js</code> shareViaTelegram</td>
+                        <td>ADVISORY</td>
+                    </tr>
+                    <tr>
+                        <td>Trainers network/dashboard/leaderboard</td>
+                        <td><code>trainers.js</code>, <code>/trainer</code></td>
+                        <td>TRAINERS-MANUAL, AUDIT-AND-STATUS</td>
+                    </tr>
+                    <tr>
+                        <td>Trainer viral recruitment</td>
+                        <td><code>?ref=CODE</code>, admin approval → 20 AIBA</td>
+                        <td>TRAINERS-MANUAL</td>
+                    </tr>
+                    <tr>
+                        <td>Economy automation</td>
+                        <td><code>economyAutomation.js</code>, allocation</td>
+                        <td>AIBA-SELF-AUTOMATION</td>
+                    </tr>
+                    <tr>
+                        <td>Token splits (15/25/50/10)</td>
+                        <td><code>tokenSplits.js</code>, EconomyConfig</td>
+                        <td>ADVISORY</td>
+                    </tr>
+                    <tr>
+                        <td>Oracle AIBA/TON (automated)</td>
+                        <td><code>aibaTonOracle.js</code>, cron, GET /api/oracle/price, admin oracle</td>
+                        <td>ORACLE-AIBA-TON</td>
+                    </tr>
+                    <tr>
+                        <td>Treasury ops</td>
+                        <td>GET /api/treasury/ops</td>
+                        <td>API-CONTRACT</td>
+                    </tr>
+                    <tr>
+                        <td>Miniapp backend alignment</td>
+                        <td>Treasury ops, Mentors upgrade, Trainers enrichment, 3D arena visuals</td>
+                        <td>USER-GUIDE, VISION-3D-ARENAS-STATUS</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
 </html>

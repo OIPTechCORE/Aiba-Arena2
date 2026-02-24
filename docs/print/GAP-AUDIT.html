@@ -1,142 +1,197 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>GAP AUDIT — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>GAP AUDIT</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Gap Audit — Docs vs Code</h1>
-<p><strong>Purpose:</strong> Deep investigation to identify gaps between documentation and implementation, and missing or incomplete features.</p>
-<p><strong>Last updated:</strong> Feb 2025</p>
-<hr/>
-<h2>1. Summary</h2>
-<table>
-<thead><tr>
-<th>Area</th>
-<th>Status</th>
-<th>Gaps / Notes</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Privacy/Terms first-open popup</td>
-<td>✅ Implemented</td>
-<td>Miniapp: LegalConsent on first open; footer links</td>
-</tr>
-<tr>
-<td>Privacy &amp; Terms links</td>
-<td>✅ Implemented</td>
-<td>In-app at <code>/privacy</code>, <code>/terms</code>; Settings; app footer</td>
-</tr>
-<tr>
-<td>Ads section</td>
-<td>✅ Present</td>
-<td>Backend: <code>GET /api/ads</code>, admin: Ads tab; miniapp: between-battles placement</td>
-</tr>
-<tr>
-<td>Brokers / Cars / Bikes (user buy)</td>
-<td>✅ Present</td>
-<td>Brokers: create, marketplace list/buy, system shop. Cars/Bikes: car-racing, bike-racing routes; list, buy from players or system</td>
-</tr>
-<tr>
-<td>“What is AIBA Arena” deep doc</td>
-<td>✅ Added</td>
-<td><code>WHAT-IS-AIBA-ARENA.md</code> — high-level explainer</td>
-</tr>
-<tr>
-<td>Platform extensibility (other games)</td>
-<td>✅ Implemented</td>
-<td><code>EXTERNAL_APPS</code> in <code>miniapp/src/config/navigation.js</code>; “More games” tab</td>
-</tr>
-<tr>
-<td>Docs vs code alignment</td>
-<td>See below</td>
-<td>API contract, feature plans, and runbooks largely match; a few doc-only or code-only items</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>2. Ads Section</h2>
-<ul>
-<li><strong>Admin:</strong> <code>routes/adminAds.js</code> — CRUD ads; admin panel has “Ads” tab (create, toggle active, refresh).</li>
-<li><strong>Miniapp:</strong> <code>page.js</code> calls <code>/api/ads</code> with <code>placement: 'between_battles'</code>; ad state used in battle flow.</li>
-<li><strong>Gap:</strong> None. Ads are implemented end-to-end. Ensure placement keys in docs match code if you document placements.</li>
-</ul>
-<hr/>
-<h2>3. Brokers, Cars, Bikes — User Ownership &amp; Marketplace</h2>
-<ul>
-<li><strong>Cars:</strong> Users create (AIBA or TON), list, buy from players or system. Backend: <code>carRacing.js</code>; models: <code>RacingCar.js</code>, <code>CarListing.js</code>. System: <code>system-cars</code>, <code>buy-system-car</code>.</li>
-<li><strong>Bikes:</strong> Same pattern. Backend: <code>bikeRacing.js</code>; models: <code>RacingMotorcycle.js</code>, <code>BikeListing.js</code>.</li>
-<li><strong>Gap:</strong> None for core “own and buy” flow. Docs (FEATURE-PLANS, API-CONTRACT) already describe marketplace and system shop; ensure USER-GUIDE mentions Brokers / Car Racing / Bike Racing market flows.</li>
-</ul>
-<hr/>
-<h2>4. Documentation vs Code — Detailed</h2>
-<h3>4.1 API contract (API-CONTRACT.md)</h3>
-<ul>
-<li><strong>Gaps:</strong> Minor: some optional query/body params may not be listed; new endpoints (e.g. trainer share-event, analytics) should be added to API-CONTRACT when stable.</li>
-</ul>
-<h3>4.2 Feature plans (FEATURE-PLANS.md)</h3>
-<ul>
-<li><strong>Gap:</strong> “Platform extensibility” (other games hub) was not in FEATURE-PLANS; now implemented and documented in this audit and in navigation config comments.</li>
-</ul>
-<h3>4.3 Game functionality (GAME-FUNCTIONALITY.md)</h3>
-<ul>
-<li><strong>Gap:</strong> Seasonal leaderboard (trainer weekly/monthly) and viral share tracking are in code but could be added as a short subsection under Trainers / Leaderboard.</li>
-</ul>
-<h3>4.4 Operations / runbooks</h3>
-<ul>
-</ul>
-<h3>4.5 User-facing legal</h3>
-<ul>
-</ul>
-<hr/>
-<h2>5. Recommended Next Steps</h2>
-<ol>
-<li><strong>USER-GUIDE:</strong> Add “Brokers / Cars / Bikes — buying and selling” and “More games” hub.</li>
-<li><strong>FEATURE-PLANS:</strong> Add one short subsection “Platform extensibility (other games)” referencing EXTERNAL_APPS and the “More games” tab.</li>
-<li><strong>GAME-FUNCTIONALITY:</strong> Add “Seasonal leaderboard (weekly/monthly)” and “Trainer viral share tracking” under relevant sections.</li>
-<li><strong>Print/HTML:</strong> Regenerate <code>docs/print/</code> from updated <code>.md</code> if you use the print pipeline.</li>
-</ol>
-<hr/>
-<h2>6. Quick Reference — Key Files</h2>
-<table>
-<thead><tr>
-<th>Topic</th>
-<th>Docs</th>
-<th>Code (key files)</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>What is AIBA Arena</td>
-<td>WHAT-IS-AIBA-ARENA.md</td>
-<td>—</td>
-</tr>
-<tr>
-<td>Privacy/Terms</td>
-<td>PRIVACY-POLICY, TERMS-OF-SERVICE</td>
-<td>miniapp: LegalConsent.js, AppFooter.js, layout.js</td>
-</tr>
-<tr>
-<td>Ads</td>
-<td>This audit, API if added</td>
-<td>backend: ads.js, adminAds.js; miniapp: page.js (ads state)</td>
-</tr>
-<tr>
-<td>Brokers/Cars/Bikes</td>
-<td>FEATURE-PLANS, API-CONTRACT, GAME-FUNCTIONALITY</td>
-<td>brokers.js, carRacing.js, bikeRacing.js, marketplace.js</td>
-</tr>
-<tr>
-<td>Other games hub</td>
-<td>This audit, navigation.js comment</td>
-<td>miniapp: config/navigation.js (EXTERNAL_APPS), page.js (games tab)</td>
-</tr>
-</tbody></table>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>GAP AUDIT — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>GAP AUDIT</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Gap Audit — Docs vs Code</h1>
+            <p>
+                <strong>Purpose:</strong> Deep investigation to identify gaps between documentation and implementation,
+                and missing or incomplete features.
+            </p>
+            <p><strong>Last updated:</strong> Feb 2025</p>
+            <hr />
+            <h2>1. Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Status</th>
+                        <th>Gaps / Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Privacy/Terms first-open popup</td>
+                        <td>✅ Implemented</td>
+                        <td>Miniapp: LegalConsent on first open; footer links</td>
+                    </tr>
+                    <tr>
+                        <td>Privacy &amp; Terms links</td>
+                        <td>✅ Implemented</td>
+                        <td>In-app at <code>/privacy</code>, <code>/terms</code>; Settings; app footer</td>
+                    </tr>
+                    <tr>
+                        <td>Ads section</td>
+                        <td>✅ Present</td>
+                        <td>Backend: <code>GET /api/ads</code>, admin: Ads tab; miniapp: between-battles placement</td>
+                    </tr>
+                    <tr>
+                        <td>Brokers / Cars / Bikes (user buy)</td>
+                        <td>✅ Present</td>
+                        <td>
+                            Brokers: create, marketplace list/buy, system shop. Cars/Bikes: car-racing, bike-racing
+                            routes; list, buy from players or system
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>“What is AIBA Arena” deep doc</td>
+                        <td>✅ Added</td>
+                        <td><code>WHAT-IS-AIBA-ARENA.md</code> — high-level explainer</td>
+                    </tr>
+                    <tr>
+                        <td>Platform extensibility (other games)</td>
+                        <td>✅ Implemented</td>
+                        <td>
+                            <code>EXTERNAL_APPS</code> in <code>miniapp/src/config/navigation.js</code>; “More games”
+                            tab
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Docs vs code alignment</td>
+                        <td>See below</td>
+                        <td>
+                            API contract, feature plans, and runbooks largely match; a few doc-only or code-only items
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>2. Ads Section</h2>
+            <ul>
+                <li>
+                    <strong>Admin:</strong> <code>routes/adminAds.js</code> — CRUD ads; admin panel has “Ads” tab
+                    (create, toggle active, refresh).
+                </li>
+                <li>
+                    <strong>Miniapp:</strong> <code>page.js</code> calls <code>/api/ads</code> with
+                    <code>placement: 'between_battles'</code>; ad state used in battle flow.
+                </li>
+                <li>
+                    <strong>Gap:</strong> None. Ads are implemented end-to-end. Ensure placement keys in docs match code
+                    if you document placements.
+                </li>
+            </ul>
+            <hr />
+            <h2>3. Brokers, Cars, Bikes — User Ownership &amp; Marketplace</h2>
+            <ul>
+                <li>
+                    <strong>Cars:</strong> Users create (AIBA or TON), list, buy from players or system. Backend:
+                    <code>carRacing.js</code>; models: <code>RacingCar.js</code>, <code>CarListing.js</code>. System:
+                    <code>system-cars</code>, <code>buy-system-car</code>.
+                </li>
+                <li>
+                    <strong>Bikes:</strong> Same pattern. Backend: <code>bikeRacing.js</code>; models:
+                    <code>RacingMotorcycle.js</code>, <code>BikeListing.js</code>.
+                </li>
+                <li>
+                    <strong>Gap:</strong> None for core “own and buy” flow. Docs (FEATURE-PLANS, API-CONTRACT) already
+                    describe marketplace and system shop; ensure USER-GUIDE mentions Brokers / Car Racing / Bike Racing
+                    market flows.
+                </li>
+            </ul>
+            <hr />
+            <h2>4. Documentation vs Code — Detailed</h2>
+            <h3>4.1 API contract (API-CONTRACT.md)</h3>
+            <ul>
+                <li>
+                    <strong>Gaps:</strong> Minor: some optional query/body params may not be listed; new endpoints (e.g.
+                    trainer share-event, analytics) should be added to API-CONTRACT when stable.
+                </li>
+            </ul>
+            <h3>4.2 Feature plans (FEATURE-PLANS.md)</h3>
+            <ul>
+                <li>
+                    <strong>Gap:</strong> “Platform extensibility” (other games hub) was not in FEATURE-PLANS; now
+                    implemented and documented in this audit and in navigation config comments.
+                </li>
+            </ul>
+            <h3>4.3 Game functionality (GAME-FUNCTIONALITY.md)</h3>
+            <ul>
+                <li>
+                    <strong>Gap:</strong> Seasonal leaderboard (trainer weekly/monthly) and viral share tracking are in
+                    code but could be added as a short subsection under Trainers / Leaderboard.
+                </li>
+            </ul>
+            <h3>4.4 Operations / runbooks</h3>
+            <ul></ul>
+            <h3>4.5 User-facing legal</h3>
+            <ul></ul>
+            <hr />
+            <h2>5. Recommended Next Steps</h2>
+            <ol>
+                <li>
+                    <strong>USER-GUIDE:</strong> Add “Brokers / Cars / Bikes — buying and selling” and “More games” hub.
+                </li>
+                <li>
+                    <strong>FEATURE-PLANS:</strong> Add one short subsection “Platform extensibility (other games)”
+                    referencing EXTERNAL_APPS and the “More games” tab.
+                </li>
+                <li>
+                    <strong>GAME-FUNCTIONALITY:</strong> Add “Seasonal leaderboard (weekly/monthly)” and “Trainer viral
+                    share tracking” under relevant sections.
+                </li>
+                <li>
+                    <strong>Print/HTML:</strong> Regenerate <code>docs/print/</code> from updated <code>.md</code> if
+                    you use the print pipeline.
+                </li>
+            </ol>
+            <hr />
+            <h2>6. Quick Reference — Key Files</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Topic</th>
+                        <th>Docs</th>
+                        <th>Code (key files)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>What is AIBA Arena</td>
+                        <td>WHAT-IS-AIBA-ARENA.md</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Privacy/Terms</td>
+                        <td>PRIVACY-POLICY, TERMS-OF-SERVICE</td>
+                        <td>miniapp: LegalConsent.js, AppFooter.js, layout.js</td>
+                    </tr>
+                    <tr>
+                        <td>Ads</td>
+                        <td>This audit, API if added</td>
+                        <td>backend: ads.js, adminAds.js; miniapp: page.js (ads state)</td>
+                    </tr>
+                    <tr>
+                        <td>Brokers/Cars/Bikes</td>
+                        <td>FEATURE-PLANS, API-CONTRACT, GAME-FUNCTIONALITY</td>
+                        <td>brokers.js, carRacing.js, bikeRacing.js, marketplace.js</td>
+                    </tr>
+                    <tr>
+                        <td>Other games hub</td>
+                        <td>This audit, navigation.js comment</td>
+                        <td>miniapp: config/navigation.js (EXTERNAL_APPS), page.js (games tab)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
 </html>

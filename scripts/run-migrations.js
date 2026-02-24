@@ -35,7 +35,8 @@ async function main() {
         return;
     }
 
-    const files = fs.readdirSync(MIGRATIONS_DIR)
+    const files = fs
+        .readdirSync(MIGRATIONS_DIR)
         .filter((f) => f.endsWith('.js'))
         .sort();
 

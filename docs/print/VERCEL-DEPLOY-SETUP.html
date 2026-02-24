@@ -1,49 +1,68 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>VERCEL DEPLOY SETUP — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>VERCEL DEPLOY SETUP</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Automatic Vercel Deployment via GitHub Actions</h1>
-<p>The <code>.github/workflows/vercel-deploy.yml</code> workflow deploys the <strong>miniapp</strong> to Vercel production on every push to <code>main</code>.</p>
-<h2>Required: Add GitHub Secrets</h2>
-<p>Add these secrets in your repository:</p>
-<p><strong>GitHub → Repository → Settings → Secrets and variables → Actions → New repository secret</strong></p>
-<table>
-<thead><tr>
-<th>Secret</th>
-<th>Where to get it</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>VERCEL_TOKEN</code></td>
-<td><a href="https://vercel.com/account/tokens">vercel.com/account/tokens</a> → Create Token</td>
-</tr>
-<tr>
-<td><code>VERCEL_ORG_ID</code></td>
-<td>Vercel project <strong>Settings</strong> → <strong>General</strong> → scroll to &quot;Project ID&quot; (or run <code>vercel link</code> locally and check <code>.vercel/project.json</code>)</td>
-</tr>
-<tr>
-<td><code>VERCEL_PROJECT_ID</code></td>
-<td>Same as above – your project's ID</td>
-</tr>
-</tbody></table>
-<h2>How it works</h2>
-<ol>
-<li>Builds the miniapp (<code>miniapp/</code>)</li>
-<li>Deploys to Vercel production via CLI</li>
-<li>Live at: https://aiba-arena2-miniapp.vercel.app/</li>
-</ol>
-<h2>Manual trigger</h2>
-<p>You can also run it manually: <strong>Actions</strong> → <strong>Deploy to Vercel</strong> → <strong>Run workflow</strong>.</p>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>VERCEL DEPLOY SETUP — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>VERCEL DEPLOY SETUP</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Automatic Vercel Deployment via GitHub Actions</h1>
+            <p>
+                The <code>.github/workflows/vercel-deploy.yml</code> workflow deploys the <strong>miniapp</strong> to
+                Vercel production on every push to <code>main</code>.
+            </p>
+            <h2>Required: Add GitHub Secrets</h2>
+            <p>Add these secrets in your repository:</p>
+            <p>
+                <strong
+                    >GitHub → Repository → Settings → Secrets and variables → Actions → New repository secret</strong
+                >
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Secret</th>
+                        <th>Where to get it</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>VERCEL_TOKEN</code></td>
+                        <td>
+                            <a href="https://vercel.com/account/tokens">vercel.com/account/tokens</a> → Create Token
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>VERCEL_ORG_ID</code></td>
+                        <td>
+                            Vercel project <strong>Settings</strong> → <strong>General</strong> → scroll to
+                            &quot;Project ID&quot; (or run <code>vercel link</code> locally and check
+                            <code>.vercel/project.json</code>)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>VERCEL_PROJECT_ID</code></td>
+                        <td>Same as above – your project's ID</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h2>How it works</h2>
+            <ol>
+                <li>Builds the miniapp (<code>miniapp/</code>)</li>
+                <li>Deploys to Vercel production via CLI</li>
+                <li>Live at: https://aiba-arena2-miniapp.vercel.app/</li>
+            </ol>
+            <h2>Manual trigger</h2>
+            <p>
+                You can also run it manually: <strong>Actions</strong> → <strong>Deploy to Vercel</strong> →
+                <strong>Run workflow</strong>.
+            </p>
+        </div>
+    </body>
 </html>

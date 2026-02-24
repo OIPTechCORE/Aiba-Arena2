@@ -1,64 +1,110 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>UI DESIGN PRINCIPLES — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>UI DESIGN PRINCIPLES</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>UI Design Principles — AIBA Arena</h1>
-<p><strong>Status:</strong> Canonical guidance for miniapp and admin UI. <strong>Last updated:</strong> Feb 2026</p>
-<hr/>
-<h2>1. Core principles</h2>
-<p>The app must be <strong>deeply and seamlessly</strong>:</p>
-<ul>
-<li><strong>Modular</strong> — Reusable components (cards, nav, buttons, tabs). Compose screens from small, testable building blocks.</li>
-<li><strong>Card-based</strong> — Content lives in cards: panels, sections, and actions use <code>.card</code>, <code>.card--elevated</code>, consistent borders and shadows (see <code>globals.css</code>).</li>
-<li><strong>Extensible</strong> — New features add new tabs or cards without rewriting existing flows. Config-driven labels and navigation where possible.</li>
-<li><strong>Interoperable</strong> — Same design tokens (CSS variables), same patterns across miniapp, admin, and legal pages. Shared components (e.g. <code>PageNav</code>) and classes.</li>
-<li><strong>Multi-tabbed</strong> — Primary navigation is tab-based (Home grid + tab panels). Sub-flows (e.g. Wallet → Staking, Market → Rentals) use nested tabs or cards, not one-off full-page layouts.</li>
-</ul>
-<hr/>
-<h2>2. Navigation (every page)</h2>
-<ul>
-<li><strong>B. Back to Previous</strong> — On every page, the user can return to where they were:</li>
-<li>- <strong>Route pages</strong> (privacy, terms, trainer, admin): use browser/tab history (<code>router.back()</code>); component: <code>PageNav</code>.</li>
-<li>- <strong>In-app tabs</strong> (HomeContent): use tab history; show “← Back to Previous” (previous tab) and “← Back to Home” in the hero when not on home.</li>
-</ul>
-<p>Use the shared <code>PageNav</code> component on all route-level pages (privacy, terms, trainer, admin).</p>
-<hr/>
-<h2>3. Design system (miniapp)</h2>
-<ul>
-<li><strong>Cards:</strong> <code>.card</code>, <code>.card__title</code>, <code>.card__hint</code>, <code>.card--elevated</code> for panels; left border accent for emphasis.</li>
-<li><strong>Buttons:</strong> <code>.btn</code>, <code>.btn--primary</code>, <code>.btn--secondary</code>, <code>.btn--ghost</code>; use for actions; keep touch targets ≥ 48px where possible.</li>
-<li><strong>Nav:</strong> <code>.page-nav</code>, <code>.page-nav__card</code>, <code>.page-nav__btn</code>, <code>.page-nav__link</code> for Back to Previous + Back to Home.</li>
-</ul>
-<hr/>
-<h2>4. Multi-tabbed interfaces</h2>
-<ul>
-<li><strong>Tab panels</strong> — One active panel per tab; use <code>.tab-panel</code>, <code>.is-active</code>, <code>aria-hidden</code> for accessibility.</li>
-<li><strong>Nested flows</strong> — Within a tab (e.g. Wallet), use sub-tabs or card sections (Staking, DAO, Gifts) rather than replacing the whole screen when possible.</li>
-</ul>
-<hr/>
-<h2>5. Implementation checklist</h2>
-<ul>
-<li>[ ] New tab in HomeContent → hero shows Back to Previous (tab) + Back to Home when not on home.</li>
-<li>[ ] New section → use card-based layout and design tokens.</li>
-<li>[ ] New component → reuse existing buttons, cards, and nav styles; avoid one-off inline styles for layout.</li>
-</ul>
-<hr/>
-<h2>See also</h2>
-<ul>
-<li><a href="USER-GUIDE.md">USER-GUIDE.md</a> — How users move through tabs and features.</li>
-<li><code>miniapp/src/app/globals.css</code> — Design tokens and card/button classes.</li>
-<li><code>miniapp/src/components/PageNav.js</code> — Shared page navigation component.</li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>UI DESIGN PRINCIPLES — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>UI DESIGN PRINCIPLES</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>UI Design Principles — AIBA Arena</h1>
+            <p>
+                <strong>Status:</strong> Canonical guidance for miniapp and admin UI. <strong>Last updated:</strong> Feb
+                2026
+            </p>
+            <hr />
+            <h2>1. Core principles</h2>
+            <p>The app must be <strong>deeply and seamlessly</strong>:</p>
+            <ul>
+                <li>
+                    <strong>Modular</strong> — Reusable components (cards, nav, buttons, tabs). Compose screens from
+                    small, testable building blocks.
+                </li>
+                <li>
+                    <strong>Card-based</strong> — Content lives in cards: panels, sections, and actions use
+                    <code>.card</code>, <code>.card--elevated</code>, consistent borders and shadows (see
+                    <code>globals.css</code>).
+                </li>
+                <li>
+                    <strong>Extensible</strong> — New features add new tabs or cards without rewriting existing flows.
+                    Config-driven labels and navigation where possible.
+                </li>
+                <li>
+                    <strong>Interoperable</strong> — Same design tokens (CSS variables), same patterns across miniapp,
+                    admin, and legal pages. Shared components (e.g. <code>PageNav</code>) and classes.
+                </li>
+                <li>
+                    <strong>Multi-tabbed</strong> — Primary navigation is tab-based (Home grid + tab panels). Sub-flows
+                    (e.g. Wallet → Staking, Market → Rentals) use nested tabs or cards, not one-off full-page layouts.
+                </li>
+            </ul>
+            <hr />
+            <h2>2. Navigation (every page)</h2>
+            <ul>
+                <li><strong>B. Back to Previous</strong> — On every page, the user can return to where they were:</li>
+                <li>
+                    - <strong>Route pages</strong> (privacy, terms, trainer, admin): use browser/tab history
+                    (<code>router.back()</code>); component: <code>PageNav</code>.
+                </li>
+                <li>
+                    - <strong>In-app tabs</strong> (HomeContent): use tab history; show “← Back to Previous” (previous
+                    tab) and “← Back to Home” in the hero when not on home.
+                </li>
+            </ul>
+            <p>
+                Use the shared <code>PageNav</code> component on all route-level pages (privacy, terms, trainer, admin).
+            </p>
+            <hr />
+            <h2>3. Design system (miniapp)</h2>
+            <ul>
+                <li>
+                    <strong>Cards:</strong> <code>.card</code>, <code>.card__title</code>, <code>.card__hint</code>,
+                    <code>.card--elevated</code> for panels; left border accent for emphasis.
+                </li>
+                <li>
+                    <strong>Buttons:</strong> <code>.btn</code>, <code>.btn--primary</code>,
+                    <code>.btn--secondary</code>, <code>.btn--ghost</code>; use for actions; keep touch targets ≥ 48px
+                    where possible.
+                </li>
+                <li>
+                    <strong>Nav:</strong> <code>.page-nav</code>, <code>.page-nav__card</code>,
+                    <code>.page-nav__btn</code>, <code>.page-nav__link</code> for Back to Previous + Back to Home.
+                </li>
+            </ul>
+            <hr />
+            <h2>4. Multi-tabbed interfaces</h2>
+            <ul>
+                <li>
+                    <strong>Tab panels</strong> — One active panel per tab; use <code>.tab-panel</code>,
+                    <code>.is-active</code>, <code>aria-hidden</code> for accessibility.
+                </li>
+                <li>
+                    <strong>Nested flows</strong> — Within a tab (e.g. Wallet), use sub-tabs or card sections (Staking,
+                    DAO, Gifts) rather than replacing the whole screen when possible.
+                </li>
+            </ul>
+            <hr />
+            <h2>5. Implementation checklist</h2>
+            <ul>
+                <li>[ ] New tab in HomeContent → hero shows Back to Previous (tab) + Back to Home when not on home.</li>
+                <li>[ ] New section → use card-based layout and design tokens.</li>
+                <li>
+                    [ ] New component → reuse existing buttons, cards, and nav styles; avoid one-off inline styles for
+                    layout.
+                </li>
+            </ul>
+            <hr />
+            <h2>See also</h2>
+            <ul>
+                <li><a href="USER-GUIDE.md">USER-GUIDE.md</a> — How users move through tabs and features.</li>
+                <li><code>miniapp/src/app/globals.css</code> — Design tokens and card/button classes.</li>
+                <li><code>miniapp/src/components/PageNav.js</code> — Shared page navigation component.</li>
+            </ul>
+        </div>
+    </body>
 </html>

@@ -1,65 +1,96 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AIBA Arena — Banner Template (Customizable)</title>
-  <style>
-    /* CUSTOMIZE: Change colors, sizes, text */
-    :root {
-      --bg: #0a0e14;
-      --accent: #00d4ff;
-      --gold: #ffd700;
-      --text: #e8ecef;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: #111; padding: 20px; }
-    .banner {
-      width: 728px;
-      height: 90px;
-      background: linear-gradient(135deg, var(--bg) 0%, #141a22 100%);
-      border: 1px solid var(--accent);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      position: relative;
-      overflow: hidden;
-    }
-    .banner::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: radial-gradient(circle at 80% 50%, rgba(0,212,255,0.08) 0%, transparent 50%);
-      pointer-events: none;
-    }
-    .text { position: relative; z-index: 1; }
-    .title { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; }
-    .sub { font-size: 14px; color: var(--text); margin-top: 4px; opacity: 0.9; }
-    .cta {
-      background: var(--accent);
-      color: var(--bg);
-      padding: 10px 20px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 14px;
-      text-decoration: none;
-      position: relative;
-      z-index: 1;
-    }
-    .hint { font-size: 11px; color: #666; margin-top: 16px; }
-  </style>
-</head>
-<body>
-  <!-- CUSTOMIZE: Edit text below. Export as PNG (browser screenshot or dev tools) -->
-  <div class="banner">
-    <div class="text">
-      <div class="title"><!-- CUSTOMIZE -->Own AI Brokers. Earn on TON.</div>
-      <div class="sub"><!-- CUSTOMIZE -->Play AIBA Arena — Telegram Mini App</div>
-    </div>
-    <a href="#" class="cta"><!-- CUSTOMIZE -->Play Now</a>
-  </div>
-  <p class="hint">Resize viewport or edit CSS (.banner width/height) for other sizes. Screenshot to export.</p>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>AIBA Arena — Banner Template (Customizable)</title>
+        <style>
+            /* CUSTOMIZE: Change colors, sizes, text */
+            :root {
+                --bg: #0a0e14;
+                --accent: #00d4ff;
+                --gold: #ffd700;
+                --text: #e8ecef;
+            }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                background: #111;
+                padding: 20px;
+            }
+            .banner {
+                width: 728px;
+                height: 90px;
+                background: linear-gradient(135deg, var(--bg) 0%, #141a22 100%);
+                border: 1px solid var(--accent);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 24px;
+                position: relative;
+                overflow: hidden;
+            }
+            .banner::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: radial-gradient(circle at 80% 50%, rgba(0, 212, 255, 0.08) 0%, transparent 50%);
+                pointer-events: none;
+            }
+            .text {
+                position: relative;
+                z-index: 1;
+            }
+            .title {
+                font-size: 22px;
+                font-weight: 700;
+                color: var(--accent);
+                letter-spacing: 0.02em;
+            }
+            .sub {
+                font-size: 14px;
+                color: var(--text);
+                margin-top: 4px;
+                opacity: 0.9;
+            }
+            .cta {
+                background: var(--accent);
+                color: var(--bg);
+                padding: 10px 20px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 14px;
+                text-decoration: none;
+                position: relative;
+                z-index: 1;
+            }
+            .hint {
+                font-size: 11px;
+                color: #666;
+                margin-top: 16px;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- CUSTOMIZE: Edit text below. Export as PNG (browser screenshot or dev tools) -->
+        <div class="banner">
+            <div class="text">
+                <div class="title"><!-- CUSTOMIZE -->Own AI Brokers. Earn on TON.</div>
+                <div class="sub"><!-- CUSTOMIZE -->Play AIBA Arena — Telegram Mini App</div>
+            </div>
+            <a href="#" class="cta"><!-- CUSTOMIZE -->Play Now</a>
+        </div>
+        <p class="hint">Resize viewport or edit CSS (.banner width/height) for other sizes. Screenshot to export.</p>
+    </body>
 </html>

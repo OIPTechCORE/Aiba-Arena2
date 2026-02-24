@@ -5,16 +5,16 @@ Quick map of the five product/backend items to the codebase.
 ## 1. Memes + Earn visibility (hero, nav, onboarding)
 
 - **Miniapp:** `miniapp/src/app/HomeContent.js`
-  - Quick-access strip: Memes and Earn tabs in the strip.
-  - Hero: "Create & Earn" card linking to Memes and Earn.
-  - Onboarding: Dismissible tip "New: Create & Earn" (links to Memes and Earn).
+    - Quick-access strip: Memes and Earn tabs in the strip.
+    - Hero: "Create & Earn" card linking to Memes and Earn.
+    - Onboarding: Dismissible tip "New: Create & Earn" (links to Memes and Earn).
 - Optional: persist `memesEarnTipDismissed` in localStorage so it survives refresh.
 
 ## 2. Sharing UX and redemption prominence
 
 - **Miniapp:** `miniapp/src/app/HomeContent.js`
-  - Meme share copy: "Create memes & earn AIBA/NEUR in AIBA Arena"; detail shows "Shared! More shares = higher score = more rewards." (clears after 3s).
-  - Earn tab: Redemption banner ("Turn AIBA & NEUR into real value") and creator tier line from `earnSummary.creatorTier`.
+    - Meme share copy: "Create memes & earn AIBA/NEUR in AIBA Arena"; detail shows "Shared! More shares = higher score = more rewards." (clears after 3s).
+    - Earn tab: Redemption banner ("Turn AIBA & NEUR into real value") and creator tier line from `earnSummary.creatorTier`.
 
 ## 3. Creator tiers (config, job multipliers)
 

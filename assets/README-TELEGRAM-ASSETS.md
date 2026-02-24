@@ -8,7 +8,9 @@
   Use in your Web App (e.g. `window.Telegram.WebApp.showAlert` or your splash UI) or in BotFather when configuring the Mini App.
 
 To regenerate from a new logo:
+
 ```bash
 node scripts/telegram-assets.js path/to/your-logo.png
 ```
+
 Outputs are written to `assets/`.

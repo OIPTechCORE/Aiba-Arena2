@@ -57,12 +57,13 @@ contract AiAssetMarketplaceEscrow with Ownable {
         require(listing != null, "Listing not found");
         require(listing!!.active, "Listing inactive");
 
-        let paid = value();
+        let paid = myBalance();
         require(paid >= listing!!.price, "Insufficient payment");
 
         // lock listing
-        listing!!.active = false;
-        self.listings.set(msg.listingId, listing!!);
+        let updatedListing = listing!!;
+        updatedListing.active = false;
+        self.listings.set(msg.listingId, updatedListing);
 
         // fee split (burn is implicit by not forwarding)
         let totalFee = (listing!!.price * self.feeBps) / 10000;
@@ -91,7 +92,7 @@ contract AiAssetMarketplaceEscrow with Ownable {
         cashback(sender());
     }
 
-    get fun getListing(id: Int as uint64): Listing? {
+    get fun getListing(id: Int): Listing? {
         return self.listings.get(id);
     }
 }

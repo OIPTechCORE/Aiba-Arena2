@@ -1,47 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>CONTRACT DEPLOYMENT ORDER — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>CONTRACT DEPLOYMENT ORDER</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Contract Deployment Order (TON / Tact)</h1>
-<p>This order matches current scripts and dependencies. Use testnet first.</p>
-<h2>1) Build</h2>
-<pre><code>npm run build:contracts</code></pre>
-<h2>2) Deploy order</h2>
-<ol>
-<li><strong>AibaJettonSupply</strong> (supply/minting)</li>
-<li><strong>AibaToken</strong> (legacy token, if needed)</li>
-<li><strong>ArenaVault</strong></li>
-<li><strong>ArenaRewardVault</strong> (requires AibaToken address)</li>
-<li><strong>BrokerNFT</strong></li>
-<li><strong>BrokerMarketplaceEscrow</strong></li>
-<li><strong>AiAssetRegistry</strong></li>
-<li><strong>AiAssetMarketplaceEscrow</strong></li>
-<li><strong>AiAssetMarketplaceEscrowJetton</strong></li>
-<li><strong>MentorStakingVault</strong></li>
-</ol>
-<p>Scripts live in <code>scripts/</code> and <code>tact.config.json</code> defines projects.</p>
-<h2>3) Backend env required for claims</h2>
-<p>Set these in backend:</p>
-<ul>
-<li><code>AIBA_JETTON_MASTER</code></li>
-<li><code>ORACLE_PRIVATE_KEY_HEX</code> or <code>ORACLE_SIGNER_URL</code></li>
-<li><code>TON_PROVIDER_URL</code></li>
-<li><code>TON_API_KEY</code></li>
-</ul>
-<h2>4) Validate</h2>
-<ul>
-<li>Run a small claim end‑to‑end with a test wallet</li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>CONTRACT DEPLOYMENT ORDER — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>CONTRACT DEPLOYMENT ORDER</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Contract Deployment Order (TON / Tact)</h1>
+            <p>This order matches current scripts and dependencies. Use testnet first.</p>
+            <h2>1) Build</h2>
+            <pre><code>npm run build:contracts</code></pre>
+            <h2>2) Deploy order</h2>
+            <ol>
+                <li><strong>AibaJettonSupply</strong> (supply/minting)</li>
+                <li><strong>AibaToken</strong> (legacy token, if needed)</li>
+                <li><strong>ArenaVault</strong></li>
+                <li><strong>ArenaRewardVault</strong> (requires AibaToken address)</li>
+                <li><strong>BrokerNFT</strong></li>
+                <li><strong>BrokerMarketplaceEscrow</strong></li>
+                <li><strong>AiAssetRegistry</strong></li>
+                <li><strong>AiAssetMarketplaceEscrow</strong></li>
+                <li><strong>AiAssetMarketplaceEscrowJetton</strong></li>
+                <li><strong>MentorStakingVault</strong></li>
+            </ol>
+            <p>Scripts live in <code>scripts/</code> and <code>tact.config.json</code> defines projects.</p>
+            <h2>3) Backend env required for claims</h2>
+            <p>Set these in backend:</p>
+            <ul>
+                <li><code>AIBA_JETTON_MASTER</code></li>
+                <li><code>ORACLE_PRIVATE_KEY_HEX</code> or <code>ORACLE_SIGNER_URL</code></li>
+                <li><code>TON_PROVIDER_URL</code></li>
+                <li><code>TON_API_KEY</code></li>
+            </ul>
+            <h2>4) Validate</h2>
+            <ul>
+                <li>Run a small claim end‑to‑end with a test wallet</li>
+            </ul>
+        </div>
+    </body>
 </html>

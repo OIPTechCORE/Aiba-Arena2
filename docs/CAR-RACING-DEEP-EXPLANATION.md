@@ -6,12 +6,12 @@ A full technical and product explanation of **Car Racing** in AIBA Arena: create
 
 ## 1. Spec vs implementation (practically ready?)
 
-| Requirement | Status | Notes |
-|-------------|--------|--------|
-| **Create or buy a car** | ✅ | Create with AIBA or TON; buy from system shop (4 cars) or player marketplace (list/buy). |
-| **Enter open races** | ✅ | Open races per track (seeded on startup); replenished when a race completes. Entry fee in AIBA. |
-| **Earn AIBA by finish position** | ✅ | Race runs when ≥2 entries; deterministic simulation; reward pool (entry fees) distributed by position; AIBA credited. |
-| **Inspired by (classes)** | ✅ | 14 car classes with labels in model and config; system shop offers Touring, GT1, Formula 1, Le Mans. |
+| Requirement                      | Status | Notes                                                                                                                 |
+| -------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
+| **Create or buy a car**          | ✅     | Create with AIBA or TON; buy from system shop (4 cars) or player marketplace (list/buy).                              |
+| **Enter open races**             | ✅     | Open races per track (seeded on startup); replenished when a race completes. Entry fee in AIBA.                       |
+| **Earn AIBA by finish position** | ✅     | Race runs when ≥2 entries; deterministic simulation; reward pool (entry fees) distributed by position; AIBA credited. |
+| **Inspired by (classes)**        | ✅     | 14 car classes with labels in model and config; system shop offers Touring, GT1, Formula 1, Le Mans.                  |
 
 **Verdict: Practically ready.** All core flows are implemented. One critical bug was fixed during this audit: reward distribution now stays within the pool (see §5).
 
@@ -21,55 +21,55 @@ A full technical and product explanation of **Car Racing** in AIBA Arena: create
 
 ### 2.1 RacingCar (`backend/models/RacingCar.js`)
 
-| Field | Type | Default | Meaning |
-|-------|------|---------|--------|
-| **ownerTelegramId** | String | required | Owner’s Telegram user ID. |
-| **carClass** | String | 'formula1' | One of 14 classes (formula1, lemans, canam, indycar, groupB, gt1, electric, drag, touring, hillclimb, nascar, historic, hypercar, extreme). |
-| **topSpeed**, **acceleration**, **handling**, **durability** | Number | 50 | Stats 0–100; used in race simulation. |
-| **level** | Number | 1 | Level bonus in simulation (+1% per level). |
-| **xp**, **energy**, **energyUpdatedAt**, **cooldowns**, **lastRaceAt** | — | — | Reserved for future use. |
-| **nftItemAddress**, **createdWithTonTxHash** | String | '' | Optional on-chain / TON creation. |
+| Field                                                                  | Type   | Default    | Meaning                                                                                                                                     |
+| ---------------------------------------------------------------------- | ------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ownerTelegramId**                                                    | String | required   | Owner’s Telegram user ID.                                                                                                                   |
+| **carClass**                                                           | String | 'formula1' | One of 14 classes (formula1, lemans, canam, indycar, groupB, gt1, electric, drag, touring, hillclimb, nascar, historic, hypercar, extreme). |
+| **topSpeed**, **acceleration**, **handling**, **durability**           | Number | 50         | Stats 0–100; used in race simulation.                                                                                                       |
+| **level**                                                              | Number | 1          | Level bonus in simulation (+1% per level).                                                                                                  |
+| **xp**, **energy**, **energyUpdatedAt**, **cooldowns**, **lastRaceAt** | —      | —          | Reserved for future use.                                                                                                                    |
+| **nftItemAddress**, **createdWithTonTxHash**                           | String | ''         | Optional on-chain / TON creation.                                                                                                           |
 
 ### 2.2 CarTrack (`backend/models/CarTrack.js`)
 
-| Field | Meaning |
-|-------|--------|
-| **trackId** | Unique id (e.g. circuit-rookie, circuit-pro, circuit-elite). |
-| **name**, **length**, **difficulty** | Used by race engine (trackLength, trackDifficulty). |
-| **league** | rookie | pro | elite. |
-| **active** | If true, track appears in GET /tracks. |
+| Field                                | Meaning                                                      |
+| ------------------------------------ | ------------------------------------------------------------ | --- | ------ |
+| **trackId**                          | Unique id (e.g. circuit-rookie, circuit-pro, circuit-elite). |
+| **name**, **length**, **difficulty** | Used by race engine (trackLength, trackDifficulty).          |
+| **league**                           | rookie                                                       | pro | elite. |
+| **active**                           | If true, track appears in GET /tracks.                       |
 
 Seeded in `backend/jobs/seedRacingTracks.js`: 3 default car tracks (rookie, pro, elite).
 
 ### 2.3 CarRace (`backend/models/CarRace.js`)
 
-| Field | Default | Meaning |
-|-------|---------|--------|
-| **trackId** | required | Which track. |
-| **league** | 'rookie' | rookie / pro / elite. |
-| **status** | 'open' | open → running → completed. |
-| **entryFeeAiba** | 0 | Fee per entry (config: carEntryFeeAiba, e.g. 10). |
-| **rewardPool** | 0 | Sum of entry fees; distributed after race. |
-| **maxEntries** | 16 | Cap entries; race can still run with 2+ (see below). |
-| **seed** | '' | Set when race runs; used for deterministic simulation. |
-| **startedAt**, **completedAt** | Date | Set when status changes. |
+| Field                          | Default  | Meaning                                                |
+| ------------------------------ | -------- | ------------------------------------------------------ |
+| **trackId**                    | required | Which track.                                           |
+| **league**                     | 'rookie' | rookie / pro / elite.                                  |
+| **status**                     | 'open'   | open → running → completed.                            |
+| **entryFeeAiba**               | 0        | Fee per entry (config: carEntryFeeAiba, e.g. 10).      |
+| **rewardPool**                 | 0        | Sum of entry fees; distributed after race.             |
+| **maxEntries**                 | 16       | Cap entries; race can still run with 2+ (see below).   |
+| **seed**                       | ''       | Set when race runs; used for deterministic simulation. |
+| **startedAt**, **completedAt** | Date     | Set when status changes.                               |
 
 ### 2.4 CarRaceEntry (`backend/models/CarRaceEntry.js`)
 
-| Field | Meaning |
-|-------|--------|
-| **raceId**, **carId** | References to CarRace and RacingCar. |
-| **telegramId** | Entrant; used to credit AIBA and enforce one entry per user per race. |
-| **position**, **finishTime**, **points**, **aibaReward** | Set when race completes. |
+| Field                                                    | Meaning                                                               |
+| -------------------------------------------------------- | --------------------------------------------------------------------- |
+| **raceId**, **carId**                                    | References to CarRace and RacingCar.                                  |
+| **telegramId**                                           | Entrant; used to credit AIBA and enforce one entry per user per race. |
+| **position**, **finishTime**, **points**, **aibaReward** | Set when race completes.                                              |
 
 Unique index: (telegramId, raceId) — one entry per user per race.
 
 ### 2.5 CarListing (`backend/models/CarListing.js`)
 
-| Field | Meaning |
-|-------|--------|
-| **carId**, **sellerTelegramId**, **priceAIBA** | Listing details. |
-| **status** | 'active' \| 'sold' \| 'cancelled'. |
+| Field                                          | Meaning                            |
+| ---------------------------------------------- | ---------------------------------- |
+| **carId**, **sellerTelegramId**, **priceAIBA** | Listing details.                   |
+| **status**                                     | 'active' \| 'sold' \| 'cancelled'. |
 
 ---
 
@@ -77,23 +77,23 @@ Unique index: (telegramId, raceId) — one entry per user per race.
 
 Mounted at `/api/car-racing` in `backend/app.js`.
 
-| Method | Path | Auth | Purpose |
-|--------|------|------|--------|
-| GET | /config | — | createCarCostAiba, createCarCostTonNano, entryFeeAiba, walletForTon, carClasses. |
-| GET | /tracks | — | Active tracks (optional ?league=). |
-| GET | /races | — | Open races with entryCount. |
-| GET | /cars | Telegram | Current user’s cars. |
-| GET | /system-cars | — | System shop catalog (SYSTEM_CARS) with class labels. |
-| GET | /listings | Telegram | Active car listings (for market buy). |
-| GET | /leaderboard | — | Top by total points, wins, aibaEarned. |
-| GET | /race/:id | — | Single race + entries (for result view). |
-| GET | /classes | — | Car class id + label list. |
-| POST | /create | Telegram | Create car with AIBA (idempotent via requestId). |
-| POST | /create-with-ton | Telegram | Create car with TON (txHash verified, one-time). |
-| POST | /buy-system-car | Telegram | Buy from system shop (debit AIBA, create RacingCar). |
-| POST | /list | Telegram | List own car for sale (priceAIBA). |
-| POST | /buy-car | Telegram | Buy from listing (debit buyer, credit seller minus fee, transfer car). |
-| POST | /enter | Telegram | Enter race (raceId, carId); debit entry fee; add to rewardPool; create entry; if ≥2 entries, run race. |
+| Method | Path             | Auth     | Purpose                                                                                                |
+| ------ | ---------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| GET    | /config          | —        | createCarCostAiba, createCarCostTonNano, entryFeeAiba, walletForTon, carClasses.                       |
+| GET    | /tracks          | —        | Active tracks (optional ?league=).                                                                     |
+| GET    | /races           | —        | Open races with entryCount.                                                                            |
+| GET    | /cars            | Telegram | Current user’s cars.                                                                                   |
+| GET    | /system-cars     | —        | System shop catalog (SYSTEM_CARS) with class labels.                                                   |
+| GET    | /listings        | Telegram | Active car listings (for market buy).                                                                  |
+| GET    | /leaderboard     | —        | Top by total points, wins, aibaEarned.                                                                 |
+| GET    | /race/:id        | —        | Single race + entries (for result view).                                                               |
+| GET    | /classes         | —        | Car class id + label list.                                                                             |
+| POST   | /create          | Telegram | Create car with AIBA (idempotent via requestId).                                                       |
+| POST   | /create-with-ton | Telegram | Create car with TON (txHash verified, one-time).                                                       |
+| POST   | /buy-system-car  | Telegram | Buy from system shop (debit AIBA, create RacingCar).                                                   |
+| POST   | /list            | Telegram | List own car for sale (priceAIBA).                                                                     |
+| POST   | /buy-car         | Telegram | Buy from listing (debit buyer, credit seller minus fee, transfer car).                                 |
+| POST   | /enter           | Telegram | Enter race (raceId, carId); debit entry fee; add to rewardPool; create entry; if ≥2 entries, run race. |
 
 ---
 
@@ -109,7 +109,7 @@ Mounted at `/api/car-racing` in `backend/app.js`.
 
 ## 5. Reward distribution (bug fix in audit)
 
-**Before:** `positionShare = toDistribute / totalPositions`, then `aibaReward = floor(positionShare * bonus)`. Sum of (positionShare * bonus) could exceed toDistribute (e.g. 2 players: 1.5 + 1.2 = 2.7× share), so the game could credit more AIBA than the pool.
+**Before:** `positionShare = toDistribute / totalPositions`, then `aibaReward = floor(positionShare * bonus)`. Sum of (positionShare \* bonus) could exceed toDistribute (e.g. 2 players: 1.5 + 1.2 = 2.7× share), so the game could credit more AIBA than the pool.
 
 **After:** `sumBonuses = sum of positionBonus[i] for i in 0..n-1`; then `aibaReward = floor((toDistribute * bonus) / sumBonuses)`. Payouts sum to ≤ toDistribute (with possible dust from flooring).
 
@@ -119,12 +119,12 @@ Mounted at `/api/car-racing` in `backend/app.js`.
 
 In `backend/config/systemShop.js`, **SYSTEM_CARS**:
 
-| id | name | carClass | priceAiba | Stats (SPD/ACC/HND/DUR) |
-|----|------|----------|-----------|--------------------------|
-| touring | Touring Pro | touring | 80 | 55/52/58/55 |
-| gt1 | GT1 Racer | gt1 | 150 | 62/58/60/55 |
-| formula1 | Formula 1 | formula1 | 300 | 70/68/72/50 |
-| lemans | Le Mans Hypercar | lemans | 400 | 72/70/70/58 |
+| id       | name             | carClass | priceAiba | Stats (SPD/ACC/HND/DUR) |
+| -------- | ---------------- | -------- | --------- | ----------------------- |
+| touring  | Touring Pro      | touring  | 80        | 55/52/58/55             |
+| gt1      | GT1 Racer        | gt1      | 150       | 62/58/60/55             |
+| formula1 | Formula 1        | formula1 | 300       | 70/68/72/50             |
+| lemans   | Le Mans Hypercar | lemans   | 400       | 72/70/70/58             |
 
 Create-with-AIBA gives a **random** car class; buy-from-system gives a chosen catalog car with fixed class and stats.
 

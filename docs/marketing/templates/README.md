@@ -6,11 +6,11 @@
 
 ## Files
 
-| File | Size | Use |
-|------|------|-----|
-| `banner-template.html` | 728×90 (leaderboard) | Display ads, social headers |
-| (Add `story-template.html` for 1080×1920) | — | Instagram/TG story |
-| (Add `square-template.html` for 1080×1080) | — | Instagram post |
+| File                                       | Size                 | Use                         |
+| ------------------------------------------ | -------------------- | --------------------------- |
+| `banner-template.html`                     | 728×90 (leaderboard) | Display ads, social headers |
+| (Add `story-template.html` for 1080×1920)  | —                    | Instagram/TG story          |
+| (Add `square-template.html` for 1080×1080) | —                    | Instagram post              |
 
 ---
 

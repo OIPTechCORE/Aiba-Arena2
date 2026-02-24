@@ -1,317 +1,430 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>ARENAS DEEP EXPLANATION — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>ARENAS DEEP EXPLANATION</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Arenas — Deep Explanation</h1>
-<p>A full technical and product explanation of <strong>Arenas</strong> (battle modes) in AIBA Arena: what they are, how they are configured, and how they drive battles, rewards, and leagues.</p>
-<hr/>
-<h2>1. What is an Arena?</h2>
-<p>An <strong>arena</strong> is a <strong>battle mode</strong> in which your broker competes. It determines:</p>
-<ul>
-<li><strong>Costs and limits</strong> — Energy per battle, cooldown between runs, optional entry fees (NEUR/AIBA).</li>
-<li><strong>Rewards</strong> — Multipliers on AIBA and NEUR; guild wars split NEUR with the guild.</li>
-<li><strong>Prerequisites</strong> — Some arenas (e.g. <strong>guild wars</strong>) require guild membership; <strong>leagues</strong> (rookie, pro, elite) require minimum broker level.</li>
-</ul>
-<p>Arenas do <strong>not</strong> change the core mechanic: every battle is a <strong>deterministic simulation</strong> (broker stats + seed → score). The arena only changes the <strong>weights</strong> in the formula and the <strong>rules</strong> (energy, cooldown, fees, guild).</p>
-<hr/>
-<h2>2. GameMode model (data)</h2>
-<p>Arenas and leagues are represented as <strong>GameMode</strong> documents (<code>backend/models/GameMode.js</code>). Each mode has a unique <code>key</code> and belongs to an <code>arena</code> + <code>league</code> bucket.</p>
-<h3>2.1 Fields</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Type</th>
-<th>Default</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>key</strong></td>
-<td>String</td>
-<td>required, unique</td>
-<td>e.g. <code>prediction</code>, <code>prediction-pro</code>, <code>guildWars-elite</code>. Used for idempotency and cooldowns.</td>
-</tr>
-<tr>
-<td><strong>name</strong></td>
-<td>String</td>
-<td>required</td>
-<td>Display name, e.g. &quot;Prediction (pro)&quot;.</td>
-</tr>
-<tr>
-<td><strong>description</strong></td>
-<td>String</td>
-<td>''</td>
-<td>Optional description.</td>
-</tr>
-<tr>
-<td><strong>enabled</strong></td>
-<td>Boolean</td>
-<td>true</td>
-<td>If false, the mode cannot be used for battle.</td>
-</tr>
-<tr>
-<td><strong>arena</strong></td>
-<td>String</td>
-<td>required</td>
-<td>Arena bucket: <code>prediction</code>, <code>simulation</code>, <code>strategyWars</code>, <code>guildWars</code>, <code>arbitrage</code>.</td>
-</tr>
-<tr>
-<td><strong>league</strong></td>
-<td>String</td>
-<td>'rookie'</td>
-<td>League: <code>rookie</code>, <code>pro</code>, <code>elite</code>. Affects score multiplier and min broker level.</td>
-</tr>
-</tbody></table>
-<h3>2.2 Per-battle costs and limits</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>energyCost</strong></td>
-<td>10</td>
-<td>Energy consumed per battle (broker must have ≥ this).</td>
-</tr>
-<tr>
-<td><strong>cooldownSeconds</strong></td>
-<td>30</td>
-<td>Minimum seconds before the same broker can run this mode again.</td>
-</tr>
-<tr>
-<td><strong>entryNeurCost</strong></td>
-<td>0</td>
-<td>Optional NEUR fee to enter (debited before battle).</td>
-</tr>
-<tr>
-<td><strong>entryAibaCost</strong></td>
-<td>0</td>
-<td>Optional AIBA fee to enter (debited before battle).</td>
-</tr>
-</tbody></table>
-<h3>2.3 Rewards</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>rewardMultiplierAiba</strong></td>
-<td>1.0</td>
-<td>Multiply proposed AIBA by this (after base score × config).</td>
-</tr>
-<tr>
-<td><strong>rewardMultiplierNeur</strong></td>
-<td>1.0</td>
-<td>Multiply proposed NEUR by this.</td>
-</tr>
-</tbody></table>
-<h3>2.4 Rules (object)</h3>
-<table>
-<thead><tr>
-<th>Key</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>requiresGuild</strong></td>
-<td>If true, user must be in a guild (e.g. guild wars).</td>
-</tr>
-<tr>
-<td><strong>minBrokerLevel</strong></td>
-<td>Override default min level for this league (rookie 1, pro 5, elite 10).</td>
-</tr>
-<tr>
-<td><strong>arenaWeights</strong></td>
-<td>Override default INT/SPD/RISK weights for the score formula.</td>
-</tr>
-<tr>
-<td><strong>leagueMultiplier</strong></td>
-<td>Override default league multiplier (rookie 1.0, pro 1.1, elite 1.2).</td>
-</tr>
-<tr>
-<td><strong>varianceBase</strong></td>
-<td>Override default variance base (30) for score noise.</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>3. Default arenas and leagues</h2>
-<p>On first DB connect, <code>ensureDefaultGameModes()</code> in <code>backend/db.js</code> upserts <strong>15 modes</strong>:</p>
-<ul>
-<li><strong>Leagues:</strong> <code>rookie</code>, <code>pro</code>, <code>elite</code>.</li>
-</ul>
-<p>For each arena × league:</p>
-<ul>
-<li><strong>name:</strong> e.g. &quot;prediction (pro)&quot;.</li>
-<li><strong>energyCost:</strong> rookie 10, pro 15, elite 20; guild wars +5.</li>
-<li><strong>cooldownSeconds:</strong> rookie 30, pro 45, elite 60; guild wars +15.</li>
-<li><strong>rules:</strong> <code>{ requiresGuild: true }</code> for <code>guildWars</code> only.</li>
-</ul>
-<p>Admins can add or edit modes via <strong>Admin → Game Modes</strong> (key, name, arena, league, energy, cooldown, entry fees, multipliers, rules).</p>
-<hr/>
-<h2>4. How a battle uses the arena</h2>
-<h3>4.1 Resolving the mode</h3>
-<ol>
-<li>If <strong>modeKey</strong> is set: <code>GameMode.findOne({ key: modeKey })</code>.</li>
-<li>Else: <code>GameMode.findOne({ enabled: true, arena, league })</code>.</li>
-<li>If no mode or <code>enabled === false</code> → 400/403.</li>
-</ol>
-<h3>4.2 Checks before simulation</h3>
-<ul>
-<li><strong>Broker:</strong> Ownership (or rental), not banned, energy ≥ <code>mode.energyCost</code>, cooldown elapsed for this mode, broker level ≥ <code>rules.minBrokerLevel</code> (or league default: elite 10, pro 5, rookie 1).</li>
-<li><strong>Entry fees:</strong> If <code>entryNeurCost</code> or <code>entryAibaCost</code> &gt; 0, user balance is debited (idempotent with requestId).</li>
-</ul>
-<h3>4.3 Seed and score</h3>
-<ul>
-<li><strong>Score:</strong> <code>simulateBattle({ broker, seed, arena, league, rules })</code> in <code>backend/engine/battleEngine.js</code>:</li>
-<li>- <strong>Arena weights</strong> (defaults): prediction (INT 0.7, SPD 0.2, RISK 0.1), simulation (0.5, 0.3, 0.2), strategyWars (0.6, 0.1, 0.3), guildWars (0.4, 0.3, 0.3), arbitrage (0.5, 0.3, 0.2). Overridable via <code>rules.arenaWeights</code>.</li>
-<li>- <strong>League multiplier:</strong> rookie 1.0, pro 1.1, elite 1.2 (or <code>rules.leagueMultiplier</code>).</li>
-<li>- <strong>Level multiplier:</strong> +2% per broker level, cap +50%.</li>
-<li>- <strong>Base score</strong> = 100 × leagueMul × levelMul × (weighted sum of INT/SPD/RISK).</li>
-<li>- <strong>Variance</strong> = varianceBase × leagueMul × (0.2 + risk); <strong>noise</strong> from deterministic RNG.</li>
-<li>- <strong>score</strong> = max(0, round(base + noise)).</li>
-</ul>
-<h3>4.4 Guild wars adjustment</h3>
-<p>If guild wars and both guilds exist: <strong>bonus</strong> = clamp(-15, 15, (myPoolCount − oppPoolCount) × 3). Score becomes max(0, round(score + bonus)).</p>
-<h3>4.5 After the battle</h3>
-<ul>
-<li>Rewards: proposedAiba/Neur from score × config × mode multipliers; then innovations (streak, premium, boost). <strong>Guild wars NEUR:</strong> 20% to guild (1% to creator, 19% to vault), 80% to player. AIBA stays 100% to player.</li>
-<li>Battle document saved with arena, league, modeKey, score, rewards.</li>
-</ul>
-<hr/>
-<h2>5. Arena weights (score formula)</h2>
-<p>Default weights by arena (INT, SPD, RISK):</p>
-<table>
-<thead><tr>
-<th>Arena</th>
-<th>Intelligence</th>
-<th>Speed</th>
-<th>Risk</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>prediction</td>
-<td>0.7</td>
-<td>0.2</td>
-<td>0.1</td>
-</tr>
-<tr>
-<td>simulation</td>
-<td>0.5</td>
-<td>0.3</td>
-<td>0.2</td>
-</tr>
-<tr>
-<td>strategyWars</td>
-<td>0.6</td>
-<td>0.1</td>
-<td>0.3</td>
-</tr>
-<tr>
-<td>guildWars</td>
-<td>0.4</td>
-<td>0.3</td>
-<td>0.3</td>
-</tr>
-<tr>
-<td>arbitrage (default)</td>
-<td>0.5</td>
-<td>0.3</td>
-<td>0.2</td>
-</tr>
-</tbody></table>
-<p>Override per mode via <code>mode.rules.arenaWeights</code> (e.g. <code>{ intelligence: 0.8, speed: 0.1, risk: 0.1 }</code>).</p>
-<hr/>
-<h2>6. Leagues</h2>
-<table>
-<thead><tr>
-<th>League</th>
-<th>Min broker level (default)</th>
-<th>Score multiplier</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>rookie</td>
-<td>1</td>
-<td>1.0</td>
-</tr>
-<tr>
-<td>pro</td>
-<td>5</td>
-<td>1.1</td>
-</tr>
-<tr>
-<td>elite</td>
-<td>10</td>
-<td>1.2</td>
-</tr>
-</tbody></table>
-<p>Higher league = higher rewards and stricter level gate. Override min level per mode with <code>rules.minBrokerLevel</code>.</p>
-<hr/>
-<h2>7. API</h2>
-<h3>7.1 List modes (miniapp)</h3>
-<ul>
-</ul>
-<h3>7.2 Run battle</h3>
-<ul>
-</ul>
-<h3>7.3 Admin</h3>
-<ul>
-<li><strong>POST /api/admin/game-modes</strong> — Create mode (key, name, arena, league, energyCost, cooldownSeconds, entryNeurCost, entryAibaCost, rewardMultiplierAiba/Neur, rules).</li>
-<li><strong>PATCH /api/admin/game-modes/:id</strong> — Update mode.</li>
-<li><strong>DELETE /api/admin/game-modes/:id</strong> — Delete mode.</li>
-</ul>
-<hr/>
-<h2>8. Miniapp behavior</h2>
-<ul>
-<li><strong>Fallback:</strong> If the game-modes API fails, a static list of arena-only options is used (e.g. Prediction, Simulation, …); battle then uses league <code>rookie</code> for those.</li>
-<li><strong>Guild wars:</strong> UI hints that a guild is required; server returns 403 if the user is not in a guild.</li>
-<li><strong>Mode info:</strong> Optionally show for the selected mode: energy cost, cooldown, entry fees, reward multipliers (so the player knows what they’re entering).</li>
-</ul>
-<hr/>
-<h2>9. Summary</h2>
-<table>
-<thead><tr>
-<th>Concept</th>
-<th>Short answer</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>What is an arena?</strong></td>
-<td>A battle mode: arena + league, with weights, energy, cooldown, optional fees and guild requirement.</td>
-</tr>
-<tr>
-<td><strong>How is the mode chosen?</strong></td>
-<td>By <code>arena</code> + <code>league</code> or by <code>modeKey</code>. Stored as GameMode; defaults created on DB init.</td>
-</tr>
-<tr>
-<td><strong>How does the arena affect score?</strong></td>
-<td>Via arena weights (INT/SPD/RISK), league multiplier, and optional rules overrides. Same seed ⇒ same score.</td>
-</tr>
-<tr>
-<td><strong>What are leagues?</strong></td>
-<td>rookie (1.0×, level 1+), pro (1.1×, level 5+), elite (1.2×, level 10+).</td>
-</tr>
-<tr>
-<td><strong>Guild wars?</strong></td>
-<td>Requires guild; NEUR split 80% player / 20% guild; small pool-size bonus/penalty to score.</td>
-</tr>
-</tbody></table>
-<p>For broker stats and the full score formula, see <strong>BROKERS-DEEP-EXPLANATION.md</strong> and <strong>GAME-FUNCTIONALITY.md</strong>.</p>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>ARENAS DEEP EXPLANATION — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>ARENAS DEEP EXPLANATION</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Arenas — Deep Explanation</h1>
+            <p>
+                A full technical and product explanation of <strong>Arenas</strong> (battle modes) in AIBA Arena: what
+                they are, how they are configured, and how they drive battles, rewards, and leagues.
+            </p>
+            <hr />
+            <h2>1. What is an Arena?</h2>
+            <p>
+                An <strong>arena</strong> is a <strong>battle mode</strong> in which your broker competes. It
+                determines:
+            </p>
+            <ul>
+                <li>
+                    <strong>Costs and limits</strong> — Energy per battle, cooldown between runs, optional entry fees
+                    (NEUR/AIBA).
+                </li>
+                <li><strong>Rewards</strong> — Multipliers on AIBA and NEUR; guild wars split NEUR with the guild.</li>
+                <li>
+                    <strong>Prerequisites</strong> — Some arenas (e.g. <strong>guild wars</strong>) require guild
+                    membership; <strong>leagues</strong> (rookie, pro, elite) require minimum broker level.
+                </li>
+            </ul>
+            <p>
+                Arenas do <strong>not</strong> change the core mechanic: every battle is a
+                <strong>deterministic simulation</strong> (broker stats + seed → score). The arena only changes the
+                <strong>weights</strong> in the formula and the <strong>rules</strong> (energy, cooldown, fees, guild).
+            </p>
+            <hr />
+            <h2>2. GameMode model (data)</h2>
+            <p>
+                Arenas and leagues are represented as <strong>GameMode</strong> documents
+                (<code>backend/models/GameMode.js</code>). Each mode has a unique <code>key</code> and belongs to an
+                <code>arena</code> + <code>league</code> bucket.
+            </p>
+            <h3>2.1 Fields</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>key</strong></td>
+                        <td>String</td>
+                        <td>required, unique</td>
+                        <td>
+                            e.g. <code>prediction</code>, <code>prediction-pro</code>, <code>guildWars-elite</code>.
+                            Used for idempotency and cooldowns.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>name</strong></td>
+                        <td>String</td>
+                        <td>required</td>
+                        <td>Display name, e.g. &quot;Prediction (pro)&quot;.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>description</strong></td>
+                        <td>String</td>
+                        <td>''</td>
+                        <td>Optional description.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>enabled</strong></td>
+                        <td>Boolean</td>
+                        <td>true</td>
+                        <td>If false, the mode cannot be used for battle.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>arena</strong></td>
+                        <td>String</td>
+                        <td>required</td>
+                        <td>
+                            Arena bucket: <code>prediction</code>, <code>simulation</code>, <code>strategyWars</code>,
+                            <code>guildWars</code>, <code>arbitrage</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>league</strong></td>
+                        <td>String</td>
+                        <td>'rookie'</td>
+                        <td>
+                            League: <code>rookie</code>, <code>pro</code>, <code>elite</code>. Affects score multiplier
+                            and min broker level.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.2 Per-battle costs and limits</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>energyCost</strong></td>
+                        <td>10</td>
+                        <td>Energy consumed per battle (broker must have ≥ this).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>cooldownSeconds</strong></td>
+                        <td>30</td>
+                        <td>Minimum seconds before the same broker can run this mode again.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>entryNeurCost</strong></td>
+                        <td>0</td>
+                        <td>Optional NEUR fee to enter (debited before battle).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>entryAibaCost</strong></td>
+                        <td>0</td>
+                        <td>Optional AIBA fee to enter (debited before battle).</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.3 Rewards</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>rewardMultiplierAiba</strong></td>
+                        <td>1.0</td>
+                        <td>Multiply proposed AIBA by this (after base score × config).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>rewardMultiplierNeur</strong></td>
+                        <td>1.0</td>
+                        <td>Multiply proposed NEUR by this.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.4 Rules (object)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>requiresGuild</strong></td>
+                        <td>If true, user must be in a guild (e.g. guild wars).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>minBrokerLevel</strong></td>
+                        <td>Override default min level for this league (rookie 1, pro 5, elite 10).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>arenaWeights</strong></td>
+                        <td>Override default INT/SPD/RISK weights for the score formula.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>leagueMultiplier</strong></td>
+                        <td>Override default league multiplier (rookie 1.0, pro 1.1, elite 1.2).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>varianceBase</strong></td>
+                        <td>Override default variance base (30) for score noise.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>3. Default arenas and leagues</h2>
+            <p>
+                On first DB connect, <code>ensureDefaultGameModes()</code> in <code>backend/db.js</code> upserts
+                <strong>15 modes</strong>:
+            </p>
+            <ul>
+                <li><strong>Leagues:</strong> <code>rookie</code>, <code>pro</code>, <code>elite</code>.</li>
+            </ul>
+            <p>For each arena × league:</p>
+            <ul>
+                <li><strong>name:</strong> e.g. &quot;prediction (pro)&quot;.</li>
+                <li><strong>energyCost:</strong> rookie 10, pro 15, elite 20; guild wars +5.</li>
+                <li><strong>cooldownSeconds:</strong> rookie 30, pro 45, elite 60; guild wars +15.</li>
+                <li><strong>rules:</strong> <code>{ requiresGuild: true }</code> for <code>guildWars</code> only.</li>
+            </ul>
+            <p>
+                Admins can add or edit modes via <strong>Admin → Game Modes</strong> (key, name, arena, league, energy,
+                cooldown, entry fees, multipliers, rules).
+            </p>
+            <hr />
+            <h2>4. How a battle uses the arena</h2>
+            <h3>4.1 Resolving the mode</h3>
+            <ol>
+                <li>If <strong>modeKey</strong> is set: <code>GameMode.findOne({ key: modeKey })</code>.</li>
+                <li>Else: <code>GameMode.findOne({ enabled: true, arena, league })</code>.</li>
+                <li>If no mode or <code>enabled === false</code> → 400/403.</li>
+            </ol>
+            <h3>4.2 Checks before simulation</h3>
+            <ul>
+                <li>
+                    <strong>Broker:</strong> Ownership (or rental), not banned, energy ≥ <code>mode.energyCost</code>,
+                    cooldown elapsed for this mode, broker level ≥ <code>rules.minBrokerLevel</code> (or league default:
+                    elite 10, pro 5, rookie 1).
+                </li>
+                <li>
+                    <strong>Entry fees:</strong> If <code>entryNeurCost</code> or <code>entryAibaCost</code> &gt; 0,
+                    user balance is debited (idempotent with requestId).
+                </li>
+            </ul>
+            <h3>4.3 Seed and score</h3>
+            <ul>
+                <li>
+                    <strong>Score:</strong> <code>simulateBattle({ broker, seed, arena, league, rules })</code> in
+                    <code>backend/engine/battleEngine.js</code>:
+                </li>
+                <li>
+                    - <strong>Arena weights</strong> (defaults): prediction (INT 0.7, SPD 0.2, RISK 0.1), simulation
+                    (0.5, 0.3, 0.2), strategyWars (0.6, 0.1, 0.3), guildWars (0.4, 0.3, 0.3), arbitrage (0.5, 0.3, 0.2).
+                    Overridable via <code>rules.arenaWeights</code>.
+                </li>
+                <li>
+                    - <strong>League multiplier:</strong> rookie 1.0, pro 1.1, elite 1.2 (or
+                    <code>rules.leagueMultiplier</code>).
+                </li>
+                <li>- <strong>Level multiplier:</strong> +2% per broker level, cap +50%.</li>
+                <li>- <strong>Base score</strong> = 100 × leagueMul × levelMul × (weighted sum of INT/SPD/RISK).</li>
+                <li>
+                    - <strong>Variance</strong> = varianceBase × leagueMul × (0.2 + risk); <strong>noise</strong> from
+                    deterministic RNG.
+                </li>
+                <li>- <strong>score</strong> = max(0, round(base + noise)).</li>
+            </ul>
+            <h3>4.4 Guild wars adjustment</h3>
+            <p>
+                If guild wars and both guilds exist: <strong>bonus</strong> = clamp(-15, 15, (myPoolCount −
+                oppPoolCount) × 3). Score becomes max(0, round(score + bonus)).
+            </p>
+            <h3>4.5 After the battle</h3>
+            <ul>
+                <li>
+                    Rewards: proposedAiba/Neur from score × config × mode multipliers; then innovations (streak,
+                    premium, boost). <strong>Guild wars NEUR:</strong> 20% to guild (1% to creator, 19% to vault), 80%
+                    to player. AIBA stays 100% to player.
+                </li>
+                <li>Battle document saved with arena, league, modeKey, score, rewards.</li>
+            </ul>
+            <hr />
+            <h2>5. Arena weights (score formula)</h2>
+            <p>Default weights by arena (INT, SPD, RISK):</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Arena</th>
+                        <th>Intelligence</th>
+                        <th>Speed</th>
+                        <th>Risk</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>prediction</td>
+                        <td>0.7</td>
+                        <td>0.2</td>
+                        <td>0.1</td>
+                    </tr>
+                    <tr>
+                        <td>simulation</td>
+                        <td>0.5</td>
+                        <td>0.3</td>
+                        <td>0.2</td>
+                    </tr>
+                    <tr>
+                        <td>strategyWars</td>
+                        <td>0.6</td>
+                        <td>0.1</td>
+                        <td>0.3</td>
+                    </tr>
+                    <tr>
+                        <td>guildWars</td>
+                        <td>0.4</td>
+                        <td>0.3</td>
+                        <td>0.3</td>
+                    </tr>
+                    <tr>
+                        <td>arbitrage (default)</td>
+                        <td>0.5</td>
+                        <td>0.3</td>
+                        <td>0.2</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                Override per mode via <code>mode.rules.arenaWeights</code> (e.g.
+                <code>{ intelligence: 0.8, speed: 0.1, risk: 0.1 }</code>).
+            </p>
+            <hr />
+            <h2>6. Leagues</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>League</th>
+                        <th>Min broker level (default)</th>
+                        <th>Score multiplier</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>rookie</td>
+                        <td>1</td>
+                        <td>1.0</td>
+                    </tr>
+                    <tr>
+                        <td>pro</td>
+                        <td>5</td>
+                        <td>1.1</td>
+                    </tr>
+                    <tr>
+                        <td>elite</td>
+                        <td>10</td>
+                        <td>1.2</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                Higher league = higher rewards and stricter level gate. Override min level per mode with
+                <code>rules.minBrokerLevel</code>.
+            </p>
+            <hr />
+            <h2>7. API</h2>
+            <h3>7.1 List modes (miniapp)</h3>
+            <ul></ul>
+            <h3>7.2 Run battle</h3>
+            <ul></ul>
+            <h3>7.3 Admin</h3>
+            <ul>
+                <li>
+                    <strong>POST /api/admin/game-modes</strong> — Create mode (key, name, arena, league, energyCost,
+                    cooldownSeconds, entryNeurCost, entryAibaCost, rewardMultiplierAiba/Neur, rules).
+                </li>
+                <li><strong>PATCH /api/admin/game-modes/:id</strong> — Update mode.</li>
+                <li><strong>DELETE /api/admin/game-modes/:id</strong> — Delete mode.</li>
+            </ul>
+            <hr />
+            <h2>8. Miniapp behavior</h2>
+            <ul>
+                <li>
+                    <strong>Fallback:</strong> If the game-modes API fails, a static list of arena-only options is used
+                    (e.g. Prediction, Simulation, …); battle then uses league <code>rookie</code> for those.
+                </li>
+                <li>
+                    <strong>Guild wars:</strong> UI hints that a guild is required; server returns 403 if the user is
+                    not in a guild.
+                </li>
+                <li>
+                    <strong>Mode info:</strong> Optionally show for the selected mode: energy cost, cooldown, entry
+                    fees, reward multipliers (so the player knows what they’re entering).
+                </li>
+            </ul>
+            <hr />
+            <h2>9. Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Concept</th>
+                        <th>Short answer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>What is an arena?</strong></td>
+                        <td>
+                            A battle mode: arena + league, with weights, energy, cooldown, optional fees and guild
+                            requirement.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>How is the mode chosen?</strong></td>
+                        <td>
+                            By <code>arena</code> + <code>league</code> or by <code>modeKey</code>. Stored as GameMode;
+                            defaults created on DB init.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>How does the arena affect score?</strong></td>
+                        <td>
+                            Via arena weights (INT/SPD/RISK), league multiplier, and optional rules overrides. Same seed
+                            ⇒ same score.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>What are leagues?</strong></td>
+                        <td>rookie (1.0×, level 1+), pro (1.1×, level 5+), elite (1.2×, level 10+).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Guild wars?</strong></td>
+                        <td>
+                            Requires guild; NEUR split 80% player / 20% guild; small pool-size bonus/penalty to score.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                For broker stats and the full score formula, see <strong>BROKERS-DEEP-EXPLANATION.md</strong> and
+                <strong>GAME-FUNCTIONALITY.md</strong>.
+            </p>
+        </div>
+    </body>
 </html>

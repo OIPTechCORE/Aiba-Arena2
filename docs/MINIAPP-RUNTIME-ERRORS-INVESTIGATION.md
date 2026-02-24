@@ -6,10 +6,10 @@ This doc summarizes the two runtime errors seen in production (Vercel) and what 
 
 ## Quick checklist when you see these errors
 
-| Error | Cause | What to do |
-|-------|--------|------------|
-| **webpage_content_reporter.js** … `Unexpected token 'export'` | Browser extension injecting a script | **Ignore.** Test in Incognito with extensions disabled to confirm it goes away. |
-| **117-….js** … `Cannot access 'dw' before initialization` | Next.js App Router runtime chunk (TDZ) | 1) Ensure miniapp uses **Next 14.2.18** in `miniapp/package.json`. 2) Redeploy: `cd miniapp && del package-lock.json && npm install`, then commit & push. 3) If it persists, try Next **13.5.8** (different runtime) or defer TonConnect load. |
+| Error                                                         | Cause                                  | What to do                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **webpage_content_reporter.js** … `Unexpected token 'export'` | Browser extension injecting a script   | **Ignore.** Test in Incognito with extensions disabled to confirm it goes away.                                                                                                                                                                |
+| **117-….js** … `Cannot access 'dw' before initialization`     | Next.js App Router runtime chunk (TDZ) | 1) Ensure miniapp uses **Next 14.2.18** in `miniapp/package.json`. 2) Redeploy: `cd miniapp && del package-lock.json && npm install`, then commit & push. 3) If it persists, try Next **13.5.8** (different runtime) or defer TonConnect load. |
 
 ---
 
@@ -34,13 +34,13 @@ This doc summarizes the two runtime errors seen in production (Vercel) and what 
 ### Finding
 
 - **Chunk 117** is part of the **Next.js App Router runtime** (in `rootMainFiles`). It contains:
-  - Next.js router (hydrate, appBootstrap, addBasePath, reducer, fetchServerResponse, etc.)
-  - React scheduler (MessageChannel, `unstable_scheduleCallback`)
-  - Polyfills and framework helpers
+    - Next.js router (hydrate, appBootstrap, addBasePath, reducer, fetchServerResponse, etc.)
+    - React scheduler (MessageChannel, `unstable_scheduleCallback`)
+    - Polyfills and framework helpers
 - The stack points at **MessagePort.M** (scheduler) and then into the **page** chunk. So the failure happens when the scheduler runs work that touches code in chunk 117 where a minified binding (e.g. `dw`) is used before its declaration (TDZ).
 - This is consistent with **circular dependency or module initialization order** inside the framework/runtime chunk, not with our app source files. Our app already:
-  - Uses **dynamic import** for `HomeContent` and for **Providers** (TonConnect).
-  - **Lazy-loads** `tonJetton` and `tonRewardClaim` (and thus `@ton/core`) only when building payloads, so `@ton/core` is not in the initial page bundle.
+    - Uses **dynamic import** for `HomeContent` and for **Providers** (TonConnect).
+    - **Lazy-loads** `tonJetton` and `tonRewardClaim` (and thus `@ton/core`) only when building payloads, so `@ton/core` is not in the initial page bundle.
 
 ### What we already did
 
@@ -73,7 +73,7 @@ This doc summarizes the two runtime errors seen in production (Vercel) and what 
 
 ## Summary
 
-| Error | Source | Action |
-|-------|--------|--------|
-| `webpage_content_reporter.js` … `Unexpected token 'export'` | Almost certainly a **browser extension** | Ignore for app; confirm in Incognito without extensions. |
-| `117-….js` … `Cannot access 'dw' before initialization` | **Next.js App Router runtime** chunk (module order / TDZ) | Already mitigated by lazy TON libs; if it persists, try deploy verification, Next patch, or deferring TonConnect load. |
+| Error                                                       | Source                                                    | Action                                                                                                                 |
+| ----------------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `webpage_content_reporter.js` … `Unexpected token 'export'` | Almost certainly a **browser extension**                  | Ignore for app; confirm in Incognito without extensions.                                                               |
+| `117-….js` … `Cannot access 'dw' before initialization`     | **Next.js App Router runtime** chunk (module order / TDZ) | Already mitigated by lazy TON libs; if it persists, try deploy verification, Next patch, or deferring TonConnect load. |

@@ -8,15 +8,15 @@
 
 ## 1. Summary
 
-| Area | Status | Gaps / Notes |
-|------|--------|--------------|
-| Privacy/Terms first-open popup | ✅ Implemented | Miniapp: LegalConsent on first open; footer links |
-| Privacy & Terms links | ✅ Implemented | In-app at `/privacy`, `/terms`; Settings; app footer |
-| Ads section | ✅ Present | Backend: `GET /api/ads`, admin: Ads tab; miniapp: between-battles placement |
-| Brokers / Cars / Bikes (user buy) | ✅ Present | Brokers: create, marketplace list/buy, system shop. Cars/Bikes: car-racing, bike-racing routes; list, buy from players or system |
-| “What is AIBA Arena” deep doc | ✅ Added | `WHAT-IS-AIBA-ARENA.md` — high-level explainer |
-| Platform extensibility (other games) | ✅ Implemented | `EXTERNAL_APPS` in `miniapp/src/config/navigation.js`; “More games” tab |
-| Docs vs code alignment | See below | API contract, feature plans, and runbooks largely match; a few doc-only or code-only items |
+| Area                                 | Status         | Gaps / Notes                                                                                                                     |
+| ------------------------------------ | -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Privacy/Terms first-open popup       | ✅ Implemented | Miniapp: LegalConsent on first open; footer links                                                                                |
+| Privacy & Terms links                | ✅ Implemented | In-app at `/privacy`, `/terms`; Settings; app footer                                                                             |
+| Ads section                          | ✅ Present     | Backend: `GET /api/ads`, admin: Ads tab; miniapp: between-battles placement                                                      |
+| Brokers / Cars / Bikes (user buy)    | ✅ Present     | Brokers: create, marketplace list/buy, system shop. Cars/Bikes: car-racing, bike-racing routes; list, buy from players or system |
+| “What is AIBA Arena” deep doc        | ✅ Added       | `WHAT-IS-AIBA-ARENA.md` — high-level explainer                                                                                   |
+| Platform extensibility (other games) | ✅ Implemented | `EXTERNAL_APPS` in `miniapp/src/config/navigation.js`; “More games” tab                                                          |
+| Docs vs code alignment               | See below      | API contract, feature plans, and runbooks largely match; a few doc-only or code-only items                                       |
 
 ---
 
@@ -77,10 +77,10 @@
 
 ## 6. Quick Reference — Key Files
 
-| Topic | Docs | Code (key files) |
-|-------|------|-------------------|
-| What is AIBA Arena | WHAT-IS-AIBA-ARENA.md | — |
-| Privacy/Terms | PRIVACY-POLICY, TERMS-OF-SERVICE | miniapp: LegalConsent.js, AppFooter.js, layout.js |
-| Ads | This audit, API if added | backend: ads.js, adminAds.js; miniapp: page.js (ads state) |
-| Brokers/Cars/Bikes | FEATURE-PLANS, API-CONTRACT, GAME-FUNCTIONALITY | brokers.js, carRacing.js, bikeRacing.js, marketplace.js |
-| Other games hub | This audit, navigation.js comment | miniapp: config/navigation.js (EXTERNAL_APPS), page.js (games tab) |
+| Topic              | Docs                                            | Code (key files)                                                   |
+| ------------------ | ----------------------------------------------- | ------------------------------------------------------------------ |
+| What is AIBA Arena | WHAT-IS-AIBA-ARENA.md                           | —                                                                  |
+| Privacy/Terms      | PRIVACY-POLICY, TERMS-OF-SERVICE                | miniapp: LegalConsent.js, AppFooter.js, layout.js                  |
+| Ads                | This audit, API if added                        | backend: ads.js, adminAds.js; miniapp: page.js (ads state)         |
+| Brokers/Cars/Bikes | FEATURE-PLANS, API-CONTRACT, GAME-FUNCTIONALITY | brokers.js, carRacing.js, bikeRacing.js, marketplace.js            |
+| Other games hub    | This audit, navigation.js comment               | miniapp: config/navigation.js (EXTERNAL_APPS), page.js (games tab) |

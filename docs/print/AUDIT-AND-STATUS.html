@@ -1,407 +1,587 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>AUDIT AND STATUS — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>AUDIT AND STATUS</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Audit &amp; status — Project assessment, leaderboard, ecosystems, vision</h1>
-<p>Single reference for codebase audits and status checks: project assessment, leaderboard &amp; groups, ecosystems (NFT, staking, CoE, Wall of Fame), and vision vs implementation.</p>
-<hr/>
-<h2>1. Project assessment (summary)</h2>
-<p><strong>Scope:</strong> Contracts, backend, miniapp, admin, docs, CI.</p>
-<p><strong>Status:</strong> Feature-complete for testnet/MVP. Contracts build and have tests; backend has production-readiness checks and Vercel serverless; miniapp implements full user flow. Mainnet readiness requires env, key isolation, monitoring, backups (see DEPLOYMENT-AND-ENV.md and OPERATIONS.md).</p>
-<table>
-<thead><tr>
-<th>Component</th>
-<th>Path</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Contracts</td>
-<td><code>contracts/</code></td>
-<td>Tact/Blueprint; build + tests</td>
-</tr>
-<tr>
-<td>Backend</td>
-<td><code>backend/</code></td>
-<td>Express, Mongoose; <code>backend/tests/</code> Node --test</td>
-</tr>
-<tr>
-<td>Miniapp</td>
-<td><code>miniapp/</code></td>
-<td>Next.js 15, TonConnect</td>
-</tr>
-<tr>
-<td>Admin</td>
-<td><code>admin-panel/</code></td>
-<td>Next.js 14, backend API</td>
-</tr>
-<tr>
-<td>Docs</td>
-<td><code>docs/</code></td>
-<td>Deployment, operations, testing, feature plans</td>
-</tr>
-<tr>
-<td>CI</td>
-<td><code>.github/workflows/ci.yml</code></td>
-<td>Build, test, lint, miniapp &amp; admin build</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>2. Leaderboard &amp; groups</h2>
-<ul>
-<li><strong>Top leaders create groups:</strong> Top N by score (config: <code>leaderboardTopFreeCreate</code>, default 50) can create a guild without paying TON. Rank = count of users with higher total score + 1.</li>
-<li><strong>Guild benefits:</strong> Guild Wars arena, guild vault (NEUR/AIBA), deposit brokers to pool, boost count &amp; visibility, join/leave. Implemented in <code>guilds</code> routes and miniapp Guilds tab.</li>
-</ul>
-<hr/>
-<h2>3. Ecosystems audit (NFT, staking, CoE, Wall of Fame)</h2>
-<table>
-<thead><tr>
-<th>Ecosystem</th>
-<th>Backend</th>
-<th>Miniapp</th>
-<th>Verdict</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>NFT creator</strong></td>
-<td>Broker mint (AIBA → BrokerMintJob), create-with-TON, metadata</td>
-<td>Brokers tab mint; Market “Create broker (pay TON)”</td>
-<td>Present; optional: dedicated tab, gallery, “Creator Lab”</td>
-</tr>
-<tr>
-<td><strong>Staking</strong></td>
-<td>Staking model, stake/unstake/claim; locked periods (30/90/180/365d), stake-locked, cancel-early (fee→Treasury), claim-lock; APY</td>
-<td>Wallet tab: flexible + locked staking, periods, reward preview, countdown, cancel-early, claim-lock</td>
-<td>Present; optional: dedicated “Yield Vault” tab</td>
-</tr>
-<tr>
-<td><strong>Center of Excellence</strong></td>
-<td>University + Trainers + Referrals routes</td>
-<td><strong>CoE tab</strong>: branded stats bar, University (modules, Graduate badge), Trainers (status, earned AIBA), Creator Economy (refs, tier badges)</td>
-<td>Present; CoE branded product tab implemented</td>
-</tr>
-<tr>
-<td><strong>Wall of Fame</strong></td>
-<td>Leaderboard, badges</td>
-<td>Leaderboard tab, badges in profile/leaderboard</td>
-<td>Present (leaderboard + badges)</td>
-</tr>
-<tr>
-<td><strong>Trainers</strong></td>
-<td>Global network, dashboard, leaderboard</td>
-<td><code>/trainer</code> portal; network, leaderboard, profile editor; viral recruitment; 5 AIBA/user, 20 AIBA/recruited trainer</td>
-<td>Present; Super Admin approves at /admin</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>4. Vision vs codebase</h2>
-<p>Use this section to track high-level vision vs implementation.</p>
-<p><strong>Key alignments (backend + miniapp implemented):</strong> battles, economy (NEUR/AIBA), <strong>brokers for sale</strong> (Market Trade + system catalog), <strong>cars for sale</strong> (Car Racing → Market: list/buy from players or system), <strong>bikes for sale</strong> (Bike Racing → Market: list/buy from players or system), Super Futuristic Unified Marketplace, guilds (create/join, deposit brokers, Guild Wars, top N free create), referrals, car/bike racing (races, leaderboard), university, charity (Max NEUR/AIBA, presets, message, anonymous, <strong>campaign detail</strong> with recent donations via <code>GET /api/charity/campaigns/:id</code>), multiverse (NFT/stake), <strong>Governance</strong> (realm proposals) + <strong>DAO</strong> (community proposals, staking requirement for create), wallet (TonConnect, claim, staking flow switch), <strong>trainers</strong> (global network, dashboard, leaderboard, viral recruitment), <strong>Unified Comms</strong> (announcements read/unread, support form, collapsible FAQ), predict (Battle of the hour), broker rental (list, rent, unlist own).</p>
-<p><strong>Gaps (closed):</strong> All previously identified gaps have been implemented:</p>
-<table>
-<thead><tr>
-<th>Gap</th>
-<th>Implementation</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>CoE as branded product</strong></td>
-<td>Dedicated CoE tab (<code>tab === 'coe'</code>) with branded hero (<code>coe-hero</code>), stats bar (University modules, Trainer status+earned AIBA, Creator refs+earned NEUR/AIBA), and three cards: University, Trainers, Creator Economy. CSS: <code>coe-hero</code>, <code>coe-stats-bar</code>, <code>coe-grid</code>, <code>coe-card</code> in globals.css.</td>
-</tr>
-<tr>
-<td><strong>NFT gallery</strong></td>
-<td>Dedicated NFT Gallery tab (<code>tab === 'nftGallery'</code>) with My NFTs grid/list view toggle, All/Staked/Available filter, <code>nft-gallery</code>, <code>nft-gallery-card</code>, <code>nft-gallery-card--large</code>, stake/unstake per NFT, rewards claim. CSS: <code>nft-gallery-dedicated</code>, <code>nft-gallery</code>, <code>nft-gallery-card</code>, <code>nft-gallery-card--large</code>.</td>
-</tr>
-<tr>
-<td><strong>Dedicated Yield Vault tab</strong></td>
-<td>Dedicated staking tab (<code>tab === 'staking'</code>) with locked + flexible staking, periods, reward preview, cancel-early, claim-lock. CSS: <code>yield-vault-hero</code>. Home quick-access: featured strip (CoE · NFT Gallery · Yield Vault) + dedicated Yield Vault card + Command Center button. In TAB_LIST and HOME_GRID_IDS.</td>
-</tr>
-<tr>
-<td><strong>Operational hardening</strong></td>
-<td><code>scripts/monitoring-check.js</code> (health, metrics, vault, --json for alerting); <code>scripts/health-check.js</code> (--vault, CI-friendly); <a href="BACKUP-RUNBOOK.md">BACKUP-RUNBOOK.md</a> (MongoDB, secrets, TON, code, cron example); <a href="KEY-ROTATION.md">KEY-ROTATION.md</a> (Oracle, Admin JWT, Bot token, Battle seed). OPERATIONS.md references all, includes cron examples for monitoring.</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>5. Deep implementation checklist (backend + frontend)</h2>
-<table>
-<thead><tr>
-<th>Feature</th>
-<th>Backend</th>
-<th>Frontend (miniapp)</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Brokers for sale</strong></td>
-<td><code>POST /api/marketplace/buy</code>, <code>POST /api/marketplace/buy-system-broker</code>, system catalog</td>
-<td>Market tab → Trade</td>
-</tr>
-<tr>
-<td><strong>Cars for sale</strong></td>
-<td><code>POST /api/car-racing/buy-car</code>, <code>POST /api/car-racing/buy-system-car</code>, <code>GET /api/car-racing/listings</code>, <code>GET /api/car-racing/system-cars</code></td>
-<td>Car Racing tab (listings + system catalog)</td>
-</tr>
-<tr>
-<td><strong>Bikes for sale</strong></td>
-<td><code>POST /api/bike-racing/buy-bike</code>, <code>POST /api/bike-racing/buy-system-bike</code>, <code>GET /api/bike-racing/listings</code>, <code>GET /api/bike-racing/system-bikes</code></td>
-<td>Bike Racing tab (listings + system catalog)</td>
-</tr>
-<tr>
-<td><strong>Locked staking</strong></td>
-<td><code>POST /api/staking/stake-locked</code>, <code>POST /api/staking/cancel-early</code>, <code>POST /api/staking/claim-lock</code></td>
-<td>Yield Vault tab; Wallet tab staking card; Home quick-access (dedicated card + button)</td>
-</tr>
-<tr>
-<td><strong>CoE (Center of Excellence)</strong></td>
-<td>University, Trainers, Referrals APIs</td>
-<td>CoE tab (branded hero, stats bar, University + Trainers + Creator Economy cards)</td>
-</tr>
-<tr>
-<td><strong>NFT Gallery</strong></td>
-<td>Multiverse/staking APIs</td>
-<td>Dedicated NFT Gallery tab (My NFTs grid gallery, stake/unstake per NFT)</td>
-</tr>
-<tr>
-<td><strong>Leaderboard</strong></td>
-<td><code>GET /api/leaderboard</code>, <code>GET /api/leaderboard/my-rank</code></td>
-<td>Leaderboard tab</td>
-</tr>
-<tr>
-<td><strong>Guilds</strong></td>
-<td><code>guilds</code> routes (create, join, deposit, Guild Wars)</td>
-<td>Guilds tab</td>
-</tr>
-<tr>
-<td><strong>Trainers</strong></td>
-<td><code>trainers.js</code>, <code>adminTrainers.js</code></td>
-<td><code>/trainer</code> portal</td>
-</tr>
-<tr>
-<td><strong>DAO</strong></td>
-<td>Governance routes, staking requirement for proposals</td>
-<td>Governance tab</td>
-</tr>
-<tr>
-<td><strong>Unified Comms</strong></td>
-<td>Announcements, support form, read/unread</td>
-<td>In-app announcements, support</td>
-</tr>
-<tr>
-<td><strong>Predict</strong></td>
-<td>Battle of the hour (predict)</td>
-<td>Arena / battle flow</td>
-</tr>
-<tr>
-<td><strong>Broker rental</strong></td>
-<td><code>broker-rental</code> routes</td>
-<td>Market / Brokers</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>6. Implemented feature paths (quick reference)</h2>
-<table>
-<thead><tr>
-<th>Feature</th>
-<th>Miniapp</th>
-<th>Scripts / docs</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>CoE tab</td>
-<td><code>page.js</code> tab <code>coe</code></td>
-<td>—</td>
-</tr>
-<tr>
-<td>NFT Gallery tab</td>
-<td><code>page.js</code> tab <code>nftGallery</code> (view toggle, All/Staked/Available filter)</td>
-<td>—</td>
-</tr>
-<tr>
-<td>Yield Vault tab</td>
-<td><code>page.js</code> tab <code>staking</code></td>
-<td>—</td>
-</tr>
-<tr>
-<td>Home quick-access strip</td>
-<td>CoE · NFT Gallery · Yield Vault buttons above Yield Vault card</td>
-<td>—</td>
-</tr>
-<tr>
-<td>Home Yield Vault quick-access</td>
-<td>Dedicated card + Command Center button</td>
-<td>—</td>
-</tr>
-<tr>
-<td>Operational monitoring</td>
-<td>—</td>
-<td><code>scripts/monitoring-check.js</code>, <code>scripts/health-check.js</code></td>
-</tr>
-<tr>
-<td>Backup runbook</td>
-<td>—</td>
-<td><code>docs/BACKUP-RUNBOOK.md</code> (includes cron example)</td>
-</tr>
-<tr>
-<td>Key rotation</td>
-<td>—</td>
-<td><code>docs/KEY-ROTATION.md</code></td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>7. Latest implementation status (gaps closed)</h2>
-<table>
-<thead><tr>
-<th>Area</th>
-<th>Implementation</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>CoE tab</strong></td>
-<td>Branded hero, stats bar (University/Trainers/Creator), three cards. <code>page.js</code> tab <code>coe</code>.</td>
-</tr>
-<tr>
-<td><strong>NFT Gallery tab</strong></td>
-<td>Dedicated tab with Gallery/List view toggle, All/Staked/Available filter. <code>page.js</code> tab <code>nftGallery</code>.</td>
-</tr>
-<tr>
-<td><strong>Yield Vault tab</strong></td>
-<td>Locked + flexible staking, reward preview, cancel-early, claim-lock. <code>page.js</code> tab <code>staking</code>.</td>
-</tr>
-<tr>
-<td><strong>Home quick-access</strong></td>
-<td>Featured strip: CoE · NFT Gallery · Yield Vault + dedicated Yield Vault card + Command Center button.</td>
-</tr>
-<tr>
-<td><strong>Operational hardening</strong></td>
-<td><code>scripts/monitoring-check.js</code>, <code>scripts/health-check.js</code>, BACKUP-RUNBOOK.md (cron), KEY-ROTATION.md, OPERATIONS.md.</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>9. Deep implementation verification (gaps closed)</h2>
-<p><strong>Last scan:</strong> Comprehensive codebase scan confirming all gap items from OPERATIONS.md and previous audits are implemented.</p>
-<table>
-<thead><tr>
-<th>Gap item</th>
-<th>Location</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>CoE as branded product</strong></td>
-<td><code>page.js</code> tab <code>coe</code> (~4414); <code>globals.css</code> <code>.coe-hero</code>, <code>.coe-stats-bar</code>, <code>.coe-grid</code>, <code>.coe-card</code></td>
-<td>Hero + stats bar + three cards</td>
-</tr>
-<tr>
-<td><strong>NFT Gallery dedicated tab</strong></td>
-<td><code>page.js</code> tab <code>nftGallery</code> (~4136); <code>.nft-gallery-dedicated</code>, <code>.nft-gallery</code>, <code>.nft-gallery-card</code></td>
-<td>Gallery/List, All/Staked/Available, stake/unstake per NFT</td>
-</tr>
-<tr>
-<td><strong>Dedicated Yield Vault tab</strong></td>
-<td><code>page.js</code> tab <code>staking</code> (~5004); <code>.yield-vault-hero</code>; <code>TAB_LIST</code> <code>staking</code></td>
-<td>Locked + flexible, cancel-early, claim-lock; <code>.home-overview__yield-vault</code></td>
-</tr>
-<tr>
-<td><strong>Home quick-access</strong></td>
-<td><code>page.js</code> ~3107: CoE · NFT Gallery · Yield Vault strip; dedicated Yield Vault card</td>
-<td>Yield Vault primary button</td>
-</tr>
-<tr>
-<td><strong>Creator stats API</strong></td>
-<td>Backend <code>referrals.js</code> <code>GET /api/referrals/me/stats</code></td>
-<td>earnedNeur, earnedAiba</td>
-</tr>
-<tr>
-<td><strong>Monitoring</strong></td>
-<td><code>scripts/monitoring-check.js</code> — health, metrics, vault, <code>--json</code>, <code>--vault</code></td>
-<td>Implemented</td>
-</tr>
-<tr>
-<td><strong>Health check</strong></td>
-<td><code>scripts/health-check.js</code> — <code>--vault</code>, exit 0/1</td>
-<td>Implemented</td>
-</tr>
-<tr>
-<td><strong>Backup runbook</strong></td>
-<td><code>docs/BACKUP-RUNBOOK.md</code> — MongoDB, secrets, TON, code, cron</td>
-<td>Implemented</td>
-</tr>
-<tr>
-<td><strong>Key rotation</strong></td>
-<td><code>docs/KEY-ROTATION.md</code> — Oracle, Admin JWT, Bot token, Battle seed</td>
-<td>Implemented</td>
-</tr>
-<tr>
-<td><strong>OPERATIONS.md</strong></td>
-<td>§4 — scripts, cron, BACKUP-RUNBOOK, KEY-ROTATION</td>
-<td>Implemented</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>10. Deepest implementation (complete)</h2>
-<p><strong>Date:</strong> Final gap-closure implementation.</p>
-<p><strong>Implemented features:</strong></p>
-<table>
-<thead><tr>
-<th>Feature</th>
-<th>Details</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>CoE tab</strong></td>
-<td>Branded hero, stats bar (University modules, Trainer status+earned AIBA, Creator refs+earned NEUR/AIBA), three cards (University, Trainers, Creator Economy). Refresh on tab focus.</td>
-</tr>
-<tr>
-<td><strong>NFT Gallery tab</strong></td>
-<td>Dedicated tab with Gallery/List view toggle, All/Staked/Available filter, <code>nft-gallery-card--large</code>, stake/unstake per NFT, rewards claim. CSS: <code>nft-gallery-dedicated</code>, <code>nft-gallery</code>, <code>nft-gallery-card</code>.</td>
-</tr>
-<tr>
-<td><strong>Yield Vault tab</strong></td>
-<td>Hero shows minimum stake (ecosystem-aligned: 1T AIBA, broker mint cost); mini stats bar (active locks, total locked AIBA). Locked staking: min displayed, input label, enforce on confirm. Flexible staking: min displayed, placeholder, enforce on stake. Wallet tab staking: same min displayed and enforced. CSS: <code>yield-vault-hero</code>, <code>home-overview__yield-vault</code>.</td>
-</tr>
-<tr>
-<td><strong>Home quick-access</strong></td>
-<td>Featured strip (<code>.home-featured-strip</code>): CoE · NFT Gallery · Yield Vault buttons + dedicated Yield Vault card + Command Center Yield Vault button.</td>
-</tr>
-<tr>
-<td><strong>Operational hardening</strong></td>
-<td><code>scripts/monitoring-check.js</code> (health, metrics, vault, <code>--json</code>), <code>scripts/health-check.js</code> (<code>--vault</code>). BACKUP-RUNBOOK.md (MongoDB, secrets, TON, cron). KEY-ROTATION.md (Oracle, Admin JWT, Bot, Battle seed). OPERATIONS.md §4–5 (scripts, cron, checklist).</td>
-</tr>
-</tbody></table>
-<p><strong>Navigation:</strong> CoE, NFT Gallery, Yield Vault in <code>TAB_LIST</code> and <code>HOME_GRID_IDS</code>; accessible from tab bar and Home grid.</p>
-<hr/>
-<h2>10. Global scan (docs, APIs, endpoints) — gaps fixed</h2>
-<table>
-<thead><tr>
-<th>Issue</th>
-<th>Fix</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Guilds route order</strong></td>
-<td><code>GET /api/guilds/list</code> was defined <em>after</em> <code>GET /api/guilds/:guildId/pool</code>, so requests to <code>/list</code> matched <code>/:guildId</code> with guildId=<code>&quot;list&quot;</code> and failed validation. Reordered: <code>/list</code>, <code>/mine</code>, <code>/top</code> now come <em>before</em> <code>/:guildId/pool</code>.</td>
-</tr>
-<tr>
-<td><strong>API-CONTRACT.md gaps</strong></td>
-<td>Added §5h: Charity (campaigns, stats, my-impact, leaderboard, donate), Daily (claim, combo-claim, status), Premium (status, buy), Broker Rental (list, rent, unlist), Tasks, Tournaments, Global Boss, Stars Store.</td>
-</tr>
-<tr>
-<td><strong>Announcements doc</strong></td>
-<td>Clarified <code>GET /api/announcements</code> returns <code>{ items: Announcement[], unreadCount }</code>; added Auth requirement.</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>11. Up-to-date check</h2>
-<p>When auditing “is everything up to date”: (1) Backend and miniapp env match DEPLOYMENT-AND-ENV.md. (2) All required env set for target (localhost vs prod). (3) CI green; backend and miniapp tests pass. (4) No committed secrets; runbook and monitoring in place for production.</p>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>AUDIT AND STATUS — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>AUDIT AND STATUS</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Audit &amp; status — Project assessment, leaderboard, ecosystems, vision</h1>
+            <p>
+                Single reference for codebase audits and status checks: project assessment, leaderboard &amp; groups,
+                ecosystems (NFT, staking, CoE, Wall of Fame), and vision vs implementation.
+            </p>
+            <hr />
+            <h2>1. Project assessment (summary)</h2>
+            <p><strong>Scope:</strong> Contracts, backend, miniapp, admin, docs, CI.</p>
+            <p>
+                <strong>Status:</strong> Feature-complete for testnet/MVP. Contracts build and have tests; backend has
+                production-readiness checks and Vercel serverless; miniapp implements full user flow. Mainnet readiness
+                requires env, key isolation, monitoring, backups (see DEPLOYMENT-AND-ENV.md and OPERATIONS.md).
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Path</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Contracts</td>
+                        <td><code>contracts/</code></td>
+                        <td>Tact/Blueprint; build + tests</td>
+                    </tr>
+                    <tr>
+                        <td>Backend</td>
+                        <td><code>backend/</code></td>
+                        <td>Express, Mongoose; <code>backend/tests/</code> Node --test</td>
+                    </tr>
+                    <tr>
+                        <td>Miniapp</td>
+                        <td><code>miniapp/</code></td>
+                        <td>Next.js 15, TonConnect</td>
+                    </tr>
+                    <tr>
+                        <td>Admin</td>
+                        <td><code>admin-panel/</code></td>
+                        <td>Next.js 14, backend API</td>
+                    </tr>
+                    <tr>
+                        <td>Docs</td>
+                        <td><code>docs/</code></td>
+                        <td>Deployment, operations, testing, feature plans</td>
+                    </tr>
+                    <tr>
+                        <td>CI</td>
+                        <td><code>.github/workflows/ci.yml</code></td>
+                        <td>Build, test, lint, miniapp &amp; admin build</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>2. Leaderboard &amp; groups</h2>
+            <ul>
+                <li>
+                    <strong>Top leaders create groups:</strong> Top N by score (config:
+                    <code>leaderboardTopFreeCreate</code>, default 50) can create a guild without paying TON. Rank =
+                    count of users with higher total score + 1.
+                </li>
+                <li>
+                    <strong>Guild benefits:</strong> Guild Wars arena, guild vault (NEUR/AIBA), deposit brokers to pool,
+                    boost count &amp; visibility, join/leave. Implemented in <code>guilds</code> routes and miniapp
+                    Guilds tab.
+                </li>
+            </ul>
+            <hr />
+            <h2>3. Ecosystems audit (NFT, staking, CoE, Wall of Fame)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ecosystem</th>
+                        <th>Backend</th>
+                        <th>Miniapp</th>
+                        <th>Verdict</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>NFT creator</strong></td>
+                        <td>Broker mint (AIBA → BrokerMintJob), create-with-TON, metadata</td>
+                        <td>Brokers tab mint; Market “Create broker (pay TON)”</td>
+                        <td>Present; optional: dedicated tab, gallery, “Creator Lab”</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Staking</strong></td>
+                        <td>
+                            Staking model, stake/unstake/claim; locked periods (30/90/180/365d), stake-locked,
+                            cancel-early (fee→Treasury), claim-lock; APY
+                        </td>
+                        <td>
+                            Wallet tab: flexible + locked staking, periods, reward preview, countdown, cancel-early,
+                            claim-lock
+                        </td>
+                        <td>Present; optional: dedicated “Yield Vault” tab</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Center of Excellence</strong></td>
+                        <td>University + Trainers + Referrals routes</td>
+                        <td>
+                            <strong>CoE tab</strong>: branded stats bar, University (modules, Graduate badge), Trainers
+                            (status, earned AIBA), Creator Economy (refs, tier badges)
+                        </td>
+                        <td>Present; CoE branded product tab implemented</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Wall of Fame</strong></td>
+                        <td>Leaderboard, badges</td>
+                        <td>Leaderboard tab, badges in profile/leaderboard</td>
+                        <td>Present (leaderboard + badges)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Trainers</strong></td>
+                        <td>Global network, dashboard, leaderboard</td>
+                        <td>
+                            <code>/trainer</code> portal; network, leaderboard, profile editor; viral recruitment; 5
+                            AIBA/user, 20 AIBA/recruited trainer
+                        </td>
+                        <td>Present; Super Admin approves at /admin</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>4. Vision vs codebase</h2>
+            <p>Use this section to track high-level vision vs implementation.</p>
+            <p>
+                <strong>Key alignments (backend + miniapp implemented):</strong> battles, economy (NEUR/AIBA),
+                <strong>brokers for sale</strong> (Market Trade + system catalog), <strong>cars for sale</strong> (Car
+                Racing → Market: list/buy from players or system), <strong>bikes for sale</strong> (Bike Racing →
+                Market: list/buy from players or system), Super Futuristic Unified Marketplace, guilds (create/join,
+                deposit brokers, Guild Wars, top N free create), referrals, car/bike racing (races, leaderboard),
+                university, charity (Max NEUR/AIBA, presets, message, anonymous, <strong>campaign detail</strong> with
+                recent donations via <code>GET /api/charity/campaigns/:id</code>), multiverse (NFT/stake),
+                <strong>Governance</strong> (realm proposals) + <strong>DAO</strong> (community proposals, staking
+                requirement for create), wallet (TonConnect, claim, staking flow switch),
+                <strong>trainers</strong> (global network, dashboard, leaderboard, viral recruitment),
+                <strong>Unified Comms</strong> (announcements read/unread, support form, collapsible FAQ), predict
+                (Battle of the hour), broker rental (list, rent, unlist own).
+            </p>
+            <p><strong>Gaps (closed):</strong> All previously identified gaps have been implemented:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Gap</th>
+                        <th>Implementation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CoE as branded product</strong></td>
+                        <td>
+                            Dedicated CoE tab (<code>tab === 'coe'</code>) with branded hero (<code>coe-hero</code>),
+                            stats bar (University modules, Trainer status+earned AIBA, Creator refs+earned NEUR/AIBA),
+                            and three cards: University, Trainers, Creator Economy. CSS: <code>coe-hero</code>,
+                            <code>coe-stats-bar</code>, <code>coe-grid</code>, <code>coe-card</code> in globals.css.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>NFT gallery</strong></td>
+                        <td>
+                            Dedicated NFT Gallery tab (<code>tab === 'nftGallery'</code>) with My NFTs grid/list view
+                            toggle, All/Staked/Available filter, <code>nft-gallery</code>,
+                            <code>nft-gallery-card</code>, <code>nft-gallery-card--large</code>, stake/unstake per NFT,
+                            rewards claim. CSS: <code>nft-gallery-dedicated</code>, <code>nft-gallery</code>,
+                            <code>nft-gallery-card</code>, <code>nft-gallery-card--large</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dedicated Yield Vault tab</strong></td>
+                        <td>
+                            Dedicated staking tab (<code>tab === 'staking'</code>) with locked + flexible staking,
+                            periods, reward preview, cancel-early, claim-lock. CSS: <code>yield-vault-hero</code>. Home
+                            quick-access: featured strip (CoE · NFT Gallery · Yield Vault) + dedicated Yield Vault card
+                            + Command Center button. In TAB_LIST and HOME_GRID_IDS.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Operational hardening</strong></td>
+                        <td>
+                            <code>scripts/monitoring-check.js</code> (health, metrics, vault, --json for alerting);
+                            <code>scripts/health-check.js</code> (--vault, CI-friendly);
+                            <a href="BACKUP-RUNBOOK.md">BACKUP-RUNBOOK.md</a> (MongoDB, secrets, TON, code, cron
+                            example); <a href="KEY-ROTATION.md">KEY-ROTATION.md</a> (Oracle, Admin JWT, Bot token,
+                            Battle seed). OPERATIONS.md references all, includes cron examples for monitoring.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>5. Deep implementation checklist (backend + frontend)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Backend</th>
+                        <th>Frontend (miniapp)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Brokers for sale</strong></td>
+                        <td>
+                            <code>POST /api/marketplace/buy</code>,
+                            <code>POST /api/marketplace/buy-system-broker</code>, system catalog
+                        </td>
+                        <td>Market tab → Trade</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cars for sale</strong></td>
+                        <td>
+                            <code>POST /api/car-racing/buy-car</code>, <code>POST /api/car-racing/buy-system-car</code>,
+                            <code>GET /api/car-racing/listings</code>, <code>GET /api/car-racing/system-cars</code>
+                        </td>
+                        <td>Car Racing tab (listings + system catalog)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bikes for sale</strong></td>
+                        <td>
+                            <code>POST /api/bike-racing/buy-bike</code>,
+                            <code>POST /api/bike-racing/buy-system-bike</code>,
+                            <code>GET /api/bike-racing/listings</code>, <code>GET /api/bike-racing/system-bikes</code>
+                        </td>
+                        <td>Bike Racing tab (listings + system catalog)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Locked staking</strong></td>
+                        <td>
+                            <code>POST /api/staking/stake-locked</code>, <code>POST /api/staking/cancel-early</code>,
+                            <code>POST /api/staking/claim-lock</code>
+                        </td>
+                        <td>Yield Vault tab; Wallet tab staking card; Home quick-access (dedicated card + button)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CoE (Center of Excellence)</strong></td>
+                        <td>University, Trainers, Referrals APIs</td>
+                        <td>CoE tab (branded hero, stats bar, University + Trainers + Creator Economy cards)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NFT Gallery</strong></td>
+                        <td>Multiverse/staking APIs</td>
+                        <td>Dedicated NFT Gallery tab (My NFTs grid gallery, stake/unstake per NFT)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Leaderboard</strong></td>
+                        <td><code>GET /api/leaderboard</code>, <code>GET /api/leaderboard/my-rank</code></td>
+                        <td>Leaderboard tab</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Guilds</strong></td>
+                        <td><code>guilds</code> routes (create, join, deposit, Guild Wars)</td>
+                        <td>Guilds tab</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Trainers</strong></td>
+                        <td><code>trainers.js</code>, <code>adminTrainers.js</code></td>
+                        <td><code>/trainer</code> portal</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DAO</strong></td>
+                        <td>Governance routes, staking requirement for proposals</td>
+                        <td>Governance tab</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Unified Comms</strong></td>
+                        <td>Announcements, support form, read/unread</td>
+                        <td>In-app announcements, support</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Predict</strong></td>
+                        <td>Battle of the hour (predict)</td>
+                        <td>Arena / battle flow</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Broker rental</strong></td>
+                        <td><code>broker-rental</code> routes</td>
+                        <td>Market / Brokers</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>6. Implemented feature paths (quick reference)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Miniapp</th>
+                        <th>Scripts / docs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>CoE tab</td>
+                        <td><code>page.js</code> tab <code>coe</code></td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>NFT Gallery tab</td>
+                        <td>
+                            <code>page.js</code> tab <code>nftGallery</code> (view toggle, All/Staked/Available filter)
+                        </td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Yield Vault tab</td>
+                        <td><code>page.js</code> tab <code>staking</code></td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Home quick-access strip</td>
+                        <td>CoE · NFT Gallery · Yield Vault buttons above Yield Vault card</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Home Yield Vault quick-access</td>
+                        <td>Dedicated card + Command Center button</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Operational monitoring</td>
+                        <td>—</td>
+                        <td><code>scripts/monitoring-check.js</code>, <code>scripts/health-check.js</code></td>
+                    </tr>
+                    <tr>
+                        <td>Backup runbook</td>
+                        <td>—</td>
+                        <td><code>docs/BACKUP-RUNBOOK.md</code> (includes cron example)</td>
+                    </tr>
+                    <tr>
+                        <td>Key rotation</td>
+                        <td>—</td>
+                        <td><code>docs/KEY-ROTATION.md</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>7. Latest implementation status (gaps closed)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Implementation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CoE tab</strong></td>
+                        <td>
+                            Branded hero, stats bar (University/Trainers/Creator), three cards. <code>page.js</code> tab
+                            <code>coe</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>NFT Gallery tab</strong></td>
+                        <td>
+                            Dedicated tab with Gallery/List view toggle, All/Staked/Available filter.
+                            <code>page.js</code> tab <code>nftGallery</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Yield Vault tab</strong></td>
+                        <td>
+                            Locked + flexible staking, reward preview, cancel-early, claim-lock.
+                            <code>page.js</code> tab <code>staking</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Home quick-access</strong></td>
+                        <td>
+                            Featured strip: CoE · NFT Gallery · Yield Vault + dedicated Yield Vault card + Command
+                            Center button.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Operational hardening</strong></td>
+                        <td>
+                            <code>scripts/monitoring-check.js</code>, <code>scripts/health-check.js</code>,
+                            BACKUP-RUNBOOK.md (cron), KEY-ROTATION.md, OPERATIONS.md.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>9. Deep implementation verification (gaps closed)</h2>
+            <p>
+                <strong>Last scan:</strong> Comprehensive codebase scan confirming all gap items from OPERATIONS.md and
+                previous audits are implemented.
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Gap item</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CoE as branded product</strong></td>
+                        <td>
+                            <code>page.js</code> tab <code>coe</code> (~4414); <code>globals.css</code>
+                            <code>.coe-hero</code>, <code>.coe-stats-bar</code>, <code>.coe-grid</code>,
+                            <code>.coe-card</code>
+                        </td>
+                        <td>Hero + stats bar + three cards</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NFT Gallery dedicated tab</strong></td>
+                        <td>
+                            <code>page.js</code> tab <code>nftGallery</code> (~4136);
+                            <code>.nft-gallery-dedicated</code>, <code>.nft-gallery</code>,
+                            <code>.nft-gallery-card</code>
+                        </td>
+                        <td>Gallery/List, All/Staked/Available, stake/unstake per NFT</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dedicated Yield Vault tab</strong></td>
+                        <td>
+                            <code>page.js</code> tab <code>staking</code> (~5004); <code>.yield-vault-hero</code>;
+                            <code>TAB_LIST</code> <code>staking</code>
+                        </td>
+                        <td>Locked + flexible, cancel-early, claim-lock; <code>.home-overview__yield-vault</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Home quick-access</strong></td>
+                        <td>
+                            <code>page.js</code> ~3107: CoE · NFT Gallery · Yield Vault strip; dedicated Yield Vault
+                            card
+                        </td>
+                        <td>Yield Vault primary button</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Creator stats API</strong></td>
+                        <td>Backend <code>referrals.js</code> <code>GET /api/referrals/me/stats</code></td>
+                        <td>earnedNeur, earnedAiba</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Monitoring</strong></td>
+                        <td>
+                            <code>scripts/monitoring-check.js</code> — health, metrics, vault, <code>--json</code>,
+                            <code>--vault</code>
+                        </td>
+                        <td>Implemented</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Health check</strong></td>
+                        <td><code>scripts/health-check.js</code> — <code>--vault</code>, exit 0/1</td>
+                        <td>Implemented</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Backup runbook</strong></td>
+                        <td><code>docs/BACKUP-RUNBOOK.md</code> — MongoDB, secrets, TON, code, cron</td>
+                        <td>Implemented</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Key rotation</strong></td>
+                        <td><code>docs/KEY-ROTATION.md</code> — Oracle, Admin JWT, Bot token, Battle seed</td>
+                        <td>Implemented</td>
+                    </tr>
+                    <tr>
+                        <td><strong>OPERATIONS.md</strong></td>
+                        <td>§4 — scripts, cron, BACKUP-RUNBOOK, KEY-ROTATION</td>
+                        <td>Implemented</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>10. Deepest implementation (complete)</h2>
+            <p><strong>Date:</strong> Final gap-closure implementation.</p>
+            <p><strong>Implemented features:</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CoE tab</strong></td>
+                        <td>
+                            Branded hero, stats bar (University modules, Trainer status+earned AIBA, Creator refs+earned
+                            NEUR/AIBA), three cards (University, Trainers, Creator Economy). Refresh on tab focus.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>NFT Gallery tab</strong></td>
+                        <td>
+                            Dedicated tab with Gallery/List view toggle, All/Staked/Available filter,
+                            <code>nft-gallery-card--large</code>, stake/unstake per NFT, rewards claim. CSS:
+                            <code>nft-gallery-dedicated</code>, <code>nft-gallery</code>, <code>nft-gallery-card</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Yield Vault tab</strong></td>
+                        <td>
+                            Hero shows minimum stake (ecosystem-aligned: 1T AIBA, broker mint cost); mini stats bar
+                            (active locks, total locked AIBA). Locked staking: min displayed, input label, enforce on
+                            confirm. Flexible staking: min displayed, placeholder, enforce on stake. Wallet tab staking:
+                            same min displayed and enforced. CSS: <code>yield-vault-hero</code>,
+                            <code>home-overview__yield-vault</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Home quick-access</strong></td>
+                        <td>
+                            Featured strip (<code>.home-featured-strip</code>): CoE · NFT Gallery · Yield Vault buttons
+                            + dedicated Yield Vault card + Command Center Yield Vault button.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Operational hardening</strong></td>
+                        <td>
+                            <code>scripts/monitoring-check.js</code> (health, metrics, vault, <code>--json</code>),
+                            <code>scripts/health-check.js</code> (<code>--vault</code>). BACKUP-RUNBOOK.md (MongoDB,
+                            secrets, TON, cron). KEY-ROTATION.md (Oracle, Admin JWT, Bot, Battle seed). OPERATIONS.md
+                            §4–5 (scripts, cron, checklist).
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Navigation:</strong> CoE, NFT Gallery, Yield Vault in <code>TAB_LIST</code> and
+                <code>HOME_GRID_IDS</code>; accessible from tab bar and Home grid.
+            </p>
+            <hr />
+            <h2>10. Global scan (docs, APIs, endpoints) — gaps fixed</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Issue</th>
+                        <th>Fix</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Guilds route order</strong></td>
+                        <td>
+                            <code>GET /api/guilds/list</code> was defined <em>after</em>
+                            <code>GET /api/guilds/:guildId/pool</code>, so requests to <code>/list</code> matched
+                            <code>/:guildId</code> with guildId=<code>&quot;list&quot;</code> and failed validation.
+                            Reordered: <code>/list</code>, <code>/mine</code>, <code>/top</code> now come
+                            <em>before</em> <code>/:guildId/pool</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>API-CONTRACT.md gaps</strong></td>
+                        <td>
+                            Added §5h: Charity (campaigns, stats, my-impact, leaderboard, donate), Daily (claim,
+                            combo-claim, status), Premium (status, buy), Broker Rental (list, rent, unlist), Tasks,
+                            Tournaments, Global Boss, Stars Store.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Announcements doc</strong></td>
+                        <td>
+                            Clarified <code>GET /api/announcements</code> returns
+                            <code>{ items: Announcement[], unreadCount }</code>; added Auth requirement.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>11. Up-to-date check</h2>
+            <p>
+                When auditing “is everything up to date”: (1) Backend and miniapp env match DEPLOYMENT-AND-ENV.md. (2)
+                All required env set for target (localhost vs prod). (3) CI green; backend and miniapp tests pass. (4)
+                No committed secrets; runbook and monitoring in place for production.
+            </p>
+        </div>
+    </body>
 </html>

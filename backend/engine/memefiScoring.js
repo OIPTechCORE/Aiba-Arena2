@@ -20,11 +20,14 @@ function timeDecayFactor(createdAt, halfLifeHours = 24) {
     return Math.pow(0.5, hours / halfLifeHours);
 }
 
-function computeEngagementScore(meme, cfg = {}) {
-    const wLike = Number(cfg.weightLike) || 1;
-    const wComment = Number(cfg.weightComment) || 2;
-    const wInternal = Number(cfg.weightInternalShare) || 3;
-    const wExternal = Number(cfg.weightExternalShare) || 5;
+function computeEngagementScore(meme, cfg = {}, reactionCounts = {}) {
+    const ec = meme.educationCategory && cfg.educationWeights && cfg.educationWeights[meme.educationCategory];
+    const wLike = ec && ec.weightLike != null ? Number(ec.weightLike) : Number(cfg.weightLike) || 1;
+    const wComment = ec && ec.weightComment != null ? Number(ec.weightComment) : Number(cfg.weightComment) || 2;
+    const wInternal =
+        ec && ec.weightInternalShare != null ? Number(ec.weightInternalShare) : Number(cfg.weightInternalShare) || 3;
+    const wExternal =
+        ec && ec.weightExternalShare != null ? Number(ec.weightExternalShare) : Number(cfg.weightExternalShare) || 5;
     const boostMul = Number(cfg.boostMultiplierPerUnit) || 0.1;
     const halfLife = Number(cfg.timeDecayHalfLifeHours) || 24;
 
@@ -34,28 +37,37 @@ function computeEngagementScore(meme, cfg = {}) {
     const externalShareCount = Math.max(0, Number(meme.externalShareCount) || 0);
     const boostTotal = Math.max(0, Number(meme.boostTotal) || 0);
 
-    const raw =
+    let raw =
         likeCount * wLike +
         commentCount * wComment +
         internalShareCount * wInternal +
         externalShareCount * wExternal +
         boostTotal * boostMul;
 
-    const decay = timeDecayFactor(meme.createdAt, halfLife);
+    const rw = cfg.reactionWeights || {};
+    for (const [type, count] of Object.entries(reactionCounts)) {
+        raw += (Number(count) || 0) * (Number(rw[type]) || 1);
+    }
+
+    const decay = timeDecayFactor(meme.publishedAt || meme.createdAt, halfLife);
     const score = Math.max(0, Math.round(raw * decay));
     return { score, raw, decay };
 }
 
 async function recomputeMemeScore(memeId) {
     const Meme = require('../models/Meme');
+    const MemeReaction = require('../models/MemeReaction');
     const meme = await Meme.findById(memeId).lean();
     if (!meme) return null;
     const cfg = await getMemeFiConfig();
-    const { score } = computeEngagementScore(meme, cfg);
-    await Meme.updateOne(
-        { _id: memeId },
-        { $set: { engagementScore: score, scoreUpdatedAt: new Date() } },
-    );
+    const reactionCounts = {};
+    const reactions = await MemeReaction.aggregate([
+        { $match: { memeId: meme._id } },
+        { $group: { _id: '$reactionType', count: { $sum: 1 } } },
+    ]);
+    for (const r of reactions) reactionCounts[r._id] = r.count;
+    const { score } = computeEngagementScore(meme, cfg, reactionCounts);
+    await Meme.updateOne({ _id: memeId }, { $set: { engagementScore: score, scoreUpdatedAt: new Date() } });
     return score;
 }
 

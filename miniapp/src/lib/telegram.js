@@ -1,35 +1,35 @@
 export function getTelegramInitData() {
-  try {
-    return typeof window !== 'undefined' ? (window?.Telegram?.WebApp?.initData || '') : '';
-  } catch {
-    return '';
-  }
+    try {
+        return typeof window !== 'undefined' ? window?.Telegram?.WebApp?.initData || '' : '';
+    } catch {
+        return '';
+    }
 }
 
 export function getTelegramUserUnsafe() {
-  try {
-    return typeof window !== 'undefined'
-      ? (window?.Telegram?.WebApp?.initDataUnsafe?.user || null)
-      : null;
-  } catch {
-    return null;
-  }
+    try {
+        return typeof window !== 'undefined' ? window?.Telegram?.WebApp?.initDataUnsafe?.user || null : null;
+    } catch {
+        return null;
+    }
 }
 
 /** Check if running inside Telegram WebApp */
 export function isTelegramWebApp() {
-  try {
-    return Boolean(typeof window !== 'undefined' && window?.Telegram?.WebApp);
-  } catch {
-    return false;
-  }
+    try {
+        return Boolean(typeof window !== 'undefined' && window?.Telegram?.WebApp);
+    } catch {
+        return false;
+    }
 }
 
 /** Trigger haptic feedback when available */
 export function hapticFeedback(type = 'light') {
-  try {
-    window?.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.(type);
-  } catch { /* ignore */ }
+    try {
+        window?.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.(type);
+    } catch {
+        /* ignore */
+    }
 }
 
 /** Open Telegram native share (t.me/share/url) when in Telegram; fallback to navigator.share or clipboard */
@@ -50,6 +50,8 @@ export function shareViaTelegram({ title, text, url }) {
             navigator.clipboard.writeText(t + (u ? ' ' + u : '')).catch(() => {});
             return true;
         }
-    } catch { /* ignore */ }
+    } catch {
+        /* ignore */
+    }
     return false;
 }

@@ -1,92 +1,125 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>DOCS STRUCTURE — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>DOCS STRUCTURE</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Docs Structure — Markdown vs HTML</h1>
-<p><strong>Why are there <code>.html</code> files when I only see some <code>.md</code> files?</strong></p>
-<hr/>
-<h2>Source of truth: Markdown (<code>.md</code>)</h2>
-<table>
-<thead><tr>
-<th>Location</th>
-<th>Purpose</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>docs/</code> (all .md)</td>
-<td>Primary documentation — <strong>edit these</strong>.</td>
-</tr>
-<tr>
-<td><code>docs/marketing/</code> (all .md)</td>
-<td>Marketing materials.</td>
-</tr>
-<tr>
-<td><code>docs/marketing/templates/</code> (all .md)</td>
-<td>Template readme.</td>
-</tr>
-</tbody></table>
-<p>All documentation should be written in <strong>Markdown</strong>. That is the source of truth.</p>
-<hr/>
-<h2>Generated: HTML in <code>docs/print/</code></h2>
-<p>The folder <strong><code>docs/print/</code></strong> contains <strong>print-friendly HTML</strong> generated from Markdown:</p>
-<ol>
-<li>The script scans <code>docs/</code> for all <code>.md</code> files.</li>
-<li>Each <code>.md</code> file is converted to HTML and written to <code>docs/print/</code>.</li>
-<li>Naming: <code>docs/marketing/README.md</code> → <code>docs/print/marketing-README.html</code>.</li>
-</ol>
-<p><strong>Use:</strong> Open <code>docs/print/index.html</code> in a browser and print or save as PDF.</p>
-<hr/>
-<h2><code>.md</code> source files — one-to-one with generated HTML</h2>
-<p>As of the latest update, <strong>all <code>.html</code> files in <code>docs/print/</code> have a corresponding <code>.md</code> source</strong> in <code>docs/</code>. The build script generates exactly one HTML file per <code>.md</code> file (excluding <code>docs/print/</code>, <code>docs/templates/</code>).</p>
-<table>
-<thead><tr>
-<th>Count</th>
-<th>Location</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>~58 <code>.md</code> files</td>
-<td><code>docs/</code> (and <code>docs/marketing/</code>)</td>
-</tr>
-<tr>
-<td>58 doc HTML + index</td>
-<td><code>docs/print/</code></td>
-</tr>
-</tbody></table>
-<hr/>
-<h3>Previously orphan HTML — now restored</h3>
-<p>The following <code>.md</code> files were <strong>restored or created</strong> so every HTML has a source:</p>
-<ul>
-<li><strong>Redirect stubs</strong> (point to canonical docs): <code>AUTONOMOUS-RACING-MASTER-PLAN.md</code>, <code>ECOSYSTEMS-AUDIT.md</code>, <code>GAME-EXPLAINED.md</code>, <code>LEADERBOARD-AND-GROUPS-CHECK.md</code>, <code>NFT-MULTIVERSE-MASTER-PLAN.md</code>, <code>PROJECT-ASSESSMENT.md</code>, <code>PROJECT-DESCRIPTION-SYSTEMATIC.md</code>, <code>STARS-BADGES-DIAMONDS-PLAN.md</code>, <code>STARS-BADGES-DIAMONDS-RESEARCH-MISSING.md</code>, <code>STARS-BADGES-DIAMONDS-VISION.md</code>, <code>TELEGRAM-MINI-APP-SETUP-GUIDE.md</code>, <code>UP-TO-DATE-CHECK.md</code>, <code>VERCEL-ENV-GUIDE.md</code>, <code>VISION-VS-CODEBASE-CHECK.md</code></li>
-</ul>
-<p><strong>Best practice:</strong></p>
-<ul>
-<li>Run <code>npm run build:print-docs</code> after doc changes.</li>
-</ul>
-<hr/>
-<h2>Summary</h2>
-<table>
-<thead><tr>
-<th>Edit</th>
-<th>Generate</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>docs/*.md</code></td>
-<td><code>npm run build:print-docs</code> → <code>docs/print/*.html</code></td>
-</tr>
-</tbody></table>
-<p><strong>Don't edit the HTML directly.</strong> Edit Markdown and regenerate.</p>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>DOCS STRUCTURE — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>DOCS STRUCTURE</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Docs Structure — Markdown vs HTML</h1>
+            <p>
+                <strong>Why are there <code>.html</code> files when I only see some <code>.md</code> files?</strong>
+            </p>
+            <hr />
+            <h2>Source of truth: Markdown (<code>.md</code>)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>docs/</code> (all .md)</td>
+                        <td>Primary documentation — <strong>edit these</strong>.</td>
+                    </tr>
+                    <tr>
+                        <td><code>docs/marketing/</code> (all .md)</td>
+                        <td>Marketing materials.</td>
+                    </tr>
+                    <tr>
+                        <td><code>docs/marketing/templates/</code> (all .md)</td>
+                        <td>Template readme.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>All documentation should be written in <strong>Markdown</strong>. That is the source of truth.</p>
+            <hr />
+            <h2>Generated: HTML in <code>docs/print/</code></h2>
+            <p>
+                The folder <strong><code>docs/print/</code></strong> contains
+                <strong>print-friendly HTML</strong> generated from Markdown:
+            </p>
+            <ol>
+                <li>The script scans <code>docs/</code> for all <code>.md</code> files.</li>
+                <li>Each <code>.md</code> file is converted to HTML and written to <code>docs/print/</code>.</li>
+                <li>Naming: <code>docs/marketing/README.md</code> → <code>docs/print/marketing-README.html</code>.</li>
+            </ol>
+            <p><strong>Use:</strong> Open <code>docs/print/index.html</code> in a browser and print or save as PDF.</p>
+            <hr />
+            <h2><code>.md</code> source files — one-to-one with generated HTML</h2>
+            <p>
+                As of the latest update,
+                <strong
+                    >all <code>.html</code> files in <code>docs/print/</code> have a corresponding
+                    <code>.md</code> source</strong
+                >
+                in <code>docs/</code>. The build script generates exactly one HTML file per <code>.md</code> file
+                (excluding <code>docs/print/</code>, <code>docs/templates/</code>).
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Count</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>~58 <code>.md</code> files</td>
+                        <td><code>docs/</code> (and <code>docs/marketing/</code>)</td>
+                    </tr>
+                    <tr>
+                        <td>58 doc HTML + index</td>
+                        <td><code>docs/print/</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h3>Previously orphan HTML — now restored</h3>
+            <p>
+                The following <code>.md</code> files were <strong>restored or created</strong> so every HTML has a
+                source:
+            </p>
+            <ul>
+                <li>
+                    <strong>Redirect stubs</strong> (point to canonical docs):
+                    <code>AUTONOMOUS-RACING-MASTER-PLAN.md</code>, <code>ECOSYSTEMS-AUDIT.md</code>,
+                    <code>GAME-EXPLAINED.md</code>, <code>LEADERBOARD-AND-GROUPS-CHECK.md</code>,
+                    <code>NFT-MULTIVERSE-MASTER-PLAN.md</code>, <code>PROJECT-ASSESSMENT.md</code>,
+                    <code>PROJECT-DESCRIPTION-SYSTEMATIC.md</code>, <code>TELEGRAM-MINI-APP-SETUP-GUIDE.md</code>,
+                    <code>UP-TO-DATE-CHECK.md</code>, <code>VERCEL-ENV-GUIDE.md</code>,
+                    <code>VISION-VS-CODEBASE-CHECK.md</code>
+                </li>
+            </ul>
+            <p><strong>Best practice:</strong></p>
+            <ul>
+                <li>Run <code>npm run build:print-docs</code> after doc changes.</li>
+            </ul>
+            <hr />
+            <h2>Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Edit</th>
+                        <th>Generate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>docs/*.md</code></td>
+                        <td><code>npm run build:print-docs</code> → <code>docs/print/*.html</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>Don't edit the HTML directly.</strong> Edit Markdown and regenerate.</p>
+        </div>
+    </body>
 </html>

@@ -43,8 +43,9 @@ contract AiAssetRegistry with Ownable {
         require(record != null, "Asset not found");
         let op = self.operators.get(sender());
         require(record!!.owner == sender() || (op != null && op!!), "Not owner");
-        record!!.owner = msg.newOwner;
-        self.assets.set(msg.assetId, record!!);
+        let updatedRecord = record!!;
+        updatedRecord.owner = msg.newOwner;
+        self.assets.set(msg.assetId, updatedRecord);
         cashback(sender());
     }
 
@@ -58,7 +59,7 @@ contract AiAssetRegistry with Ownable {
         cashback(sender());
     }
 
-    get fun getAsset(assetId: Int as uint64): AssetRecord? {
+    get fun getAsset(assetId: Int): AssetRecord? {
         return self.assets.get(assetId);
     }
 }

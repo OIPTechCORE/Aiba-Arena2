@@ -26,14 +26,14 @@
 
 **Connect → Broker → Arena → Battle → Earn → Claim**
 
-| Step | Action | Result |
-|------|--------|--------|
-| 1 | Connect wallet (TonConnect) | Backend saves TON address for claims |
-| 2 | Create broker (starter or buy/create with TON) | First broker free; additional via AIBA or TON |
-| 3 | Choose arena + league | prediction, simulation, strategyWars, arbitrage, guildWars |
-| 4 | Run battle | Deterministic simulation → score |
-| 5 | Earn NEUR & AIBA | Off-chain credits; Stars on win; Diamonds on first win |
-| 6 | Claim AIBA on-chain | Wallet → Vault → signed claim → TonConnect tx |
+| Step | Action                                         | Result                                                     |
+| ---- | ---------------------------------------------- | ---------------------------------------------------------- |
+| 1    | Connect wallet (TonConnect)                    | Backend saves TON address for claims                       |
+| 2    | Create broker (starter or buy/create with TON) | First broker free; additional via AIBA or TON              |
+| 3    | Choose arena + league                          | prediction, simulation, strategyWars, arbitrage, guildWars |
+| 4    | Run battle                                     | Deterministic simulation → score                           |
+| 5    | Earn NEUR & AIBA                               | Off-chain credits; Stars on win; Diamonds on first win     |
+| 6    | Claim AIBA on-chain                            | Wallet → Vault → signed claim → TonConnect tx              |
 
 ---
 
@@ -41,37 +41,37 @@
 
 ### 2.1 Model (`backend/models/Broker.js`)
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `ownerTelegramId` | String | required | Telegram user ID |
-| `risk` | Number | 50 | 0–100; affects score variance |
-| `intelligence` | Number | 50 | 0–100; weighted in prediction |
-| `speed` | Number | 50 | 0–100; weighted in simulation |
-| `specialty` | String | 'crypto' | Display / future use |
-| `level` | Number | 1 | Unlocks leagues; score bonus |
-| `xp` | Number | 0 | Progression |
-| `energy` | Number | 10 | Per-battle cost; regens over time |
-| `energyUpdatedAt` | Date | now | Last energy regen tick |
-| `lastBattleAt` | Date | null | Last battle timestamp |
-| `cooldowns` | Map&lt;String, Date&gt; | {} | modeKey/arena → last run |
-| `anomalyFlags` | Number | 0 | Auto-ban threshold |
-| `banned` | Boolean | false | Broker banned |
-| `banReason` | String | '' | Moderation reason |
-| `lastRequestId` | String | '' | Idempotency |
-| `nftCollectionAddress` | String | '' | On-chain NFT |
-| `nftItemAddress` | String | '' | On-chain NFT |
-| `guildId` | ObjectId | null | Guild pool (guild wars) |
-| `createdWithTonTxHash` | String | '' | One broker per TON tx |
+| Field                  | Type                    | Default  | Description                       |
+| ---------------------- | ----------------------- | -------- | --------------------------------- |
+| `ownerTelegramId`      | String                  | required | Telegram user ID                  |
+| `risk`                 | Number                  | 50       | 0–100; affects score variance     |
+| `intelligence`         | Number                  | 50       | 0–100; weighted in prediction     |
+| `speed`                | Number                  | 50       | 0–100; weighted in simulation     |
+| `specialty`            | String                  | 'crypto' | Display / future use              |
+| `level`                | Number                  | 1        | Unlocks leagues; score bonus      |
+| `xp`                   | Number                  | 0        | Progression                       |
+| `energy`               | Number                  | 10       | Per-battle cost; regens over time |
+| `energyUpdatedAt`      | Date                    | now      | Last energy regen tick            |
+| `lastBattleAt`         | Date                    | null     | Last battle timestamp             |
+| `cooldowns`            | Map&lt;String, Date&gt; | {}       | modeKey/arena → last run          |
+| `anomalyFlags`         | Number                  | 0        | Auto-ban threshold                |
+| `banned`               | Boolean                 | false    | Broker banned                     |
+| `banReason`            | String                  | ''       | Moderation reason                 |
+| `lastRequestId`        | String                  | ''       | Idempotency                       |
+| `nftCollectionAddress` | String                  | ''       | On-chain NFT                      |
+| `nftItemAddress`       | String                  | ''       | On-chain NFT                      |
+| `guildId`              | ObjectId                | null     | Guild pool (guild wars)           |
+| `createdWithTonTxHash` | String                  | ''       | One broker per TON tx             |
 
 ### 2.2 Actions
 
-| Action | API | Cost | Notes |
-|--------|-----|------|-------|
-| Create starter | `POST /api/brokers/starter` | Free | First broker; 50/50/50 stats, 10 energy |
-| Create with TON | `POST /api/brokers/create-with-ton` | 1 TON (config) | Verify tx → CREATED_BROKERS_WALLET; auto-list |
-| Combine | `POST /api/brokers/combine` | 50 NEUR | Base absorbs sacrifice; blended stats; +20 XP |
-| Mint NFT | `POST /api/brokers/mint-nft` | 100 AIBA | BrokerMintJob queued |
-| List / Buy | `POST /api/marketplace/list`, `/buy` | AIBA | Withdraw from guild first |
+| Action          | API                                  | Cost           | Notes                                         |
+| --------------- | ------------------------------------ | -------------- | --------------------------------------------- |
+| Create starter  | `POST /api/brokers/starter`          | Free           | First broker; 50/50/50 stats, 10 energy       |
+| Create with TON | `POST /api/brokers/create-with-ton`  | 1 TON (config) | Verify tx → CREATED_BROKERS_WALLET; auto-list |
+| Combine         | `POST /api/brokers/combine`          | 50 NEUR        | Base absorbs sacrifice; blended stats; +20 XP |
+| Mint NFT        | `POST /api/brokers/mint-nft`         | 100 AIBA       | BrokerMintJob queued                          |
+| List / Buy      | `POST /api/marketplace/list`, `/buy` | AIBA           | Withdraw from guild first                     |
 
 ### 2.3 Combine Formula
 
@@ -144,13 +144,13 @@ score = max(0, round(base + noise))
 
 ### 4.4 Arena Weights (defaults)
 
-| Arena | INT | SPD | RISK |
-|-------|-----|-----|------|
-| prediction | 0.7 | 0.2 | 0.1 |
-| simulation | 0.5 | 0.3 | 0.2 |
-| strategyWars | 0.6 | 0.1 | 0.3 |
-| guildWars | 0.4 | 0.3 | 0.3 |
-| arbitrage (default) | 0.5 | 0.3 | 0.2 |
+| Arena               | INT | SPD | RISK |
+| ------------------- | --- | --- | ---- |
+| prediction          | 0.7 | 0.2 | 0.1  |
+| simulation          | 0.5 | 0.3 | 0.2  |
+| strategyWars        | 0.6 | 0.1 | 0.3  |
+| guildWars           | 0.4 | 0.3 | 0.3  |
+| arbitrage (default) | 0.5 | 0.3 | 0.2  |
 
 Override via `mode.rules.arenaWeights`.
 
@@ -178,12 +178,12 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)
 
 ### 5.2 Currencies
 
-| Currency | Earned | Spent | On-chain |
-|----------|--------|-------|----------|
-| NEUR | Battle, referrals, daily | Entry fees, combine | No |
-| AIBA | Battle, referrals | Mint, staking, marketplace | Yes (claim) |
-| Stars | Battle win | Stars Store | No |
-| Diamonds | First battle win | — | No |
+| Currency | Earned                   | Spent                      | On-chain    |
+| -------- | ------------------------ | -------------------------- | ----------- |
+| NEUR     | Battle, referrals, daily | Entry fees, combine        | No          |
+| AIBA     | Battle, referrals        | Mint, staking, marketplace | Yes (claim) |
+| Stars    | Battle win               | Stars Store                | No          |
+| Diamonds | First battle win         | —                          | No          |
 
 ---
 
@@ -193,90 +193,90 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)
 
 ### 6.1 Emission & Caps
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| `dailyCapAiba` | 1_000_000 | Global daily AIBA cap |
-| `dailyCapNeur` | 10_000_000 | Global daily NEUR cap |
-| `dailyCapAibaByArena` | Map | Per-arena AIBA cap |
-| `dailyCapNeurByArena` | Map | Per-arena NEUR cap |
-| `emissionStartHourUtc` | 0 | Start hour (0–23) |
-| `emissionEndHourUtc` | 24 | End hour (1–24) |
-| `emissionWindowsUtc` | Object | Override per arena or `arena:league` |
+| Field                  | Default    | Description                          |
+| ---------------------- | ---------- | ------------------------------------ |
+| `dailyCapAiba`         | 1_000_000  | Global daily AIBA cap                |
+| `dailyCapNeur`         | 10_000_000 | Global daily NEUR cap                |
+| `dailyCapAibaByArena`  | Map        | Per-arena AIBA cap                   |
+| `dailyCapNeurByArena`  | Map        | Per-arena NEUR cap                   |
+| `emissionStartHourUtc` | 0          | Start hour (0–23)                    |
+| `emissionEndHourUtc`   | 24         | End hour (1–24)                      |
+| `emissionWindowsUtc`   | Object     | Override per arena or `arena:league` |
 
 ### 6.2 Reward Knobs
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| `baseRewardAibaPerScore` | 2 | AIBA per score point |
-| `baseRewardNeurPerScore` | 0 | NEUR per score point |
+| Field                    | Default | Description          |
+| ------------------------ | ------- | -------------------- |
+| `baseRewardAibaPerScore` | 2       | AIBA per score point |
+| `baseRewardNeurPerScore` | 0       | NEUR per score point |
 
 ### 6.3 Broker Sinks
 
-| Field | Default |
-|-------|---------|
-| `combineNeurCost` | 50 |
-| `upgradeAibaCost` | 50 |
-| `trainNeurCost` | 25 |
-| `repairNeurCost` | 15 |
-| `mintAibaCost` | 100 |
+| Field             | Default |
+| ----------------- | ------- |
+| `combineNeurCost` | 50      |
+| `upgradeAibaCost` | 50      |
+| `trainNeurCost`   | 25      |
+| `repairNeurCost`  | 15      |
+| `mintAibaCost`    | 100     |
 
 ### 6.4 Battle Hardening
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| `battleMaxEnergy` | 100 | Energy cap |
-| `battleEnergyRegenSecondsPerEnergy` | 60 | 1 energy / minute |
-| `battleAnomalyScoreMax` | 220 | Score > this flags anomaly |
-| `battleAutoBanBrokerAnomalyFlags` | 5 | Broker auto-ban |
-| `battleAutoBanUserAnomalyFlags` | 25 | User auto-ban |
-| `battleAutoBanUserMinutes` | 1440 | 24h ban duration |
+| Field                               | Default | Description                |
+| ----------------------------------- | ------- | -------------------------- |
+| `battleMaxEnergy`                   | 100     | Energy cap                 |
+| `battleEnergyRegenSecondsPerEnergy` | 60      | 1 energy / minute          |
+| `battleAnomalyScoreMax`             | 220     | Score > this flags anomaly |
+| `battleAutoBanBrokerAnomalyFlags`   | 5       | Broker auto-ban            |
+| `battleAutoBanUserAnomalyFlags`     | 25      | User auto-ban              |
+| `battleAutoBanUserMinutes`          | 1440    | 24h ban duration           |
 
 ### 6.5 TON Payments (Super Admin)
 
-| Field | Default | Env Wallet |
-|-------|---------|------------|
-| `createBrokerCostTonNano` | 1e9 | CREATED_BROKERS_WALLET |
-| `boostProfileCostTonNano` | 1e9 | BOOST_PROFILE_WALLET |
-| `boostProfileDurationDays` | 7 | — |
-| `giftCostTonNano` | 1e9 | GIFTS_WALLET |
-| `createGroupCostTonNano` | 1e9 | LEADER_BOARD_WALLET |
-| `boostGroupCostTonNano` | 1e9 | BOOST_GROUP_WALLET |
-| `leaderboardTopFreeCreate` | 50 | Top N create guild free |
+| Field                      | Default | Env Wallet              |
+| -------------------------- | ------- | ----------------------- |
+| `createBrokerCostTonNano`  | 1e9     | CREATED_BROKERS_WALLET  |
+| `boostProfileCostTonNano`  | 1e9     | BOOST_PROFILE_WALLET    |
+| `boostProfileDurationDays` | 7       | —                       |
+| `giftCostTonNano`          | 1e9     | GIFTS_WALLET            |
+| `createGroupCostTonNano`   | 1e9     | LEADER_BOARD_WALLET     |
+| `boostGroupCostTonNano`    | 1e9     | BOOST_GROUP_WALLET      |
+| `leaderboardTopFreeCreate` | 50      | Top N create guild free |
 
 ### 6.6a Staking & DAO
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| `stakingMinAiba` | 100 | Min AIBA to stake (flexible + locked). Ecosystem-aligned: broker mint cost, 1T AIBA supply. |
-| `stakingApyPercent` | 15 | APY for flexible staking |
-| `stakingPeriods` | [{ days: 30, apyPercent: 10 }, ...] | Period-based locks: 30/90/180/365 days with tiered APY |
-| `stakingCancelEarlyFeeBps` | 500 | 5% fee when cancelling lock early → Treasury (CANCELLED_STAKES_WALLET) |
-| `daoProposalMinStakedAiba` | 10_000 | Min AIBA staked to create proposals |
-| `daoProposalMinStakeDays` | 30 | Min days staked (flexible or lock) to create proposals |
+| Field                      | Default                             | Description                                                                  |
+| -------------------------- | ----------------------------------- | ---------------------------------------------------------------------------- |
+| `stakingMinAiba`           | 1000                                | Min AIBA to stake (flexible + locked). Super Admin sets via Admin → Economy. |
+| `stakingApyPercent`        | 15                                  | APY for flexible staking                                                     |
+| `stakingPeriods`           | [{ days: 30, apyPercent: 10 }, ...] | Period-based locks: 30/90/180/365 days with tiered APY                       |
+| `stakingCancelEarlyFeeBps` | 500                                 | 5% fee when cancelling lock early → Treasury (CANCELLED_STAKES_WALLET)       |
+| `daoProposalMinStakedAiba` | 10_000                              | Min AIBA staked to create proposals                                          |
+| `daoProposalMinStakeDays`  | 30                                  | Min days staked (flexible or lock) to create proposals                       |
 
 Wallet tab: Overview | Staking flow; period selection, preview, countdown; cancel-early with fee. Yield Vault tab: hero shows min (ecosystem-aligned); locked + flexible staking both show min and enforce it. Wallet tab staking flow: same min displayed and enforced. `stakingMinAiba` configurable via Admin → Economy (PATCH).
 
 ### 6.6 Stars, Diamonds, Referrals
 
-| Field | Default |
-|-------|---------|
-| `starRewardPerBattle` | 1 |
-| `diamondRewardFirstWin` | 1 |
-| `referralRewardNeurReferrer` | 250 |
-| `referralRewardNeurReferee` | 150 |
-| `referralRewardAibaReferrer` | 10 |
-| `referralRewardAibaReferee` | 5 |
-| `referralUnlock3BonusBps` | 100 (1% battle bonus when 3+ referrals) |
+| Field                        | Default                                 |
+| ---------------------------- | --------------------------------------- |
+| `starRewardPerBattle`        | 1                                       |
+| `diamondRewardFirstWin`      | 1                                       |
+| `referralRewardNeurReferrer` | 250                                     |
+| `referralRewardNeurReferee`  | 150                                     |
+| `referralRewardAibaReferrer` | 10                                      |
+| `referralRewardAibaReferee`  | 5                                       |
+| `referralUnlock3BonusBps`    | 100 (1% battle bonus when 3+ referrals) |
 
 ### 6.7 Trainers & Automation
 
-| Field | Default | Description |
-|-------|---------|--------------|
-| `trainerRewardAibaPerUser` | 5 | AIBA per referred user with 3+ battles |
-| `trainerRewardAibaPerRecruitedTrainer` | 20 | AIBA per trainer recruited (when approved) |
-| `automationEnabled` | false | Dynamic dailyCapAiba via economy-automation |
-| `automationTargetEmissionPercentPerYear` | 10 | Target % of supply/year |
-| `automationMinCapAiba` / `automationMaxCapAiba` | 500k / 5M | Bounds for automation |
+| Field                                           | Default   | Description                                 |
+| ----------------------------------------------- | --------- | ------------------------------------------- |
+| `trainerRewardAibaPerUser`                      | 5         | AIBA per referred user with 3+ battles      |
+| `trainerRewardAibaPerRecruitedTrainer`          | 20        | AIBA per trainer recruited (when approved)  |
+| `automationEnabled`                             | false     | Dynamic dailyCapAiba via economy-automation |
+| `automationTargetEmissionPercentPerYear`        | 10        | Target % of supply/year                     |
+| `automationMinCapAiba` / `automationMaxCapAiba` | 500k / 5M | Bounds for automation                       |
 
 ---
 
@@ -284,19 +284,19 @@ Wallet tab: Overview | Staking flow; period selection, preview, countdown; cance
 
 ### 7.1 GameMode Model (`backend/models/GameMode.js`)
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `key` | String | Unique, e.g. `prediction_rookie` |
-| `arena` | String | prediction, simulation, etc. |
-| `league` | String | rookie, pro, elite |
-| `enabled` | Boolean | If false, 403 |
-| `energyCost` | Number | Per battle |
-| `cooldownSeconds` | Number | Between battles |
-| `entryNeurCost` | Number | Optional |
-| `entryAibaCost` | Number | Optional |
-| `rewardMultiplierAiba` | Number | 1.0 |
-| `rewardMultiplierNeur` | Number | 1.0 |
-| `rules` | Object | requiresGuild, minBrokerLevel, arenaWeights, etc. |
+| Field                  | Type    | Description                                       |
+| ---------------------- | ------- | ------------------------------------------------- |
+| `key`                  | String  | Unique, e.g. `prediction_rookie`                  |
+| `arena`                | String  | prediction, simulation, etc.                      |
+| `league`               | String  | rookie, pro, elite                                |
+| `enabled`              | Boolean | If false, 403                                     |
+| `energyCost`           | Number  | Per battle                                        |
+| `cooldownSeconds`      | Number  | Between battles                                   |
+| `entryNeurCost`        | Number  | Optional                                          |
+| `entryAibaCost`        | Number  | Optional                                          |
+| `rewardMultiplierAiba` | Number  | 1.0                                               |
+| `rewardMultiplierNeur` | Number  | 1.0                                               |
+| `rules`                | Object  | requiresGuild, minBrokerLevel, arenaWeights, etc. |
 
 ### 7.2 Cooldown Key (`backend/engine/battleCooldown.js`)
 
@@ -314,7 +314,7 @@ simulateRace({ vehicles, trackLength, trackDifficulty, seed })
 ```
 
 - Each vehicle: `topSpeed`, `acceleration`, `handling`, `durability`, `level`
-- Weights: speed 35%, accel 35%, handling 15%+difficulty*20%, durability 15%
+- Weights: speed 35%, accel 35%, handling 15%+difficulty\*20%, durability 15%
 - Level bonus: `1 + (level-1)*0.01`
 - Finish order by `rawPerformance`; variance from durability
 - Points: [25, 18, 15, 12, 10, 8, 6, 4, 2, 1] by position
@@ -410,15 +410,15 @@ Create car/bike (AIBA or TON) → Enter race (AIBA entry fee)
 
 ## 11. Edge Cases
 
-| Case | Handling |
-|------|----------|
-| **Cooldown** | `now - lastBattleAt < cooldownSeconds` → 429 retryAfterMs |
-| **Energy** | Regen: `deltaSec / regenSecondsPerEnergy`; cap at maxEnergy |
-| **Guild Wars no guild** | 403 guild required |
-| **Guild Wars no opponent** | Match vs another guild (or fallback) |
-| **Vault claim gap** | If `lastIssued > lastOnchain`, skip claim (outstanding unconfirmed) |
-| **Duplicate requestId** | Return existing Battle; 409 if used by different user |
-| **Concurrent battle** | BattleRunKey → 409 in_progress |
+| Case                       | Handling                                                            |
+| -------------------------- | ------------------------------------------------------------------- |
+| **Cooldown**               | `now - lastBattleAt < cooldownSeconds` → 429 retryAfterMs           |
+| **Energy**                 | Regen: `deltaSec / regenSecondsPerEnergy`; cap at maxEnergy         |
+| **Guild Wars no guild**    | 403 guild required                                                  |
+| **Guild Wars no opponent** | Match vs another guild (or fallback)                                |
+| **Vault claim gap**        | If `lastIssued > lastOnchain`, skip claim (outstanding unconfirmed) |
+| **Duplicate requestId**    | Return existing Battle; 409 if used by different user               |
+| **Concurrent battle**      | BattleRunKey → 409 in_progress                                      |
 
 ---
 
@@ -426,78 +426,78 @@ Create car/bike (AIBA or TON) → Enter race (AIBA entry fee)
 
 ### 12.1 Game Core
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/battle/run` | POST | Run battle |
-| `/api/brokers/starter` | POST | Create starter broker |
-| `/api/brokers/mine` | GET | List user brokers |
-| `/api/brokers/combine` | POST | Combine two brokers |
-| `/api/brokers/mint-nft` | POST | Mint broker as NFT |
-| `/api/brokers/create-with-ton` | POST | Pay TON, create broker |
-| `/api/economy/me` | GET | Balances (NEUR, AIBA, Stars, Diamonds) |
-| `/api/economy/claim-aiba` | POST | Create claim (manual) |
-| `/api/vault/inventory` | GET | Vault TON + jetton balance |
-| `/api/vault/claim-status` | GET | Check claim confirmation |
-| `/api/wallet/connect` | POST | Save TON address |
+| Endpoint                       | Method | Purpose                                |
+| ------------------------------ | ------ | -------------------------------------- |
+| `/api/battle/run`              | POST   | Run battle                             |
+| `/api/brokers/starter`         | POST   | Create starter broker                  |
+| `/api/brokers/mine`            | GET    | List user brokers                      |
+| `/api/brokers/combine`         | POST   | Combine two brokers                    |
+| `/api/brokers/mint-nft`        | POST   | Mint broker as NFT                     |
+| `/api/brokers/create-with-ton` | POST   | Pay TON, create broker                 |
+| `/api/economy/me`              | GET    | Balances (NEUR, AIBA, Stars, Diamonds) |
+| `/api/economy/claim-aiba`      | POST   | Create claim (manual)                  |
+| `/api/vault/inventory`         | GET    | Vault TON + jetton balance             |
+| `/api/vault/claim-status`      | GET    | Check claim confirmation               |
+| `/api/wallet/connect`          | POST   | Save TON address                       |
 
 ### 12.2 Leaderboard & Guilds
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/leaderboard` | GET | Global ranks (by: score, aiba, neur, battles) |
-| `/api/leaderboard/my-rank` | GET | User rank |
-| `/api/guilds/list` | GET | All guilds |
-| `/api/guilds/mine` | GET | User guilds |
-| `/api/guilds/create` | POST | Create guild |
-| `/api/guilds/join` | POST | Join guild |
-| `/api/guilds/:guildId/boost` | POST | Boost guild (TON) |
-| `/api/guilds/deposit-broker` | POST | Deposit broker |
-| `/api/guilds/withdraw-broker` | POST | Withdraw broker |
+| Endpoint                      | Method | Purpose                                       |
+| ----------------------------- | ------ | --------------------------------------------- |
+| `/api/leaderboard`            | GET    | Global ranks (by: score, aiba, neur, battles) |
+| `/api/leaderboard/my-rank`    | GET    | User rank                                     |
+| `/api/guilds/list`            | GET    | All guilds                                    |
+| `/api/guilds/mine`            | GET    | User guilds                                   |
+| `/api/guilds/create`          | POST   | Create guild                                  |
+| `/api/guilds/join`            | POST   | Join guild                                    |
+| `/api/guilds/:guildId/boost`  | POST   | Boost guild (TON)                             |
+| `/api/guilds/deposit-broker`  | POST   | Deposit broker                                |
+| `/api/guilds/withdraw-broker` | POST   | Withdraw broker                               |
 
 ### 12.3 Marketplace & Racing
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/marketplace/listings` | GET | Broker listings |
-| `/api/marketplace/system-brokers` | GET | System catalog |
-| `/api/marketplace/list` | POST | List broker |
-| `/api/marketplace/buy` | POST | Buy listing |
-| `/api/marketplace/buy-system-broker` | POST | Buy from system |
-| `/api/broker-rental` | GET | List available rentals |
-| `/api/broker-rental/list` | POST | List broker for rent |
-| `/api/broker-rental/:id/rent` | POST | Rent broker (AIBA, 1h) |
-| `/api/broker-rental/:id/unlist` | POST | Unlist your broker |
-| `/api/car-racing/*` | Mixed | Config, tracks, races, cars, enter, buy, list, leaderboard |
-| `/api/bike-racing/*` | Mixed | Same for bikes (config, tracks, races, bikes, enter, buy, list, leaderboard) |
+| Endpoint                             | Method | Purpose                                                                      |
+| ------------------------------------ | ------ | ---------------------------------------------------------------------------- |
+| `/api/marketplace/listings`          | GET    | Broker listings                                                              |
+| `/api/marketplace/system-brokers`    | GET    | System catalog                                                               |
+| `/api/marketplace/list`              | POST   | List broker                                                                  |
+| `/api/marketplace/buy`               | POST   | Buy listing                                                                  |
+| `/api/marketplace/buy-system-broker` | POST   | Buy from system                                                              |
+| `/api/broker-rental`                 | GET    | List available rentals                                                       |
+| `/api/broker-rental/list`            | POST   | List broker for rent                                                         |
+| `/api/broker-rental/:id/rent`        | POST   | Rent broker (AIBA, 1h)                                                       |
+| `/api/broker-rental/:id/unlist`      | POST   | Unlist your broker                                                           |
+| `/api/car-racing/*`                  | Mixed  | Config, tracks, races, cars, enter, buy, list, leaderboard                   |
+| `/api/bike-racing/*`                 | Mixed  | Same for bikes (config, tracks, races, bikes, enter, buy, list, leaderboard) |
 
 ### 12.4 Extensions
 
-| Endpoint | Purpose |
-|----------|---------|
-| `/api/referrals/me`, `/create`, `/use`, `/top` | Referrals |
-| `/api/tasks` | Personalized tasks |
-| `/api/daily/status`, `/claim` | Daily NEUR |
-| `/api/charity/*` | Campaigns, donate (NEUR/AIBA), leaderboard |
-| `/api/donate/config`, `/broker`, `/car`, `/bike`, `/gifts` | Donate broker/car/bike/gifts (TON) |
-| `/api/university/*` | Courses, progress, mint badges |
-| `/api/realms`, `/api/missions`, `/api/mentors` | Realms, missions, mentors (stake/unstake) |
-| `/api/assets/` (and subtree), `/api/asset-marketplace/` (and subtree) | AI assets |
-| `/api/governance/*` | Proposals, vote |
-| `/api/multiverse/*` | NFT universes, stake, claim |
-| `/api/staking/*` | Stake AIBA, claim, cancel-early (fee) |
-| `/api/dao/*` | Proposals, vote (create requires staked AIBA) |
-| `/api/boosts/*` | Buy boost (NEUR/TON) |
-| `/api/gifts/*` | Send/receive gifts |
-| `/api/p2p-aiba/config`, `/send`, `/buy` | P2P AIBA send, Buy AIBA with TON |
-| `/api/predict/events`, `/events/:id`, `/events/:id/bet` | Predict: list events, bet (brokerId, amountAiba) |
-| `/api/trainers/me`, `/apply`, `/network`, `/leaderboard`, `/claim-rewards`, etc. | Trainers: apply, network, leaderboard, claim |
-| `/api/tournaments`, `/api/tournaments/:id`, `/api/tournaments/:id/enter` | Tournaments: list, single, enter |
-| `/api/global-boss`, `/api/global-boss/record-damage` | Global boss: state, record damage |
-| `/api/premium/status`, `/api/premium/buy` | Premium status, buy (TON) |
-| `/api/breeding/breed` | Breed two brokers (burns both + AIBA) |
-| `/api/game-modes` | Game modes config |
-| `/api/treasury` | Treasury telemetry |
-| `/api/oracle` | Oracle (AIBA/TON rate, etc.) |
+| Endpoint                                                                         | Purpose                                          |
+| -------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `/api/referrals/me`, `/create`, `/use`, `/top`                                   | Referrals                                        |
+| `/api/tasks`                                                                     | Personalized tasks                               |
+| `/api/daily/status`, `/claim`                                                    | Daily NEUR                                       |
+| `/api/charity/*`                                                                 | Campaigns, donate (NEUR/AIBA), leaderboard       |
+| `/api/donate/config`, `/broker`, `/car`, `/bike`, `/gifts`                       | Donate broker/car/bike/gifts (TON)               |
+| `/api/university/*`                                                              | Courses, progress, mint badges                   |
+| `/api/realms`, `/api/missions`, `/api/mentors`                                   | Realms, missions, mentors (stake/unstake)        |
+| `/api/assets/` (and subtree), `/api/asset-marketplace/` (and subtree)            | AI assets                                        |
+| `/api/governance/*`                                                              | Proposals, vote                                  |
+| `/api/multiverse/*`                                                              | NFT universes, stake, claim                      |
+| `/api/staking/*`                                                                 | Stake AIBA, claim, cancel-early (fee)            |
+| `/api/dao/*`                                                                     | Proposals, vote (create requires staked AIBA)    |
+| `/api/boosts/*`                                                                  | Buy boost (NEUR/TON)                             |
+| `/api/gifts/*`                                                                   | Send/receive gifts                               |
+| `/api/p2p-aiba/config`, `/send`, `/buy`                                          | P2P AIBA send, Buy AIBA with TON                 |
+| `/api/predict/events`, `/events/:id`, `/events/:id/bet`                          | Predict: list events, bet (brokerId, amountAiba) |
+| `/api/trainers/me`, `/apply`, `/network`, `/leaderboard`, `/claim-rewards`, etc. | Trainers: apply, network, leaderboard, claim     |
+| `/api/tournaments`, `/api/tournaments/:id`, `/api/tournaments/:id/enter`         | Tournaments: list, single, enter                 |
+| `/api/global-boss`, `/api/global-boss/record-damage`                             | Global boss: state, record damage                |
+| `/api/premium/status`, `/api/premium/buy`                                        | Premium status, buy (TON)                        |
+| `/api/breeding/breed`                                                            | Breed two brokers (burns both + AIBA)            |
+| `/api/game-modes`                                                                | Game modes config                                |
+| `/api/treasury`                                                                  | Treasury telemetry                               |
+| `/api/oracle`                                                                    | Oracle (AIBA/TON rate, etc.)                     |
 
 ---
 

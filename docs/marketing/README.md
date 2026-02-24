@@ -6,12 +6,12 @@
 
 ## Contents
 
-| Document | Purpose |
-|----------|---------|
-| [CUSTOMIZATION-GUIDE.md](./CUSTOMIZATION-GUIDE.md) | Placeholders, sizes, colors, how to customize |
-| [INFLUENCER-KIT.md](./INFLUENCER-KIT.md) | All influencer categories, pre-written posts, video scripts |
-| [AD-TEMPLATES.md](./AD-TEMPLATES.md) | Digital ads: social, display, email, landing, UTM |
-| [SOCIAL-POST-BANK.md](./SOCIAL-POST-BANK.md) | 50+ ready posts by platform & angle |
+| Document                                           | Purpose                                                     |
+| -------------------------------------------------- | ----------------------------------------------------------- |
+| [CUSTOMIZATION-GUIDE.md](./CUSTOMIZATION-GUIDE.md) | Placeholders, sizes, colors, how to customize               |
+| [INFLUENCER-KIT.md](./INFLUENCER-KIT.md)           | All influencer categories, pre-written posts, video scripts |
+| [AD-TEMPLATES.md](./AD-TEMPLATES.md)               | Digital ads: social, display, email, landing, UTM           |
+| [SOCIAL-POST-BANK.md](./SOCIAL-POST-BANK.md)       | 50+ ready posts by platform & angle                         |
 
 ---
 

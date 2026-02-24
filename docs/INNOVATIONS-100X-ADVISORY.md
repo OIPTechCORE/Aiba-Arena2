@@ -10,16 +10,16 @@
 
 ## Executive Summary
 
-| Innovation Category | 100× Lever | Users | AIBA MC | Founders |
-|--------------------|------------|-------|---------|----------|
-| **Tournaments** | Prize pools, FOMO | Top players $1M+/yr | CEX listings → $100B path | Entry fees (TON/AIBA) |
-| **Streaks & Daily Combo** | 10× retention | 10× more battles | 10× DAU → 10× MC | 10× TON flows |
-| **Creator Economy** | K > 1 viral | Affiliates earn % | Viral growth | Reduced CAC |
-| **Predict/Bet** | Vig on every battle | Bet & win | GMV explosion | 2–5% vig |
-| **Subscription** | Recurring $ | Premium rewards | Premium demand | $2–5/user/mo |
-| **Broker Rental** | Passive income | Rent → earn | Marketplace GMV | Fee on rentals |
-| **Global Boss / Raid** | Coordinated FOMO | Shared reward pool | Community event | Treasury-funded |
-| **NFT Breeding** | New asset class | Breed & sell | Burn + fee revenue | Treasury 25% |
+| Innovation Category       | 100× Lever          | Users               | AIBA MC                   | Founders              |
+| ------------------------- | ------------------- | ------------------- | ------------------------- | --------------------- |
+| **Tournaments**           | Prize pools, FOMO   | Top players $1M+/yr | CEX listings → $100B path | Entry fees (TON/AIBA) |
+| **Streaks & Daily Combo** | 10× retention       | 10× more battles    | 10× DAU → 10× MC          | 10× TON flows         |
+| **Creator Economy**       | K > 1 viral         | Affiliates earn %   | Viral growth              | Reduced CAC           |
+| **Predict/Bet**           | Vig on every battle | Bet & win           | GMV explosion             | 2–5% vig              |
+| **Subscription**          | Recurring $         | Premium rewards     | Premium demand            | $2–5/user/mo          |
+| **Broker Rental**         | Passive income      | Rent → earn         | Marketplace GMV           | Fee on rentals        |
+| **Global Boss / Raid**    | Coordinated FOMO    | Shared reward pool  | Community event           | Treasury-funded       |
+| **NFT Breeding**          | New asset class     | Breed & sell        | Burn + fee revenue        | Treasury 25%          |
 
 ---
 
@@ -27,13 +27,13 @@
 
 From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
-| Metric | Current | 100× Target |
-|--------|---------|-------------|
-| **Top user earnings** | $10k–$50k/yr | $1M–$5M/yr |
-| **Total user earnings/year** | ~$100M (at scale) | ~$10B |
-| **AIBA FDV** | $1B @ $0.001 | $100B @ $0.01 |
-| **Founder TON revenue** | ~$6M/yr @ 1M DAU | ~$600M/yr |
-| **Founder treasury (AIBA fees)** | ~$100k/mo @ 1M DAU | ~$10M/mo |
+| Metric                           | Current            | 100× Target   |
+| -------------------------------- | ------------------ | ------------- |
+| **Top user earnings**            | $10k–$50k/yr       | $1M–$5M/yr    |
+| **Total user earnings/year**     | ~$100M (at scale)  | ~$10B         |
+| **AIBA FDV**                     | $1B @ $0.001       | $100B @ $0.01 |
+| **Founder TON revenue**          | ~$6M/yr @ 1M DAU   | ~$600M/yr     |
+| **Founder treasury (AIBA fees)** | ~$100k/mo @ 1M DAU | ~$10M/mo      |
 
 ---
 
@@ -53,11 +53,11 @@ From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
 ### 100× Impact
 
-| Dimension | Baseline | With Tournaments (10× adoption) |
-|-----------|----------|---------------------------------|
-| **User earnings** | Top $50k/yr | Tournament winners $500k+/yr (from prize pools) |
-| **AIBA** | $1B FDV | Tournament hype → CEX listings → $10B+ FDV |
-| **Founders** | $6M TON/yr | 20% of entry fees; 1M DAU, 5% enter weekly @ 1 TON = $5M/yr extra |
+| Dimension         | Baseline    | With Tournaments (10× adoption)                                   |
+| ----------------- | ----------- | ----------------------------------------------------------------- |
+| **User earnings** | Top $50k/yr | Tournament winners $500k+/yr (from prize pools)                   |
+| **AIBA**          | $1B FDV     | Tournament hype → CEX listings → $10B+ FDV                        |
+| **Founders**      | $6M TON/yr  | 20% of entry fees; 1M DAU, 5% enter weekly @ 1 TON = $5M/yr extra |
 
 ### Implementation
 
@@ -82,11 +82,11 @@ From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
 ### 100× Impact
 
-| Dimension | Baseline | With Streaks (3× retention) |
-|-----------|----------|-----------------------------|
-| **User earnings** | 90 battles/mo casual | 270 battles (streak multiplier 1.5×) = 2.25× effective |
-| **AIBA** | 1M DAU | 3M effective DAU from retention → 3× MC potential |
-| **Founders** | 0.1 TON/user/mo | 0.3 TON (more engaged users spend more) → 3× TON revenue |
+| Dimension         | Baseline             | With Streaks (3× retention)                              |
+| ----------------- | -------------------- | -------------------------------------------------------- |
+| **User earnings** | 90 battles/mo casual | 270 battles (streak multiplier 1.5×) = 2.25× effective   |
+| **AIBA**          | 1M DAU               | 3M effective DAU from retention → 3× MC potential        |
+| **Founders**      | 0.1 TON/user/mo      | 0.3 TON (more engaged users spend more) → 3× TON revenue |
 
 ---
 
@@ -105,11 +105,11 @@ From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
 ### 100× Impact
 
-| Dimension | Baseline | With Creators (K=1) |
-|-----------|----------|---------------------|
-| **User earnings** | Referrers $125/mo (500 refs) | Creators $50k+/mo (50k refs, 5% of earnings) |
-| **AIBA** | Linear growth | Exponential; 10× DAU in months |
-| **Founders** | Pay for ads | Creators pay themselves; founders capture treasury from GMV |
+| Dimension         | Baseline                     | With Creators (K=1)                                         |
+| ----------------- | ---------------------------- | ----------------------------------------------------------- |
+| **User earnings** | Referrers $125/mo (500 refs) | Creators $50k+/mo (50k refs, 5% of earnings)                |
+| **AIBA**          | Linear growth                | Exponential; 10× DAU in months                              |
+| **Founders**      | Pay for ads                  | Creators pay themselves; founders capture treasury from GMV |
 
 ---
 
@@ -128,11 +128,11 @@ From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
 ### 100× Impact
 
-| Dimension | Baseline | With Predict (moderate adoption) |
-|-----------|----------|----------------------------------|
-| **User earnings** | Battle + refer | Winners 2× from bet winnings |
-| **AIBA** | $1B FDV | GMV explosion → burns → scarcity → $10B FDV |
-| **Founders** | 25% of 3% fee | 3–5% vig on billions AIBA GMV → $10M+/mo treasury |
+| Dimension         | Baseline       | With Predict (moderate adoption)                  |
+| ----------------- | -------------- | ------------------------------------------------- |
+| **User earnings** | Battle + refer | Winners 2× from bet winnings                      |
+| **AIBA**          | $1B FDV        | GMV explosion → burns → scarcity → $10B FDV       |
+| **Founders**      | 25% of 3% fee  | 3–5% vig on billions AIBA GMV → $10M+/mo treasury |
 
 ---
 
@@ -151,11 +151,11 @@ From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
 ### 100× Impact
 
-| Dimension | Baseline | With Premium (10% subscribe) |
-|-----------|----------|-----------------------------|
-| **User earnings** | $480/mo active | Premium 2× = $960/mo |
-| **AIBA** | 1M DAU | Premium users drive 2× GMV (more active) |
-| **Founders** | TON one-off | 1M × 0.1 × 5 TON × $5 = **$2.5M/mo** recurring |
+| Dimension         | Baseline       | With Premium (10% subscribe)                   |
+| ----------------- | -------------- | ---------------------------------------------- |
+| **User earnings** | $480/mo active | Premium 2× = $960/mo                           |
+| **AIBA**          | 1M DAU         | Premium users drive 2× GMV (more active)       |
+| **Founders**      | TON one-off    | 1M × 0.1 × 5 TON × $5 = **$2.5M/mo** recurring |
 
 ---
 
@@ -174,11 +174,11 @@ From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
 ### 100× Impact
 
-| Dimension | Baseline | With Rentals (5% of users rent) |
-|-----------|----------|----------------------------------|
-| **User earnings** | Sell broker once | Rent 100 hours/mo @ 50 AIBA/hr = 5k AIBA (× 0.8) = 4k AIBA passive |
-| **AIBA** | Broker sales only | Rental GMV adds 20–50% to marketplace volume |
-| **Founders** | 3% fee on sales | 20% of rental = new revenue stream |
+| Dimension         | Baseline          | With Rentals (5% of users rent)                                    |
+| ----------------- | ----------------- | ------------------------------------------------------------------ |
+| **User earnings** | Sell broker once  | Rent 100 hours/mo @ 50 AIBA/hr = 5k AIBA (× 0.8) = 4k AIBA passive |
+| **AIBA**          | Broker sales only | Rental GMV adds 20–50% to marketplace volume                       |
+| **Founders**      | 3% fee on sales   | 20% of rental = new revenue stream                                 |
 
 ---
 
@@ -198,11 +198,11 @@ From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
 ### 100× Impact
 
-| Dimension | Baseline | With Raid (2× weekly engagement) |
-|-----------|----------|-----------------------------------|
+| Dimension         | Baseline       | With Raid (2× weekly engagement)                                      |
+| ----------------- | -------------- | --------------------------------------------------------------------- |
 | **User earnings** | Steady battles | Top 1000 get 8M AIBA split = 8k each per raid; 4 raids/mo = 32k extra |
-| **AIBA** | Emission only | Raid drives burns (entry), hype, CEX attention |
-| **Founders** | — | Treasury-funded; drives adoption; indirect 10× via DAU |
+| **AIBA**          | Emission only  | Raid drives burns (entry), hype, CEX attention                        |
+| **Founders**      | —              | Treasury-funded; drives adoption; indirect 10× via DAU                |
 
 ---
 
@@ -221,11 +221,11 @@ From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
 ### 100× Impact
 
-| Dimension | Baseline | With Breeding |
-|-----------|----------|----------------|
-| **User earnings** | Sell 1 broker | Breed rare; sell for 10×; marketplace volume 5× |
-| **AIBA** | Burns from fees | Breed burns 200 AIBA + 2 brokers; deflationary |
-| **Founders** | 3% sales | 5% breed fee + marketplace volume 5× = 5× fee revenue |
+| Dimension         | Baseline        | With Breeding                                         |
+| ----------------- | --------------- | ----------------------------------------------------- |
+| **User earnings** | Sell 1 broker   | Breed rare; sell for 10×; marketplace volume 5×       |
+| **AIBA**          | Burns from fees | Breed burns 200 AIBA + 2 brokers; deflationary        |
+| **Founders**      | 3% sales        | 5% breed fee + marketplace volume 5× = 5× fee revenue |
 
 ---
 
@@ -233,42 +233,42 @@ From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
 ### A. Users → 100× More
 
-| Lever | Mechanism | 100× Path |
-|-------|-----------|-----------|
-| Tournaments | Prize pools $500k+/event | Top 10 players $1M+/yr |
-| Creators | 5% of referred earnings | 50k referees × $500/yr × 5% = $1.25M/yr |
-| Streaks | 2× multiplier, 3× retention | 6× effective earnings |
-| Predict | Bet & win | 2× from winnings |
-| Premium | 2× rewards | 2× |
-| Rental | Passive 4k AIBA/mo | $40–$400/mo @ $0.001–$0.01 |
-| Raid | Top 1000 get 32k AIBA/mo | $32–$320/mo |
-| Breeding | Sell rare for 10× | 10× on marketplace |
+| Lever       | Mechanism                   | 100× Path                               |
+| ----------- | --------------------------- | --------------------------------------- |
+| Tournaments | Prize pools $500k+/event    | Top 10 players $1M+/yr                  |
+| Creators    | 5% of referred earnings     | 50k referees × $500/yr × 5% = $1.25M/yr |
+| Streaks     | 2× multiplier, 3× retention | 6× effective earnings                   |
+| Predict     | Bet & win                   | 2× from winnings                        |
+| Premium     | 2× rewards                  | 2×                                      |
+| Rental      | Passive 4k AIBA/mo          | $40–$400/mo @ $0.001–$0.01              |
+| Raid        | Top 1000 get 32k AIBA/mo    | $32–$320/mo                             |
+| Breeding    | Sell rare for 10×           | 10× on marketplace                      |
 
 **Blended:** Top 0.01% can reach **$1M–$5M/yr** with full stack.
 
 ### B. AIBA → 100× Market Cap ($100B)
 
-| Lever | Mechanism |
-|-------|-----------|
-| Viral growth | K>1 → 10M–50M DAU |
-| Burns | Breeding, predict vig, marketplace fees → deflation |
-| CEX listings | Tournament/raid hype → Binance, Bybit |
-| Premium demand | 2× earners need more AIBA → buy pressure |
-| Staking lock | 20% locked → circulating supply cut |
-| Treasury buyback | Founders use TON revenue to buy AIBA |
+| Lever            | Mechanism                                           |
+| ---------------- | --------------------------------------------------- |
+| Viral growth     | K>1 → 10M–50M DAU                                   |
+| Burns            | Breeding, predict vig, marketplace fees → deflation |
+| CEX listings     | Tournament/raid hype → Binance, Bybit               |
+| Premium demand   | 2× earners need more AIBA → buy pressure            |
+| Staking lock     | 20% locked → circulating supply cut                 |
+| Treasury buyback | Founders use TON revenue to buy AIBA                |
 
 **Path:** 10M DAU, $0.01 AIBA, 400B circulating → **$4B FDV**. Scale to 50M DAU, $0.02 → **$40B**. Add hype, burns → **$100B** possible.
 
 ### C. Founders → 100× Revenue
 
-| Lever | Mechanism | 100× Path |
-|-------|-----------|-----------|
-| Subscription | $2.5M/mo @ 10% of 1M DAU | $25M/mo @ 10M DAU |
-| Tournament vig | 20% of entries | $5M+/mo from weekly tournaments |
-| Predict vig | 3–5% of billions GMV | $10M+/mo |
-| Creator economy | Same TON flows, 10× DAU | $60M/yr → $600M/yr |
-| Rental fee | 20% of rentals | New stream $1M+/mo |
-| Breeding fee | 5% + volume | 5× marketplace fees |
+| Lever           | Mechanism                | 100× Path                       |
+| --------------- | ------------------------ | ------------------------------- |
+| Subscription    | $2.5M/mo @ 10% of 1M DAU | $25M/mo @ 10M DAU               |
+| Tournament vig  | 20% of entries           | $5M+/mo from weekly tournaments |
+| Predict vig     | 3–5% of billions GMV     | $10M+/mo                        |
+| Creator economy | Same TON flows, 10× DAU  | $60M/yr → $600M/yr              |
+| Rental fee      | 20% of rentals           | New stream $1M+/mo              |
+| Breeding fee    | 5% + volume              | 5× marketplace fees             |
 
 **Blended:** 10M DAU + full innovation stack → **$500M–$1B/year** founder revenue possible.
 
@@ -276,31 +276,31 @@ From `ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md`:
 
 ## 10. Implementation Priority
 
-| Priority | Innovation | Effort | Impact | Dependency |
-|----------|------------|--------|--------|-------------|
-| 1 | Streaks & Daily Combo | Low | High retention | — |
-| 2 | Tournaments | Medium | High FOMO | GameMode, battle |
-| 3 | Subscription | Low | Recurring $ | Economy config |
-| 4 | Creator economy | Medium | Viral K | Referrals |
-| 5 | Global Boss / Raid | Medium | Community | Battle, cron |
-| 6 | Broker Rental | Medium | Passive $ | Marketplace |
-| 7 | Predict / Bet | High | GMV explosion | Legal review |
-| 8 | NFT Breeding | High | Deflation | Broker, marketplace |
+| Priority | Innovation            | Effort | Impact         | Dependency          |
+| -------- | --------------------- | ------ | -------------- | ------------------- |
+| 1        | Streaks & Daily Combo | Low    | High retention | —                   |
+| 2        | Tournaments           | Medium | High FOMO      | GameMode, battle    |
+| 3        | Subscription          | Low    | Recurring $    | Economy config      |
+| 4        | Creator economy       | Medium | Viral K        | Referrals           |
+| 5        | Global Boss / Raid    | Medium | Community      | Battle, cron        |
+| 6        | Broker Rental         | Medium | Passive $      | Marketplace         |
+| 7        | Predict / Bet         | High   | GMV explosion  | Legal review        |
+| 8        | NFT Breeding          | High   | Deflation      | Broker, marketplace |
 
 ---
 
 ## 10a. Implementation Status (Codebase)
 
-| Innovation | Status | Location |
-|------------|--------|----------|
-| **Streaks & Daily Combo** | ✅ Implemented | `innovations.js`, `daily.js`, `battle.js` — login/battle streaks, daily combo spend → bonus |
-| **Tournaments** | ✅ Implemented | `Tournament.js`, `tournaments.js`, `adminTournaments.js` — brackets, entry AIBA/TON, 20% treasury |
-| **Subscription / Premium** | ✅ Implemented | `premium.js` — 5 TON/month, 2× rewards |
-| **Creator Economy** | ✅ Implemented | `getCreatorReferrerAndBps` in `innovations.js` — 2% base; 100 refs=3%, 1k=5%, 10k=7%. Credits referrer on: battle, car/bike racing, tournaments, global boss rewards |
-| **Global Boss / Raid** | ✅ Implemented | `GlobalBoss.js`, `globalBoss.js` — damage from battles, top 1000 share pool |
-| **Broker Rental** | ✅ Implemented | `BrokerRental.js`, `brokerRental.js` — rent broker for AIBA |
-| **Predict / Bet** | ✅ Implemented | `PredictEvent.js`, `PredictBet.js`, `predict.js`, `adminPredict.js` — bet on broker A vs B, vig → treasury |
-| **NFT Breeding** | ✅ Implemented | `breeding.js` — breed 2 brokers → 1, burn both + AIBA cost |
+| Innovation                 | Status         | Location                                                                                                                                                             |
+| -------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Streaks & Daily Combo**  | ✅ Implemented | `innovations.js`, `daily.js`, `battle.js` — login/battle streaks, daily combo spend → bonus                                                                          |
+| **Tournaments**            | ✅ Implemented | `Tournament.js`, `tournaments.js`, `adminTournaments.js` — brackets, entry AIBA/TON, 20% treasury                                                                    |
+| **Subscription / Premium** | ✅ Implemented | `premium.js` — 5 TON/month, 2× rewards                                                                                                                               |
+| **Creator Economy**        | ✅ Implemented | `getCreatorReferrerAndBps` in `innovations.js` — 2% base; 100 refs=3%, 1k=5%, 10k=7%. Credits referrer on: battle, car/bike racing, tournaments, global boss rewards |
+| **Global Boss / Raid**     | ✅ Implemented | `GlobalBoss.js`, `globalBoss.js` — damage from battles, top 1000 share pool                                                                                          |
+| **Broker Rental**          | ✅ Implemented | `BrokerRental.js`, `brokerRental.js` — rent broker for AIBA                                                                                                          |
+| **Predict / Bet**          | ✅ Implemented | `PredictEvent.js`, `PredictBet.js`, `predict.js`, `adminPredict.js` — bet on broker A vs B, vig → treasury                                                           |
+| **NFT Breeding**           | ✅ Implemented | `breeding.js` — breed 2 brokers → 1, burn both + AIBA cost                                                                                                           |
 
 **Config (Admin → Economy):** `creatorPercentBps`, `creatorTier100RefsBps`, `creatorTier1000RefsBps`, `creatorTier10000RefsBps`, `predictVigBps`, `predictMaxBetAiba`, `streakMultiplierAt7Days`, `dailyComboRequirementAiba`, etc.
 

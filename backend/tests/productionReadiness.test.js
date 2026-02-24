@@ -62,7 +62,7 @@ test('enforceProductionReadiness rejects dev placeholder BATTLE_SEED_SECRET', ()
 
 test('enforceProductionReadiness enforces all-or-nothing vault/claim env', () => {
     const env = baseProdEnv({ ARENA_VAULT_ADDRESS: '0:' + '11'.repeat(32) });
-    assert.throws(() => enforceProductionReadiness(env), /must all be set together/);
+    assert.throws(() => enforceProductionReadiness(env), /must be set, and either/);
 });
 
 test('enforceProductionReadiness validates ORACLE_PRIVATE_KEY_HEX shape and TON provider', () => {

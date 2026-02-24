@@ -125,7 +125,7 @@ contract AiAssetMarketplaceEscrowJetton with Ownable {
                     destination: self.treasury,
                     responseDestination: self.treasury,
                     customPayload: null,
-                    forwardAmount: 0,
+                    forwardTonAmount: 0,
                     forwardPayload: emptySlice()
                 }.toCell(),
             });
@@ -142,7 +142,7 @@ contract AiAssetMarketplaceEscrowJetton with Ownable {
                     destination: listing!!.seller,
                     responseDestination: listing!!.seller,
                     customPayload: null,
-                    forwardAmount: 0,
+                    forwardTonAmount: 0,
                     forwardPayload: emptySlice()
                 }.toCell(),
             });
@@ -151,7 +151,7 @@ contract AiAssetMarketplaceEscrowJetton with Ownable {
         cashback(sender());
     }
 
-    get fun getListing(id: Int as uint64): Listing? {
+    get fun getListing(id: Int): Listing? {
         return self.listings.get(id);
     }
 }

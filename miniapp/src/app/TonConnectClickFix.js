@@ -45,7 +45,8 @@ export function TonConnectClickFix() {
                 if (isModalOpen(root)) {
                     root.style.setProperty('pointer-events', 'auto', 'important');
                     const all = root.querySelectorAll('*');
-                    for (let i = 0; i < all.length; i++) all[i].style.setProperty('pointer-events', 'auto', 'important');
+                    for (let i = 0; i < all.length; i++)
+                        all[i].style.setProperty('pointer-events', 'auto', 'important');
                 } else {
                     setWidgetPassThrough(root);
                 }

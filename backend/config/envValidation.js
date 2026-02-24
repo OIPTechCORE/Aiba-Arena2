@@ -200,10 +200,13 @@ function validateAndReport() {
             securityReport.recommendations.forEach((rec) => console.log(`[CONFIG] - ${rec}`));
         }
 
-        // Overall status
-        if (securityReport.status === 'FAIL') {
-            console.error('[CONFIG] Security validation failed - please address critical issues');
-            return false;
+        // Only fail on critical security issues in production
+        const isProduction = process.env.APP_ENV === 'production' || process.env.NODE_ENV === 'production';
+        if (!isProduction && securityReport.issues.length > 0) {
+            console.log('[CONFIG] Security validation skipped in development mode');
+        } else if (isProduction && securityReport.issues.length > 0) {
+            console.log('[CONFIG] Security validation failed - please address critical issues');
+            throw new Error('Security validation failed');
         }
 
         console.log('[CONFIG] All validations passed successfully');

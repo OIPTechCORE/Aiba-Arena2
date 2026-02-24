@@ -44,9 +44,9 @@ Step-by-step procedures for rotating secrets when compromised or as part of regu
 **Rotation steps:**
 
 1. **Generate new bcrypt hash:**
-   ```bash
-   node -e "const bcrypt=require('bcrypt'); bcrypt.hash('NEW_STRONG_PASSWORD', 10).then(h=>console.log(h));"
-   ```
+    ```bash
+    node -e "const bcrypt=require('bcrypt'); bcrypt.hash('NEW_STRONG_PASSWORD', 10).then(h=>console.log(h));"
+    ```
 2. **Update backend:** Set new `ADMIN_PASSWORD_HASH` in secret manager / env.
 3. **Restart backend** (or wait for next deploy).
 4. **Effect:** Old admin password no longer works. Use new password for login.

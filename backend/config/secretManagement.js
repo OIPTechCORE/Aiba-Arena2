@@ -30,7 +30,7 @@ class SecretManager {
         }
 
         // Create a new key and warn user
-        const key = crypto.randomBytes(this.keyLength);
+        const key = crypto.randomBytes(this.keyLength || 32);
         console.warn('[SECURITY] SECRET_ENCRYPTION_KEY not set. Generated temporary key.');
         console.warn('[SECURITY] Set SECRET_ENCRYPTION_KEY in your environment to persist secrets.');
         console.log(`[SECURITY] Generated key: ${key.toString('hex')}`);
@@ -43,8 +43,8 @@ class SecretManager {
     encrypt(text) {
         if (!text) return null;
 
-        const iv = crypto.randomBytes(this.ivLength);
-        const cipher = crypto.createCipher(this.algorithm, this.encryptionKey);
+        const iv = crypto.randomBytes(this.ivLength || 16);
+        const cipher = crypto.createCipher(this.algorithm, this.encryptionKey, { ivLength: this.ivLength });
         cipher.setAAD(Buffer.from('additional-data'));
 
         let encrypted = cipher.update(text, 'utf8', 'hex');
@@ -65,7 +65,7 @@ class SecretManager {
     decrypt(encryptedData) {
         if (!encryptedData || !encryptedData.encrypted) return null;
 
-        const decipher = crypto.createDecipher(this.algorithm, this.encryptionKey);
+        const decipher = crypto.createDecipher(this.algorithm, this.encryptionKey, { ivLength: this.ivLength });
         decipher.setAAD(Buffer.from('additional-data'));
         decipher.setAuthTag(Buffer.from(encryptedData.tag, 'hex'));
 

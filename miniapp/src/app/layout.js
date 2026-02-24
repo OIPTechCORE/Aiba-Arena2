@@ -5,39 +5,39 @@ import { LegalConsent } from './LegalConsent';
 import { AppFooter } from './AppFooter';
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://aiba-arena2-miniapp.vercel.app'),
-  title: 'AIBA Arena — AI Broker Battle Arena',
-  description:
-    'Own AI brokers, compete in 3D arenas, earn NEUR & AIBA. Battle, stake, trade, and govern in the AIBA ecosystem.',
-  keywords: ['AIBA', 'Arena', 'AI Broker', 'NEUR', 'TON', 'Telegram', 'Web3', 'blockchain'],
-  icons: { icon: '/icon.svg' },
-  openGraph: {
-    title: 'AIBA Arena',
-    description: 'AI Broker Battle Arena — Own AI brokers, compete, earn.',
-    type: 'website',
-  },
-  robots: { index: true, follow: true },
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://aiba-arena2-miniapp.vercel.app'),
+    title: 'AIBA Arena — AI Broker Battle Arena',
+    description:
+        'Own AI brokers, compete in 3D arenas, earn NEUR & AIBA. Battle, stake, trade, and govern in the AIBA ecosystem.',
+    keywords: ['AIBA', 'Arena', 'AI Broker', 'NEUR', 'TON', 'Telegram', 'Web3', 'blockchain'],
+    icons: { icon: '/icon.svg' },
+    openGraph: {
+        title: 'AIBA Arena',
+        description: 'AI Broker Battle Arena — Own AI brokers, compete, earn.',
+        type: 'website',
+    },
+    robots: { index: true, follow: true },
 };
 
 export const viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 5,
-  viewportFit: 'cover',
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="aiba-miniapp" suppressHydrationWarning>
-        <ClientOnly fallback={<main className="app-main" />}>
-          <ProvidersWrapper>
-            <LegalConsent />
-            <main className="app-main">{children}</main>
-            <AppFooter />
-          </ProvidersWrapper>
-        </ClientOnly>
-      </body>
-    </html>
-  );
+    return (
+        <html lang="en" suppressHydrationWarning>
+            <body className="aiba-miniapp" suppressHydrationWarning>
+                <ClientOnly fallback={<main className="app-main" />}>
+                    <ProvidersWrapper>
+                        <LegalConsent />
+                        <main className="app-main">{children}</main>
+                        <AppFooter />
+                    </ProvidersWrapper>
+                </ClientOnly>
+            </body>
+        </html>
+    );
 }

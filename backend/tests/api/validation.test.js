@@ -13,7 +13,10 @@ test('POST /api/marketplace/buy-system-broker without body returns 400 or 401', 
             headers: { 'x-telegram-id': 'test-user', 'Content-Type': 'application/json' },
             body: '{}',
         });
-        assert.ok(res.status === 400 || res.status === 401 || res.status === 404, 'invalid or missing catalogId should yield 400/401/404');
+        assert.ok(
+            res.status === 400 || res.status === 401 || res.status === 404,
+            'invalid or missing catalogId should yield 400/401/404',
+        );
     } finally {
         await new Promise((resolve) => server.close(resolve));
     }

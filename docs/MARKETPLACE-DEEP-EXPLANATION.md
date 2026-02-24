@@ -6,16 +6,16 @@ A full technical and product explanation of the **Super Futuristic Unified Marke
 
 ## 1. Spec vs implementation (deeply operational, full fledged?)
 
-| Requirement | Status | Notes |
-|-------------|--------|--------|
-| **One place (hub)** | ✅ | Single tab “Market” with flow switches: Overview, Trade, Rental, System, Boosts. Assets accessible via “Go to AI Assets” from Overview. |
-| **Brokers** | ✅ | Create with TON (Overview); list/buy with AIBA (Trade); buy from system for AIBA (System). |
-| **Assets** | ✅ | In hub via shortcut to AI Assets tab (mint, list, buy, rent). Full flows on Assets tab. |
-| **Rentals** | ✅ | List broker for rent (AIBA/hour), rent, unlist — all in Rental flow. |
-| **System shop** | ✅ | Buy system brokers for AIBA (System flow). Stars Store in Overview (AIBA or TON). |
-| **Boosts** | ✅ | Buy with NEUR or TON in Boosts flow (config-driven; TON when boostCostTonNano + BOOST_TON_WALLET set). |
-| **Trade with TON + AIBA** | ✅ | TON: create broker, Stars Store, boosts. AIBA: broker list/buy, system brokers, rentals, boosts (NEUR in-app). |
-| **List, buy, create** | ✅ | List: brokers (Trade), rentals (Rental). Buy: listings (Trade), system (System), rentals (Rental), boosts (Boosts). Create: broker with TON (Overview). |
+| Requirement               | Status | Notes                                                                                                                                                   |
+| ------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **One place (hub)**       | ✅     | Single tab “Market” with flow switches: Overview, Trade, Rental, System, Boosts. Assets accessible via “Go to AI Assets” from Overview.                 |
+| **Brokers**               | ✅     | Create with TON (Overview); list/buy with AIBA (Trade); buy from system for AIBA (System).                                                              |
+| **Assets**                | ✅     | In hub via shortcut to AI Assets tab (mint, list, buy, rent). Full flows on Assets tab.                                                                 |
+| **Rentals**               | ✅     | List broker for rent (AIBA/hour), rent, unlist — all in Rental flow.                                                                                    |
+| **System shop**           | ✅     | Buy system brokers for AIBA (System flow). Stars Store in Overview (AIBA or TON).                                                                       |
+| **Boosts**                | ✅     | Buy with NEUR or TON in Boosts flow (config-driven; TON when boostCostTonNano + BOOST_TON_WALLET set).                                                  |
+| **Trade with TON + AIBA** | ✅     | TON: create broker, Stars Store, boosts. AIBA: broker list/buy, system brokers, rentals, boosts (NEUR in-app).                                          |
+| **List, buy, create**     | ✅     | List: brokers (Trade), rentals (Rental). Buy: listings (Trade), system (System), rentals (Rental), boosts (Boosts). Create: broker with TON (Overview). |
 
 **Verdict: Deeply operational, full fledged.** Multi-tabbed and seamlessly extensible via `MARKET_FLOWS`; all pillars implemented; TON + AIBA; list, buy, create across the hub.
 
@@ -63,37 +63,37 @@ A full technical and product explanation of the **Super Futuristic Unified Marke
 
 ### 3.1 Marketplace (`/api/marketplace`)
 
-| Method | Path | Auth | Purpose |
-|--------|------|------|--------|
-| GET | /system-brokers | — | Catalog of system brokers (AIBA). |
-| GET | /listings | Telegram | Active broker listings with broker snapshot. |
-| POST | /list | Telegram | List broker (brokerId, priceAIBA, priceNEUR?). |
-| POST | /delist | Telegram | Cancel own listing. |
-| POST | /buy | Telegram | Buy listing (AIBA); transfer broker; fee to platform. |
-| POST | /buy-system-broker | Telegram | Buy from system (catalogId); debit AIBA, create Broker. |
+| Method | Path               | Auth     | Purpose                                                 |
+| ------ | ------------------ | -------- | ------------------------------------------------------- |
+| GET    | /system-brokers    | —        | Catalog of system brokers (AIBA).                       |
+| GET    | /listings          | Telegram | Active broker listings with broker snapshot.            |
+| POST   | /list              | Telegram | List broker (brokerId, priceAIBA, priceNEUR?).          |
+| POST   | /delist            | Telegram | Cancel own listing.                                     |
+| POST   | /buy               | Telegram | Buy listing (AIBA); transfer broker; fee to platform.   |
+| POST   | /buy-system-broker | Telegram | Buy from system (catalogId); debit AIBA, create Broker. |
 
 **Models:** `Listing` (brokerId, sellerTelegramId, priceAIBA, priceNEUR, status). `Broker` (owner transfer on buy).
 
 ### 3.2 Broker rental (`/api/broker-rental`)
 
-| Method | Path | Auth | Purpose |
-|--------|------|------|--------|
-| GET | / | — | List available rentals (status 'listed'), broker populated. |
-| POST | /list | Telegram | List broker for rent (brokerId, priceAibaPerHour). |
-| POST | /:id/rent | Telegram | Rent for 1 hour (debit AIBA, credit owner minus fee, set rentedBy/rentedUntil). |
-| POST | /:id/unlist | Telegram | Unlist own rental (only if not rented). |
+| Method | Path        | Auth     | Purpose                                                                         |
+| ------ | ----------- | -------- | ------------------------------------------------------------------------------- |
+| GET    | /           | —        | List available rentals (status 'listed'), broker populated.                     |
+| POST   | /list       | Telegram | List broker for rent (brokerId, priceAibaPerHour).                              |
+| POST   | /:id/rent   | Telegram | Rent for 1 hour (debit AIBA, credit owner minus fee, set rentedBy/rentedUntil). |
+| POST   | /:id/unlist | Telegram | Unlist own rental (only if not rented).                                         |
 
 **Models:** `BrokerRental` (brokerId, ownerTelegramId, priceAibaPerHour, status: listed|rented|unlisted, rentedByTelegramId, returnAt). Fee from `economy.brokerRentalFeeBps`.
 
 ### 3.3 Boosts (`/api/boosts`)
 
-| Method | Path | Auth | Purpose |
-|--------|------|------|--------|
-| GET | /config | — | boostCostTonNano, walletForTon, boostCostNeur, duration, multiplier (for UI). |
-| GET | /mine | Telegram | Active boosts for user. |
-| POST | /buy | Telegram | Buy boost with NEUR (boostKey, requestId). |
-| POST | /buy-with-ton | Telegram | Buy boost with TON (boostKey, txHash); verify payment to BOOST_TON_WALLET. |
-| POST | /buy-profile-with-ton | Telegram | Profile visibility boost (separate product). |
+| Method | Path                  | Auth     | Purpose                                                                       |
+| ------ | --------------------- | -------- | ----------------------------------------------------------------------------- |
+| GET    | /config               | —        | boostCostTonNano, walletForTon, boostCostNeur, duration, multiplier (for UI). |
+| GET    | /mine                 | Telegram | Active boosts for user.                                                       |
+| POST   | /buy                  | Telegram | Buy boost with NEUR (boostKey, requestId).                                    |
+| POST   | /buy-with-ton         | Telegram | Buy boost with TON (boostKey, txHash); verify payment to BOOST_TON_WALLET.    |
+| POST   | /buy-profile-with-ton | Telegram | Profile visibility boost (separate product).                                  |
 
 ### 3.4 Assets (separate tab, same “one hub” concept)
 

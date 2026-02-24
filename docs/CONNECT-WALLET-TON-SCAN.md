@@ -6,14 +6,14 @@ This document confirms that **Connect your TON wallet** is correctly wired and w
 
 ## 1. Architecture (verified)
 
-| Layer | Location | Role |
-|-------|----------|------|
-| **Provider** | `miniapp/src/app/providers.js` | `TonConnectUIProvider` with `manifestUrl` and `uiPreferences.theme: 'DARK'` |
-| **Manifest API** | `miniapp/src/app/api/tonconnect-manifest/route.js` | Serves app manifest at `GET /api/tonconnect-manifest` (url, name, iconUrl) |
-| **Manifest URL** | Client: `window.location.origin + '/api/tonconnect-manifest'` or `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL` | Wallets fetch this to discover the dApp |
-| **Connect button** | `miniapp/src/app/page.js` | When disconnected: custom button calls `tonConnectUI?.openModal?.()`; when connected: `<TonConnectButton />` |
-| **Wallet sync** | `page.js` useEffect | On `wallet?.account?.address` change, POST `/api/wallet/connect` with `{ address }` to save wallet for the user |
-| **Claim on-chain** | `page.js` → `claimOnChain()` | Uses `tonConnectUI.sendTransaction()` with payload from `lib/tonRewardClaim.js` (ArenaRewardVault claim) |
+| Layer              | Location                                                                                               | Role                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| **Provider**       | `miniapp/src/app/providers.js`                                                                         | `TonConnectUIProvider` with `manifestUrl` and `uiPreferences.theme: 'DARK'`                                     |
+| **Manifest API**   | `miniapp/src/app/api/tonconnect-manifest/route.js`                                                     | Serves app manifest at `GET /api/tonconnect-manifest` (url, name, iconUrl)                                      |
+| **Manifest URL**   | Client: `window.location.origin + '/api/tonconnect-manifest'` or `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL` | Wallets fetch this to discover the dApp                                                                         |
+| **Connect button** | `miniapp/src/app/page.js`                                                                              | When disconnected: custom button calls `tonConnectUI?.openModal?.()`; when connected: `<TonConnectButton />`    |
+| **Wallet sync**    | `page.js` useEffect                                                                                    | On `wallet?.account?.address` change, POST `/api/wallet/connect` with `{ address }` to save wallet for the user |
+| **Claim on-chain** | `page.js` → `claimOnChain()`                                                                           | Uses `tonConnectUI.sendTransaction()` with payload from `lib/tonRewardClaim.js` (ArenaRewardVault claim)        |
 
 ---
 
@@ -44,10 +44,10 @@ This document confirms that **Connect your TON wallet** is correctly wired and w
 ## 5. Claim on-chain (TonConnect)
 
 - **Flow:** User has a signed claim from the backend → clicks "Claim on-chain (TonConnect)" → `claimOnChain()`:
-  - Ensures `lastClaim`, `wallet.account.address`, and that the connected wallet matches `claim.toAddress`.
-  - Builds payload with `buildRewardClaimPayload()` from `lib/tonRewardClaim.js`.
-  - Calls `tonConnectUI.sendTransaction({ validUntil, messages: [{ address: vaultAddress, amount: '70000000', payload }] })`.
-  - Polls `/api/vault/claim-status` until confirmed or timeout.
+    - Ensures `lastClaim`, `wallet.account.address`, and that the connected wallet matches `claim.toAddress`.
+    - Builds payload with `buildRewardClaimPayload()` from `lib/tonRewardClaim.js`.
+    - Calls `tonConnectUI.sendTransaction({ validUntil, messages: [{ address: vaultAddress, amount: '70000000', payload }] })`.
+    - Polls `/api/vault/claim-status` until confirmed or timeout.
 - **Other sendTransaction usages:** Same pattern used for listing/buy flows (e.g. asset marketplace) where a TON/token tx is required.
 
 ---
@@ -57,36 +57,36 @@ This document confirms that **Connect your TON wallet** is correctly wired and w
 ### Error -102 (ERR_CONNECTION_REFUSED)
 
 - **Meaning:** The browser (or Telegram in-app browser) could not open the URL (e.g. `http://localhost:3000/`). Connection refused usually means:
-  1. **Dev server not running** — Start the app with `npm run dev` (from project root) or `npm run dev --prefix miniapp`, then open `http://localhost:3000` in a **desktop browser** on the same machine.
-  2. **Opening from Telegram or another app** — Many in-app browsers (e.g. Telegram Mini App on mobile) **cannot reach `localhost`** because that refers to the device, not your PC. Use an HTTPS deployment or a tunnel (e.g. ngrok) for testing from Telegram.
+    1. **Dev server not running** — Start the app with `npm run dev` (from project root) or `npm run dev --prefix miniapp`, then open `http://localhost:3000` in a **desktop browser** on the same machine.
+    2. **Opening from Telegram or another app** — Many in-app browsers (e.g. Telegram Mini App on mobile) **cannot reach `localhost`** because that refers to the device, not your PC. Use an HTTPS deployment or a tunnel (e.g. ngrok) for testing from Telegram.
 
 ### Connect Wallet on localhost
 
 - **Manifest URL:** On localhost, the provider uses `http://localhost:3000/api/tonconnect-manifest`. Desktop **browser extension** wallets (e.g. Tonkeeper extension) can load this because they run in the same browser.
 - **Mobile wallets** (Tonkeeper app, etc.) run on the user’s phone and cannot fetch `http://localhost:3000` from your dev machine. So:
-  - **Option A:** Test Connect Wallet on localhost with a **browser extension** wallet only.
-  - **Option B:** Deploy the miniapp to HTTPS (e.g. Vercel) or expose localhost via **ngrok** (`npm run tunnel`), and set `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL` to that HTTPS URL (e.g. `https://your-app.vercel.app/api/tonconnect-manifest`) so mobile wallets can load the manifest.
+    - **Option A:** Test Connect Wallet on localhost with a **browser extension** wallet only.
+    - **Option B:** Deploy the miniapp to HTTPS (e.g. Vercel) or expose localhost via **ngrok** (`npm run tunnel`), and set `NEXT_PUBLIC_TONCONNECT_MANIFEST_URL` to that HTTPS URL (e.g. `https://your-app.vercel.app/api/tonconnect-manifest`) so mobile wallets can load the manifest.
 
 ---
 
 ## 7. Checklist for “Connect your TON wallet” fully functional
 
-| Check | Status / action |
-|-------|------------------|
-| TonConnectUIProvider wraps the app with a valid manifestUrl | ✅ `providers.js` |
-| Manifest API returns url, name, iconUrl (GET, no auth) | ✅ `api/tonconnect-manifest/route.js` |
-| Icon format (PNG/ICO 180×180 recommended) | ⚠️ Use PNG for full compatibility; add `icon.png` and point manifest to it (see below) |
-| Connect button opens wallet list when disconnected | ✅ `tonConnectUI?.openModal?.()` |
-| TonConnectButton shown when connected | ✅ `page.js` header |
-| Wallet address synced to backend after connect | ✅ POST `/api/wallet/connect` in useEffect |
-| Claim on-chain uses sendTransaction and matches claim.toAddress | ✅ `claimOnChain()` |
-| Localhost: dev server running; use browser or tunnel for mobile | ✅ Documented above |
-| Error -102: start dev server and/or use HTTPS/tunnel | ✅ §6 |
+| Check                                                           | Status / action                                                                        |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| TonConnectUIProvider wraps the app with a valid manifestUrl     | ✅ `providers.js`                                                                      |
+| Manifest API returns url, name, iconUrl (GET, no auth)          | ✅ `api/tonconnect-manifest/route.js`                                                  |
+| Icon format (PNG/ICO 180×180 recommended)                       | ⚠️ Use PNG for full compatibility; add `icon.png` and point manifest to it (see below) |
+| Connect button opens wallet list when disconnected              | ✅ `tonConnectUI?.openModal?.()`                                                       |
+| TonConnectButton shown when connected                           | ✅ `page.js` header                                                                    |
+| Wallet address synced to backend after connect                  | ✅ POST `/api/wallet/connect` in useEffect                                             |
+| Claim on-chain uses sendTransaction and matches claim.toAddress | ✅ `claimOnChain()`                                                                    |
+| Localhost: dev server running; use browser or tunnel for mobile | ✅ Documented above                                                                    |
+| Error -102: start dev server and/or use HTTPS/tunnel            | ✅ §6                                                                                  |
 
 ### Optional: PNG icon for manifest
 
 1. Add `miniapp/public/icon.png` (180×180 px, PNG).
-2. In `miniapp/src/app/api/tonconnect-manifest/route.js`, set `iconUrl` to `\`${baseUrl}/icon.png\`` instead of `icon.svg`.
+2. In `miniapp/src/app/api/tonconnect-manifest/route.js`, set `iconUrl` to `\`${baseUrl}/icon.png\``instead of`icon.svg`.
 
 ---
 

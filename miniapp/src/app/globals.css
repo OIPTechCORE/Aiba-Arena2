@@ -27,11 +27,16 @@
     /* Gradients */
     --metal-gradient: linear-gradient(180deg, #ffe066 0%, #ffcc00 20%, #e6b800 45%, #b38600 75%, #996600 100%);
     --metal-gradient-btn: linear-gradient(180deg, #fff0aa 0%, #ffcc00 25%, #cc9900 60%, #996600 100%);
-    --metal-gradient-text: linear-gradient(180deg, var(--metal-light) 0%, var(--accent-gold) 50%, var(--metal-mid) 100%);
+    --metal-gradient-text: linear-gradient(
+        180deg,
+        var(--metal-light) 0%,
+        var(--accent-gold) 50%,
+        var(--metal-mid) 100%
+    );
     /* Bevel / depth */
-    --metal-inset: inset 0 1px 0 rgba(255,255,255,0.35);
-    --metal-outer: 0 4px 0 #4d3300, 0 6px 20px rgba(0,0,0,0.6), 0 0 28px rgba(255,204,0,0.4);
-    --metal-glow: 0 0 28px rgba(255,204,0,0.45);
+    --metal-inset: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    --metal-outer: 0 4px 0 #4d3300, 0 6px 20px rgba(0, 0, 0, 0.6), 0 0 28px rgba(255, 204, 0, 0.4);
+    --metal-glow: 0 0 28px rgba(255, 204, 0, 0.45);
     --metal-border: 1px solid rgba(255, 224, 102, 0.4);
     /* Accents */
     --accent-cyan: #f5a623;
@@ -52,8 +57,8 @@
     --glow-amber: 0 0 24px rgba(230, 184, 0, 0.4);
     --shadow-deep: 0 14px 40px rgba(0, 0, 0, 0.6);
     --shadow-3d: 0 3px 12px rgba(0, 0, 0, 0.5);
-    --shadow-3d-button: 0 4px 0 #4d3300, 0 6px 24px rgba(0,0,0,0.5), 0 0 20px rgba(255,204,0,0.35);
-    --shadow-3d-card: 0 2px 4px rgba(0,0,0,0.4), 0 10px 28px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,204,0,0.12);
+    --shadow-3d-button: 0 4px 0 #4d3300, 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 204, 0, 0.35);
+    --shadow-3d-card: 0 2px 4px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 204, 0, 0.12);
     --perspective-view: none;
     --radius-sm: 12px;
     --radius-md: 14px;
@@ -85,31 +90,36 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 18px rgba(255,204,0,0.4)) drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 0 18px rgba(255, 204, 0, 0.4)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 .metal-panel {
     background: var(--bg-glass);
     border: var(--metal-border);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4), var(--metal-inset), 0 0 0 1px rgba(255,204,0,0.08);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
+        var(--metal-inset),
+        0 0 0 1px rgba(255, 204, 0, 0.08);
 }
 .metal-btn {
     background: var(--metal-gradient-btn);
     color: #0a0804;
     font-weight: 700;
     box-shadow: var(--metal-inset), var(--metal-outer);
-    border: 1px solid rgba(255,224,102,0.35);
+    border: 1px solid rgba(255, 224, 102, 0.35);
 }
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
 /* Unified shell — strong metallic dark + gold radials */
@@ -185,7 +195,10 @@ main.app-main {
     backdrop-filter: blur(14px);
     border-radius: 0 0 var(--radius-md) var(--radius-md);
     border-bottom: 2px solid var(--border-metal);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 1px 0 rgba(255,224,102,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.5),
+        0 1px 0 rgba(255, 224, 102, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
     max-width: min(560px, 100vw);
     margin: 0 auto;
 }
@@ -267,7 +280,7 @@ main.app-main {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 18px rgba(255,204,0,0.45)) drop-shadow(0 1px 3px rgba(0,0,0,0.6));
+    filter: drop-shadow(0 0 18px rgba(255, 204, 0, 0.45)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
 }
 
 .aiba-app__sub {
@@ -299,7 +312,8 @@ main.app-main {
     left: 0;
     right: 0;
     z-index: 99;
-    padding: 8px max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    padding: 8px max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom))
+        max(12px, env(safe-area-inset-left));
     max-width: min(560px, 100vw);
     margin: 0 auto;
 }
@@ -314,7 +328,9 @@ main.app-main {
     border: 1px solid rgba(255, 200, 92, 0.25);
     background: rgba(26, 21, 16, 0.98);
     backdrop-filter: blur(12px);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 200, 92, 0.08);
+    box-shadow:
+        0 2px 12px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(255, 200, 92, 0.08);
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scroll-snap-type: x proximity;
@@ -365,7 +381,9 @@ main.app-main {
     color: var(--accent-gold);
     border-color: var(--border-glass);
     background: linear-gradient(135deg, rgba(255, 200, 92, 0.22), rgba(255, 183, 77, 0.15));
-    box-shadow: inset 0 0 0 1px rgba(255, 200, 92, 0.35), var(--glow-gold);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 200, 92, 0.35),
+        var(--glow-gold);
 }
 
 .android-bottom-nav__btn::after {
@@ -421,18 +439,28 @@ main.app-main {
 }
 
 @keyframes tabIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Elevated card for key Android surfaces */
 .card--elevated {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.34), 0 8px 22px rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.34),
+        0 8px 22px rgba(0, 0, 0, 0.3);
     border-color: var(--border-glass);
 }
 
 .card--elevated:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.34), 0 12px 28px rgba(0, 0, 0, 0.34);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.34),
+        0 12px 28px rgba(0, 0, 0, 0.34);
 }
 
 /* ─── Android action buttons ─────────────────────────────────────────────── */
@@ -512,16 +540,23 @@ main.app-main {
     color: #0a0804;
     font-weight: 700;
     box-shadow: var(--metal-inset), var(--metal-outer);
-    border: 1px solid rgba(255,224,102,0.3);
+    border: 1px solid rgba(255, 224, 102, 0.3);
 }
 
 .btn--primary:hover:not(:disabled) {
     filter: brightness(1.08);
-    box-shadow: var(--metal-inset), 0 5px 0 var(--metal-shadow), 0 8px 28px rgba(0,0,0,0.55), 0 0 32px rgba(255,204,0,0.45);
+    box-shadow:
+        var(--metal-inset),
+        0 5px 0 var(--metal-shadow),
+        0 8px 28px rgba(0, 0, 0, 0.55),
+        0 0 32px rgba(255, 204, 0, 0.45);
 }
 
 .btn--primary:active:not(:disabled) {
-    box-shadow: var(--metal-inset), 0 2px 0 var(--metal-shadow), 0 4px 16px rgba(0,0,0,0.5);
+    box-shadow:
+        var(--metal-inset),
+        0 2px 0 var(--metal-shadow),
+        0 4px 16px rgba(0, 0, 0, 0.5);
     transform: translateY(2px);
 }
 
@@ -536,19 +571,25 @@ main.app-main {
 
 .btn--secondary:hover:not(:disabled) {
     background: rgba(245, 166, 35, 0.2);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 204, 0, 0.2);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 204, 0, 0.2);
 }
 
 /* Success / CTA */
 .btn--success {
     background: var(--accent-green);
     color: #071b0f;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.32), 0 3px 8px rgba(0, 0, 0, 0.2);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.32),
+        0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn--success:hover:not(:disabled) {
     filter: brightness(1.04);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28), 0 6px 14px rgba(0, 0, 0, 0.2);
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.28),
+        0 6px 14px rgba(0, 0, 0, 0.2);
 }
 
 .btn--success:active:not(:disabled) {
@@ -564,7 +605,9 @@ main.app-main {
 
 .btn--danger:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 6px 0 #8b0000, 0 0 16px rgba(255, 82, 82, 0.35);
+    box-shadow:
+        0 6px 0 #8b0000,
+        0 0 16px rgba(255, 82, 82, 0.35);
 }
 
 /* Ghost — minimal for dense action groups */
@@ -592,7 +635,9 @@ main.app-main {
     border-radius: var(--radius-pill);
     border: 1px solid var(--border-metal);
     backdrop-filter: blur(8px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
 }
@@ -652,7 +697,9 @@ main.app-main {
 }
 
 .card:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.34), 0 10px 24px rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.34),
+        0 10px 24px rgba(0, 0, 0, 0.3);
 }
 
 .card__title {
@@ -807,18 +854,29 @@ main.app-main {
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
-    box-shadow: 0 6px 0 #94520c, 0 10px 36px rgba(0, 0, 0, 0.35), 0 0 30px rgba(255, 204, 0, 0.4);
-    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow:
+        0 6px 0 #94520c,
+        0 10px 36px rgba(0, 0, 0, 0.35),
+        0 0 30px rgba(255, 204, 0, 0.4);
+    transition:
+        transform 0.15s,
+        box-shadow 0.2s;
 }
 
 .cinematic__enter:hover {
     transform: translateY(-3px);
-    box-shadow: 0 9px 0 #94520c, 0 14px 40px rgba(0, 0, 0, 0.4), 0 0 44px rgba(255, 204, 0, 0.5);
+    box-shadow:
+        0 9px 0 #94520c,
+        0 14px 40px rgba(0, 0, 0, 0.4),
+        0 0 44px rgba(255, 204, 0, 0.5);
 }
 
 .cinematic__enter:active {
     transform: translateY(2px);
-    box-shadow: 0 4px 0 #94520c, 0 6px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(255, 204, 0, 0.4);
+    box-shadow:
+        0 4px 0 #94520c,
+        0 6px 24px rgba(0, 0, 0, 0.3),
+        0 0 24px rgba(255, 204, 0, 0.4);
 }
 
 /* ─── Hero block: AI BROKER ARENA in the middle of the page ─────────────── */
@@ -877,7 +935,10 @@ main.app-main {
     border: 2px solid var(--accent-gold);
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    transition:
+        background 0.2s,
+        color 0.2s,
+        box-shadow 0.2s;
 }
 .hero-center__enter--btn:hover {
     background: rgba(255, 204, 0, 0.2);
@@ -983,32 +1044,49 @@ main.app-main {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    transition:
+        color 0.2s,
+        border-color 0.2s,
+        box-shadow 0.2s,
+        transform 0.15s;
     backdrop-filter: blur(12px);
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    box-shadow:
+        0 4px 0 rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .nav-hub__btn:hover {
     color: var(--text-primary);
     border-color: var(--border-glass);
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 204, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 4px 0 rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(255, 204, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
     transform: translateY(-2px);
 }
 
 .nav-hub__btn:active {
     transform: translateY(1px);
-    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow:
+        0 2px 0 rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .nav-hub__btn--active {
     color: var(--accent-gold);
     border-color: var(--border-glass);
     background: linear-gradient(135deg, rgba(255, 204, 0, 0.22) 0%, rgba(245, 166, 35, 0.15) 100%);
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2), 0 0 24px rgba(255, 204, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 4px 0 rgba(0, 0, 0, 0.2),
+        0 0 24px rgba(255, 204, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .nav-hub__btn--active:hover {
-    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.18), 0 0 28px rgba(255, 204, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    box-shadow:
+        0 5px 0 rgba(0, 0, 0, 0.18),
+        0 0 28px rgba(255, 204, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .nav-hub__icon {
@@ -1055,7 +1133,11 @@ main.app-main {
     border-radius: var(--radius-lg);
     padding: 24px;
     max-width: 360px;
-    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.25), 0 20px 48px rgba(0, 0, 0, 0.4), 0 0 24px rgba(255, 204, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 8px 0 rgba(0, 0, 0, 0.25),
+        0 20px 48px rgba(0, 0, 0, 0.4),
+        0 0 24px rgba(255, 204, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .tutorial-card__title {
@@ -1156,27 +1238,27 @@ main.app-main {
     border-color: var(--border-glass);
 }
 .home-grid__item:active {
-  transform: scale(0.97);
+    transform: scale(0.97);
 }
 .home-grid__item--trainers {
-  border-color: rgba(138, 180, 248, 0.65);
-  background: linear-gradient(135deg, rgba(138, 180, 248, 0.28), rgba(138, 100, 248, 0.18));
-  box-shadow: 0 0 16px rgba(138, 180, 248, 0.22);
+    border-color: rgba(138, 180, 248, 0.65);
+    background: linear-gradient(135deg, rgba(138, 180, 248, 0.28), rgba(138, 100, 248, 0.18));
+    box-shadow: 0 0 16px rgba(138, 180, 248, 0.22);
 }
 .home-grid__item--trainers:hover {
-  border-color: var(--accent-gold);
-  background: linear-gradient(135deg, rgba(138, 180, 248, 0.34), rgba(138, 100, 248, 0.25));
+    border-color: var(--accent-gold);
+    background: linear-gradient(135deg, rgba(138, 180, 248, 0.34), rgba(138, 100, 248, 0.25));
 }
 .home-grid__item--trainers .home-grid__label {
-  color: #cbe3ff;
+    color: #cbe3ff;
 }
 .home-grid__item--dao {
-  border-color: rgba(34, 197, 94, 0.4);
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(6, 182, 212, 0.1));
+    border-color: rgba(34, 197, 94, 0.4);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(6, 182, 212, 0.1));
 }
 .home-grid__item--dao:hover {
-  border-color: var(--accent-cyan);
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(6, 182, 212, 0.2));
+    border-color: var(--accent-cyan);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(6, 182, 212, 0.2));
 }
 .home-grid__icon {
     display: flex;
@@ -1383,7 +1465,9 @@ main.app-main {
     max-height: 120px;
     overflow: hidden;
     margin-bottom: 8px;
-    transition: max-height 0.25s var(--android-ease-standard), opacity 0.25s var(--android-ease-standard);
+    transition:
+        max-height 0.25s var(--android-ease-standard),
+        opacity 0.25s var(--android-ease-standard);
 }
 .quick-nav-wrap--hidden {
     max-height: 0;
@@ -1404,7 +1488,9 @@ main.app-main {
     border-radius: var(--radius-md);
     margin-top: 12px;
     font-size: 0.85rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28), 0 6px 18px rgba(0, 0, 0, 0.22);
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.28),
+        0 6px 18px rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(8px);
 }
 
@@ -1436,8 +1522,14 @@ main.app-main {
     width: 16px;
     height: 16px;
 }
-.balance-strip__label--star .icon-svg { color: #ffc107; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.24)); }
-.balance-strip__label--diamond .icon-svg { color: #b8e0f0; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.24)); }
+.balance-strip__label--star .icon-svg {
+    color: #ffc107;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.24));
+}
+.balance-strip__label--diamond .icon-svg {
+    color: #b8e0f0;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.24));
+}
 
 .balance-strip__value--stars {
     color: #ffc107;
@@ -1491,31 +1583,41 @@ main.app-main {
     color: var(--accent-gold);
     background: rgba(255, 193, 7, 0.3);
     /* Encircled: double ring for visible circle */
-    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.5), inset 0 0 0 1px rgba(255, 193, 7, 0.15);
+    box-shadow:
+        0 0 0 2px rgba(255, 193, 7, 0.5),
+        inset 0 0 0 1px rgba(255, 193, 7, 0.15);
 }
 .badge-new--magenta {
     border-color: var(--accent-magenta);
     color: var(--accent-magenta);
     background: rgba(236, 72, 153, 0.3);
-    box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.5), inset 0 0 0 1px rgba(236, 72, 153, 0.15);
+    box-shadow:
+        0 0 0 2px rgba(236, 72, 153, 0.5),
+        inset 0 0 0 1px rgba(236, 72, 153, 0.15);
 }
 .badge-new--cyan {
     border-color: var(--accent-amber);
     color: var(--accent-amber);
     background: rgba(251, 191, 36, 0.25);
-    box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.5), inset 0 0 0 1px rgba(251, 191, 36, 0.2);
+    box-shadow:
+        0 0 0 2px rgba(255, 204, 0, 0.5),
+        inset 0 0 0 1px rgba(251, 191, 36, 0.2);
 }
 .badge-new--green {
     border-color: var(--accent-green);
     color: var(--accent-green);
     background: rgba(34, 197, 94, 0.3);
-    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.5), inset 0 0 0 1px rgba(34, 197, 94, 0.15);
+    box-shadow:
+        0 0 0 2px rgba(34, 197, 94, 0.5),
+        inset 0 0 0 1px rgba(34, 197, 94, 0.15);
 }
 .badge-new--gold {
     border-color: var(--accent-gold);
     color: var(--accent-gold);
     background: rgba(255, 193, 7, 0.3);
-    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.5), inset 0 0 0 1px rgba(255, 193, 7, 0.15);
+    box-shadow:
+        0 0 0 2px rgba(255, 193, 7, 0.5),
+        inset 0 0 0 1px rgba(255, 193, 7, 0.15);
 }
 .identity-name {
     font-family: var(--font-display);
@@ -1553,11 +1655,15 @@ main.app-main {
 /* ─── Stars / Diamonds wallet cards ─────────────────────────────────────── */
 .card--stars {
     border-color: rgba(255, 193, 7, 0.4);
-    box-shadow: 0 0 24px rgba(255, 193, 7, 0.12), inset 0 1px 0 rgba(255, 193, 7, 0.08);
+    box-shadow:
+        0 0 24px rgba(255, 193, 7, 0.12),
+        inset 0 1px 0 rgba(255, 193, 7, 0.08);
 }
 .card--diamonds {
     border-color: rgba(251, 191, 36, 0.45);
-    box-shadow: 0 0 24px rgba(255, 204, 0, 0.15), inset 0 1px 0 rgba(255, 204, 0, 0.1);
+    box-shadow:
+        0 0 24px rgba(255, 204, 0, 0.15),
+        inset 0 1px 0 rgba(255, 204, 0, 0.1);
 }
 .balance-display {
     margin-top: 10px;
@@ -1567,10 +1673,24 @@ main.app-main {
     align-items: center;
     gap: 8px;
 }
-.balance-display--stars { color: #ffc107; }
-.balance-display--stars .icon-svg { width: 22px; height: 22px; color: #ffc107; filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.5)); }
-.balance-display--diamonds { color: #ffeaa7; }
-.balance-display--diamonds .icon-svg { width: 22px; height: 22px; color: #ffeaa7; filter: drop-shadow(0 0 8px rgba(255, 204, 0, 0.5)); }
+.balance-display--stars {
+    color: #ffc107;
+}
+.balance-display--stars .icon-svg {
+    width: 22px;
+    height: 22px;
+    color: #ffc107;
+    filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.5));
+}
+.balance-display--diamonds {
+    color: #ffeaa7;
+}
+.balance-display--diamonds .icon-svg {
+    width: 22px;
+    height: 22px;
+    color: #ffeaa7;
+    filter: drop-shadow(0 0 8px rgba(255, 204, 0, 0.5));
+}
 
 /* Global Star/Diamond icon glow (balance strip, cards, victory) */
 .icon-svg--star {
@@ -1583,7 +1703,7 @@ main.app-main {
 }
 
 /* Optional: verified badge pill (X-style check) */
-.badge-pill[data-badge="verified"] {
+.badge-pill[data-badge='verified'] {
     box-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
 }
 
@@ -1753,12 +1873,19 @@ main.app-main {
 .victory-card {
     margin-top: 16px;
     padding: 20px;
-    background: linear-gradient(145deg, rgba(255, 204, 0, 0.18) 0%, rgba(245, 166, 35, 0.12) 50%, rgba(0, 0, 0, 0.3) 100%);
+    background: linear-gradient(
+        145deg,
+        rgba(255, 204, 0, 0.18) 0%,
+        rgba(245, 166, 35, 0.12) 50%,
+        rgba(0, 0, 0, 0.3) 100%
+    );
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-lg);
     color: var(--text-primary);
     text-align: center;
-    box-shadow: var(--glow-gold), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    box-shadow:
+        var(--glow-gold),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .victory-card__badge {
@@ -1888,12 +2015,25 @@ main.app-main {
 
 .arena-visual--hero:hover,
 .arena-visual--hero:focus {
-    box-shadow: inset 0 0 80px rgba(255, 204, 0, 0.15), 0 0 40px rgba(255, 204, 0, 0.25);
+    box-shadow:
+        inset 0 0 80px rgba(255, 204, 0, 0.15),
+        0 0 40px rgba(255, 204, 0, 0.25);
 }
 
 @keyframes arena-glow {
-    0%, 100% { box-shadow: inset 0 0 60px rgba(255, 204, 0, 0.1), 0 0 30px rgba(255, 204, 0, 0.2), 0 4px 20px rgba(0, 0, 0, 0.4); }
-    50% { box-shadow: inset 0 0 70px rgba(255, 204, 0, 0.14), 0 0 35px rgba(255, 204, 0, 0.25), 0 4px 20px rgba(0, 0, 0, 0.4); }
+    0%,
+    100% {
+        box-shadow:
+            inset 0 0 60px rgba(255, 204, 0, 0.1),
+            0 0 30px rgba(255, 204, 0, 0.2),
+            0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    50% {
+        box-shadow:
+            inset 0 0 70px rgba(255, 204, 0, 0.14),
+            0 0 35px rgba(255, 204, 0, 0.25),
+            0 4px 20px rgba(0, 0, 0, 0.4);
+    }
 }
 
 /* ─── Shared icon sizing (buttons and cards) ─────────────────────────────── */
@@ -2069,14 +2209,18 @@ main.app-main {
     justify-content: space-between;
     gap: 8px;
 }
-.comms-faq__summary::-webkit-details-marker { display: none; }
+.comms-faq__summary::-webkit-details-marker {
+    display: none;
+}
 .comms-faq__summary::after {
     content: '▶';
     font-size: 0.65rem;
     color: var(--text-muted);
     transition: transform 0.2s;
 }
-.comms-faq__item[open] .comms-faq__summary::after { transform: rotate(90deg); }
+.comms-faq__item[open] .comms-faq__summary::after {
+    transform: rotate(90deg);
+}
 .comms-faq__item .card__hint {
     margin: 0;
     padding: 8px 14px 12px;
@@ -2088,7 +2232,9 @@ main.app-main {
 /* ─── AIBA ARENA UNIVERSITY (Hamster Kombat learning hub) ─────────────────── */
 .card--university.university-hero {
     border-color: rgba(255, 204, 0, 0.4);
-    box-shadow: 0 0 24px rgba(255, 204, 0, 0.15), inset 0 1px 0 rgba(255, 204, 0, 0.1);
+    box-shadow:
+        0 0 24px rgba(255, 204, 0, 0.15),
+        inset 0 1px 0 rgba(255, 204, 0, 0.1);
 }
 .university-hero .card__title {
     font-family: var(--font-display);
@@ -2207,8 +2353,9 @@ main.app-main {
     margin-top: 12px;
 }
 .home-featured-strip .btn {
-    transition: transform var(--android-motion-fast) var(--android-ease-standard),
-                box-shadow var(--android-motion-standard) var(--android-ease-standard);
+    transition:
+        transform var(--android-motion-fast) var(--android-ease-standard),
+        box-shadow var(--android-motion-standard) var(--android-ease-standard);
 }
 .home-featured-strip .btn:hover {
     transform: translateY(-1px);
@@ -2223,7 +2370,9 @@ main.app-main {
 .coe-hero {
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, transparent 55%) !important;
     border-color: rgba(255, 204, 0, 0.5) !important;
-    box-shadow: 0 0 28px rgba(255, 204, 0, 0.12), inset 0 1px 0 rgba(255, 204, 0, 0.08);
+    box-shadow:
+        0 0 28px rgba(255, 204, 0, 0.12),
+        inset 0 1px 0 rgba(255, 204, 0, 0.08);
 }
 .coe-hero .card__title {
     font-family: var(--font-display);
@@ -2249,8 +2398,9 @@ main.app-main {
     gap: 16px;
 }
 .coe-card {
-    transition: box-shadow var(--android-motion-standard) var(--android-ease-standard),
-                border-color var(--android-motion-standard) var(--android-ease-standard);
+    transition:
+        box-shadow var(--android-motion-standard) var(--android-ease-standard),
+        border-color var(--android-motion-standard) var(--android-ease-standard);
 }
 .coe-card:hover {
     border-color: rgba(255, 204, 0, 0.35) !important;
@@ -2273,8 +2423,9 @@ main.app-main {
     border: 1px solid var(--border);
     background: var(--card-bg);
     box-shadow: var(--shadow-3d-card);
-    transition: transform var(--android-motion-fast) var(--android-ease-standard),
-                box-shadow var(--android-motion-standard) var(--android-ease-standard);
+    transition:
+        transform var(--android-motion-fast) var(--android-ease-standard),
+        box-shadow var(--android-motion-standard) var(--android-ease-standard);
 }
 .nft-gallery-card:hover {
     transform: translateY(-2px);
@@ -2282,7 +2433,9 @@ main.app-main {
 }
 .nft-gallery-card--large {
     border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        0 8px 24px rgba(0, 0, 0, 0.35);
 }
 .nft-gallery-card--large:hover {
     box-shadow: var(--glow-gold);
@@ -2336,7 +2489,7 @@ main.app-main {
 /* ─── TonConnect: wallet list modal — seamlessly responsive, nothing hidden ─ */
 /* Ensure body never clips the modal */
 body.ton-connect-modal-open,
-html:has(#tc-widget-root [data-tc-modal="true"]) {
+html:has(#tc-widget-root [data-tc-modal='true']) {
     overflow: visible;
     height: auto;
     min-height: 100vh;
@@ -2368,7 +2521,7 @@ body.aiba-miniapp > *:not(#tc-widget-root) {
     align-items: center;
     justify-content: center;
 }
-#tc-widget-root:has([data-tc-modal="true"]) {
+#tc-widget-root:has([data-tc-modal='true']) {
     z-index: 10000;
     overflow-y: auto;
     overflow-x: hidden;
@@ -2377,7 +2530,7 @@ body.aiba-miniapp > *:not(#tc-widget-root) {
 }
 
 /* Modal backdrop: full viewport, nothing clipped */
-#tc-widget-root [data-tc-modal="true"] {
+#tc-widget-root [data-tc-modal='true'] {
     min-height: 100%;
     min-height: 100dvh;
     min-width: 100%;
@@ -2393,9 +2546,9 @@ body.aiba-miniapp > *:not(#tc-widget-root) {
 }
 
 /* Inner modal content: scrollable so wallet list is never hidden */
-#tc-widget-root [data-tc-modal="true"] > div,
-#tc-widget-root [data-tc-modal="true"] [class*="modal"],
-#tc-widget-root [data-tc-modal="true"] [class*="Modal"] {
+#tc-widget-root [data-tc-modal='true'] > div,
+#tc-widget-root [data-tc-modal='true'] [class*='modal'],
+#tc-widget-root [data-tc-modal='true'] [class*='Modal'] {
     max-height: 100%;
     max-height: 100dvh;
     overflow-y: auto;
@@ -2407,7 +2560,7 @@ body.aiba-miniapp > *:not(#tc-widget-root) {
 }
 
 @media (max-width: 440px) {
-    #tc-widget-root [data-tc-modal="true"] {
+    #tc-widget-root [data-tc-modal='true'] {
         width: 100%;
         max-width: 100vw;
         padding-left: env(safe-area-inset-left);
@@ -2493,14 +2646,29 @@ body.aiba-miniapp > *:not(#tc-widget-root) {
     width: 32px;
     height: 32px;
 }
-.profile-info { flex: 1; min-width: 0; }
-.profile-name { font-weight: 600; font-size: 1rem; }
-.profile-username, .profile-id { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+.profile-info {
+    flex: 1;
+    min-width: 0;
+}
+.profile-name {
+    font-weight: 600;
+    font-size: 1rem;
+}
+.profile-username,
+.profile-id {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
 
 /* Desktop: header and buttons always visible, never moving */
 @media (min-width: 769px) {
-    .app-header__row .header-nav__label { display: inline !important; }
-    .app-header__wallet .connect-wallet-btn span { display: inline !important; }
+    .app-header__row .header-nav__label {
+        display: inline !important;
+    }
+    .app-header__wallet .connect-wallet-btn span {
+        display: inline !important;
+    }
     .header-nav__btn,
     .header-nav__btn:hover,
     .header-nav__btn:active,
@@ -2520,54 +2688,124 @@ body.aiba-miniapp > *:not(#tc-widget-root) {
     .header-nav__btn,
     .quick-nav__btn,
     .app-header .btn {
-        transition: background 0.15s, color 0.15s !important;
+        transition:
+            background 0.15s,
+            color 0.15s !important;
     }
 }
 
 /* Header responsive: single line, horizontal scroll if needed on very narrow */
 @media (max-width: 600px) {
-    .app-header__row { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
-    .app-header__row .header-nav__btn { min-width: auto; padding: 4px 6px; }
+    .app-header__row {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    .app-header__row .header-nav__btn {
+        min-width: auto;
+        padding: 4px 6px;
+    }
 }
 
 /* Seamless responsiveness: single consolidated block for narrow viewports (--bp-narrow = 400px) */
 @media (max-width: 400px) {
-    .dashboard-grid { gap: 8px; }
-    .dashboard-tile { min-height: 72px; padding: 10px 6px; }
-    .dashboard-tile__icon .icon-svg { width: 22px; height: 22px; }
-    .dashboard-tile__label { font-size: 0.62rem; }
-    .app-header__row .aiba-app__title { font-size: 0.95rem; }
-    .app-header__row .header-nav__btn { padding: 4px 5px; font-size: 0.65rem; }
-    .app-header__wallet .connect-wallet-btn { padding: 6px 10px; font-size: 0.75rem; }
-    .home-grid__item { min-height: 68px; padding: 8px 4px; }
-    .home-grid__label { font-size: 0.65rem; }
-    .balance-strip { padding: 10px 12px; gap: 8px; }
-    .balance-strip__value { font-size: 0.9rem; }
-    .quick-nav { gap: 6px; }
-    .quick-nav__btn { padding: 6px 10px; font-size: 0.82rem; }
-    .card { padding: 12px 14px; }
-    .hero-center__title { font-size: clamp(1.2rem, 5vw, 1.4rem); }
-    .hero-center__sub { font-size: 0.88rem; }
+    .dashboard-grid {
+        gap: 8px;
+    }
+    .dashboard-tile {
+        min-height: 72px;
+        padding: 10px 6px;
+    }
+    .dashboard-tile__icon .icon-svg {
+        width: 22px;
+        height: 22px;
+    }
+    .dashboard-tile__label {
+        font-size: 0.62rem;
+    }
+    .app-header__row .aiba-app__title {
+        font-size: 0.95rem;
+    }
+    .app-header__row .header-nav__btn {
+        padding: 4px 5px;
+        font-size: 0.65rem;
+    }
+    .app-header__wallet .connect-wallet-btn {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+    .home-grid__item {
+        min-height: 68px;
+        padding: 8px 4px;
+    }
+    .home-grid__label {
+        font-size: 0.65rem;
+    }
+    .balance-strip {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+    .balance-strip__value {
+        font-size: 0.9rem;
+    }
+    .quick-nav {
+        gap: 6px;
+    }
+    .quick-nav__btn {
+        padding: 6px 10px;
+        font-size: 0.82rem;
+    }
+    .card {
+        padding: 12px 14px;
+    }
+    .hero-center__title {
+        font-size: clamp(1.2rem, 5vw, 1.4rem);
+    }
+    .hero-center__sub {
+        font-size: 0.88rem;
+    }
 }
 
 /* Ensure touch targets and overflow handling */
 @media (max-width: 500px) {
-    .android-bottom-nav__btn { min-width: 72px; }
+    .android-bottom-nav__btn {
+        min-width: 72px;
+    }
 }
 
-.card, .balance-strip { max-width: 100%; }
+.card,
+.balance-strip {
+    max-width: 100%;
+}
 
 /* Body/html: prevent horizontal overflow, seamless responsive base */
-html, body { overflow-x: hidden; width: 100%; min-width: 0; }
-html { scroll-behavior: smooth; scroll-padding-top: 80px; }
-body { scroll-padding-top: 80px; -webkit-overflow-scrolling: touch; }
+html,
+body {
+    overflow-x: hidden;
+    width: 100%;
+    min-width: 0;
+}
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+}
+body {
+    scroll-padding-top: 80px;
+    -webkit-overflow-scrolling: touch;
+}
 /* Flex/grid children: allow shrinking to prevent overflow */
 .aiba-app .tab-content,
 .aiba-app .action-row,
 .aiba-app .card,
 .aiba-app .balance-strip,
-.aiba-app .flow-switch { min-width: 0; }
-.aiba-app img { max-width: 100%; height: auto; }
+.aiba-app .flow-switch {
+    min-width: 0;
+}
+.aiba-app img {
+    max-width: 100%;
+    height: auto;
+}
 
 /* ─── Status message ────────────────────────────────────────────────────── */
 .status-msg {
@@ -2665,8 +2903,14 @@ body { scroll-padding-top: 80px; -webkit-overflow-scrolling: touch; }
 }
 
 @keyframes sheetCardIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Status banner variants (for flow sections) */
@@ -2988,4 +3232,162 @@ body { scroll-padding-top: 80px; -webkit-overflow-scrolling: touch; }
 
 .legal-page__links a:hover {
     text-decoration: underline;
+}
+
+/* ─── App assistant (custom free agent: FAB + panel) ───────────────────────── */
+.agent-fab {
+    position: fixed;
+    bottom: calc(56px + 12px);
+    right: 16px;
+    z-index: 900;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--border-glass);
+    background: var(--bg-panel);
+    color: var(--accent-gold);
+    box-shadow: var(--shadow-3d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition:
+        transform var(--android-motion-standard) var(--android-ease-standard),
+        box-shadow 0.2s ease;
+}
+.agent-fab:hover {
+    transform: scale(1.05);
+    box-shadow: var(--metal-glow);
+}
+.agent-fab .icon-svg {
+    width: 26px;
+    height: 26px;
+}
+.agent-panel {
+    position: fixed;
+    bottom: calc(56px + 68px);
+    right: 16px;
+    left: 16px;
+    max-width: 480px;
+    margin-left: auto;
+    max-height: min(70vh, 420px);
+    z-index: 901;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-deep), var(--metal-glow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.agent-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+}
+.agent-panel__title {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: var(--android-title-size);
+}
+.agent-panel__close {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.agent-panel__close:hover {
+    background: var(--android-state-layer);
+    color: var(--accent-gold);
+}
+.agent-panel__close .icon-svg {
+    width: 20px;
+    height: 20px;
+}
+.agent-panel__hint {
+    padding: 8px 14px;
+    font-size: var(--android-hint-size);
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+}
+.agent-panel__list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 80px;
+}
+.agent-panel__placeholder {
+    font-size: var(--android-hint-size);
+    color: var(--text-muted);
+    margin: 0;
+}
+.agent-msg {
+    display: flex;
+    justify-content: flex-start;
+}
+.agent-msg--user {
+    justify-content: flex-end;
+}
+.agent-msg__bubble {
+    max-width: 85%;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    font-size: var(--android-body-size);
+    line-height: 1.4;
+}
+.agent-msg--user .agent-msg__bubble {
+    background: var(--metal-dark);
+    color: var(--text-primary);
+    border: 1px solid var(--border-glass);
+}
+.agent-msg--assistant .agent-msg__bubble {
+    background: rgba(255, 204, 0, 0.08);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+}
+.agent-msg__text {
+    margin: 0 0 4px 0;
+}
+.agent-msg__text:last-child {
+    margin-bottom: 0;
+}
+.agent-panel__input-row {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    background: var(--bg-space);
+}
+.agent-panel__input {
+    flex: 1;
+    min-width: 0;
+}
+.agent-panel__ask {
+    flex-shrink: 0;
+}
+.agent-panel__ask .icon-svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+}
+@media (min-width: 400px) {
+    .agent-panel {
+        right: 24px;
+        left: auto;
+        width: 360px;
+    }
 }

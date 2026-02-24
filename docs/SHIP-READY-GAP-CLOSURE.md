@@ -10,19 +10,19 @@
 ### Backend transaction safety
 
 - **Predict bet (`backend/routes/predict.js`):**
-  - Idempotency: `requestId` stored on `PredictBet`; at start of handler, if a bet with same `requestId` exists, return `201` with same payload.
-  - Debit duplicate: if `debitAibaFromUser` returns `duplicate: true`, return `201` with same payload.
-  - Bet create + pool update remain in a single Mongo transaction; `requestId` included in created bet.
+    - Idempotency: `requestId` stored on `PredictBet`; at start of handler, if a bet with same `requestId` exists, return `201` with same payload.
+    - Debit duplicate: if `debitAibaFromUser` returns `duplicate: true`, return `201` with same payload.
+    - Bet create + pool update remain in a single Mongo transaction; `requestId` included in created bet.
 
 - **Predict resolve (`backend/routes/adminPredict.js`):**
-  - Atomic order: **transaction first** (event status → resolved + `TreasuryOp` create), **then** payouts (idempotent by `sourceId`). Payout failures are logged and rethrown (no silent swallow).
-  - Fixed payout loop: `credited` is now assigned from `creditAibaNoCap` and checked; payout failure is logged with `eventId`, `betId`, `share`, `telegramId`.
+    - Atomic order: **transaction first** (event status → resolved + `TreasuryOp` create), **then** payouts (idempotent by `sourceId`). Payout failures are logged and rethrown (no silent swallow).
+    - Fixed payout loop: `credited` is now assigned from `creditAibaNoCap` and checked; payout failure is logged with `eventId`, `betId`, `share`, `telegramId`.
 
 - **Staking (`backend/routes/staking.js`):**
-  - **Stake:** If `debitAibaFromUser` returns `duplicate: true`, return existing summary (no double-increment).
-  - **Stake-locked:** Same; on duplicate return `201` with existing lock if found.
-  - **Claim:** Capture `credited` from `creditAibaNoCap`; if `!credited?.ok` return 500; if `credited.duplicate` return 200 without updating `lastClaimedAt`.
-  - **Claim-lock:** If `credited.duplicate` return success payload without further side effects.
+    - **Stake:** If `debitAibaFromUser` returns `duplicate: true`, return existing summary (no double-increment).
+    - **Stake-locked:** Same; on duplicate return `201` with existing lock if found.
+    - **Claim:** Capture `credited` from `creditAibaNoCap`; if `!credited?.ok` return 500; if `credited.duplicate` return 200 without updating `lastClaimedAt`.
+    - **Claim-lock:** If `credited.duplicate` return success payload without further side effects.
 
 ### Backend validation and idempotency
 
@@ -37,9 +37,9 @@
 ### Models
 
 - **PredictBet (`backend/models/PredictBet.js`):**
-  - Added `requestId` (string, sparse).
-  - Index for resolve path: `{ eventId: 1, brokerId: 1 }` (already present).
-  - Idempotency index: `{ requestId: 1 }` unique, sparse.
+    - Added `requestId` (string, sparse).
+    - Index for resolve path: `{ eventId: 1, brokerId: 1 }` (already present).
+    - Idempotency index: `{ requestId: 1 }` unique, sparse.
 
 ---
 

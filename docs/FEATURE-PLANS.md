@@ -40,11 +40,11 @@ Single reference for major feature plans. Each section summarizes vision and key
 
 **Implemented — three core categories for sale:**
 
-| Category | Where | List (sell) | Buy from players | Buy from system | Backend |
-|----------|-------|-------------|------------------|-----------------|---------|
-| **1. Brokers for sale** | Market tab → Trade | `POST /api/marketplace/list` | `POST /api/marketplace/buy` | `POST /api/marketplace/buy-system-broker` | `marketplace` + `systemShop` |
-| **2. Cars for sale** | Car Racing tab → Market flow | `POST /api/car-racing/list` | `POST /api/car-racing/buy-car` | `POST /api/car-racing/buy-system-car` | `carRacing` + `systemShop` |
-| **3. Bikes for sale** | Bike Racing tab → Market flow | `POST /api/bike-racing/list` | `POST /api/bike-racing/buy-bike` | `POST /api/bike-racing/buy-system-bike` | `bikeRacing` + `systemShop` |
+| Category                | Where                         | List (sell)                  | Buy from players                 | Buy from system                           | Backend                      |
+| ----------------------- | ----------------------------- | ---------------------------- | -------------------------------- | ----------------------------------------- | ---------------------------- |
+| **1. Brokers for sale** | Market tab → Trade            | `POST /api/marketplace/list` | `POST /api/marketplace/buy`      | `POST /api/marketplace/buy-system-broker` | `marketplace` + `systemShop` |
+| **2. Cars for sale**    | Car Racing tab → Market flow  | `POST /api/car-racing/list`  | `POST /api/car-racing/buy-car`   | `POST /api/car-racing/buy-system-car`     | `carRacing` + `systemShop`   |
+| **3. Bikes for sale**   | Bike Racing tab → Market flow | `POST /api/bike-racing/list` | `POST /api/bike-racing/buy-bike` | `POST /api/bike-racing/buy-system-bike`   | `bikeRacing` + `systemShop`  |
 
 System catalogs: `GET /api/marketplace/system-brokers`, `GET /api/car-racing/system-cars`, `GET /api/bike-racing/system-bikes`. Listings: `GET /api/marketplace/listings`, `GET /api/car-racing/listings`, `GET /api/bike-racing/listings`.
 

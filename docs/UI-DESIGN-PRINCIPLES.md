@@ -22,8 +22,8 @@ The app must be **deeply and seamlessly**:
 
 - **A. Back to Home** — On every page and every tab, the user can return to Home in one action (link to `/` or set tab to `home`).
 - **B. Back to Previous** — On every page, the user can return to where they were:
-  - **Route pages** (privacy, terms, trainer, admin): use browser/tab history (`router.back()`); component: `PageNav`.
-  - **In-app tabs** (HomeContent): use tab history; show “← Back to Previous” (previous tab) and “← Back to Home” in the hero when not on home.
+    - **Route pages** (privacy, terms, trainer, admin): use browser/tab history (`router.back()`); component: `PageNav`.
+    - **In-app tabs** (HomeContent): use tab history; show “← Back to Previous” (previous tab) and “← Back to Home” in the hero when not on home.
 
 Use the shared `PageNav` component on all route-level pages (privacy, terms, trainer, admin).
 

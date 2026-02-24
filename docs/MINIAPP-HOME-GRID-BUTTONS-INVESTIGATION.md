@@ -15,22 +15,22 @@ The home page 4×4 grid (Brokers, Arenas, Market, Tasks, etc.) was not respondin
 3. **`#tc-widget-root:has([data-tc-modal="true"]) * { pointer-events: auto; }`**  
    When the wallet modal is open, the modal content is made interactive again.
 
-4. **Defensive styles**  
-   - `.aiba-app`: `position: relative`, `z-index: 1`, `pointer-events: auto`  
-   - `main.app-main`: `position: relative`, `pointer-events: auto`  
-   - `.home-grid` and `.home-grid__item`: `pointer-events: auto`  
+4. **Defensive styles**
+    - `.aiba-app`: `position: relative`, `z-index: 1`, `pointer-events: auto`
+    - `main.app-main`: `position: relative`, `pointer-events: auto`
+    - `.home-grid` and `.home-grid__item`: `pointer-events: auto`
 
-   So the app and the grid are explicitly marked as interactive and not dependent on inheritance.
+    So the app and the grid are explicitly marked as interactive and not dependent on inheritance.
 
 ## Flow checked
 
 - **React**: Grid items are `<button type="button" className="home-grid__item" onClick={() => setTab(id)}>`. `setTab` is from `useState('home')` in `HomeContent.js`. Tab panels use `tab === 'home' ? 'is-active' : ''` and `.tab-panel.is-active { display: block }`, so changing `tab` correctly switches panels. No bug found in React or state.
 - **DOM**: Root is `<div className="aiba-app">`; inside it, header, balance strip, hero, then `<div className="tab-content">` and `<section className="tab-panel ... is-active">` containing `<div className="home-grid">` and the buttons. No wrapper with `pointer-events: none` or overlay from our code covering the grid.
 - **Overlays that can block when visible** (not the cause when they are hidden):
-  - `.legal-consent-overlay` (z-index 10000) – legal consent
-  - `.cinematic` (z-index 10000) – first‑time intro
-  - `.tutorial-overlay` (z-index 9999) – tutorial steps 1–4
-  - `#tc-widget-root` (z-index 10000) – always present; fixed by the rules above.
+    - `.legal-consent-overlay` (z-index 10000) – legal consent
+    - `.cinematic` (z-index 10000) – first‑time intro
+    - `.tutorial-overlay` (z-index 9999) – tutorial steps 1–4
+    - `#tc-widget-root` (z-index 10000) – always present; fixed by the rules above.
 
 ## How to verify
 

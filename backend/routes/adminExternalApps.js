@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const ExternalApp = require('../models/ExternalApp');
-const { requireAdminAuth } = require('../middleware/requireAdmin');
+const { requireAdmin } = require('../middleware/requireAdmin');
 
 // Apply admin authentication to all routes
-router.use(requireAdminAuth);
+router.use(requireAdmin());
 
 // GET /api/admin/external-apps - List all external apps
 router.get('/', async (req, res) => {

@@ -8,11 +8,11 @@ Add these secrets in your repository:
 
 **GitHub → Repository → Settings → Secrets and variables → Actions → New repository secret**
 
-| Secret | Where to get it |
-|--------|-----------------|
-| `VERCEL_TOKEN` | [vercel.com/account/tokens](https://vercel.com/account/tokens) → Create Token |
-| `VERCEL_ORG_ID` | Vercel project **Settings** → **General** → scroll to "Project ID" (or run `vercel link` locally and check `.vercel/project.json`) |
-| `VERCEL_PROJECT_ID` | Same as above – your project's ID |
+| Secret              | Where to get it                                                                                                                    |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `VERCEL_TOKEN`      | [vercel.com/account/tokens](https://vercel.com/account/tokens) → Create Token                                                      |
+| `VERCEL_ORG_ID`     | Vercel project **Settings** → **General** → scroll to "Project ID" (or run `vercel link` locally and check `.vercel/project.json`) |
+| `VERCEL_PROJECT_ID` | Same as above – your project's ID                                                                                                  |
 
 ## How it works
 

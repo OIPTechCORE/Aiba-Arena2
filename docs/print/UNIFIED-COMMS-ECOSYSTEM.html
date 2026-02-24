@@ -1,148 +1,234 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>UNIFIED COMMS ECOSYSTEM — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>UNIFIED COMMS ECOSYSTEM</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Unified Super Futuristic Communications Ecosystem</h1>
-<p>This document defines the <strong>Unified Super Futuristic Communications Ecosystem</strong> for AIBA Arena: one coherent layer for notifications, announcements, support, and community so users stay informed, connected, and engaged.</p>
-<hr/>
-<h2>1. Vision</h2>
-<ul>
-<li><strong>For Users</strong>: Users see updates, get push notifications for key events (battle win, Stars, Diamonds), check system status, and find help in one flow.</li>
-</ul>
-<hr/>
-<h2>2. Principles</h2>
-<table>
-<thead><tr>
-<th>Principle</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Single source of truth</strong></td>
-<td>Announcements and status live in the backend; miniapp and Telegram both consume them.</td>
-</tr>
-<tr>
-<td><strong>Re-engagement</strong></td>
-<td>Timely Telegram notifications (battle win, optional announcement broadcast) bring users back.</td>
-</tr>
-<tr>
-<td><strong>Transparency</strong></td>
-<td>Status (operational / maintenance) and announcements build trust.</td>
-</tr>
-<tr>
-<td><strong>Scalable support</strong></td>
-<td>In-app FAQ and status reduce &quot;where do I ask?&quot;; optional link to support channel.</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>3. Channels</h2>
-<table>
-<thead><tr>
-<th>Channel</th>
-<th>Purpose</th>
-<th>Implementation</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>In-app feed</strong></td>
-<td>Announcements, maintenance notices, tips.</td>
-<td>Updates tab in miniapp; <code>GET /api/announcements</code>.</td>
-</tr>
-<tr>
-<td><strong>Telegram push</strong></td>
-<td>Battle win (existing), optional broadcast for critical announcements.</td>
-<td><code>telegramNotify.notifyBattleWin</code>, <code>notifyAnnouncement</code>; admin Broadcast action.</td>
-</tr>
-<tr>
-<td><strong>System status</strong></td>
-<td>Operational / maintenance.</td>
-<td><code>GET /health</code> (uptime; returns <code>{ ok: true }</code>) or <code>GET /api/comms/status</code> (returns <code>{ status, updatedAt }</code>); Updates tab uses comms/status.</td>
-</tr>
-<tr>
-<td><strong>Support / FAQ</strong></td>
-<td>Short FAQ in-app; optional link to Telegram support group.</td>
-<td>Static block in Updates tab; optional <code>supportLink</code> in config.</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>4. Data &amp; API</h2>
-<h3>Announcements</h3>
-<ul>
-<li><strong>Mark as read (Phase 3)</strong>: <code>POST /api/announcements/seen</code> — Body: <code>{ announcementId }</code>. Updates user's <code>lastSeenAnnouncementId</code>.</li>
-<li><strong>Admin</strong>: <code>GET/POST/PATCH/DELETE /api/admin/announcements</code>, plus <code>POST /api/admin/announcements/:id/broadcast</code> (send to all users via Telegram).</li>
-</ul>
-<h3>Status</h3>
-<ul>
-<li><strong><code>GET /api/comms/config</code></strong> — Returns <code>{ supportLink, supportTelegramGroup }</code> (Phase 4; configurable in Admin → Economy).</li>
-</ul>
-<h3>Support (Phase 4)</h3>
-<ul>
-<li><strong>subject</strong> must be one of: <code>question</code>, <code>bug</code>, <code>feature</code>, <code>account</code>, <code>other</code> (case-insensitive; invalid → <code>other</code>).</li>
-<li>Config: <code>supportLink</code>, <code>supportTelegramGroup</code> in EconomyConfig (Admin → Economy).</li>
-</ul>
-<hr/>
-<h2>5. Miniapp UX</h2>
-<ul>
-<li><strong>Announcements feed</strong>: Cards (title, date, body snippet, optional link); glass-and-glow style (<code>comms-feed</code>, <code>comms-feed__item</code>). Read/unread indicator (Phase 3): &quot;New&quot; badge on first unread; tab bar shows unread count badge on Updates when <code>unreadCount</code> &gt; 0. Click to mark as read (<code>POST /api/announcements/seen</code>).</li>
-<li><strong>FAQ / Support</strong>: Collapsible FAQ block (native <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code>, <code>.comms-faq__item</code>) + in-app support form (Phase 4) with subject (question, bug, feature, account, other) + message. When <code>supportLink</code> or <code>supportTelegramGroup</code> configured (comms/config), display &quot;Open support channel&quot; and/or Telegram link above the form.</li>
-<li><strong>Guide tip</strong>: When tab is Updates, show tip &quot;Stay informed. Announcements, status &amp; support here.&quot;</li>
-</ul>
-<hr/>
-<h2>6. Phased Roadmap</h2>
-<table>
-<thead><tr>
-<th>Phase</th>
-<th>Deliverable</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>1</strong></td>
-<td>Vision doc, Announcement model, public + admin APIs, notifyAnnouncement + broadcast</td>
-<td>Done</td>
-</tr>
-<tr>
-<td><strong>2</strong></td>
-<td>Miniapp Updates tab: feed, status, FAQ block; Admin Comms tab</td>
-<td>Done</td>
-</tr>
-<tr>
-<td><strong>3</strong></td>
-<td>Read/unread per user via <code>lastSeenAnnouncementId</code>; <code>POST /api/announcements/seen</code></td>
-<td><strong>Done</strong></td>
-</tr>
-<tr>
-<td><strong>4</strong></td>
-<td>In-app support form (<code>POST /api/support/request</code>) + <code>GET /api/comms/config</code> (supportLink, supportTelegramGroup)</td>
-<td><strong>Done</strong></td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>7. Files Touched</h2>
-<ul>
-<li><strong>backend/models/User.js</strong> — <code>lastSeenAnnouncementId</code> (Phase 3).</li>
-<li><strong>backend/models/SupportRequest.js</strong> — support requests (Phase 4).</li>
-<li><strong>backend/models/EconomyConfig.js</strong> — <code>supportLink</code>, <code>supportTelegramGroup</code> (Phase 4).</li>
-<li><strong>backend/routes/announcements.js</strong> — <code>GET /api/announcements</code> (public feed + unreadCount), <code>POST /api/announcements/seen</code>.</li>
-<li><strong>backend/routes/adminAnnouncements.js</strong> — GET/POST/PATCH/DELETE + <code>POST /:id/broadcast</code>.</li>
-<li><strong>backend/routes/comms.js</strong> — <code>GET /api/comms/status</code>, <code>GET /api/comms/config</code>.</li>
-<li><strong>backend/routes/support.js</strong> — <code>POST /api/support/request</code>.</li>
-<li><strong>backend/routes/adminSupport.js</strong> — <code>GET /api/admin/support</code>, <code>PATCH /api/admin/support/:id</code>.</li>
-<li><strong>backend/services/telegramNotify.js</strong> — <code>notifyAnnouncement(telegramId, { title, body, link })</code>.</li>
-<li><strong>backend/app.js</strong> — mount <code>/api/announcements</code>, <code>/api/admin/announcements</code>, <code>/api/comms</code>, <code>/api/support</code>, <code>/api/admin/support</code>.</li>
-<li><strong>miniapp</strong> — Updates tab: feed, status, support form, read/unread.</li>
-<li><strong>admin-panel</strong> — Comms tab; Admin → Support for requests.</li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>UNIFIED COMMS ECOSYSTEM — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>UNIFIED COMMS ECOSYSTEM</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Unified Super Futuristic Communications Ecosystem</h1>
+            <p>
+                This document defines the <strong>Unified Super Futuristic Communications Ecosystem</strong> for AIBA
+                Arena: one coherent layer for notifications, announcements, support, and community so users stay
+                informed, connected, and engaged.
+            </p>
+            <hr />
+            <h2>1. Vision</h2>
+            <ul>
+                <li>
+                    <strong>For Users</strong>: Users see updates, get push notifications for key events (battle win,
+                    Stars, Diamonds), check system status, and find help in one flow.
+                </li>
+            </ul>
+            <hr />
+            <h2>2. Principles</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Principle</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Single source of truth</strong></td>
+                        <td>Announcements and status live in the backend; miniapp and Telegram both consume them.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Re-engagement</strong></td>
+                        <td>
+                            Timely Telegram notifications (battle win, optional announcement broadcast) bring users
+                            back.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Transparency</strong></td>
+                        <td>Status (operational / maintenance) and announcements build trust.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scalable support</strong></td>
+                        <td>
+                            In-app FAQ and status reduce &quot;where do I ask?&quot;; optional link to support channel.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>3. Channels</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Purpose</th>
+                        <th>Implementation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>In-app feed</strong></td>
+                        <td>Announcements, maintenance notices, tips.</td>
+                        <td>Updates tab in miniapp; <code>GET /api/announcements</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Telegram push</strong></td>
+                        <td>Battle win (existing), optional broadcast for critical announcements.</td>
+                        <td>
+                            <code>telegramNotify.notifyBattleWin</code>, <code>notifyAnnouncement</code>; admin
+                            Broadcast action.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>System status</strong></td>
+                        <td>Operational / maintenance.</td>
+                        <td>
+                            <code>GET /health</code> (uptime; returns <code>{ ok: true }</code>) or
+                            <code>GET /api/comms/status</code> (returns <code>{ status, updatedAt }</code>); Updates tab
+                            uses comms/status.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Support / FAQ</strong></td>
+                        <td>Short FAQ in-app; optional link to Telegram support group.</td>
+                        <td>Static block in Updates tab; optional <code>supportLink</code> in config.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>4. Data &amp; API</h2>
+            <h3>Announcements</h3>
+            <ul>
+                <li>
+                    <strong>Mark as read (Phase 3)</strong>: <code>POST /api/announcements/seen</code> — Body:
+                    <code>{ announcementId }</code>. Updates user's <code>lastSeenAnnouncementId</code>.
+                </li>
+                <li>
+                    <strong>Admin</strong>: <code>GET/POST/PATCH/DELETE /api/admin/announcements</code>, plus
+                    <code>POST /api/admin/announcements/:id/broadcast</code> (send to all users via Telegram).
+                </li>
+            </ul>
+            <h3>Status</h3>
+            <ul>
+                <li>
+                    <strong><code>GET /api/comms/config</code></strong> — Returns
+                    <code>{ supportLink, supportTelegramGroup }</code> (Phase 4; configurable in Admin → Economy).
+                </li>
+            </ul>
+            <h3>Support (Phase 4)</h3>
+            <ul>
+                <li>
+                    <strong>subject</strong> must be one of: <code>question</code>, <code>bug</code>,
+                    <code>feature</code>, <code>account</code>, <code>other</code> (case-insensitive; invalid →
+                    <code>other</code>).
+                </li>
+                <li>
+                    Config: <code>supportLink</code>, <code>supportTelegramGroup</code> in EconomyConfig (Admin →
+                    Economy).
+                </li>
+            </ul>
+            <hr />
+            <h2>5. Miniapp UX</h2>
+            <ul>
+                <li>
+                    <strong>Announcements feed</strong>: Cards (title, date, body snippet, optional link);
+                    glass-and-glow style (<code>comms-feed</code>, <code>comms-feed__item</code>). Read/unread indicator
+                    (Phase 3): &quot;New&quot; badge on first unread; tab bar shows unread count badge on Updates when
+                    <code>unreadCount</code> &gt; 0. Click to mark as read (<code>POST /api/announcements/seen</code>).
+                </li>
+                <li>
+                    <strong>FAQ / Support</strong>: Collapsible FAQ block (native
+                    <code>&lt;details&gt;</code>/<code>&lt;summary&gt;</code>, <code>.comms-faq__item</code>) + in-app
+                    support form (Phase 4) with subject (question, bug, feature, account, other) + message. When
+                    <code>supportLink</code> or <code>supportTelegramGroup</code> configured (comms/config), display
+                    &quot;Open support channel&quot; and/or Telegram link above the form.
+                </li>
+                <li>
+                    <strong>Guide tip</strong>: When tab is Updates, show tip &quot;Stay informed. Announcements, status
+                    &amp; support here.&quot;
+                </li>
+            </ul>
+            <hr />
+            <h2>6. Phased Roadmap</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Phase</th>
+                        <th>Deliverable</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1</strong></td>
+                        <td>Vision doc, Announcement model, public + admin APIs, notifyAnnouncement + broadcast</td>
+                        <td>Done</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2</strong></td>
+                        <td>Miniapp Updates tab: feed, status, FAQ block; Admin Comms tab</td>
+                        <td>Done</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3</strong></td>
+                        <td>
+                            Read/unread per user via <code>lastSeenAnnouncementId</code>;
+                            <code>POST /api/announcements/seen</code>
+                        </td>
+                        <td><strong>Done</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>4</strong></td>
+                        <td>
+                            In-app support form (<code>POST /api/support/request</code>) +
+                            <code>GET /api/comms/config</code> (supportLink, supportTelegramGroup)
+                        </td>
+                        <td><strong>Done</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>7. Files Touched</h2>
+            <ul>
+                <li><strong>backend/models/User.js</strong> — <code>lastSeenAnnouncementId</code> (Phase 3).</li>
+                <li><strong>backend/models/SupportRequest.js</strong> — support requests (Phase 4).</li>
+                <li>
+                    <strong>backend/models/EconomyConfig.js</strong> — <code>supportLink</code>,
+                    <code>supportTelegramGroup</code> (Phase 4).
+                </li>
+                <li>
+                    <strong>backend/routes/announcements.js</strong> — <code>GET /api/announcements</code> (public feed
+                    + unreadCount), <code>POST /api/announcements/seen</code>.
+                </li>
+                <li>
+                    <strong>backend/routes/adminAnnouncements.js</strong> — GET/POST/PATCH/DELETE +
+                    <code>POST /:id/broadcast</code>.
+                </li>
+                <li>
+                    <strong>backend/routes/comms.js</strong> — <code>GET /api/comms/status</code>,
+                    <code>GET /api/comms/config</code>.
+                </li>
+                <li><strong>backend/routes/support.js</strong> — <code>POST /api/support/request</code>.</li>
+                <li>
+                    <strong>backend/routes/adminSupport.js</strong> — <code>GET /api/admin/support</code>,
+                    <code>PATCH /api/admin/support/:id</code>.
+                </li>
+                <li>
+                    <strong>backend/services/telegramNotify.js</strong> —
+                    <code>notifyAnnouncement(telegramId, { title, body, link })</code>.
+                </li>
+                <li>
+                    <strong>backend/app.js</strong> — mount <code>/api/announcements</code>,
+                    <code>/api/admin/announcements</code>, <code>/api/comms</code>, <code>/api/support</code>,
+                    <code>/api/admin/support</code>.
+                </li>
+                <li><strong>miniapp</strong> — Updates tab: feed, status, support form, read/unread.</li>
+                <li><strong>admin-panel</strong> — Comms tab; Admin → Support for requests.</li>
+            </ul>
+        </div>
+    </body>
 </html>

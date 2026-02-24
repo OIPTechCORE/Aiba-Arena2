@@ -1,70 +1,110 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>STARS BADGES DIAMONDS — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>STARS BADGES DIAMONDS</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Stars, profile badges &amp; diamonds — Plan, vision, gaps</h1>
-<p>Single reference for <strong>Telegram Stars–style</strong> currency, <strong>X-style profile badges</strong>, and <strong>TON Diamonds</strong> in AIBA Arena.</p>
-<hr/>
-<h2>1. Vision</h2>
-<ul>
-<li><strong>Profile badges</strong> — verified, early_adopter, top_donor, guild_leader, top_leader, champion. Assigned by admin or auto (e.g. top leaderboard → top_leader). Shown as pills next to username and in leaderboards.</li>
-<li><strong>Diamonds</strong> — Premium TON asset. Earned on first win and select achievements; displayed as status. Futuristic diamond icon and styling.</li>
-</ul>
-<p>All three integrate with the balance strip and modular miniapp UI.</p>
-<hr/>
-<h2>2. Implementation (plan summary)</h2>
-<p><strong>Stars:</strong> <code>User.starsBalance</code>; <code>EconomyConfig.starRewardPerBattle</code>; credit on battle win; balance strip + Wallet card with star icon.</p>
-<p><strong>Badges:</strong> <code>User.badges[]</code>; admin <code>POST /api/admin/mod/user-badges</code>; auto top_leader via sync job; <code>BADGE_LABELS</code> (label, color, title); Profile card pills, leaderboard inline pills, optional verified mark in balance strip.</p>
-<p><strong>Diamonds:</strong> <code>User.diamondsBalance</code>; first win + optional achievements; balance strip + Wallet card; diamond icon and premium styling.</p>
-<p><strong>Economy /me:</strong> Returns <code>starsBalance</code>, <code>diamondsBalance</code>, <code>badges</code>, and economy config (e.g. starRewardPerBattle).</p>
-<hr/>
-<h2>3. Gaps and follow-ups (research)</h2>
-<table>
-<thead><tr>
-<th>Area</th>
-<th>Gap / note</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Stars eligibility</td>
-<td>Plan: “battle <strong>win</strong>”; confirm credit only when score &gt; 0 if desired.</td>
-</tr>
-<tr>
-<td>Leaderboard badges</td>
-<td>Leaderboard API should return <code>badges</code>; UI should render badge pills (BADGE_LABELS + .badge-pill).</td>
-</tr>
-<tr>
-<td>Profile card</td>
-<td>Show Telegram display name/username (e.g. from getTelegramUserUnsafe()); not only badges.</td>
-</tr>
-<tr>
-<td>Balance strip</td>
-<td>Optional small “verified” badge when user has <code>verified</code> in economyMe.badges.</td>
-</tr>
-<tr>
-<td>Auto top_leader</td>
-<td>Cron or hook to assign top_leader from leaderboard top N.</td>
-</tr>
-<tr>
-<td>Notifications</td>
-<td>notifyBattleWin: optionally include “+X Stars” and “+N Diamond (first win!)”; pass starsGranted and firstWinDiamond to notifier.</td>
-</tr>
-<tr>
-<td>Admin</td>
-<td>Optional: read-only view of user stars/diamonds/badges; ledger filter by currency.</td>
-</tr>
-</tbody></table>
-<p>Backend: leaderboard aggregation <code>$project</code> should include <code>badges</code> from users. Charity leaderboard can optionally expose badges. Miniapp: leaderboard tab render badges; profile card show username/avatar.</p>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>STARS BADGES DIAMONDS — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>STARS BADGES DIAMONDS</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Stars, profile badges &amp; diamonds — Plan, vision, gaps</h1>
+            <p>
+                Single reference for <strong>Telegram Stars–style</strong> currency,
+                <strong>X-style profile badges</strong>, and <strong>TON Diamonds</strong> in AIBA Arena.
+            </p>
+            <hr />
+            <h2>1. Vision</h2>
+            <ul>
+                <li>
+                    <strong>Profile badges</strong> — verified, early_adopter, top_donor, guild_leader, top_leader,
+                    champion. Assigned by admin or auto (e.g. top leaderboard → top_leader). Shown as pills next to
+                    username and in leaderboards.
+                </li>
+                <li>
+                    <strong>Diamonds</strong> — Premium TON asset. Earned on first win and select achievements;
+                    displayed as status. Futuristic diamond icon and styling.
+                </li>
+            </ul>
+            <p>All three integrate with the balance strip and modular miniapp UI.</p>
+            <hr />
+            <h2>2. Implementation (plan summary)</h2>
+            <p>
+                <strong>Stars:</strong> <code>User.starsBalance</code>; <code>EconomyConfig.starRewardPerBattle</code>;
+                credit on battle win; balance strip + Wallet card with star icon.
+            </p>
+            <p>
+                <strong>Badges:</strong> <code>User.badges[]</code>; admin <code>POST /api/admin/mod/user-badges</code>;
+                auto top_leader via sync job; <code>BADGE_LABELS</code> (label, color, title); Profile card pills,
+                leaderboard inline pills, optional verified mark in balance strip.
+            </p>
+            <p>
+                <strong>Diamonds:</strong> <code>User.diamondsBalance</code>; first win + optional achievements; balance
+                strip + Wallet card; diamond icon and premium styling.
+            </p>
+            <p>
+                <strong>Economy /me:</strong> Returns <code>starsBalance</code>, <code>diamondsBalance</code>,
+                <code>badges</code>, and economy config (e.g. starRewardPerBattle).
+            </p>
+            <hr />
+            <h2>3. Gaps and follow-ups (research)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Gap / note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Stars eligibility</td>
+                        <td>Plan: “battle <strong>win</strong>”; confirm credit only when score &gt; 0 if desired.</td>
+                    </tr>
+                    <tr>
+                        <td>Leaderboard badges</td>
+                        <td>
+                            Leaderboard API should return <code>badges</code>; UI should render badge pills
+                            (BADGE_LABELS + .badge-pill).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Profile card</td>
+                        <td>
+                            Show Telegram display name/username (e.g. from getTelegramUserUnsafe()); not only badges.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Balance strip</td>
+                        <td>
+                            Optional small “verified” badge when user has <code>verified</code> in economyMe.badges.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Auto top_leader</td>
+                        <td>Cron or hook to assign top_leader from leaderboard top N.</td>
+                    </tr>
+                    <tr>
+                        <td>Notifications</td>
+                        <td>
+                            notifyBattleWin: optionally include “+X Stars” and “+N Diamond (first win!)”; pass
+                            starsGranted and firstWinDiamond to notifier.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Admin</td>
+                        <td>Optional: read-only view of user stars/diamonds/badges; ledger filter by currency.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                Backend: leaderboard aggregation <code>$project</code> should include <code>badges</code> from users.
+                Charity leaderboard can optionally expose badges. Miniapp: leaderboard tab render badges; profile card
+                show username/avatar.
+            </p>
+        </div>
+    </body>
 </html>

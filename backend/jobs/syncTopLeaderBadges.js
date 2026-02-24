@@ -8,10 +8,7 @@ async function syncTopLeaderBadges() {
     const cfg = await getConfig();
     const topN = Math.max(0, Math.min(1000, Number(cfg?.topLeaderBadgeTopN) ?? 10));
     if (topN === 0) {
-        const result = await User.updateMany(
-            { badges: BADGE_ID },
-            { $pull: { badges: BADGE_ID } },
-        );
+        const result = await User.updateMany({ badges: BADGE_ID }, { $pull: { badges: BADGE_ID } });
         console.log('syncTopLeaderBadges: topN=0, removed badge from', result.modifiedCount, 'users');
         return { removed: result.modifiedCount, granted: 0 };
     }
@@ -25,17 +22,11 @@ async function syncTopLeaderBadges() {
 
     const topTelegramIds = new Set(topUsers.map((r) => String(r.telegramId)).filter(Boolean));
 
-    const removeResult = await User.updateMany(
-        { badges: BADGE_ID },
-        { $pull: { badges: BADGE_ID } },
-    );
+    const removeResult = await User.updateMany({ badges: BADGE_ID }, { $pull: { badges: BADGE_ID } });
 
     let granted = 0;
     for (const telegramId of topTelegramIds) {
-        const update = await User.updateOne(
-            { telegramId },
-            { $addToSet: { badges: BADGE_ID } },
-        );
+        const update = await User.updateOne({ telegramId }, { $addToSet: { badges: BADGE_ID } });
         if (update.modifiedCount) granted++;
     }
 

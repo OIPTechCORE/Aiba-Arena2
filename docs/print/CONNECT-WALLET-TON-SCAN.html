@@ -1,155 +1,259 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>CONNECT WALLET TON SCAN — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>CONNECT WALLET TON SCAN</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Connect TON Wallet — Deep Scan Report</h1>
-<p>This document confirms that <strong>Connect your TON wallet</strong> is correctly wired and what to do for full functionality (including localhost and Error -102).</p>
-<hr/>
-<h2>1. Architecture (verified)</h2>
-<table>
-<thead><tr>
-<th>Layer</th>
-<th>Location</th>
-<th>Role</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Provider</strong></td>
-<td><code>miniapp/src/app/providers.js</code></td>
-<td><code>TonConnectUIProvider</code> with <code>manifestUrl</code> and <code>uiPreferences.theme: 'DARK'</code></td>
-</tr>
-<tr>
-<td><strong>Manifest API</strong></td>
-<td><code>miniapp/src/app/api/tonconnect-manifest/route.js</code></td>
-<td>Serves app manifest at <code>GET /api/tonconnect-manifest</code> (url, name, iconUrl)</td>
-</tr>
-<tr>
-<td><strong>Manifest URL</strong></td>
-<td>Client: <code>window.location.origin + '/api/tonconnect-manifest'</code> or <code>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</code></td>
-<td>Wallets fetch this to discover the dApp</td>
-</tr>
-<tr>
-<td><strong>Connect button</strong></td>
-<td><code>miniapp/src/app/page.js</code></td>
-<td>When disconnected: custom button calls <code>tonConnectUI?.openModal?.()</code>; when connected: <code>&lt;TonConnectButton /&gt;</code></td>
-</tr>
-<tr>
-<td><strong>Wallet sync</strong></td>
-<td><code>page.js</code> useEffect</td>
-<td>On <code>wallet?.account?.address</code> change, POST <code>/api/wallet/connect</code> with <code>{ address }</code> to save wallet for the user</td>
-</tr>
-<tr>
-<td><strong>Claim on-chain</strong></td>
-<td><code>page.js</code> → <code>claimOnChain()</code></td>
-<td>Uses <code>tonConnectUI.sendTransaction()</code> with payload from <code>lib/tonRewardClaim.js</code> (ArenaRewardVault claim)</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>2. Manifest (dApp discovery)</h2>
-<ul>
-<li><strong>Response:</strong> <code>{ url, name: 'AIBA Arena', iconUrl }</code> where <code>url</code> and <code>iconUrl</code> use <code>getBaseUrl()</code> (from <code>x-forwarded-proto</code>/<code>host</code> or <code>NEXT_PUBLIC_APP_URL</code>).</li>
-<li><strong>TON requirement:</strong> <a href="https://docs.ton.org/ecosystem/ton-connect/manifest">TON Connect manifests</a> require <strong>iconUrl in PNG or ICO</strong> (180×180 px PNG recommended). <strong>SVG is not supported</strong> by the spec. The app currently serves <code>icon.svg</code>; some wallets may show a fallback or broken icon. For full compatibility, add <code>miniapp/public/icon.png</code> (180×180) and point the manifest to <code>/icon.png</code> (see §6 below).</li>
-<li><strong>Public access:</strong> Manifest must be GET-able without auth. The route returns JSON with no CORS restriction from your app; ensure your host (e.g. Vercel) does not require auth for this path.</li>
-</ul>
-<hr/>
-<h2>3. Connect button and modal</h2>
-<ul>
-<li><strong>When connected:</strong> <code>&lt;TonConnectButton /&gt;</code> is rendered so the user can disconnect or change wallet.</li>
-<li><strong>Modal styling:</strong> <code>miniapp/src/app/globals.css</code> targets <code>#tc-widget-root</code> and <code>[data-tc-modal=&quot;true&quot;]</code> with fixed overlay, <code>100dvh</code>, safe-area insets, and responsive width (e.g. full width ≤440px). Layout uses <code>viewportFit: 'cover'</code> for notched devices.</li>
-</ul>
-<hr/>
-<h2>4. Wallet → backend sync</h2>
-<ul>
-<li>Backend: <code>backend/routes/wallet.js</code> — <code>requireTelegram</code>, validates <code>address</code>, updates <code>User</code> by <code>telegramId</code> with <code>wallet: address</code>. Required for linking the Telegram user to the TON address (claims, rewards).</li>
-</ul>
-<hr/>
-<h2>5. Claim on-chain (TonConnect)</h2>
-<ul>
-<li>- Ensures <code>lastClaim</code>, <code>wallet.account.address</code>, and that the connected wallet matches <code>claim.toAddress</code>.</li>
-<li>- Builds payload with <code>buildRewardClaimPayload()</code> from <code>lib/tonRewardClaim.js</code>.</li>
-<li>- Calls <code>tonConnectUI.sendTransaction({ validUntil, messages: [{ address: vaultAddress, amount: '70000000', payload }] })</code>.</li>
-<li>- Polls <code>/api/vault/claim-status</code> until confirmed or timeout.</li>
-<li><strong>Other sendTransaction usages:</strong> Same pattern used for listing/buy flows (e.g. asset marketplace) where a TON/token tx is required.</li>
-</ul>
-<hr/>
-<h2>6. Localhost and Error -102</h2>
-<h3>Error -102 (ERR_CONNECTION_REFUSED)</h3>
-<ul>
-<li>1. <strong>Dev server not running</strong> — Start the app with <code>npm run dev</code> (from project root) or <code>npm run dev --prefix miniapp</code>, then open <code>http://localhost:3000</code> in a <strong>desktop browser</strong> on the same machine.</li>
-<li>2. <strong>Opening from Telegram or another app</strong> — Many in-app browsers (e.g. Telegram Mini App on mobile) <strong>cannot reach <code>localhost</code></strong> because that refers to the device, not your PC. Use an HTTPS deployment or a tunnel (e.g. ngrok) for testing from Telegram.</li>
-</ul>
-<h3>Connect Wallet on localhost</h3>
-<ul>
-<li><strong>Mobile wallets</strong> (Tonkeeper app, etc.) run on the user’s phone and cannot fetch <code>http://localhost:3000</code> from your dev machine. So:</li>
-<li>- <strong>Option A:</strong> Test Connect Wallet on localhost with a <strong>browser extension</strong> wallet only.</li>
-<li>- <strong>Option B:</strong> Deploy the miniapp to HTTPS (e.g. Vercel) or expose localhost via <strong>ngrok</strong> (<code>npm run tunnel</code>), and set <code>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</code> to that HTTPS URL (e.g. <code>https://your-app.vercel.app/api/tonconnect-manifest</code>) so mobile wallets can load the manifest.</li>
-</ul>
-<hr/>
-<h2>7. Checklist for “Connect your TON wallet” fully functional</h2>
-<table>
-<thead><tr>
-<th>Check</th>
-<th>Status / action</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>TonConnectUIProvider wraps the app with a valid manifestUrl</td>
-<td>✅ <code>providers.js</code></td>
-</tr>
-<tr>
-<td>Manifest API returns url, name, iconUrl (GET, no auth)</td>
-<td>✅ <code>api/tonconnect-manifest/route.js</code></td>
-</tr>
-<tr>
-<td>Icon format (PNG/ICO 180×180 recommended)</td>
-<td>⚠️ Use PNG for full compatibility; add <code>icon.png</code> and point manifest to it (see below)</td>
-</tr>
-<tr>
-<td>Connect button opens wallet list when disconnected</td>
-<td>✅ <code>tonConnectUI?.openModal?.()</code></td>
-</tr>
-<tr>
-<td>TonConnectButton shown when connected</td>
-<td>✅ <code>page.js</code> header</td>
-</tr>
-<tr>
-<td>Wallet address synced to backend after connect</td>
-<td>✅ POST <code>/api/wallet/connect</code> in useEffect</td>
-</tr>
-<tr>
-<td>Claim on-chain uses sendTransaction and matches claim.toAddress</td>
-<td>✅ <code>claimOnChain()</code></td>
-</tr>
-<tr>
-<td>Localhost: dev server running; use browser or tunnel for mobile</td>
-<td>✅ Documented above</td>
-</tr>
-<tr>
-<td>Error -102: start dev server and/or use HTTPS/tunnel</td>
-<td>✅ §6</td>
-</tr>
-</tbody></table>
-<h3>Optional: PNG icon for manifest</h3>
-<ol>
-<li>In <code>miniapp/src/app/api/tonconnect-manifest/route.js</code>, set <code>iconUrl</code> to <code>\</code>${baseUrl}/icon.png\`<code> instead of </code>icon.svg`.</li>
-</ol>
-<hr/>
-<h2>8. Summary</h2>
-<p>Connect your TON wallet is <strong>correctly implemented</strong>: provider, manifest route, Connect button, modal, wallet sync, and on-chain claim flow are in place and consistent with TON Connect. For <strong>full</strong> compatibility and best UX:</p>
-<ul>
-<li>On <strong>localhost</strong>, run the dev server and use a desktop browser (or ngrok + HTTPS manifest URL for mobile).</li>
-<li><strong>Error -102</strong> is resolved by ensuring the app is reachable (server running, or use a public HTTPS URL).</li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>CONNECT WALLET TON SCAN — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>CONNECT WALLET TON SCAN</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Connect TON Wallet — Deep Scan Report</h1>
+            <p>
+                This document confirms that <strong>Connect your TON wallet</strong> is correctly wired and what to do
+                for full functionality (including localhost and Error -102).
+            </p>
+            <hr />
+            <h2>1. Architecture (verified)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Layer</th>
+                        <th>Location</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Provider</strong></td>
+                        <td><code>miniapp/src/app/providers.js</code></td>
+                        <td>
+                            <code>TonConnectUIProvider</code> with <code>manifestUrl</code> and
+                            <code>uiPreferences.theme: 'DARK'</code>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Manifest API</strong></td>
+                        <td><code>miniapp/src/app/api/tonconnect-manifest/route.js</code></td>
+                        <td>Serves app manifest at <code>GET /api/tonconnect-manifest</code> (url, name, iconUrl)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Manifest URL</strong></td>
+                        <td>
+                            Client: <code>window.location.origin + '/api/tonconnect-manifest'</code> or
+                            <code>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</code>
+                        </td>
+                        <td>Wallets fetch this to discover the dApp</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Connect button</strong></td>
+                        <td><code>miniapp/src/app/page.js</code></td>
+                        <td>
+                            When disconnected: custom button calls <code>tonConnectUI?.openModal?.()</code>; when
+                            connected: <code>&lt;TonConnectButton /&gt;</code>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Wallet sync</strong></td>
+                        <td><code>page.js</code> useEffect</td>
+                        <td>
+                            On <code>wallet?.account?.address</code> change, POST <code>/api/wallet/connect</code> with
+                            <code>{ address }</code> to save wallet for the user
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Claim on-chain</strong></td>
+                        <td><code>page.js</code> → <code>claimOnChain()</code></td>
+                        <td>
+                            Uses <code>tonConnectUI.sendTransaction()</code> with payload from
+                            <code>lib/tonRewardClaim.js</code> (ArenaRewardVault claim)
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>2. Manifest (dApp discovery)</h2>
+            <ul>
+                <li>
+                    <strong>Response:</strong> <code>{ url, name: 'AIBA Arena', iconUrl }</code> where
+                    <code>url</code> and <code>iconUrl</code> use <code>getBaseUrl()</code> (from
+                    <code>x-forwarded-proto</code>/<code>host</code> or <code>NEXT_PUBLIC_APP_URL</code>).
+                </li>
+                <li>
+                    <strong>TON requirement:</strong>
+                    <a href="https://docs.ton.org/ecosystem/ton-connect/manifest">TON Connect manifests</a> require
+                    <strong>iconUrl in PNG or ICO</strong> (180×180 px PNG recommended).
+                    <strong>SVG is not supported</strong> by the spec. The app currently serves <code>icon.svg</code>;
+                    some wallets may show a fallback or broken icon. For full compatibility, add
+                    <code>miniapp/public/icon.png</code> (180×180) and point the manifest to <code>/icon.png</code> (see
+                    §6 below).
+                </li>
+                <li>
+                    <strong>Public access:</strong> Manifest must be GET-able without auth. The route returns JSON with
+                    no CORS restriction from your app; ensure your host (e.g. Vercel) does not require auth for this
+                    path.
+                </li>
+            </ul>
+            <hr />
+            <h2>3. Connect button and modal</h2>
+            <ul>
+                <li>
+                    <strong>When connected:</strong> <code>&lt;TonConnectButton /&gt;</code> is rendered so the user can
+                    disconnect or change wallet.
+                </li>
+                <li>
+                    <strong>Modal styling:</strong> <code>miniapp/src/app/globals.css</code> targets
+                    <code>#tc-widget-root</code> and <code>[data-tc-modal=&quot;true&quot;]</code> with fixed overlay,
+                    <code>100dvh</code>, safe-area insets, and responsive width (e.g. full width ≤440px). Layout uses
+                    <code>viewportFit: 'cover'</code> for notched devices.
+                </li>
+            </ul>
+            <hr />
+            <h2>4. Wallet → backend sync</h2>
+            <ul>
+                <li>
+                    Backend: <code>backend/routes/wallet.js</code> — <code>requireTelegram</code>, validates
+                    <code>address</code>, updates <code>User</code> by <code>telegramId</code> with
+                    <code>wallet: address</code>. Required for linking the Telegram user to the TON address (claims,
+                    rewards).
+                </li>
+            </ul>
+            <hr />
+            <h2>5. Claim on-chain (TonConnect)</h2>
+            <ul>
+                <li>
+                    - Ensures <code>lastClaim</code>, <code>wallet.account.address</code>, and that the connected wallet
+                    matches <code>claim.toAddress</code>.
+                </li>
+                <li>
+                    - Builds payload with <code>buildRewardClaimPayload()</code> from
+                    <code>lib/tonRewardClaim.js</code>.
+                </li>
+                <li>
+                    - Calls
+                    <code
+                        >tonConnectUI.sendTransaction({ validUntil, messages: [{ address: vaultAddress, amount:
+                        '70000000', payload }] })</code
+                    >.
+                </li>
+                <li>- Polls <code>/api/vault/claim-status</code> until confirmed or timeout.</li>
+                <li>
+                    <strong>Other sendTransaction usages:</strong> Same pattern used for listing/buy flows (e.g. asset
+                    marketplace) where a TON/token tx is required.
+                </li>
+            </ul>
+            <hr />
+            <h2>6. Localhost and Error -102</h2>
+            <h3>Error -102 (ERR_CONNECTION_REFUSED)</h3>
+            <ul>
+                <li>
+                    1. <strong>Dev server not running</strong> — Start the app with <code>npm run dev</code> (from
+                    project root) or <code>npm run dev --prefix miniapp</code>, then open
+                    <code>http://localhost:3000</code> in a <strong>desktop browser</strong> on the same machine.
+                </li>
+                <li>
+                    2. <strong>Opening from Telegram or another app</strong> — Many in-app browsers (e.g. Telegram Mini
+                    App on mobile) <strong>cannot reach <code>localhost</code></strong> because that refers to the
+                    device, not your PC. Use an HTTPS deployment or a tunnel (e.g. ngrok) for testing from Telegram.
+                </li>
+            </ul>
+            <h3>Connect Wallet on localhost</h3>
+            <ul>
+                <li>
+                    <strong>Mobile wallets</strong> (Tonkeeper app, etc.) run on the user’s phone and cannot fetch
+                    <code>http://localhost:3000</code> from your dev machine. So:
+                </li>
+                <li>
+                    - <strong>Option A:</strong> Test Connect Wallet on localhost with a
+                    <strong>browser extension</strong> wallet only.
+                </li>
+                <li>
+                    - <strong>Option B:</strong> Deploy the miniapp to HTTPS (e.g. Vercel) or expose localhost via
+                    <strong>ngrok</strong> (<code>npm run tunnel</code>), and set
+                    <code>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</code> to that HTTPS URL (e.g.
+                    <code>https://your-app.vercel.app/api/tonconnect-manifest</code>) so mobile wallets can load the
+                    manifest.
+                </li>
+            </ul>
+            <hr />
+            <h2>7. Checklist for “Connect your TON wallet” fully functional</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Check</th>
+                        <th>Status / action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>TonConnectUIProvider wraps the app with a valid manifestUrl</td>
+                        <td>✅ <code>providers.js</code></td>
+                    </tr>
+                    <tr>
+                        <td>Manifest API returns url, name, iconUrl (GET, no auth)</td>
+                        <td>✅ <code>api/tonconnect-manifest/route.js</code></td>
+                    </tr>
+                    <tr>
+                        <td>Icon format (PNG/ICO 180×180 recommended)</td>
+                        <td>
+                            ⚠️ Use PNG for full compatibility; add <code>icon.png</code> and point manifest to it (see
+                            below)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Connect button opens wallet list when disconnected</td>
+                        <td>✅ <code>tonConnectUI?.openModal?.()</code></td>
+                    </tr>
+                    <tr>
+                        <td>TonConnectButton shown when connected</td>
+                        <td>✅ <code>page.js</code> header</td>
+                    </tr>
+                    <tr>
+                        <td>Wallet address synced to backend after connect</td>
+                        <td>✅ POST <code>/api/wallet/connect</code> in useEffect</td>
+                    </tr>
+                    <tr>
+                        <td>Claim on-chain uses sendTransaction and matches claim.toAddress</td>
+                        <td>✅ <code>claimOnChain()</code></td>
+                    </tr>
+                    <tr>
+                        <td>Localhost: dev server running; use browser or tunnel for mobile</td>
+                        <td>✅ Documented above</td>
+                    </tr>
+                    <tr>
+                        <td>Error -102: start dev server and/or use HTTPS/tunnel</td>
+                        <td>✅ §6</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>Optional: PNG icon for manifest</h3>
+            <ol>
+                <li>
+                    In <code>miniapp/src/app/api/tonconnect-manifest/route.js</code>, set <code>iconUrl</code> to
+                    <code>\</code>${baseUrl}/icon.png\`<code> instead of </code>icon.svg`.
+                </li>
+            </ol>
+            <hr />
+            <h2>8. Summary</h2>
+            <p>
+                Connect your TON wallet is <strong>correctly implemented</strong>: provider, manifest route, Connect
+                button, modal, wallet sync, and on-chain claim flow are in place and consistent with TON Connect. For
+                <strong>full</strong> compatibility and best UX:
+            </p>
+            <ul>
+                <li>
+                    On <strong>localhost</strong>, run the dev server and use a desktop browser (or ngrok + HTTPS
+                    manifest URL for mobile).
+                </li>
+                <li>
+                    <strong>Error -102</strong> is resolved by ensuring the app is reachable (server running, or use a
+                    public HTTPS URL).
+                </li>
+            </ul>
+        </div>
+    </body>
 </html>

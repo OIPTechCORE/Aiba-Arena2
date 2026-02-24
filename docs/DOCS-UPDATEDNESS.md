@@ -7,11 +7,11 @@
 
 ## 1. Summary
 
-| Area | Status | Notes |
-|------|--------|--------|
-| **Code** | ✅ Current | Miniapp (PageNav, TabBackNav, responsive, tournament guard), backend (MongoDB URI), no known stale code. |
+| Area               | Status             | Notes                                                                                                                                                               |
+| ------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Code**           | ✅ Current         | Miniapp (PageNav, TabBackNav, responsive, tournament guard), backend (MongoDB URI), no known stale code.                                                            |
 | **Markdown (.md)** | ✅ Source of truth | All docs in `docs/` and `docs/marketing/`. New/updated: GAPS-SCAN-REPORT, APP-SCAN-REPORT, UI-DESIGN-PRINCIPLES, README (deep docs + gaps), GAME-FUNCTIONALITY §12. |
-| **HTML (print)** | ✅ Regenerated | `npm run build:print-docs` run; all `.md` → `docs/print/*.html` and `index.html`. **Edit .md only;** re-run after doc changes. |
+| **HTML (print)**   | ✅ Regenerated     | `npm run build:print-docs` run; all `.md` → `docs/print/*.html` and `index.html`. **Edit .md only;** re-run after doc changes.                                      |
 
 ---
 
@@ -19,15 +19,15 @@
 
 Some docs still show **Feb 2025** or **2025** in "Last updated" / "Version"; content has been updated in places. Not critical; for clarity you can set them to **Feb 2026** when you next touch the file.
 
-| Doc | Current date in doc | Content |
-|-----|----------------------|--------|
-| APP-SCAN-REPORT.md | 2026-02-16 | ✅ |
-| GAPS-SCAN-REPORT.md | 2026-02-15 | ✅ |
-| UI-DESIGN-PRINCIPLES.md | Feb 2026 | ✅ |
-| GAME-FUNCTIONALITY.md | 2025 | §12 API mapping extended 2026 |
-| API-CONTRACT.md | Feb 2025 | Canonical API ref |
-| GAP-AUDIT.md | Feb 2025 | Gap investigation |
-| README.md | — | Index + recent updates 2026 |
+| Doc                     | Current date in doc | Content                       |
+| ----------------------- | ------------------- | ----------------------------- |
+| APP-SCAN-REPORT.md      | 2026-02-16          | ✅                            |
+| GAPS-SCAN-REPORT.md     | 2026-02-15          | ✅                            |
+| UI-DESIGN-PRINCIPLES.md | Feb 2026            | ✅                            |
+| GAME-FUNCTIONALITY.md   | 2025                | §12 API mapping extended 2026 |
+| API-CONTRACT.md         | Feb 2025            | Canonical API ref             |
+| GAP-AUDIT.md            | Feb 2025            | Gap investigation             |
+| README.md               | —                   | Index + recent updates 2026   |
 
 ---
 

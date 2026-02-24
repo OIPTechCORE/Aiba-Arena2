@@ -1,369 +1,585 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>DEPLOYMENT AND ENV — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>DEPLOYMENT AND ENV</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Deployment &amp; environment — Localhost, Vercel, Telegram</h1>
-<p>Single guide: run locally, deploy backend and miniapp on Vercel, and open the app from Telegram. Backend can run on <strong>localhost and Vercel</strong>; use the same env names and point the miniapp at the backend you use.</p>
-<hr/>
-<h2>Where to get variables &amp; how to put them in Vercel</h2>
-<h3>How to add variables in Vercel (any project)</h3>
-<p><strong>Path in Vercel:</strong> <a href="https://vercel.com/dashboard">Dashboard</a> → select <strong>project</strong> → <strong>Settings</strong> → <strong>Environment Variables</strong>.</p>
-<ol>
-<li>Select your <strong>project</strong> (backend, miniapp, or admin-panel).</li>
-<li>In the top nav, click <strong>Settings</strong>, then in the left sidebar click <strong>Environment Variables</strong>.</li>
-<li>For each variable:</li>
-<li>- <strong>Key:</strong> exact name (e.g. <code>MONGO_URI</code>).</li>
-<li>- <strong>Value:</strong> the secret or value (paste; do not commit).</li>
-<li>- <strong>Environment:</strong> choose <strong>Production</strong> (and optionally Preview/Development if you use Vercel previews).</li>
-<li>Click <strong>Save</strong>. Redeploy the project so new variables apply (Deployments → … → Redeploy, or push a new commit).</li>
-</ol>
-<p><strong>Important:</strong> Variables added or changed take effect on the <strong>next deployment</strong>. No trailing spaces in keys or values.</p>
-<hr/>
-<h3>Where to get each variable</h3>
-<h4>Backend (Vercel backend project or <code>backend/.env</code>)</h4>
-<table>
-<thead><tr>
-<th>Variable</th>
-<th>Where to get it</th>
-<th>How / notes</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>MONGO_URI</strong></td>
-<td><a href="https://www.mongodb.com/cloud/atlas">MongoDB Atlas</a></td>
-<td>1) Create free cluster. 2) Database Access → Add user (save username/password). 3) Network Access → Add IP <code>0.0.0.0/0</code> (or Vercel IPs if you restrict). 4) Clusters → Connect → “Connect your application” → copy URI. Replace <code>&lt;password&gt;</code> with your user password. Example: <code>mongodb+srv://user:pass@cluster0.xxxxx.mongodb.net/aiba_arena?retryWrites=true&amp;w=majority</code></td>
-</tr>
-<tr>
-<td><strong>APP_ENV</strong></td>
-<td>You choose</td>
-<td>Use <code>prod</code> for production. Use <code>dev</code> only for local.</td>
-</tr>
-<tr>
-<td><strong>CORS_ORIGIN</strong></td>
-<td>Your deployed URLs</td>
-<td>Comma-separated, no spaces. Example: <code>https://your-miniapp.vercel.app,https://your-admin.vercel.app</code>. Get the URLs from your Vercel miniapp and admin project domains after deploy.</td>
-</tr>
-<tr>
-<td><strong>TELEGRAM_BOT_TOKEN</strong></td>
-<td><a href="https://t.me/BotFather">Telegram @BotFather</a></td>
-<td>1) Open Telegram, search <code>@BotFather</code>. 2) Send <code>/newbot</code>, follow name/username. 3) BotFather replies with a token like <code>7123456789:AAH...</code>. Copy that; this is <code>TELEGRAM_BOT_TOKEN</code>. Never share or commit it.</td>
-</tr>
-<tr>
-<td><strong>TELEGRAM_INITDATA_MAX_AGE_SECONDS</strong></td>
-<td>You choose</td>
-<td>Recommended <code>300</code>–<code>900</code> (5–15 minutes). Example: <code>600</code>.</td>
-</tr>
-<tr>
-<td><strong>ADMIN_JWT_SECRET</strong></td>
-<td>Generate yourself</td>
-<td>At least 32 random characters. Example (Node): <code>node -e &quot;console.log(require('crypto').randomBytes(32).toString('hex'))&quot;</code>. Or use a password generator; store securely.</td>
-</tr>
-<tr>
-<td><strong>ADMIN_EMAIL</strong></td>
-<td>You choose</td>
-<td>Email you use to log in to the admin panel (e.g. <code>admin@yourdomain.com</code>).</td>
-</tr>
-<tr>
-<td><strong>ADMIN_PASSWORD_HASH</strong></td>
-<td>From your password</td>
-<td><strong>Production:</strong> use bcrypt hash, not plaintext. In Node: <code>node -e &quot;const bcrypt=require('bcrypt'); bcrypt.hash('YOUR_PLAIN_PASSWORD', 10).then(h=&gt;console.log(h))&quot;</code> (run from a folder that has <code>bcrypt</code> installed). Copy the long hash into <code>ADMIN_PASSWORD_HASH</code>. Leave <code>ADMIN_PASSWORD</code> empty in prod.</td>
-</tr>
-<tr>
-<td><strong>BATTLE_SEED_SECRET</strong></td>
-<td>Generate yourself</td>
-<td>Same as ADMIN_JWT_SECRET: ≥32 random characters. Use a different value than ADMIN_JWT_SECRET.</td>
-</tr>
-<tr>
-<td><strong>PUBLIC_BASE_URL</strong></td>
-<td>Your backend URL</td>
-<td>After deploying backend on Vercel, copy its URL (e.g. <code>https://your-backend.vercel.app</code>). No trailing slash. Used for broker metadata and links.</td>
-</tr>
-</tbody></table>
-<h4>Optional backend (TON wallets, etc.)</h4>
-<table>
-<thead><tr>
-<th>Variable</th>
-<th>Where to get it</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>CREATED_BROKERS_WALLET</strong></td>
-<td>Your TON wallet address (e.g. from Tonkeeper/TON Space). Users send TON here to create a broker.</td>
-</tr>
-<tr>
-<td><strong>BOOST_TON_WALLET</strong>, <strong>STARS_STORE_WALLET</strong>, <strong>CAR_RACING_WALLET</strong>, <strong>MOTORCYCLE_RACING_WALLET</strong></td>
-<td>Same: create or use a TON wallet; put the <strong>address</strong> (starts with <code>EQ...</code>).</td>
-</tr>
-<tr>
-<td><strong>LEADER_BOARD_WALLET</strong>, <strong>BOOST_GROUP_WALLET</strong>, <strong>BOOST_PROFILE_WALLET</strong>, <strong>GIFTS_WALLET</strong></td>
-<td>Same: TON wallet addresses for each feature.</td>
-</tr>
-<tr>
-<td><strong>TON_PROVIDER_URL</strong></td>
-<td><a href="https://toncenter.com/api/v2/">TON API</a> or <a href="https://tonapi.io/">TonAPI</a>. Example: <code>https://toncenter.com/api/v2</code>. For mainnet claims use a mainnet provider.</td>
-</tr>
-<tr>
-<td><strong>TON_API_KEY</strong></td>
-<td>Optional; from the provider (e.g. Toncenter) if you use authenticated requests.</td>
-</tr>
-</tbody></table>
-<h4>Miniapp (Vercel miniapp project)</h4>
-<table>
-<thead><tr>
-<th>Variable</th>
-<th>Where to get it</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>NEXT_PUBLIC_BACKEND_URL</strong></td>
-<td>Your <strong>backend</strong> deployment URL. After the backend is on Vercel, copy it (e.g. <code>https://your-backend.vercel.app</code>). No trailing slash.</td>
-</tr>
-<tr>
-<td><strong>NEXT_PUBLIC_APP_URL</strong></td>
-<td>Optional. Your miniapp URL (e.g. <code>https://your-miniapp.vercel.app</code>). Defaults to current origin.</td>
-</tr>
-<tr>
-<td><strong>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</strong></td>
-<td>Optional. Full URL to your TonConnect manifest (e.g. <code>https://your-miniapp.vercel.app/api/tonconnect-manifest</code>).</td>
-</tr>
-</tbody></table>
-<h4>Admin panel (Vercel admin project)</h4>
-<table>
-<thead><tr>
-<th>Variable</th>
-<th>Where to get it</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>NEXT_PUBLIC_BACKEND_URL</strong></td>
-<td>Same as miniapp: your backend URL (e.g. <code>https://your-backend.vercel.app</code>).</td>
-</tr>
-</tbody></table>
-<hr/>
-<h3>Order of operations (Vercel)</h3>
-<ol>
-<li><strong>Backend first:</strong> Add all backend env vars in the <strong>backend</strong> project. Deploy. Copy the backend URL (e.g. <code>https://aiba-backend-xxx.vercel.app</code>).</li>
-<li><strong>Miniapp:</strong> In the <strong>miniapp</strong> project, add <code>NEXT_PUBLIC_BACKEND_URL</code> = that backend URL. Deploy. Copy the miniapp URL.</li>
-<li><strong>Admin:</strong> In the <strong>admin</strong> project, add <code>NEXT_PUBLIC_BACKEND_URL</code> = same backend URL. Deploy.</li>
-<li><strong>Backend again:</strong> Set <code>CORS_ORIGIN</code> to include your miniapp and admin URLs (comma-separated). Set <code>PUBLIC_BASE_URL</code> to the backend URL. Redeploy backend.</li>
-<li><strong>Telegram:</strong> In BotFather, set the bot’s menu/URL to your miniapp URL. Put <code>TELEGRAM_BOT_TOKEN</code> in the backend project (already done in step 2).</li>
-</ol>
-<hr/>
-<h2>Quick reference</h2>
-<table>
-<thead><tr>
-<th>Scenario</th>
-<th>Backend env</th>
-<th>Miniapp env</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Localhost</strong></td>
-<td><code>backend/.env</code>: <code>MONGO_URI</code>, <code>APP_ENV=dev</code></td>
-<td><code>miniapp/.env.local</code>: <code>NEXT_PUBLIC_BACKEND_URL=http://localhost:5000</code></td>
-</tr>
-<tr>
-<td><strong>Backend on Vercel</strong></td>
-<td>Vercel backend project: <code>MONGO_URI</code>, <code>APP_ENV</code>, <code>CORS_ORIGIN</code>, <code>TELEGRAM_*</code>, <code>ADMIN_JWT_SECRET</code>, <code>PUBLIC_BASE_URL</code></td>
-<td>—</td>
-</tr>
-<tr>
-<td><strong>Miniapp on Vercel</strong></td>
-<td>—</td>
-<td><code>NEXT_PUBLIC_BACKEND_URL=https://your-backend.vercel.app</code></td>
-</tr>
-<tr>
-<td><strong>Telegram</strong></td>
-<td>Same as Vercel; CORS includes miniapp origin; bot token set</td>
-<td>Miniapp URL = Bot menu; backend URL = Vercel backend</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>1. Security first</h2>
-<ul>
-<li>Remove committed <code>.env</code> from history: <code>git filter-repo --path backend/.env --invert-paths</code> (or <code>git filter-branch</code> / BFG), then <code>git push --force --all</code>.</li>
-<li>Production: use a secret manager (Vercel/Render/Railway env vars or cloud secrets); set <code>APP_ENV=prod</code> and all required vars so fail-fast checks run.</li>
-</ul>
-<hr/>
-<h2>2. Localhost</h2>
-<h3>2.1 Backend</h3>
-<p><strong>File:</strong> <code>backend/.env</code> (copy from <code>backend/.env.example</code>).</p>
-<table>
-<thead><tr>
-<th>Variable</th>
-<th>Required</th>
-<th>Example</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>PORT</code></td>
-<td>No</td>
-<td><code>5000</code></td>
-</tr>
-<tr>
-<td><code>MONGO_URI</code></td>
-<td><strong>Yes</strong></td>
-<td><code>mongodb://localhost:27017/aiba_arena</code> or Atlas URI</td>
-</tr>
-<tr>
-<td><code>APP_ENV</code></td>
-<td><strong>Yes</strong></td>
-<td><code>dev</code> (allows <code>x-telegram-id</code> without Telegram)</td>
-</tr>
-<tr>
-<td><code>CORS_ORIGIN</code></td>
-<td>No</td>
-<td>Empty or <code>http://localhost:3000,http://localhost:3001</code></td>
-</tr>
-<tr>
-<td><code>ADMIN_JWT_SECRET</code>, <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD</code>, <code>BATTLE_SEED_SECRET</code></td>
-<td>No (dev)</td>
-<td>Any; prod requires strong values</td>
-</tr>
-</tbody></table>
-<p><strong>Run:</strong> <code>cd backend &amp;&amp; npm start</code> → <code>http://localhost:5000</code>.</p>
-<h3>2.2 Miniapp &amp; admin</h3>
-<p><strong>Files:</strong> <code>miniapp/.env.local</code>, <code>admin-panel/.env.local</code> (copy from <code>.env.local.example</code>).</p>
-<table>
-<thead><tr>
-<th>Variable</th>
-<th>Required</th>
-<th>Example</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>NEXT_PUBLIC_BACKEND_URL</code></td>
-<td><strong>Yes</strong></td>
-<td><code>http://localhost:5000</code></td>
-</tr>
-</tbody></table>
-<p><strong>Run:</strong> From repo root, <code>npm install &amp;&amp; npm run dev</code> starts backend (5000), miniapp (3000), admin (3001). Or run each from its directory: <code>cd miniapp &amp;&amp; npm run dev</code>, etc.</p>
-<h3>2.3 Localhost checklist</h3>
-<ul>
-<li>[ ] Backend starts; miniapp has <code>NEXT_PUBLIC_BACKEND_URL=http://localhost:5000</code></li>
-<li>[ ] Open <code>http://localhost:3000</code> and test (New broker, Run battle, Market, Referrals)</li>
-</ul>
-<p><strong>Troubleshooting:</strong> Error -102 → start dev server. Admin &quot;Network error&quot; → start backend; set <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD</code>, <code>ADMIN_JWT_SECRET</code> in backend; ensure admin <code>.env.local</code> has backend URL.</p>
-<hr/>
-<h2>3. Vercel (backend + miniapp + admin)</h2>
-<h3>3.1 Backend (Vercel serverless)</h3>
-<p><strong>Vercel project:</strong> Root = <code>backend/</code>. Entry: <code>api/index.js</code>. Config: <code>vercel.json</code>.</p>
-<p><strong>Required env (production):</strong></p>
-<table>
-<thead><tr>
-<th>Variable</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>MONGO_URI</code></td>
-<td>MongoDB Atlas connection string</td>
-</tr>
-<tr>
-<td><code>APP_ENV</code></td>
-<td><code>prod</code></td>
-</tr>
-<tr>
-<td><code>CORS_ORIGIN</code></td>
-<td>Comma-separated: <code>https://your-miniapp.vercel.app,https://your-admin.vercel.app</code></td>
-</tr>
-<tr>
-<td><code>TELEGRAM_BOT_TOKEN</code></td>
-<td>From @BotFather</td>
-</tr>
-<tr>
-<td><code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code></td>
-<td><code>300</code>–<code>900</code></td>
-</tr>
-<tr>
-<td><code>ADMIN_JWT_SECRET</code></td>
-<td>≥ 32 characters</td>
-</tr>
-<tr>
-<td><code>ADMIN_EMAIL</code></td>
-<td>Admin login</td>
-</tr>
-<tr>
-<td><code>ADMIN_PASSWORD_HASH</code></td>
-<td>bcrypt hash (no plaintext in prod)</td>
-</tr>
-<tr>
-<td><code>BATTLE_SEED_SECRET</code></td>
-<td>≥ 32 characters</td>
-</tr>
-</tbody></table>
-<p><strong>Recommended:</strong> <code>PUBLIC_BASE_URL</code> = backend URL (for broker metadata).</p>
-<p><strong>Optional (features):</strong> <code>CREATED_BROKERS_WALLET</code>, <code>BOOST_TON_WALLET</code>, <code>STARS_STORE_WALLET</code>, <code>CAR_RACING_WALLET</code>, <code>MOTORCYCLE_RACING_WALLET</code>, <code>LEADER_BOARD_WALLET</code>, <code>BOOST_GROUP_WALLET</code>, <code>BOOST_PROFILE_WALLET</code>, <code>GIFTS_WALLET</code>; vault/claims: <code>ARENA_VAULT_ADDRESS</code>, <code>AIBA_JETTON_MASTER</code>, <code>ORACLE_PRIVATE_KEY_HEX</code> (or <code>ORACLE_SIGNER_URL</code>+<code>ORACLE_SIGNER_TOKEN</code>), <code>TON_PROVIDER_URL</code>, <code>TON_API_KEY</code>.</p>
-<h3>3.2 Miniapp (Vercel)</h3>
-<p><strong>Root:</strong> <code>miniapp/</code>. <strong>Required:</strong> <code>NEXT_PUBLIC_BACKEND_URL</code> = backend URL (no trailing slash). <strong>Optional:</strong> <code>NEXT_PUBLIC_APP_URL</code>, <code>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</code>.</p>
-<h3>3.3 Admin panel (Vercel)</h3>
-<p><strong>Root:</strong> <code>admin-panel/</code>. <strong>Required:</strong> <code>NEXT_PUBLIC_BACKEND_URL</code> = backend URL.</p>
-<h3>3.4 GitHub &amp; auto-deploy</h3>
-<ul>
-<li>Set GitHub default branch to <code>main</code>.</li>
-</ul>
-<h3>3.5 Vercel checklist</h3>
-<ul>
-<li>[ ] Miniapp project: <code>NEXT_PUBLIC_BACKEND_URL</code> = backend URL</li>
-<li>[ ] Backend <code>/health</code> returns <code>{&quot;ok&quot;:true}</code>; miniapp loads and calls API</li>
-</ul>
-<hr/>
-<h2>4. Deploying to Telegram</h2>
-<ul>
-<li><strong>Backend:</strong> Same as Vercel; <code>CORS_ORIGIN</code> must include the miniapp origin (e.g. <code>https://your-miniapp.vercel.app</code>). <code>APP_ENV=prod</code>, <code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code> set.</li>
-<li><strong>Mini App URL:</strong> BotFather → your bot → Bot Settings → Menu Button (or /setmenubutton). Set URL to miniapp, e.g. <code>https://your-miniapp.vercel.app</code>. HTTPS required.</li>
-<li><strong>Miniapp:</strong> No extra env; app uses <code>window.Telegram.WebApp.initData</code> when opened in Telegram. <code>NEXT_PUBLIC_BACKEND_URL</code> must point to production backend.</li>
-</ul>
-<p><strong>Telegram checklist:</strong> [ ] Bot created; token in backend. [ ] CORS includes miniapp. [ ] Menu/link opens miniapp URL. [ ] Open in Telegram and test auth + one flow.</p>
-<p><strong>How it works:</strong> When opened inside Telegram, the client injects the Web App SDK and passes <code>initData</code>. The miniapp sends it as <code>x-telegram-init-data</code>; the backend verifies it with <code>TELEGRAM_BOT_TOKEN</code>. See <a href="https://core.telegram.org/bots/webapps">Telegram Mini Apps</a>.</p>
-<hr/>
-<h2>5. Mainnet / production readiness</h2>
-<p>When <code>APP_ENV=prod</code> or <code>NODE_ENV=production</code>, the backend <strong>refuses to start</strong> if:</p>
-<ul>
-<li><code>TELEGRAM_BOT_TOKEN</code> or <code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code> missing or invalid</li>
-<li><code>ADMIN_JWT_SECRET</code> is placeholder or &amp;lt; 32 chars</li>
-<li><code>ADMIN_PASSWORD</code> used without <code>ADMIN_PASSWORD_HASH</code> (plaintext disallowed)</li>
-<li><code>BATTLE_SEED_SECRET</code> is placeholder or &amp;lt; 32 chars</li>
-<li>Vault/claims: if <code>ARENA_VAULT_ADDRESS</code> or <code>AIBA_JETTON_MASTER</code> set, both required plus oracle key and <strong>mainnet</strong> <code>TON_PROVIDER_URL</code></li>
-<li><code>ENABLE_LEGACY_PENDING_AIBA_DISPATCH=true</code></li>
-</ul>
-<p><strong>Key separation:</strong> Use different keys for contract deployer, reward-claim signer (<code>ORACLE_*</code>), admin JWT, Telegram bot, battle seed. Rotate any key that touched a dev machine. Document oracle key rotation (on-chain <code>set_oracle</code> + backend secret).</p>
-<hr/>
-<h2>6. Components summary</h2>
-<table>
-<thead><tr>
-<th>Component</th>
-<th>Local</th>
-<th>Vercel</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Backend</strong></td>
-<td><code>backend/server.js</code> (PORT 5000)</td>
-<td><code>backend/api/index.js</code> (serverless)</td>
-</tr>
-<tr>
-<td><strong>Miniapp</strong></td>
-<td>Next.js, port 3000</td>
-<td>Next.js, root <code>miniapp</code></td>
-</tr>
-<tr>
-<td><strong>Admin</strong></td>
-<td>Next.js, port 3001</td>
-<td>Next.js, root <code>admin-panel</code></td>
-</tr>
-</tbody></table>
-<p><strong>Endpoints:</strong> <code>GET /health</code> (uptime), <code>GET /metrics</code> (Prometheus). Predeploy: <code>npm run predeploy:check</code> (if available).</p>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>DEPLOYMENT AND ENV — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>DEPLOYMENT AND ENV</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Deployment &amp; environment — Localhost, Vercel, Telegram</h1>
+            <p>
+                Single guide: run locally, deploy backend and miniapp on Vercel, and open the app from Telegram. Backend
+                can run on <strong>localhost and Vercel</strong>; use the same env names and point the miniapp at the
+                backend you use.
+            </p>
+            <hr />
+            <h2>Where to get variables &amp; how to put them in Vercel</h2>
+            <h3>How to add variables in Vercel (any project)</h3>
+            <p>
+                <strong>Path in Vercel:</strong> <a href="https://vercel.com/dashboard">Dashboard</a> → select
+                <strong>project</strong> → <strong>Settings</strong> → <strong>Environment Variables</strong>.
+            </p>
+            <ol>
+                <li>Select your <strong>project</strong> (backend, miniapp, or admin-panel).</li>
+                <li>
+                    In the top nav, click <strong>Settings</strong>, then in the left sidebar click
+                    <strong>Environment Variables</strong>.
+                </li>
+                <li>For each variable:</li>
+                <li>- <strong>Key:</strong> exact name (e.g. <code>MONGO_URI</code>).</li>
+                <li>- <strong>Value:</strong> the secret or value (paste; do not commit).</li>
+                <li>
+                    - <strong>Environment:</strong> choose <strong>Production</strong> (and optionally
+                    Preview/Development if you use Vercel previews).
+                </li>
+                <li>
+                    Click <strong>Save</strong>. Redeploy the project so new variables apply (Deployments → … →
+                    Redeploy, or push a new commit).
+                </li>
+            </ol>
+            <p>
+                <strong>Important:</strong> Variables added or changed take effect on the
+                <strong>next deployment</strong>. No trailing spaces in keys or values.
+            </p>
+            <hr />
+            <h3>Where to get each variable</h3>
+            <h4>Backend (Vercel backend project or <code>backend/.env</code>)</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Where to get it</th>
+                        <th>How / notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>MONGO_URI</strong></td>
+                        <td><a href="https://www.mongodb.com/cloud/atlas">MongoDB Atlas</a></td>
+                        <td>
+                            1) Create free cluster. 2) Database Access → Add user (save username/password). 3) Network
+                            Access → Add IP <code>0.0.0.0/0</code> (or Vercel IPs if you restrict). 4) Clusters →
+                            Connect → “Connect your application” → copy URI. Replace <code>&lt;password&gt;</code> with
+                            your user password. Example:
+                            <code
+                                >mongodb+srv://user:pass@cluster0.xxxxx.mongodb.net/aiba_arena?retryWrites=true&amp;w=majority</code
+                            >
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>APP_ENV</strong></td>
+                        <td>You choose</td>
+                        <td>Use <code>prod</code> for production. Use <code>dev</code> only for local.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CORS_ORIGIN</strong></td>
+                        <td>Your deployed URLs</td>
+                        <td>
+                            Comma-separated, no spaces. Example:
+                            <code>https://your-miniapp.vercel.app,https://your-admin.vercel.app</code>. Get the URLs
+                            from your Vercel miniapp and admin project domains after deploy.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>TELEGRAM_BOT_TOKEN</strong></td>
+                        <td><a href="https://t.me/BotFather">Telegram @BotFather</a></td>
+                        <td>
+                            1) Open Telegram, search <code>@BotFather</code>. 2) Send <code>/newbot</code>, follow
+                            name/username. 3) BotFather replies with a token like <code>7123456789:AAH...</code>. Copy
+                            that; this is <code>TELEGRAM_BOT_TOKEN</code>. Never share or commit it.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>TELEGRAM_INITDATA_MAX_AGE_SECONDS</strong></td>
+                        <td>You choose</td>
+                        <td>
+                            Recommended <code>300</code>–<code>900</code> (5–15 minutes). Example: <code>600</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>ADMIN_JWT_SECRET</strong></td>
+                        <td>Generate yourself</td>
+                        <td>
+                            At least 32 random characters. Example (Node):
+                            <code
+                                >node -e
+                                &quot;console.log(require('crypto').randomBytes(32).toString('hex'))&quot;</code
+                            >. Or use a password generator; store securely.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>ADMIN_EMAIL</strong></td>
+                        <td>You choose</td>
+                        <td>Email you use to log in to the admin panel (e.g. <code>admin@yourdomain.com</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ADMIN_PASSWORD_HASH</strong></td>
+                        <td>From your password</td>
+                        <td>
+                            <strong>Production:</strong> use bcrypt hash, not plaintext. In Node:
+                            <code
+                                >node -e &quot;const bcrypt=require('bcrypt'); bcrypt.hash('YOUR_PLAIN_PASSWORD',
+                                10).then(h=&gt;console.log(h))&quot;</code
+                            >
+                            (run from a folder that has <code>bcrypt</code> installed). Copy the long hash into
+                            <code>ADMIN_PASSWORD_HASH</code>. Leave <code>ADMIN_PASSWORD</code> empty in prod.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>BATTLE_SEED_SECRET</strong></td>
+                        <td>Generate yourself</td>
+                        <td>
+                            Same as ADMIN_JWT_SECRET: ≥32 random characters. Use a different value than
+                            ADMIN_JWT_SECRET.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>PUBLIC_BASE_URL</strong></td>
+                        <td>Your backend URL</td>
+                        <td>
+                            After deploying backend on Vercel, copy its URL (e.g.
+                            <code>https://your-backend.vercel.app</code>). No trailing slash. Used for broker metadata
+                            and links.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h4>Optional backend (TON wallets, etc.)</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Where to get it</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CREATED_BROKERS_WALLET</strong></td>
+                        <td>
+                            Your TON wallet address (e.g. from Tonkeeper/TON Space). Users send TON here to create a
+                            broker.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>BOOST_TON_WALLET</strong>, <strong>STARS_STORE_WALLET</strong>,
+                            <strong>CAR_RACING_WALLET</strong>, <strong>MOTORCYCLE_RACING_WALLET</strong>
+                        </td>
+                        <td>
+                            Same: create or use a TON wallet; put the <strong>address</strong> (starts with
+                            <code>EQ...</code>).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>LEADER_BOARD_WALLET</strong>, <strong>BOOST_GROUP_WALLET</strong>,
+                            <strong>BOOST_PROFILE_WALLET</strong>, <strong>GIFTS_WALLET</strong>
+                        </td>
+                        <td>Same: TON wallet addresses for each feature.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TON_PROVIDER_URL</strong></td>
+                        <td>
+                            <a href="https://toncenter.com/api/v2/">TON API</a> or
+                            <a href="https://tonapi.io/">TonAPI</a>. Example: <code>https://toncenter.com/api/v2</code>.
+                            For mainnet claims use a mainnet provider.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>TON_API_KEY</strong></td>
+                        <td>Optional; from the provider (e.g. Toncenter) if you use authenticated requests.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h4>Miniapp (Vercel miniapp project)</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Where to get it</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>NEXT_PUBLIC_BACKEND_URL</strong></td>
+                        <td>
+                            Your <strong>backend</strong> deployment URL. After the backend is on Vercel, copy it (e.g.
+                            <code>https://your-backend.vercel.app</code>). No trailing slash.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>NEXT_PUBLIC_APP_URL</strong></td>
+                        <td>
+                            Optional. Your miniapp URL (e.g. <code>https://your-miniapp.vercel.app</code>). Defaults to
+                            current origin.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</strong></td>
+                        <td>
+                            Optional. Full URL to your TonConnect manifest (e.g.
+                            <code>https://your-miniapp.vercel.app/api/tonconnect-manifest</code>).
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h4>Admin panel (Vercel admin project)</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Where to get it</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>NEXT_PUBLIC_BACKEND_URL</strong></td>
+                        <td>Same as miniapp: your backend URL (e.g. <code>https://your-backend.vercel.app</code>).</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h3>Order of operations (Vercel)</h3>
+            <ol>
+                <li>
+                    <strong>Backend first:</strong> Add all backend env vars in the <strong>backend</strong> project.
+                    Deploy. Copy the backend URL (e.g. <code>https://aiba-backend-xxx.vercel.app</code>).
+                </li>
+                <li>
+                    <strong>Miniapp:</strong> In the <strong>miniapp</strong> project, add
+                    <code>NEXT_PUBLIC_BACKEND_URL</code> = that backend URL. Deploy. Copy the miniapp URL.
+                </li>
+                <li>
+                    <strong>Admin:</strong> In the <strong>admin</strong> project, add
+                    <code>NEXT_PUBLIC_BACKEND_URL</code> = same backend URL. Deploy.
+                </li>
+                <li>
+                    <strong>Backend again:</strong> Set <code>CORS_ORIGIN</code> to include your miniapp and admin URLs
+                    (comma-separated). Set <code>PUBLIC_BASE_URL</code> to the backend URL. Redeploy backend.
+                </li>
+                <li>
+                    <strong>Telegram:</strong> In BotFather, set the bot’s menu/URL to your miniapp URL. Put
+                    <code>TELEGRAM_BOT_TOKEN</code> in the backend project (already done in step 2).
+                </li>
+            </ol>
+            <hr />
+            <h2>Quick reference</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Scenario</th>
+                        <th>Backend env</th>
+                        <th>Miniapp env</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Localhost</strong></td>
+                        <td><code>backend/.env</code>: <code>MONGO_URI</code>, <code>APP_ENV=dev</code></td>
+                        <td>
+                            <code>miniapp/.env.local</code>: <code>NEXT_PUBLIC_BACKEND_URL=http://localhost:5000</code>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Backend on Vercel</strong></td>
+                        <td>
+                            Vercel backend project: <code>MONGO_URI</code>, <code>APP_ENV</code>,
+                            <code>CORS_ORIGIN</code>, <code>TELEGRAM_*</code>, <code>ADMIN_JWT_SECRET</code>,
+                            <code>PUBLIC_BASE_URL</code>
+                        </td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Miniapp on Vercel</strong></td>
+                        <td>—</td>
+                        <td><code>NEXT_PUBLIC_BACKEND_URL=https://your-backend.vercel.app</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Telegram</strong></td>
+                        <td>Same as Vercel; CORS includes miniapp origin; bot token set</td>
+                        <td>Miniapp URL = Bot menu; backend URL = Vercel backend</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>1. Security first</h2>
+            <ul>
+                <li>
+                    Remove committed <code>.env</code> from history:
+                    <code>git filter-repo --path backend/.env --invert-paths</code> (or <code>git filter-branch</code> /
+                    BFG), then <code>git push --force --all</code>.
+                </li>
+                <li>
+                    Production: use a secret manager (Vercel/Render/Railway env vars or cloud secrets); set
+                    <code>APP_ENV=prod</code> and all required vars so fail-fast checks run.
+                </li>
+            </ul>
+            <hr />
+            <h2>2. Localhost</h2>
+            <h3>2.1 Backend</h3>
+            <p><strong>File:</strong> <code>backend/.env</code> (copy from <code>backend/.env.example</code>).</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Required</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>PORT</code></td>
+                        <td>No</td>
+                        <td><code>5000</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>MONGO_URI</code></td>
+                        <td><strong>Yes</strong></td>
+                        <td><code>mongodb://localhost:27017/aiba_arena</code> or Atlas URI</td>
+                    </tr>
+                    <tr>
+                        <td><code>APP_ENV</code></td>
+                        <td><strong>Yes</strong></td>
+                        <td><code>dev</code> (allows <code>x-telegram-id</code> without Telegram)</td>
+                    </tr>
+                    <tr>
+                        <td><code>CORS_ORIGIN</code></td>
+                        <td>No</td>
+                        <td>Empty or <code>http://localhost:3000,http://localhost:3001</code></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <code>ADMIN_JWT_SECRET</code>, <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD</code>,
+                            <code>BATTLE_SEED_SECRET</code>
+                        </td>
+                        <td>No (dev)</td>
+                        <td>Any; prod requires strong values</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Run:</strong> <code>cd backend &amp;&amp; npm start</code> → <code>http://localhost:5000</code>.
+            </p>
+            <h3>2.2 Miniapp &amp; admin</h3>
+            <p>
+                <strong>Files:</strong> <code>miniapp/.env.local</code>, <code>admin-panel/.env.local</code> (copy from
+                <code>.env.local.example</code>).
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Required</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>NEXT_PUBLIC_BACKEND_URL</code></td>
+                        <td><strong>Yes</strong></td>
+                        <td><code>http://localhost:5000</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Run:</strong> From repo root, <code>npm install &amp;&amp; npm run dev</code> starts backend
+                (5000), miniapp (3000), admin (3001). Or run each from its directory:
+                <code>cd miniapp &amp;&amp; npm run dev</code>, etc.
+            </p>
+            <h3>2.3 Localhost checklist</h3>
+            <ul>
+                <li>[ ] Backend starts; miniapp has <code>NEXT_PUBLIC_BACKEND_URL=http://localhost:5000</code></li>
+                <li>
+                    [ ] Open <code>http://localhost:3000</code> and test (New broker, Run battle, Market, Referrals)
+                </li>
+            </ul>
+            <p>
+                <strong>Troubleshooting:</strong> Error -102 → start dev server. Admin &quot;Network error&quot; → start
+                backend; set <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD</code>, <code>ADMIN_JWT_SECRET</code> in
+                backend; ensure admin <code>.env.local</code> has backend URL.
+            </p>
+            <hr />
+            <h2>3. Vercel (backend + miniapp + admin)</h2>
+            <h3>3.1 Backend (Vercel serverless)</h3>
+            <p>
+                <strong>Vercel project:</strong> Root = <code>backend/</code>. Entry: <code>api/index.js</code>. Config:
+                <code>vercel.json</code>.
+            </p>
+            <p><strong>Required env (production):</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>MONGO_URI</code></td>
+                        <td>MongoDB Atlas connection string</td>
+                    </tr>
+                    <tr>
+                        <td><code>APP_ENV</code></td>
+                        <td><code>prod</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>CORS_ORIGIN</code></td>
+                        <td>
+                            Comma-separated: <code>https://your-miniapp.vercel.app,https://your-admin.vercel.app</code>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>TELEGRAM_BOT_TOKEN</code></td>
+                        <td>From @BotFather</td>
+                    </tr>
+                    <tr>
+                        <td><code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code></td>
+                        <td><code>300</code>–<code>900</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>ADMIN_JWT_SECRET</code></td>
+                        <td>≥ 32 characters</td>
+                    </tr>
+                    <tr>
+                        <td><code>ADMIN_EMAIL</code></td>
+                        <td>Admin login</td>
+                    </tr>
+                    <tr>
+                        <td><code>ADMIN_PASSWORD_HASH</code></td>
+                        <td>bcrypt hash (no plaintext in prod)</td>
+                    </tr>
+                    <tr>
+                        <td><code>BATTLE_SEED_SECRET</code></td>
+                        <td>≥ 32 characters</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>Recommended:</strong> <code>PUBLIC_BASE_URL</code> = backend URL (for broker metadata).</p>
+            <p>
+                <strong>Optional (features):</strong> <code>CREATED_BROKERS_WALLET</code>,
+                <code>BOOST_TON_WALLET</code>, <code>STARS_STORE_WALLET</code>, <code>CAR_RACING_WALLET</code>,
+                <code>MOTORCYCLE_RACING_WALLET</code>, <code>LEADER_BOARD_WALLET</code>,
+                <code>BOOST_GROUP_WALLET</code>, <code>BOOST_PROFILE_WALLET</code>, <code>GIFTS_WALLET</code>;
+                vault/claims: <code>ARENA_VAULT_ADDRESS</code>, <code>AIBA_JETTON_MASTER</code>,
+                <code>ORACLE_PRIVATE_KEY_HEX</code> (or
+                <code>ORACLE_SIGNER_URL</code>+<code>ORACLE_SIGNER_TOKEN</code>), <code>TON_PROVIDER_URL</code>,
+                <code>TON_API_KEY</code>.
+            </p>
+            <h3>3.2 Miniapp (Vercel)</h3>
+            <p>
+                <strong>Root:</strong> <code>miniapp/</code>. <strong>Required:</strong>
+                <code>NEXT_PUBLIC_BACKEND_URL</code> = backend URL (no trailing slash). <strong>Optional:</strong>
+                <code>NEXT_PUBLIC_APP_URL</code>, <code>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</code>.
+            </p>
+            <h3>3.3 Admin panel (Vercel)</h3>
+            <p>
+                <strong>Root:</strong> <code>admin-panel/</code>. <strong>Required:</strong>
+                <code>NEXT_PUBLIC_BACKEND_URL</code> = backend URL.
+            </p>
+            <h3>3.4 GitHub &amp; auto-deploy</h3>
+            <ul>
+                <li>Set GitHub default branch to <code>main</code>.</li>
+            </ul>
+            <h3>3.5 Vercel checklist</h3>
+            <ul>
+                <li>[ ] Miniapp project: <code>NEXT_PUBLIC_BACKEND_URL</code> = backend URL</li>
+                <li>
+                    [ ] Backend <code>/health</code> returns <code>{&quot;ok&quot;:true}</code>; miniapp loads and calls
+                    API
+                </li>
+            </ul>
+            <hr />
+            <h2>4. Deploying to Telegram</h2>
+            <ul>
+                <li>
+                    <strong>Backend:</strong> Same as Vercel; <code>CORS_ORIGIN</code> must include the miniapp origin
+                    (e.g. <code>https://your-miniapp.vercel.app</code>). <code>APP_ENV=prod</code>,
+                    <code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code> set.
+                </li>
+                <li>
+                    <strong>Mini App URL:</strong> BotFather → your bot → Bot Settings → Menu Button (or
+                    /setmenubutton). Set URL to miniapp, e.g. <code>https://your-miniapp.vercel.app</code>. HTTPS
+                    required.
+                </li>
+                <li>
+                    <strong>Miniapp:</strong> No extra env; app uses <code>window.Telegram.WebApp.initData</code> when
+                    opened in Telegram. <code>NEXT_PUBLIC_BACKEND_URL</code> must point to production backend.
+                </li>
+            </ul>
+            <p>
+                <strong>Telegram checklist:</strong> [ ] Bot created; token in backend. [ ] CORS includes miniapp. [ ]
+                Menu/link opens miniapp URL. [ ] Open in Telegram and test auth + one flow.
+            </p>
+            <p>
+                <strong>How it works:</strong> When opened inside Telegram, the client injects the Web App SDK and
+                passes <code>initData</code>. The miniapp sends it as <code>x-telegram-init-data</code>; the backend
+                verifies it with <code>TELEGRAM_BOT_TOKEN</code>. See
+                <a href="https://core.telegram.org/bots/webapps">Telegram Mini Apps</a>.
+            </p>
+            <hr />
+            <h2>5. Mainnet / production readiness</h2>
+            <p>
+                When <code>APP_ENV=prod</code> or <code>NODE_ENV=production</code>, the backend
+                <strong>refuses to start</strong> if:
+            </p>
+            <ul>
+                <li>
+                    <code>TELEGRAM_BOT_TOKEN</code> or <code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code> missing or invalid
+                </li>
+                <li><code>ADMIN_JWT_SECRET</code> is placeholder or &amp;lt; 32 chars</li>
+                <li>
+                    <code>ADMIN_PASSWORD</code> used without <code>ADMIN_PASSWORD_HASH</code> (plaintext disallowed)
+                </li>
+                <li><code>BATTLE_SEED_SECRET</code> is placeholder or &amp;lt; 32 chars</li>
+                <li>
+                    Vault/claims: if <code>ARENA_VAULT_ADDRESS</code> or <code>AIBA_JETTON_MASTER</code> set, both
+                    required plus oracle key and <strong>mainnet</strong> <code>TON_PROVIDER_URL</code>
+                </li>
+                <li><code>ENABLE_LEGACY_PENDING_AIBA_DISPATCH=true</code></li>
+            </ul>
+            <p>
+                <strong>Key separation:</strong> Use different keys for contract deployer, reward-claim signer
+                (<code>ORACLE_*</code>), admin JWT, Telegram bot, battle seed. Rotate any key that touched a dev
+                machine. Document oracle key rotation (on-chain <code>set_oracle</code> + backend secret).
+            </p>
+            <hr />
+            <h2>6. Components summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Local</th>
+                        <th>Vercel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Backend</strong></td>
+                        <td><code>backend/server.js</code> (PORT 5000)</td>
+                        <td><code>backend/api/index.js</code> (serverless)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Miniapp</strong></td>
+                        <td>Next.js, port 3000</td>
+                        <td>Next.js, root <code>miniapp</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Admin</strong></td>
+                        <td>Next.js, port 3001</td>
+                        <td>Next.js, root <code>admin-panel</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Endpoints:</strong> <code>GET /health</code> (uptime), <code>GET /metrics</code> (Prometheus).
+                Predeploy: <code>npm run predeploy:check</code> (if available).
+            </p>
+        </div>
+    </body>
 </html>

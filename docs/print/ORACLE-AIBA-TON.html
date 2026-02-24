@@ -1,90 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>ORACLE AIBA TON — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>ORACLE AIBA TON</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Holistic Automated AIBA/TON Oracle</h1>
-<p>Automated oracle that derives <strong>AIBA per TON</strong> from external TON price feeds and configurable AIBA USD value.</p>
-<h2>Formula</h2>
-<pre><code>AIBA_PER_TON = TON_USD / AIBA_USD</code></pre>
-<p>Example: TON = $5, AIBA = $0.001 → <strong>5,000 AIBA per TON</strong>.</p>
-<h2>Data Sources</h2>
-<ol>
-<li><strong>TonAPI</strong> (fallback, optional): requires <code>TON_API_KEY</code> env var; <code>https://tonapi.io/v2/rates?tokens=ton&amp;currencies=usd</code></li>
-</ol>
-<h2>Configuration</h2>
-<table>
-<thead><tr>
-<th>Config</th>
-<th>Description</th>
-<th>Default</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>oracleAutoUpdateEnabled</code></td>
-<td>Enable cron-based auto-updates</td>
-<td><code>false</code></td>
-</tr>
-<tr>
-<td><code>oracleAibaUsd</code></td>
-<td>Price of 1 AIBA in USD (used in formula)</td>
-<td><code>0</code></td>
-</tr>
-<tr>
-<td><code>oracleMinAibaPerTon</code></td>
-<td>Clamp minimum rate (0 = no min)</td>
-<td><code>0</code></td>
-</tr>
-<tr>
-<td><code>oracleMaxAibaPerTon</code></td>
-<td>Clamp maximum rate (0 = no max)</td>
-<td><code>0</code></td>
-</tr>
-<tr>
-<td><code>oracleFallbackAibaPerTon</code></td>
-<td>Use when TON fetch fails</td>
-<td><code>0</code></td>
-</tr>
-<tr>
-<td><code>oracleUpdateIntervalMinutes</code></td>
-<td>Cron interval (min 5)</td>
-<td><code>15</code></td>
-</tr>
-</tbody></table>
-<h3>Env Overrides</h3>
-<ul>
-<li><code>ORACLE_UPDATE_INTERVAL_MINUTES</code> — Cron interval (default 15)</li>
-<li><code>TON_API_KEY</code> — Optional TonAPI key for backup TON price source</li>
-</ul>
-<h2>Enabling Automation</h2>
-<ol>
-<li>Optionally set <code>oracleFallbackAibaPerTon</code> for when fetches fail</li>
-<li>Set <code>oracleAutoUpdateEnabled</code> to <code>true</code> via Admin → Economy config (PATCH <code>/api/admin/economy/config</code>)</li>
-</ol>
-<p>Cron runs every N minutes (from <code>ORACLE_UPDATE_INTERVAL_MINUTES</code>); only when <code>oracleAutoUpdateEnabled</code> and at least one of <code>oracleAibaUsd</code> / <code>oracleFallbackAibaPerTon</code> is set.</p>
-<h2>API</h2>
-<ul>
-<li><strong>GET</strong> <code>/api/admin/oracle/status</code> — Admin; full oracle config</li>
-<li><strong>POST</strong> <code>/api/admin/oracle/update</code> — Admin; trigger one update cycle</li>
-</ul>
-<h2>Consumers</h2>
-<ul>
-<li><code>POST /api/gifts/send-aiba</code> — TON cost = <code>amountAiba / oracleAibaPerTon + fee</code></li>
-<li><code>GET /api/p2p-aiba/config</code> — Exposes <code>oracleAibaPerTon</code> for UI</li>
-</ul>
-<h2>Related</h2>
-<ul>
-<li><a href="ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md">ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md</a> — Economy overview</li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>ORACLE AIBA TON — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>ORACLE AIBA TON</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Holistic Automated AIBA/TON Oracle</h1>
+            <p>
+                Automated oracle that derives <strong>AIBA per TON</strong> from external TON price feeds and
+                configurable AIBA USD value.
+            </p>
+            <h2>Formula</h2>
+            <pre><code>AIBA_PER_TON = TON_USD / AIBA_USD</code></pre>
+            <p>Example: TON = $5, AIBA = $0.001 → <strong>5,000 AIBA per TON</strong>.</p>
+            <h2>Data Sources</h2>
+            <ol>
+                <li>
+                    <strong>TonAPI</strong> (fallback, optional): requires <code>TON_API_KEY</code> env var;
+                    <code>https://tonapi.io/v2/rates?tokens=ton&amp;currencies=usd</code>
+                </li>
+            </ol>
+            <h2>Configuration</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Config</th>
+                        <th>Description</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>oracleAutoUpdateEnabled</code></td>
+                        <td>Enable cron-based auto-updates</td>
+                        <td><code>false</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>oracleAibaUsd</code></td>
+                        <td>Price of 1 AIBA in USD (used in formula)</td>
+                        <td><code>0</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>oracleMinAibaPerTon</code></td>
+                        <td>Clamp minimum rate (0 = no min)</td>
+                        <td><code>0</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>oracleMaxAibaPerTon</code></td>
+                        <td>Clamp maximum rate (0 = no max)</td>
+                        <td><code>0</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>oracleFallbackAibaPerTon</code></td>
+                        <td>Use when TON fetch fails</td>
+                        <td><code>0</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>oracleUpdateIntervalMinutes</code></td>
+                        <td>Cron interval (min 5)</td>
+                        <td><code>15</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>Env Overrides</h3>
+            <ul>
+                <li><code>ORACLE_UPDATE_INTERVAL_MINUTES</code> — Cron interval (default 15)</li>
+                <li><code>TON_API_KEY</code> — Optional TonAPI key for backup TON price source</li>
+            </ul>
+            <h2>Enabling Automation</h2>
+            <ol>
+                <li>Optionally set <code>oracleFallbackAibaPerTon</code> for when fetches fail</li>
+                <li>
+                    Set <code>oracleAutoUpdateEnabled</code> to <code>true</code> via Admin → Economy config (PATCH
+                    <code>/api/admin/economy/config</code>)
+                </li>
+            </ol>
+            <p>
+                Cron runs every N minutes (from <code>ORACLE_UPDATE_INTERVAL_MINUTES</code>); only when
+                <code>oracleAutoUpdateEnabled</code> and at least one of <code>oracleAibaUsd</code> /
+                <code>oracleFallbackAibaPerTon</code> is set.
+            </p>
+            <h2>API</h2>
+            <ul>
+                <li><strong>GET</strong> <code>/api/admin/oracle/status</code> — Admin; full oracle config</li>
+                <li><strong>POST</strong> <code>/api/admin/oracle/update</code> — Admin; trigger one update cycle</li>
+            </ul>
+            <h2>Consumers</h2>
+            <ul>
+                <li>
+                    <code>POST /api/gifts/send-aiba</code> — TON cost = <code>amountAiba / oracleAibaPerTon + fee</code>
+                </li>
+                <li><code>GET /api/p2p-aiba/config</code> — Exposes <code>oracleAibaPerTon</code> for UI</li>
+            </ul>
+            <h2>Related</h2>
+            <ul>
+                <li>
+                    <a href="ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md"
+                        >ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md</a
+                    >
+                    — Economy overview
+                </li>
+            </ul>
+        </div>
+    </body>
 </html>

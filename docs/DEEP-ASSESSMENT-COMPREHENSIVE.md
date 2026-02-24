@@ -7,16 +7,16 @@
 
 ## Executive Summary
 
-| Dimension | Status | Score |
-|-----------|--------|-------|
-| **Codebase Health** | ✅ Excellent | 9/10 |
-| **Feature Completeness** | ✅ Comprehensive | 9.5/10 |
-| **Documentation** | ✅ Extensive | 9/10 |
-| **Production Readiness** | ⚠️ Config-dependent | 8/10 |
-| **UI/UX Alignment** | ✅ Well aligned | 9/10 |
-| **Security** | ✅ Strong | 9/10 |
-| **Testing** | ⚠️ Partial | 7/10 |
-| **Technical Debt** | ✅ Low | 8/10 |
+| Dimension                | Status              | Score  |
+| ------------------------ | ------------------- | ------ |
+| **Codebase Health**      | ✅ Excellent        | 9/10   |
+| **Feature Completeness** | ✅ Comprehensive    | 9.5/10 |
+| **Documentation**        | ✅ Extensive        | 9/10   |
+| **Production Readiness** | ⚠️ Config-dependent | 8/10   |
+| **UI/UX Alignment**      | ✅ Well aligned     | 9/10   |
+| **Security**             | ✅ Strong           | 9/10   |
+| **Testing**              | ⚠️ Partial          | 7/10   |
+| **Technical Debt**       | ✅ Low              | 8/10   |
 
 **Overall Verdict:** **Production-ready** with proper configuration. Well-architected, feature-complete, extensively documented. Main gaps: test coverage expansion, monitoring setup, and operational procedures.
 
@@ -41,6 +41,7 @@ Aiba-Arena2/
 ### 1.2 Backend Architecture
 
 **Stack:**
+
 - **Runtime:** Node.js (Express 4.18)
 - **Database:** MongoDB (Mongoose 8.0)
 - **Auth:** Telegram initData + JWT (admin)
@@ -48,6 +49,7 @@ Aiba-Arena2/
 - **Monitoring:** Prometheus metrics (`/metrics`)
 
 **Routes:** 60+ route modules covering:
+
 - Core: Economy, Wallet, Battle, Brokers, Game Modes
 - Social: Guilds, Referrals, Leaderboard
 - Extensions: MemeFi, Redemption, Racing (car/bike), University, Charity, Staking, DAO, Governance, Predict, Tournaments, Global Boss, Trainers, Realms, Missions, Mentors, Assets, Marketplace
@@ -58,12 +60,14 @@ Aiba-Arena2/
 ### 1.3 Frontend Architecture
 
 **Miniapp (Next.js 13):**
+
 - **Tabs:** 30+ tabs (Home, Brokers, Arenas, Memes, Earn, Market, Tasks, Leaderboard, Tournaments, Global Boss, Predict, Car Racing, Bike Racing, Referrals, Trainers, Guilds, Multiverse, NFT Gallery, CoE, University, Staking, Wallet, Profile, Charity, Realms, Assets, DAO, Governance, Updates, Settings, Games)
 - **State Management:** React hooks (useState, useEffect)
 - **API Client:** Axios with Telegram auth interceptors
 - **UI Framework:** Custom CSS with design tokens (card-based, futuristic)
 
 **Admin Panel (Next.js 14):**
+
 - **Sections:** Tasks, Ads, Game Modes, Economy, Moderation, Stats, Treasury, Realms, Marketplace, Treasury Ops, Governance, Charity, MemeFi, Redemption, Schools, Trainers, Predict, etc.
 
 **Assessment:** ✅ **Feature-rich UI** — Comprehensive tab system, consistent design patterns, proper API integration.
@@ -71,6 +75,7 @@ Aiba-Arena2/
 ### 1.4 Contracts (TON)
 
 **Contracts:** 10+ Tact contracts:
+
 - AibaJetton, AibaJettonSupply
 - ArenaVault, ArenaRewardVault
 - BrokerNFT, BrokerMarketplaceEscrow
@@ -88,38 +93,38 @@ Aiba-Arena2/
 
 ### 2.1 Core Features
 
-| Feature | Status | Implementation |
-|---------|--------|----------------|
-| **Brokers** | ✅ Complete | Create, combine, mint NFT, train, repair, upgrade, rent |
-| **Battles** | ✅ Complete | Deterministic scoring, energy/cooldown, leagues, rewards |
-| **Economy** | ✅ Complete | NEUR, AIBA, Stars, Diamonds, caps, emission windows |
-| **Marketplace** | ✅ Complete | List, buy, system brokers, assets, rentals, boosts |
-| **Guilds** | ✅ Complete | Create, join, deposit/withdraw, boost, Guild Wars |
-| **Referrals** | ✅ Complete | Invite system, bonuses, unlock-3, metrics |
-| **Leaderboard** | ✅ Complete | Global, meme subsection, top N free guild creation |
+| Feature         | Status      | Implementation                                           |
+| --------------- | ----------- | -------------------------------------------------------- |
+| **Brokers**     | ✅ Complete | Create, combine, mint NFT, train, repair, upgrade, rent  |
+| **Battles**     | ✅ Complete | Deterministic scoring, energy/cooldown, leagues, rewards |
+| **Economy**     | ✅ Complete | NEUR, AIBA, Stars, Diamonds, caps, emission windows      |
+| **Marketplace** | ✅ Complete | List, buy, system brokers, assets, rentals, boosts       |
+| **Guilds**      | ✅ Complete | Create, join, deposit/withdraw, boost, Guild Wars        |
+| **Referrals**   | ✅ Complete | Invite system, bonuses, unlock-3, metrics                |
+| **Leaderboard** | ✅ Complete | Global, meme subsection, top N free guild creation       |
 
 ### 2.2 Extended Features
 
-| Feature | Status | Implementation |
-|---------|--------|----------------|
-| **MemeFi** | ✅ Complete | Phases 1-4 + P0-P5 extensions (feed, create, engagement, scoring, rewards, trending, saved, drafts, reactions, appeal, school/course) |
-| **Redemption** | ✅ Complete | Products, redeem, for-me, idempotency, expiresAt, partner webhooks |
-| **Car Racing** | ✅ Complete | Tracks, races, create, buy, list, enter, leaderboard |
-| **Bike Racing** | ✅ Complete | Same as car racing |
-| **University** | ✅ Complete | Courses, modules, progress, badges, certificates |
-| **Charity** | ✅ Complete | Campaigns, donate, leaderboard, transparency |
-| **Staking** | ✅ Complete | Flexible + locked (30/90/180/365d), APY, cancel-early fee |
-| **DAO** | ✅ Complete | Proposals, voting, staking requirement |
-| **Governance** | ✅ Complete | Treasury, operations, proposals |
-| **Predict** | ✅ Complete | Events, bets, resolve, admin CRUD |
-| **Tournaments** | ✅ Complete | Create, enter, leaderboard |
-| **Global Boss** | ✅ Complete | Boss battles, damage, rewards |
-| **Trainers** | ✅ Complete | Portal, network, leaderboard, claim-rewards, viral recruitment |
-| **Realms** | ✅ Complete | Themed learning worlds |
-| **Missions** | ✅ Complete | Tasks/quests within realms |
-| **Mentors** | ✅ Complete | AI guide entities |
-| **Assets** | ✅ Complete | AI agents/modules/systems |
-| **Asset Marketplace** | ✅ Complete | List, buy, rent assets |
+| Feature               | Status      | Implementation                                                                                                                        |
+| --------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **MemeFi**            | ✅ Complete | Phases 1-4 + P0-P5 extensions (feed, create, engagement, scoring, rewards, trending, saved, drafts, reactions, appeal, school/course) |
+| **Redemption**        | ✅ Complete | Products, redeem, for-me, idempotency, expiresAt, partner webhooks                                                                    |
+| **Car Racing**        | ✅ Complete | Tracks, races, create, buy, list, enter, leaderboard                                                                                  |
+| **Bike Racing**       | ✅ Complete | Same as car racing                                                                                                                    |
+| **University**        | ✅ Complete | Courses, modules, progress, badges, certificates                                                                                      |
+| **Charity**           | ✅ Complete | Campaigns, donate, leaderboard, transparency                                                                                          |
+| **Staking**           | ✅ Complete | Flexible + locked (30/90/180/365d), APY, cancel-early fee                                                                             |
+| **DAO**               | ✅ Complete | Proposals, voting, staking requirement                                                                                                |
+| **Governance**        | ✅ Complete | Treasury, operations, proposals                                                                                                       |
+| **Predict**           | ✅ Complete | Events, bets, resolve, admin CRUD                                                                                                     |
+| **Tournaments**       | ✅ Complete | Create, enter, leaderboard                                                                                                            |
+| **Global Boss**       | ✅ Complete | Boss battles, damage, rewards                                                                                                         |
+| **Trainers**          | ✅ Complete | Portal, network, leaderboard, claim-rewards, viral recruitment                                                                        |
+| **Realms**            | ✅ Complete | Themed learning worlds                                                                                                                |
+| **Missions**          | ✅ Complete | Tasks/quests within realms                                                                                                            |
+| **Mentors**           | ✅ Complete | AI guide entities                                                                                                                     |
+| **Assets**            | ✅ Complete | AI agents/modules/systems                                                                                                             |
+| **Asset Marketplace** | ✅ Complete | List, buy, rent assets                                                                                                                |
 
 ### 2.3 Feature Coverage Score
 
@@ -136,6 +141,7 @@ Aiba-Arena2/
 ### 3.1 Documentation Structure
 
 **Total Docs:** 99+ markdown files covering:
+
 - **User-facing:** USER-GUIDE.md, WHAT-IS-AIBA-ARENA.md
 - **Technical:** GAME-STRUCTURE.md, GAME-FUNCTIONALITY.md, API-CONTRACT.md
 - **Deployment:** DEPLOYMENT-AND-ENV.md, LAUNCH-GUIDE.md, OPERATIONS.md
@@ -146,15 +152,15 @@ Aiba-Arena2/
 
 ### 3.2 Documentation Completeness
 
-| Category | Coverage | Quality |
-|----------|----------|---------|
-| **User Guide** | ✅ Complete | Comprehensive walkthrough of all tabs and features |
-| **API Documentation** | ✅ Complete | Full API contract with all endpoints |
-| **Deployment** | ✅ Complete | Step-by-step guides for localhost, Vercel, Telegram |
-| **Feature Plans** | ✅ Complete | Vision and design for all major features |
-| **Deep Explanations** | ⚠️ Partial | Core features have deep docs; some extensions lack dedicated deep docs |
-| **Operations** | ✅ Complete | Runbook, monitoring, key rotation, backups |
-| **Assessments** | ✅ Complete | Multiple assessment documents covering readiness, gaps, UI alignment |
+| Category              | Coverage    | Quality                                                                |
+| --------------------- | ----------- | ---------------------------------------------------------------------- |
+| **User Guide**        | ✅ Complete | Comprehensive walkthrough of all tabs and features                     |
+| **API Documentation** | ✅ Complete | Full API contract with all endpoints                                   |
+| **Deployment**        | ✅ Complete | Step-by-step guides for localhost, Vercel, Telegram                    |
+| **Feature Plans**     | ✅ Complete | Vision and design for all major features                               |
+| **Deep Explanations** | ⚠️ Partial  | Core features have deep docs; some extensions lack dedicated deep docs |
+| **Operations**        | ✅ Complete | Runbook, monitoring, key rotation, backups                             |
+| **Assessments**       | ✅ Complete | Multiple assessment documents covering readiness, gaps, UI alignment   |
 
 **Assessment:** ✅ **Extensive documentation** — Well-organized, comprehensive, regularly updated. Minor gap: some extended features lack dedicated "deep explanation" docs (but covered in API-CONTRACT and FEATURE-PLANS).
 
@@ -167,6 +173,7 @@ Aiba-Arena2/
 **Status:** ✅ **Ready** (with proper env configuration)
 
 **Requirements:**
+
 - ✅ Backend deployable (Vercel-ready)
 - ✅ Miniapp deployable (Vercel-ready)
 - ✅ Admin panel deployable (Vercel-ready)
@@ -175,7 +182,8 @@ Aiba-Arena2/
 - ✅ Metrics endpoint (`/metrics`)
 
 **Critical Env Vars:**
-- ✅ Backend: MONGO_URI, APP_ENV, CORS_ORIGIN, TELEGRAM_BOT_TOKEN, ADMIN_*, BATTLE_SEED_SECRET, PUBLIC_BASE_URL
+
+- ✅ Backend: MONGO*URI, APP_ENV, CORS_ORIGIN, TELEGRAM_BOT_TOKEN, ADMIN*\*, BATTLE_SEED_SECRET, PUBLIC_BASE_URL
 - ✅ Miniapp: NEXT_PUBLIC_BACKEND_URL
 - ⚠️ Optional: TON provider, vault, oracle (for on-chain claims)
 
@@ -186,6 +194,7 @@ Aiba-Arena2/
 **Status:** ⚠️ **Config-dependent**
 
 **Required:**
+
 - ✅ Production env vars set
 - ✅ Fail-fast checks at startup
 - ⚠️ Keys & secrets management (requires secret manager)
@@ -198,6 +207,7 @@ Aiba-Arena2/
 ### 4.3 Security
 
 **Implemented:**
+
 - ✅ Production readiness checks (fail-fast)
 - ✅ Rate limiting (global + per-route)
 - ✅ Telegram auth (initData validation, replay protection)
@@ -209,6 +219,7 @@ Aiba-Arena2/
 - ✅ Idempotency (MemeFi daily runs, redemption)
 
 **Best Practices:**
+
 - ✅ No secrets in code
 - ✅ Env-based configuration
 - ✅ Fail-fast in production
@@ -267,14 +278,17 @@ Aiba-Arena2/
 ### 6.1 Backend Tests
 
 **Unit Tests:** ✅ Implemented
+
 - Engine, utilities, security logic
 - No database required
 
 **API Tests:** ✅ Implemented
+
 - Health, catalogs, university, auth, validation
 - No database required
 
 **Integration Tests:** ⚠️ Partial
+
 - Full flows with in-memory MongoDB
 - Requires `mongodb-memory-server` (optional dependency)
 - Covers: broker creation, economy, referrals, daily, leaderboard, marketplace, racing, university, announcements
@@ -284,10 +298,12 @@ Aiba-Arena2/
 ### 6.2 Frontend Tests
 
 **Build Tests:** ✅ Implemented
+
 - Miniapp build test in CI
 - Admin panel build test in CI
 
 **E2E Tests:** ❌ Not implemented
+
 - No Playwright/E2E tests
 - Manual testing recommended
 
@@ -300,6 +316,7 @@ Aiba-Arena2/
 ### 7.1 Code Quality
 
 **Strengths:**
+
 - ✅ Modular architecture
 - ✅ Consistent patterns
 - ✅ Proper error handling
@@ -308,6 +325,7 @@ Aiba-Arena2/
 - ✅ Audit logging
 
 **Areas for Improvement:**
+
 - ⚠️ Some large files (HomeContent.js ~6800 lines) — could be split into components
 - ⚠️ Test coverage expansion needed
 - ⚠️ E2E tests missing
@@ -317,11 +335,13 @@ Aiba-Arena2/
 ### 7.2 Documentation Debt
 
 **Strengths:**
+
 - ✅ Extensive documentation
 - ✅ Regularly updated
 - ✅ Well-organized
 
 **Gaps:**
+
 - ⚠️ Some extended features lack dedicated "deep explanation" docs (covered in API-CONTRACT and FEATURE-PLANS)
 - ⚠️ GAME-FUNCTIONALITY.md §12 API mapping incomplete (some endpoints listed as "Mixed" without detail)
 
@@ -333,29 +353,29 @@ Aiba-Arena2/
 
 ### 8.1 High Priority
 
-| Gap | Impact | Recommendation |
-|-----|--------|----------------|
+| Gap                         | Impact | Recommendation                                                                            |
+| --------------------------- | ------ | ----------------------------------------------------------------------------------------- |
 | **Test coverage expansion** | Medium | Expand backend integration tests to cover all endpoints; add E2E tests for critical flows |
-| **Monitoring setup** | High | Configure monitoring (health checks, metrics, alerts) per OPERATIONS.md |
-| **Backup configuration** | High | Set up MongoDB backups per BACKUP-RUNBOOK.md |
-| **MemeFi cron** | Medium | Set up daily MemeFi rewards cron (Vercel cron or external scheduler) |
+| **Monitoring setup**        | High   | Configure monitoring (health checks, metrics, alerts) per OPERATIONS.md                   |
+| **Backup configuration**    | High   | Set up MongoDB backups per BACKUP-RUNBOOK.md                                              |
+| **MemeFi cron**             | Medium | Set up daily MemeFi rewards cron (Vercel cron or external scheduler)                      |
 
 ### 8.2 Medium Priority
 
-| Gap | Impact | Recommendation |
-|-----|--------|----------------|
-| **E2E tests** | Medium | Add Playwright/E2E tests for critical user flows (create broker → run battle → earn rewards) |
-| **Component extraction** | Low | Split large files (HomeContent.js) into smaller components for maintainability |
-| **Deep explanation docs** | Low | Add dedicated deep docs for extended features (Bike Racing, Staking, DAO, Predict, Trainers, etc.) |
-| **API mapping completeness** | Low | Complete GAME-FUNCTIONALITY.md §12 with detailed endpoint lists |
+| Gap                          | Impact | Recommendation                                                                                     |
+| ---------------------------- | ------ | -------------------------------------------------------------------------------------------------- |
+| **E2E tests**                | Medium | Add Playwright/E2E tests for critical user flows (create broker → run battle → earn rewards)       |
+| **Component extraction**     | Low    | Split large files (HomeContent.js) into smaller components for maintainability                     |
+| **Deep explanation docs**    | Low    | Add dedicated deep docs for extended features (Bike Racing, Staking, DAO, Predict, Trainers, etc.) |
+| **API mapping completeness** | Low    | Complete GAME-FUNCTIONALITY.md §12 with detailed endpoint lists                                    |
 
 ### 8.3 Low Priority
 
-| Gap | Impact | Recommendation |
-|-----|--------|----------------|
-| **Stars/Diamond rewards display** | Low | Show stars per battle and diamond first win in Arenas/Wallet (transparency) |
-| **Boost duration display** | Low | Show boost duration (days) next to boost cost |
-| **Per-mode energy/cooldown** | Low | Show energy cost and cooldown in Arenas mode select |
+| Gap                               | Impact | Recommendation                                                              |
+| --------------------------------- | ------ | --------------------------------------------------------------------------- |
+| **Stars/Diamond rewards display** | Low    | Show stars per battle and diamond first win in Arenas/Wallet (transparency) |
+| **Boost duration display**        | Low    | Show boost duration (days) next to boost cost                               |
+| **Per-mode energy/cooldown**      | Low    | Show energy cost and cooldown in Arenas mode select                         |
 
 ---
 
@@ -394,21 +414,21 @@ Aiba-Arena2/
 
 ### 10.1 Launch Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| **Env misconfiguration** | Medium | High | Improved backend URL fallback, comprehensive launch guide |
-| **CORS errors** | Low | Medium | CORS_ORIGIN validation, production checks |
-| **Telegram auth issues** | Low | Medium | Proper initData validation, replay protection |
-| **MongoDB connection** | Low | High | Connection pooling, error handling, monitoring |
+| Risk                     | Likelihood | Impact | Mitigation                                                |
+| ------------------------ | ---------- | ------ | --------------------------------------------------------- |
+| **Env misconfiguration** | Medium     | High   | Improved backend URL fallback, comprehensive launch guide |
+| **CORS errors**          | Low        | Medium | CORS_ORIGIN validation, production checks                 |
+| **Telegram auth issues** | Low        | Medium | Proper initData validation, replay protection             |
+| **MongoDB connection**   | Low        | High   | Connection pooling, error handling, monitoring            |
 
 ### 10.2 Operational Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| **Key compromise** | Low | Critical | Key rotation procedures documented, secret manager recommended |
-| **Data loss** | Low | Critical | Backup runbook provided, needs configuration |
-| **Service downtime** | Medium | High | Health checks, monitoring scripts, alerting |
-| **Scaling issues** | Low | Medium | Stateless design, MongoDB Atlas scaling, Redis for rate limits |
+| Risk                 | Likelihood | Impact   | Mitigation                                                     |
+| -------------------- | ---------- | -------- | -------------------------------------------------------------- |
+| **Key compromise**   | Low        | Critical | Key rotation procedures documented, secret manager recommended |
+| **Data loss**        | Low        | Critical | Backup runbook provided, needs configuration                   |
+| **Service downtime** | Medium     | High     | Health checks, monitoring scripts, alerting                    |
+| **Scaling issues**   | Low        | Medium   | Stateless design, MongoDB Atlas scaling, Redis for rate limits |
 
 ---
 
@@ -444,6 +464,7 @@ Aiba-Arena2/
 **Verdict:** ✅ **Production-ready** with proper configuration.
 
 **Strengths:**
+
 - ✅ Comprehensive feature set (27+ features)
 - ✅ Well-architected codebase
 - ✅ Extensive documentation (99+ files)
@@ -452,6 +473,7 @@ Aiba-Arena2/
 - ✅ Low technical debt
 
 **Areas for Improvement:**
+
 - ⚠️ Test coverage expansion
 - ⚠️ E2E tests
 - ⚠️ Monitoring setup (operational)
@@ -465,15 +487,15 @@ The project is **ready for launch** with proper env configuration. Post-launch f
 
 ## 13. References
 
-| Document | Purpose |
-|----------|---------|
-| [LAUNCH-GUIDE.md](LAUNCH-GUIDE.md) | Step-by-step launch instructions |
-| [PROJECT-READINESS-AND-UI-ASSESSMENT.md](PROJECT-READINESS-AND-UI-ASSESSMENT.md) | Readiness and UI alignment |
-| [API-AND-READINESS-AUDIT.md](API-AND-READINESS-AUDIT.md) | API mapping and readiness |
-| [OPERATIONS.md](OPERATIONS.md) | Production operations |
-| [DEPLOYMENT-AND-ENV.md](DEPLOYMENT-AND-ENV.md) | Deployment guide |
-| [TESTING.md](TESTING.md) | Testing guide |
-| [MEMEFI-DEEP-INVESTIGATION-REPORT.md](MEMEFI-DEEP-INVESTIGATION-REPORT.md) | MemeFi implementation status |
+| Document                                                                         | Purpose                          |
+| -------------------------------------------------------------------------------- | -------------------------------- |
+| [LAUNCH-GUIDE.md](LAUNCH-GUIDE.md)                                               | Step-by-step launch instructions |
+| [PROJECT-READINESS-AND-UI-ASSESSMENT.md](PROJECT-READINESS-AND-UI-ASSESSMENT.md) | Readiness and UI alignment       |
+| [API-AND-READINESS-AUDIT.md](API-AND-READINESS-AUDIT.md)                         | API mapping and readiness        |
+| [OPERATIONS.md](OPERATIONS.md)                                                   | Production operations            |
+| [DEPLOYMENT-AND-ENV.md](DEPLOYMENT-AND-ENV.md)                                   | Deployment guide                 |
+| [TESTING.md](TESTING.md)                                                         | Testing guide                    |
+| [MEMEFI-DEEP-INVESTIGATION-REPORT.md](MEMEFI-DEEP-INVESTIGATION-REPORT.md)       | MemeFi implementation status     |
 
 ---
 

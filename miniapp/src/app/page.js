@@ -10,7 +10,10 @@ import dynamic from 'next/dynamic';
 const HomeContent = dynamic(() => import('./HomeContent'), {
     ssr: false,
     loading: () => (
-        <div className="aiba-app" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <div
+            className="aiba-app"
+            style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+        >
             <p style={{ color: 'var(--text-muted)' }}>Loading…</p>
         </div>
     ),

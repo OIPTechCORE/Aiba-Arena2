@@ -1,6 +1,6 @@
-# Stars, profile badges & diamonds — Plan, vision, gaps
+# Stars, profile badges & diamonds — Single reference (unified)
 
-Single reference for **Telegram Stars–style** currency, **X-style profile badges**, and **TON Diamonds** in AIBA Arena.
+**This is the only doc** for Stars, Badges, and Diamonds. All content from the former PLAN, VISION, and RESEARCH-MISSING docs was unified here; those files have been deleted.
 
 ---
 
@@ -28,14 +28,27 @@ All three integrate with the balance strip and modular miniapp UI.
 
 ## 3. Gaps and follow-ups (research)
 
-| Area | Gap / note |
-|------|------------|
-| Stars eligibility | Plan: “battle **win**”; confirm credit only when score > 0 if desired. |
-| Leaderboard badges | Leaderboard API should return `badges`; UI should render badge pills (BADGE_LABELS + .badge-pill). |
-| Profile card | Show Telegram display name/username (e.g. from getTelegramUserUnsafe()); not only badges. |
-| Balance strip | Optional small “verified” badge when user has `verified` in economyMe.badges. |
-| Auto top_leader | Cron or hook to assign top_leader from leaderboard top N. |
-| Notifications | notifyBattleWin: optionally include “+X Stars” and “+N Diamond (first win!)”; pass starsGranted and firstWinDiamond to notifier. |
-| Admin | Optional: read-only view of user stars/diamonds/badges; ledger filter by currency. |
+| Area               | Gap / note                                                                                                                       |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| Stars eligibility  | Plan: “battle **win**”; confirm credit only when score > 0 if desired.                                                           |
+| Leaderboard badges | Leaderboard API should return `badges`; UI should render badge pills (BADGE_LABELS + .badge-pill).                               |
+| Profile card       | Show Telegram display name/username (e.g. from getTelegramUserUnsafe()); not only badges.                                        |
+| Balance strip      | Optional small “verified” badge when user has `verified` in economyMe.badges.                                                    |
+| Auto top_leader    | Cron or hook to assign top_leader from leaderboard top N.                                                                        |
+| Notifications      | notifyBattleWin: optionally include “+X Stars” and “+N Diamond (first win!)”; pass starsGranted and firstWinDiamond to notifier. |
+| Admin              | Optional: read-only view of user stars/diamonds/badges; ledger filter by currency.                                               |
 
 Backend: leaderboard aggregation `$project` should include `badges` from users. Charity leaderboard can optionally expose badges. Miniapp: leaderboard tab render badges; profile card show username/avatar.
+
+---
+
+## 4. Quick reference
+
+| Concept         | Where                                     | API / config                                                 |
+| --------------- | ----------------------------------------- | ------------------------------------------------------------ |
+| **Stars**       | User.starsBalance, balance strip, Wallet  | starRewardPerBattle (EconomyConfig); credit on battle win    |
+| **Badges**      | User.badges[], profile pills, leaderboard | POST /api/admin/mod/user-badges; BADGE_LABELS in miniapp     |
+| **Diamonds**    | User.diamondsBalance, first win once      | diamondRewardFirstWin (EconomyConfig); balance strip, Wallet |
+| **Economy /me** | Balances + config                         | GET /api/economy/me → starsBalance, diamondsBalance, badges  |
+
+**Removed:** `STARS-BADGES-DIAMONDS-PLAN.md`, `STARS-BADGES-DIAMONDS-VISION.md`, and `STARS-BADGES-DIAMONDS-RESEARCH-MISSING.md` were deleted; their content lives in this doc.

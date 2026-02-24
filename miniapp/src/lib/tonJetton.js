@@ -2,12 +2,7 @@ import { Address, beginCell } from '@ton/core';
 
 const JETTON_TRANSFER_OP = 0xf8a7ea5;
 
-export function buildJettonTransferPayload({
-    destination,
-    responseAddress,
-    amount,
-    forwardPayloadCell,
-}) {
+export function buildJettonTransferPayload({ destination, responseAddress, amount, forwardPayloadCell }) {
     let cell = beginCell()
         .storeUint(JETTON_TRANSFER_OP, 32)
         .storeUint(0, 64)

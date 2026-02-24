@@ -13,23 +13,23 @@ This document defines the **Unified Super Futuristic Communications Ecosystem** 
 
 ## 2. Principles
 
-| Principle | Description |
-|-----------|-------------|
-| **Single source of truth** | Announcements and status live in the backend; miniapp and Telegram both consume them. |
-| **Re-engagement** | Timely Telegram notifications (battle win, optional announcement broadcast) bring users back. |
-| **Transparency** | Status (operational / maintenance) and announcements build trust. |
-| **Scalable support** | In-app FAQ and status reduce "where do I ask?"; optional link to support channel. |
+| Principle                  | Description                                                                                   |
+| -------------------------- | --------------------------------------------------------------------------------------------- |
+| **Single source of truth** | Announcements and status live in the backend; miniapp and Telegram both consume them.         |
+| **Re-engagement**          | Timely Telegram notifications (battle win, optional announcement broadcast) bring users back. |
+| **Transparency**           | Status (operational / maintenance) and announcements build trust.                             |
+| **Scalable support**       | In-app FAQ and status reduce "where do I ask?"; optional link to support channel.             |
 
 ---
 
 ## 3. Channels
 
-| Channel | Purpose | Implementation |
-|---------|---------|-----------------|
-| **In-app feed** | Announcements, maintenance notices, tips. | Updates tab in miniapp; `GET /api/announcements`. |
-| **Telegram push** | Battle win (existing), optional broadcast for critical announcements. | `telegramNotify.notifyBattleWin`, `notifyAnnouncement`; admin Broadcast action. |
-| **System status** | Operational / maintenance. | `GET /health` (uptime; returns `{ ok: true }`) or `GET /api/comms/status` (returns `{ status, updatedAt }`); Updates tab uses comms/status. |
-| **Support / FAQ** | Short FAQ in-app; optional link to Telegram support group. | Static block in Updates tab; optional `supportLink` in config. |
+| Channel           | Purpose                                                               | Implementation                                                                                                                              |
+| ----------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **In-app feed**   | Announcements, maintenance notices, tips.                             | Updates tab in miniapp; `GET /api/announcements`.                                                                                           |
+| **Telegram push** | Battle win (existing), optional broadcast for critical announcements. | `telegramNotify.notifyBattleWin`, `notifyAnnouncement`; admin Broadcast action.                                                             |
+| **System status** | Operational / maintenance.                                            | `GET /health` (uptime; returns `{ ok: true }`) or `GET /api/comms/status` (returns `{ status, updatedAt }`); Updates tab uses comms/status. |
+| **Support / FAQ** | Short FAQ in-app; optional link to Telegram support group.            | Static block in Updates tab; optional `supportLink` in config.                                                                              |
 
 ---
 
@@ -65,11 +65,11 @@ This document defines the **Unified Super Futuristic Communications Ecosystem** 
 
 ## 6. Phased Roadmap
 
-| Phase | Deliverable | Status |
-|-------|-------------|--------|
-| **1** | Vision doc, Announcement model, public + admin APIs, notifyAnnouncement + broadcast | Done |
-| **2** | Miniapp Updates tab: feed, status, FAQ block; Admin Comms tab | Done |
-| **3** | Read/unread per user via `lastSeenAnnouncementId`; `POST /api/announcements/seen` | **Done** |
+| Phase | Deliverable                                                                                                     | Status   |
+| ----- | --------------------------------------------------------------------------------------------------------------- | -------- |
+| **1** | Vision doc, Announcement model, public + admin APIs, notifyAnnouncement + broadcast                             | Done     |
+| **2** | Miniapp Updates tab: feed, status, FAQ block; Admin Comms tab                                                   | Done     |
+| **3** | Read/unread per user via `lastSeenAnnouncementId`; `POST /api/announcements/seen`                               | **Done** |
 | **4** | In-app support form (`POST /api/support/request`) + `GET /api/comms/config` (supportLink, supportTelegramGroup) | **Done** |
 
 ---

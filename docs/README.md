@@ -2,66 +2,87 @@
 
 Related docs have been merged so there are fewer, clearer files.
 
+## � INFRASTRUCTURE DOCUMENTATION
+
+| Doc | Contents | Status |
+| ---- | --------- | ------- |
+| **DEEP-CODEBASE-ASSESSMENT.md** | **🔍 Complete codebase architecture, quality, and security assessment (Feb 23, 2026)** | ✅ **A+ EXCELLENT** |
+| **SMART-CONTRACTS-ARCHITECTURE.md** | **🔗 Complete smart contracts architecture (Feb 23, 2026)** | ✅ **COMPREHENSIVE** |
+| **PERFORMANCE-TUNING.md** | **⚡ Complete performance optimization guide (Feb 23, 2026)** | ✅ **COMPREHENSIVE** |
+| **OBSERVABILITY-STACK.md** | **📊 Complete monitoring & observability stack (Feb 23, 2026)** | ✅ **COMPREHENSIVE** |
+| **SCALING-GUIDE.md** | **🚀 Complete multi-instance deployment guide (Feb 23, 2026)** | ✅ **COMPREHENSIVE** |
+| **INFRASTRUCTURE-DOCUMENTATION-AUDIT.md** | **📚 Complete infrastructure documentation audit (Feb 23, 2026)** | ✅ **COMPREHENSIVE (100% coverage)** |
+
+## 📊 LATEST COMPREHENSIVE ASSESSMENT
+
+| Doc | Contents | Status |
+| ---- | --------- | ------- |
+| **DEEP-COMPREHENSIVE-ASSESSMENT.md** | **🔍 Complete security, architecture, and production readiness assessment (Feb 23, 2026)** | ✅ **PRODUCTION-SECURE (85/100)** |
+| **ASSESSMENT-ARCHIVE.md** | **📈 Assessment timeline and security evolution tracking** | ✅ **MAINTAINED** |
+
 ## Android UI/UX rollout navigation (Phase 1–4)
 
-| Phase | UI label | Primary docs |
-|------|----------|--------------|
-| **Phase 1** | **Fast Win — Android UI/UX shell (top app bar + sticky bottom nav)** | `USER-GUIDE.md`, `TELEGRAM-MINI-APP-UI-UX-AUDIT.md` |
-| **Phase 2** | **Home + Tasks card redesign (spacing, typography, button sizing)** | `USER-GUIDE.md`, `TESTING.md` |
-| **Phase 3** | **Market + Racing flow redesign (sheet-style detail views)** | `FEATURE-PLANS.md`, `USER-GUIDE.md`, `TESTING.md` |
-| **Phase 4** | **Component system cleanup + theming + QA pass** | `AUDIT-AND-STATUS.md`, `TESTING.md`, `OPERATIONS.md` |
+| Phase       | UI label                                                             | Primary docs                                         |
+| ----------- | -------------------------------------------------------------------- | ---------------------------------------------------- |
+| **Phase 1** | **Fast Win — Android UI/UX shell (top app bar + sticky bottom nav)** | `USER-GUIDE.md`, `TELEGRAM-MINI-APP-UI-UX-AUDIT.md`  |
+| **Phase 2** | **Home + Tasks card redesign (spacing, typography, button sizing)**  | `USER-GUIDE.md`, `TESTING.md`                        |
+| **Phase 3** | **Market + Racing flow redesign (sheet-style detail views)**         | `FEATURE-PLANS.md`, `USER-GUIDE.md`, `TESTING.md`    |
+| **Phase 4** | **Component system cleanup + theming + QA pass**                     | `AUDIT-AND-STATUS.md`, `TESTING.md`, `OPERATIONS.md` |
 
 Use this phase table first, then open the detailed docs below.
 
-| Doc | Contents |
-|-----|----------|
-| **DEPLOYMENT-AND-ENV.md** | Localhost, Vercel, Telegram: env checklist, backend + miniapp + admin, security, mainnet readiness. |
-| **LAUNCH-TODAY-ASSESSMENT.md** | **Launch readiness:** must-do (backend + miniapp env, Telegram URL), verify list, troubleshooting, copy-paste checklist. |
-| **OPERATIONS.md** | Runbook, key management, incident response, monitoring, production readiness status. |
-| **TESTING.md** | Backend unit/API/integration tests, miniapp build, contracts, CI; extended test plan (Realms, Assets, Governance). |
-| **USER-GUIDE.md** | How to play: tabs, wallet, brokers, battles, marketplace, guilds, referrals, racing, university, charity, multiverse, troubleshooting. |
-| **FEATURE-PLANS.md** | University, autonomous racing, charity, marketplace & payments, NFT multiverse, comms, economy (vision + key design). |
-| **MEMEFI-MASTER-STRATEGY-FEASIBILITY.md** | MemeFi master strategy: feasible as modular add-on; MemeFi engine → token → Memes/Earn tabs → LMS/school-fees; stack alignment, phases. |
-| **STARS-BADGES-DIAMONDS.md** | Stars, profile badges, diamonds: plan, vision, implementation gaps. |
-| **AUDIT-AND-STATUS.md** | Project assessment, leaderboard & groups, ecosystems audit (NFT, staking, CoE, Wall of Fame, Trainers), vision vs codebase. |
-| **WHAT-IS-AIBA-ARENA.md** | Deep from-zero explainer: what AIBA Arena is, who it's for, core loop, tokens, features, where to play. |
-| **GAME-FUNCTIONALITY.md** | Expanded game functionality: battle engine, brokers, economy config, trainers, automation, racing, security, data flows, API mapping. |
-| **GAME-STRUCTURE.md** | **Deep game structure:** entities (User, Broker, GameMode, Battle), core loop, battle flow step-by-step, score formula, rewards, miniapp flow, API surface, one-page diagram. |
-| **GAP-AUDIT.md** | Docs vs code gap investigation: privacy/terms, ads, brokers/cars/bikes, extensibility, recommendations. |
-| **ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md** | Advisory: 1T AIBA mint, viral growth strategies, founder revenue calculations. |
-| **AIBA-SELF-AUTOMATION.md** | Dynamic caps, allocation config, mint constraints, anti-inflation, referralUnlock3BonusBps. |
-| **REPORTS-MONITORING.md** | Cross-validation of advisory/audit reports vs codebase; invite-3, K-factor, trainers. |
-| **TELEGRAM-APPS-MODERATION-ADVISORY.md** | Telegram Apps Moderation Center: approval probability, position in Apps Center, submission checklist, implementation status. |
-| **PRIVACY-POLICY.md** | Privacy policy: data collection, use, storage, rights. In-app at `/privacy`. |
-| **TERMS-OF-SERVICE.md** | Terms of service: acceptance, no guaranteed profits, eligibility, conduct. In-app at `/terms`. |
-| **INNOVATIONS-100X-ADVISORY.md** | Innovations to strike the game: tournaments, streaks, creator economy, predict/bet, subscription, rental, raid, breeding. 100× calculations for users, AIBA, founders. |
-| **API-CONTRACT.md** | API contract: Core (Economy, Vault, Wallet, Battle), Realms, Missions, Mentors, Assets, DAO (staking requirement), Staking, Treasury, Trainers, Oracle, P2P AIBA, Gifts, Donate, Announcements, Support. |
-| **SUPER-ADMIN-WALLETS.md** | Complete reference: all Super Admin wallets (P2P AIBA send, AIBA in gifts, Buy AIBA with TON, Donate broker/car/bike/gifts, **CANCELLED_STAKES_WALLET** for early stake cancel fee), env vars, config keys, APIs. |
-| **ORACLE-AIBA-TON.md** | Holistic automated AIBA/TON oracle: formula, config, cron, admin API. |
-| **CONTRACT-DEPLOYMENT-ORDER.md** | Contract deployment order. |
-| **UNIVERSAL-SPEC.md** | Universal spec (if present). |
-| **CONNECT-WALLET-TON-SCAN.md** | Connect wallet, TON Scan. |
-| **MIGRATIONS.md** | Data migrations. |
-| **TELEGRAM-MINI-APP-UI-UX-AUDIT.md** | Telegram miniapp UI/UX audit. |
-| **DOCS-STRUCTURE.md** | Why `.html` vs `.md`; source of truth, build process, orphan HTML files. |
-| **UNIFIED-COMMS-ECOSYSTEM.md** | Unified comms: announcements, status, support; Phases 1–4 (read/unread, support form) done. |
-| **PRINT.md** | Print/export. |
-| **VISION-3D-ARENAS-STATUS.md** | 3D arenas: what exists vs vision. Can you see them? Roadmap. |
-| **3D-ENGINE-NEEDS.md** | Do we need Unity/Unreal/Three.js? No — battles are server-simulated; optional 3D later → Three.js/React Three Fiber. |
-| **TRAINERS-MANUAL.md** | Exhaustive trainer guide: product, journeys, scripts, influencer angles. |
-| **marketing/** | Marketing materials: influencer kit, ad templates, post bank, customizable HTML banners. |
+| Doc                                              | Contents                                                                                                                                                                                                          |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **DEPLOYMENT-AND-ENV.md**                        | Localhost, Vercel, Telegram: env checklist, backend + miniapp + admin, security, mainnet readiness.                                                                                                               |
+| **LAUNCH-TODAY-ASSESSMENT.md**                   | **Launch readiness:** must-do (backend + miniapp env, Telegram URL), verify list, troubleshooting, copy-paste checklist.                                                                                          |
+| **AI-AGENT-HELP-MODULE-STATUS.md**               | **No** floating AI agent icon today; static FAQs + support form. What would be needed to add a deep AI help agent with floating icon.                                                                             |
+| **OPERATIONS.md**                                | Runbook, key management, incident response, monitoring, production readiness status.                                                                                                                              |
+| **TESTING.md**                                   | Backend unit/API/integration tests, miniapp build, contracts, CI; extended test plan (Realms, Assets, Governance).                                                                                                |
+| **USER-GUIDE.md**                                | How to play: tabs, wallet, brokers, battles, marketplace, guilds, referrals, racing, university, charity, multiverse, troubleshooting.                                                                            |
+| **FEATURE-PLANS.md**                             | University, autonomous racing, charity, marketplace & payments, NFT multiverse, comms, economy (vision + key design).                                                                                             |
+| **MEMEFI-MASTER-STRATEGY-FEASIBILITY.md**        | MemeFi master strategy: feasible as modular add-on; MemeFi engine → token → Memes/Earn tabs → LMS/school-fees; stack alignment, phases.                                                                           |
+| **MEMEFI-LMS-IMPLEMENTATION.md**                 | MemeFi + LMS implementation: Phase 1–4 and redemption (models, routes, miniapp Memes/Earn tabs, leaderboard, admin MemeFi config + redemption CRUD + seed).                                                       |
+| **STARS-BADGES-DIAMONDS.md**                     | **Single doc** for Stars, profile badges, diamonds: vision, implementation, gaps. (PLAN, VISION, RESEARCH-MISSING were removed; content is here.)                                                                 |
+| **AUDIT-AND-STATUS.md**                          | Project assessment, leaderboard & groups, ecosystems audit (NFT, staking, CoE, Wall of Fame, Trainers), vision vs codebase.                                                                                       |
+| **WHAT-IS-AIBA-ARENA.md**                        | Deep from-zero explainer: what AIBA Arena is, who it's for, core loop, tokens, features, where to play.                                                                                                           |
+| **GAME-FUNCTIONALITY.md**                        | Expanded game functionality: battle engine, brokers, economy config, trainers, automation, racing, security, data flows, API mapping.                                                                             |
+| **GAME-STRUCTURE.md**                            | **Deep game structure:** entities (User, Broker, GameMode, Battle), core loop, battle flow step-by-step, score formula, rewards, miniapp flow, API surface, one-page diagram.                                     |
+| **GAP-AUDIT.md**                                 | Docs vs code gap investigation: privacy/terms, ads, brokers/cars/bikes, extensibility, recommendations.                                                                                                           |
+| **ADVISORY-TOKENOMICS-VIRAL-FOUNDER-REVENUE.md** | Advisory: 1T AIBA mint, viral growth strategies, founder revenue calculations.                                                                                                                                    |
+| **AIBA-SELF-AUTOMATION.md**                      | Dynamic caps, allocation config, mint constraints, anti-inflation, referralUnlock3BonusBps.                                                                                                                       |
+| **REPORTS-MONITORING.md**                        | Cross-validation of advisory/audit reports vs codebase; invite-3, K-factor, trainers.                                                                                                                             |
+| **TELEGRAM-APPS-MODERATION-ADVISORY.md**         | Telegram Apps Moderation Center: approval probability, position in Apps Center, submission checklist, implementation status.                                                                                      |
+| **PRIVACY-POLICY.md**                            | Privacy policy: data collection, use, storage, rights. In-app at `/privacy`.                                                                                                                                      |
+| **TERMS-OF-SERVICE.md**                          | Terms of service: acceptance, no guaranteed profits, eligibility, conduct. In-app at `/terms`.                                                                                                                    |
+| **INNOVATIONS-100X-ADVISORY.md**                 | Innovations to strike the game: tournaments, streaks, creator economy, predict/bet, subscription, rental, raid, breeding. 100× calculations for users, AIBA, founders.                                            |
+| **GIFTING.md**                                   | **Unified** gifting: send TON, send AIBA; Ramadhan and loved ones = same API + campaign copy/placement.                                                                                                           |
+| **API-CONTRACT.md**                              | API contract: Core (Economy, Vault, Wallet, Battle), Realms, Missions, Mentors, Assets, DAO (staking requirement), Staking, Treasury, Trainers, Oracle, P2P AIBA, Gifts, Donate, Announcements, Support.          |
+| **SUPER-ADMIN-WALLETS.md**                       | Complete reference: all Super Admin wallets (P2P AIBA send, AIBA in gifts, Buy AIBA with TON, Donate broker/car/bike/gifts, **CANCELLED_STAKES_WALLET** for early stake cancel fee), env vars, config keys, APIs. |
+| **ORACLE-AIBA-TON.md**                           | Holistic automated AIBA/TON oracle: formula, config, cron, admin API.                                                                                                                                             |
+| **CONTRACT-DEPLOYMENT-ORDER.md**                 | Contract deployment order.                                                                                                                                                                                        |
+| **UNIVERSAL-SPEC.md**                            | Universal spec (if present).                                                                                                                                                                                      |
+| **CONNECT-WALLET-TON-SCAN.md**                   | Connect wallet, TON Scan.                                                                                                                                                                                         |
+| **MIGRATIONS.md**                                | Data migrations.                                                                                                                                                                                                  |
+| **TELEGRAM-MINI-APP-UI-UX-AUDIT.md**             | Telegram miniapp UI/UX audit.                                                                                                                                                                                     |
+| **DOCS-STRUCTURE.md**                            | Why `.html` vs `.md`; source of truth, build process, orphan HTML files.                                                                                                                                          |
+| **UNIFIED-COMMS-ECOSYSTEM.md**                   | Unified comms: announcements, status, support; Phases 1–4 (read/unread, support form) done.                                                                                                                       |
+| **PRINT.md**                                     | Print/export.                                                                                                                                                                                                     |
+| **VISION-3D-ARENAS-STATUS.md**                   | 3D arenas: what exists vs vision. Can you see them? Roadmap.                                                                                                                                                      |
+| **3D-ENGINE-NEEDS.md**                           | Do we need Unity/Unreal/Three.js? No — battles are server-simulated; optional 3D later → Three.js/React Three Fiber.                                                                                              |
+| **TRAINERS-MANUAL.md**                           | Exhaustive trainer guide: product, journeys, scripts, influencer angles.                                                                                                                                          |
+| **marketing/**                                   | Marketing materials: influencer kit, ad templates, post bank, customizable HTML banners.                                                                                                                          |
 
 **Deep feature docs** (per-feature deep dives):
 
-| Doc | Contents |
-|-----|----------|
-| **GAME-STRUCTURE.md** | **Game structure:** entities, core loop, battle flow (26 steps), score formula, rewards, miniapp flow, API, text diagram. Start here for "how the game works." |
-| **BROKERS-DEEP-EXPLANATION.md** | Brokers: stats, creation, listing, buying, system catalog. |
-| **ARENAS-DEEP-EXPLANATION.md** | Arenas, leagues, battle flow, scoring. |
-| **CAR-RACING-DEEP-EXPLANATION.md** | Car racing: config, tracks, cars, races, enter, buy, leaderboard. |
-| **MARKETPLACE-DEEP-EXPLANATION.md** | Unified marketplace: brokers, assets, rentals, boosts, system shop. |
+| Doc                                 | Contents                                                                                                                                                       |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **GAME-STRUCTURE.md**               | **Game structure:** entities, core loop, battle flow (26 steps), score formula, rewards, miniapp flow, API, text diagram. Start here for "how the game works." |
+| **BROKERS-DEEP-EXPLANATION.md**     | Brokers: stats, creation, listing, buying, system catalog.                                                                                                     |
+| **ARENAS-DEEP-EXPLANATION.md**      | Arenas, leagues, battle flow, scoring.                                                                                                                         |
+| **CAR-RACING-DEEP-EXPLANATION.md**  | Car racing: config, tracks, cars, races, enter, buy, leaderboard.                                                                                              |
+| **MARKETPLACE-DEEP-EXPLANATION.md** | Unified marketplace: brokers, assets, rentals, boosts, system shop.                                                                                            |
 
-**Gaps and audits:** [GAP-AUDIT.md](GAP-AUDIT.md), [GAPS-SCAN-REPORT.md](GAPS-SCAN-REPORT.md) (full app & docs gap scan), [APP-SCAN-REPORT.md](APP-SCAN-REPORT.md) (issues/errors scan). **Deep assessment (API 404/508, backend URL, console errors):** [DEEP-ASSESSMENT-APP.md](DEEP-ASSESSMENT-APP.md).
+**Gaps and audits:** [GAP-AUDIT.md](GAP-AUDIT.md), [GAPS-SCAN-REPORT.md](GAPS-SCAN-REPORT.md) (full app & docs gap scan), [APP-SCAN-REPORT.md](APP-SCAN-REPORT.md) (issues/errors scan). **Deep assessment (API 404/508, backend URL, console errors):** [DEEP-ASSESSMENT-APP.md](DEEP-ASSESSMENT-APP.md). **App deep assessment + UI reflection:** [APP-DEEP-ASSESSMENT-AND-UI-REFLECTION.md](APP-DEEP-ASSESSMENT-AND-UI-REFLECTION.md) (does API/config data show in UI; gaps and fixes).
 
 **UI & updatedness:** [UI-DESIGN-PRINCIPLES.md](UI-DESIGN-PRINCIPLES.md) (nav, card-based, responsive). [DOCS-UPDATEDNESS.md](DOCS-UPDATEDNESS.md) (code, .md, .html refresh status).
 

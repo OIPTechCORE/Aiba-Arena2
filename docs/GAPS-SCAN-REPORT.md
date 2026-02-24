@@ -7,11 +7,11 @@
 
 ## 1. Summary
 
-| Category | Count | Priority focus |
-|----------|--------|----------------|
-| **Docs gaps** | 15+ | Missing deep docs, GAME-FUNCTIONALITY §12 incomplete, README index |
-| **App–docs alignment** | 6 | API-CONTRACT vs GAME-FUNCTIONALITY, deployment doc duplication |
-| **App behaviour** | 4 | Error/empty states, config-driven copy (already improved in SHIP-READY) |
+| Category               | Count | Priority focus                                                          |
+| ---------------------- | ----- | ----------------------------------------------------------------------- |
+| **Docs gaps**          | 15+   | Missing deep docs, GAME-FUNCTIONALITY §12 incomplete, README index      |
+| **App–docs alignment** | 6     | API-CONTRACT vs GAME-FUNCTIONALITY, deployment doc duplication          |
+| **App behaviour**      | 4     | Error/empty states, config-driven copy (already improved in SHIP-READY) |
 
 Existing gap material: **GAP-AUDIT.md** (docs vs code), **SHIP-READY-GAP-CLOSURE.md** (implemented fixes). This report consolidates and extends that with a single scan artifact.
 
@@ -42,27 +42,27 @@ Existing gap material: **GAP-AUDIT.md** (docs vs code), **SHIP-READY-GAP-CLOSURE
 
 The following have **no** dedicated deep doc (cf. BROKERS, ARENAS, CAR-RACING, MARKETPLACE):
 
-| Feature | In API-CONTRACT | In GAME-FUNCTIONALITY | Deep doc |
-|--------|------------------|------------------------|----------|
-| Bike Racing | ✓ (car-racing sibling) | §12.3 (one line) | **Missing** |
-| AI Assets + Asset Marketplace | ✓ | §12.4 (one line) | **Missing** |
-| University | ✓ | §12.4 (one line) | **Missing** |
-| Staking / Yield Vault | ✓ | §12.4 (one line) | **Missing** |
-| DAO / Governance | ✓ | §12.4 (one line) | **Missing** |
-| Realms / Missions / Mentors | ✓ | §12.4 (one line) | **Missing** |
-| Predict | ✓ | Not in §12 table | **Missing** |
-| Trainers | ✓ | Mentioned elsewhere | **Missing** |
-| Tournaments | ✓ | Not in §12 table | **Missing** |
-| Global Boss | ✓ | Not in §12 table | **Missing** |
-| Referrals | ✓ | §12.4 (one line) | **Missing** |
-| Gifts / P2P AIBA | ✓ | §12.4 (one line) | **Missing** |
-| Donate (broker/car/bike/gifts) | ✓ | Not in §12 table | **Missing** |
-| Multiverse / NFT | ✓ | §12.4 (one line) | **Missing** |
-| Premium | ✓ | Not in §12 table | **Missing** |
-| Daily / Combo | ✓ | §12.4 (one line) | **Missing** |
-| Ads | ✓ (or comms) | Tasks/ads | **Missing** |
-| Broker Rental | ✓ | Not in §12 table | **Missing** |
-| Breeding | ✓ | Not in §12 table | **Missing** |
+| Feature                        | In API-CONTRACT        | In GAME-FUNCTIONALITY | Deep doc    |
+| ------------------------------ | ---------------------- | --------------------- | ----------- |
+| Bike Racing                    | ✓ (car-racing sibling) | §12.3 (one line)      | **Missing** |
+| AI Assets + Asset Marketplace  | ✓                      | §12.4 (one line)      | **Missing** |
+| University                     | ✓                      | §12.4 (one line)      | **Missing** |
+| Staking / Yield Vault          | ✓                      | §12.4 (one line)      | **Missing** |
+| DAO / Governance               | ✓                      | §12.4 (one line)      | **Missing** |
+| Realms / Missions / Mentors    | ✓                      | §12.4 (one line)      | **Missing** |
+| Predict                        | ✓                      | Not in §12 table      | **Missing** |
+| Trainers                       | ✓                      | Mentioned elsewhere   | **Missing** |
+| Tournaments                    | ✓                      | Not in §12 table      | **Missing** |
+| Global Boss                    | ✓                      | Not in §12 table      | **Missing** |
+| Referrals                      | ✓                      | §12.4 (one line)      | **Missing** |
+| Gifts / P2P AIBA               | ✓                      | §12.4 (one line)      | **Missing** |
+| Donate (broker/car/bike/gifts) | ✓                      | Not in §12 table      | **Missing** |
+| Multiverse / NFT               | ✓                      | §12.4 (one line)      | **Missing** |
+| Premium                        | ✓                      | Not in §12 table      | **Missing** |
+| Daily / Combo                  | ✓                      | §12.4 (one line)      | **Missing** |
+| Ads                            | ✓ (or comms)           | Tasks/ads             | **Missing** |
+| Broker Rental                  | ✓                      | Not in §12 table      | **Missing** |
+| Breeding                       | ✓                      | Not in §12 table      | **Missing** |
 
 **Recommendation (P1):** Add at least **Bike Racing** and **Broker Rental** deep docs (parity with Car Racing and Marketplace). Optionally add **Staking**, **DAO**, **Predict**, **Trainers** next.
 
@@ -113,16 +113,16 @@ The following have **no** dedicated deep doc (cf. BROKERS, ARENAS, CAR-RACING, M
 
 ## 4. Prioritised action list
 
-| Prio | Action |
-|------|--------|
-| **P0** | None (no blocking gaps identified). |
+| Prio   | Action                                                                                                                                                                                             |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **P0** | None (no blocking gaps identified).                                                                                                                                                                |
 | **P1** | Extend GAME-FUNCTIONALITY §12 with broker-rental, predict, trainers, tournaments, global-boss, donate, premium, p2p-aiba, breeding, game-modes, treasury, oracle; add car/bike per-endpoint lines. |
-| **P1** | Add "Deep feature docs" to README.md linking BROKERS, ARENAS, CAR-RACING, MARKETPLACE (and future deep docs). |
-| **P1** | Add BIKE-RACING-DEEP-EXPLANATION.md (and optionally BROKER-RENTAL-DEEP-EXPLANATION.md) for parity. |
-| **P2** | USER-GUIDE: explicit Broker Rental and Donate (broker/car/bike/gifts) in Marketplace or dedicated subsection. |
-| **P2** | Canonical deployment doc: DEPLOYMENT-AND-ENV.md; point other deployment/vercel docs to it. |
-| **P2** | Optional: contract test miniapp API paths vs backend routes. |
-| **P2** | Optional: UX pass for error/empty states in key flows. |
+| **P1** | Add "Deep feature docs" to README.md linking BROKERS, ARENAS, CAR-RACING, MARKETPLACE (and future deep docs).                                                                                      |
+| **P1** | Add BIKE-RACING-DEEP-EXPLANATION.md (and optionally BROKER-RENTAL-DEEP-EXPLANATION.md) for parity.                                                                                                 |
+| **P2** | USER-GUIDE: explicit Broker Rental and Donate (broker/car/bike/gifts) in Marketplace or dedicated subsection.                                                                                      |
+| **P2** | Canonical deployment doc: DEPLOYMENT-AND-ENV.md; point other deployment/vercel docs to it.                                                                                                         |
+| **P2** | Optional: contract test miniapp API paths vs backend routes.                                                                                                                                       |
+| **P2** | Optional: UX pass for error/empty states in key flows.                                                                                                                                             |
 
 ---
 

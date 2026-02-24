@@ -39,20 +39,20 @@ A deep, from-zero explanation of the product for players, partners, and develope
 
 ## Main features (at a glance)
 
-| Feature | What it is |
-|--------|-------------|
-| **Brokers** | Your AI agents. Create, combine, list, buy, mint as NFT. Used in every battle. |
-| **Arenas** | Game modes: prediction, simulation, arbitrage, guild wars, etc. Each has different rules and rewards. |
-| **Battles** | Run a battle with a broker in an arena. You get a score and rewards (NEUR, AIBA, Stars). |
-| **Marketplace** | One place to trade: brokers, cars, bikes, assets, rentals, system shop, boosts. TON + AIBA. |
-| **Car & Bike Racing** | Own cars/bikes, enter races, earn by position. Buy from players or system shop. |
-| **Guilds** | Create or join groups, deposit brokers, compete in guild wars. |
-| **Referrals & Trainers** | Share links; earn when others join or become trainers. Trainers get tiered rewards and seasonal leaderboards. |
-| **Staking (Yield Vault)** | Lock AIBA for periods; earn APY. Longer lock = higher APY. |
-| **DAO / Governance** | Propose and vote on changes. Staking AIBA for 30+ days can be required to create proposals. |
-| **Charity** | Donate NEUR or AIBA to campaigns. |
-| **University & CoE** | In-app learning (courses, modules) and hub for trainers and creator economy. |
-| **More games** | Hub for other apps/games in the ecosystem; extensible via config. |
+| Feature                   | What it is                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Brokers**               | Your AI agents. Create, combine, list, buy, mint as NFT. Used in every battle.                                |
+| **Arenas**                | Game modes: prediction, simulation, arbitrage, guild wars, etc. Each has different rules and rewards.         |
+| **Battles**               | Run a battle with a broker in an arena. You get a score and rewards (NEUR, AIBA, Stars).                      |
+| **Marketplace**           | One place to trade: brokers, cars, bikes, assets, rentals, system shop, boosts. TON + AIBA.                   |
+| **Car & Bike Racing**     | Own cars/bikes, enter races, earn by position. Buy from players or system shop.                               |
+| **Guilds**                | Create or join groups, deposit brokers, compete in guild wars.                                                |
+| **Referrals & Trainers**  | Share links; earn when others join or become trainers. Trainers get tiered rewards and seasonal leaderboards. |
+| **Staking (Yield Vault)** | Lock AIBA for periods; earn APY. Longer lock = higher APY.                                                    |
+| **DAO / Governance**      | Propose and vote on changes. Staking AIBA for 30+ days can be required to create proposals.                   |
+| **Charity**               | Donate NEUR or AIBA to campaigns.                                                                             |
+| **University & CoE**      | In-app learning (courses, modules) and hub for trainers and creator economy.                                  |
+| **More games**            | Hub for other apps/games in the ecosystem; extensible via config.                                             |
 
 ---
 
@@ -80,7 +80,7 @@ Rewards and token values are not guaranteed; they depend on gameplay and partici
 
 ## For more detail
 
-- **Game rules and tech:** [GAME-FUNCTIONALITY.md](GAME-FUNCTIONALITY.md)  
-- **Features and vision:** [FEATURE-PLANS.md](FEATURE-PLANS.md)  
-- **APIs:** [API-CONTRACT.md](API-CONTRACT.md)  
+- **Game rules and tech:** [GAME-FUNCTIONALITY.md](GAME-FUNCTIONALITY.md)
+- **Features and vision:** [FEATURE-PLANS.md](FEATURE-PLANS.md)
+- **APIs:** [API-CONTRACT.md](API-CONTRACT.md)
 - **Docs index:** [README.md](README.md)

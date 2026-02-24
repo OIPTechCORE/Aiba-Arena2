@@ -50,10 +50,7 @@ async function updateLoginStreak(telegramId) {
     if (last === yesterday) {
         newStreak = (user.loginStreakDays || 0) + 1;
     }
-    await User.updateOne(
-        { telegramId },
-        { $set: { lastLoginStreakDate: today, loginStreakDays: newStreak } },
-    );
+    await User.updateOne({ telegramId }, { $set: { lastLoginStreakDate: today, loginStreakDays: newStreak } });
     return newStreak;
 }
 
@@ -68,19 +65,13 @@ async function updateBattleWinStreak(telegramId) {
         const diff = (now - lastWin) / 1000;
         if (diff < 86400) newStreak = (user.battleWinStreak || 0) + 1; // same day or within 24h
     }
-    await User.updateOne(
-        { telegramId },
-        { $set: { battleWinStreak: newStreak, lastBattleWinAt: now } },
-    );
+    await User.updateOne({ telegramId }, { $set: { battleWinStreak: newStreak, lastBattleWinAt: now } });
     return newStreak;
 }
 
 /** Reset battle win streak on loss */
 async function resetBattleWinStreak(telegramId) {
-    await User.updateOne(
-        { telegramId },
-        { $set: { battleWinStreak: 0 } },
-    );
+    await User.updateOne({ telegramId }, { $set: { battleWinStreak: 0 } });
 }
 
 /** Check if user has premium (2x rewards) */
@@ -96,16 +87,16 @@ async function getRewardMultiplier(telegramId, cfg = {}) {
     const user = await User.findOne({ telegramId }).lean();
     if (user) {
         mul *= getStreakMultiplier(user.loginStreakDays, cfg);
-        mul *= (1 + getBattleWinStreakBonusBps(user.battleWinStreak, cfg) / 10000);
+        mul *= 1 + getBattleWinStreakBonusBps(user.battleWinStreak, cfg) / 10000;
         if (user.premiumUntil && new Date(user.premiumUntil) > new Date()) {
-            mul *= (Number(cfg.premiumRewardMultiplier) || 2);
+            mul *= Number(cfg.premiumRewardMultiplier) || 2;
         }
         // Invite-3 unlock: 1% bonus (default) when user referred 3+ friends
         const refUnlockBps = Number(cfg.referralUnlock3BonusBps) || 100;
         if (refUnlockBps > 0) {
             const ref = await Referral.findOne({ ownerTelegramId: telegramId, active: true }).lean();
             if (ref && (ref.uses ?? 0) >= 3) {
-                mul *= (1 + refUnlockBps / 10000);
+                mul *= 1 + refUnlockBps / 10000;
             }
         }
     }
@@ -135,7 +126,7 @@ async function recordAibaSpendForDailyCombo(telegramId, amount) {
     const day = utcDayKey();
     const user = await User.findOne({ telegramId }).lean();
     if (!user) return;
-    const current = user.dailyComboSpentDate === day ? (user.dailyComboSpentTodayAiba || 0) : 0;
+    const current = user.dailyComboSpentDate === day ? user.dailyComboSpentTodayAiba || 0 : 0;
     await User.updateOne(
         { telegramId },
         { $set: { dailyComboSpentTodayAiba: current + amount, dailyComboSpentDate: day } },

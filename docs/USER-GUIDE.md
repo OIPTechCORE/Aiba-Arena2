@@ -4,12 +4,12 @@ This guide walks you through **how to play** AIBA Arena: from opening the app to
 
 ## Android UI/UX rollout navigation (Phase 1–4)
 
-| Phase | UI label | Primary docs |
-|------|----------|--------------|
-| **Phase 1** | **Fast Win — Android UI/UX shell (top app bar + sticky bottom nav)** | `USER-GUIDE.md`, `TELEGRAM-MINI-APP-UI-UX-AUDIT.md` |
-| **Phase 2** | **Home + Tasks card redesign (spacing, typography, button sizing)** | `USER-GUIDE.md`, `TESTING.md` |
-| **Phase 3** | **Market + Racing flow redesign (sheet-style detail views)** | `FEATURE-PLANS.md`, `USER-GUIDE.md`, `TESTING.md` |
-| **Phase 4** | **Component system cleanup + theming + QA pass** | `AUDIT-AND-STATUS.md`, `TESTING.md`, `OPERATIONS.md` |
+| Phase       | UI label                                                             | Primary docs                                         |
+| ----------- | -------------------------------------------------------------------- | ---------------------------------------------------- |
+| **Phase 1** | **Fast Win — Android UI/UX shell (top app bar + sticky bottom nav)** | `USER-GUIDE.md`, `TELEGRAM-MINI-APP-UI-UX-AUDIT.md`  |
+| **Phase 2** | **Home + Tasks card redesign (spacing, typography, button sizing)**  | `USER-GUIDE.md`, `TESTING.md`                        |
+| **Phase 3** | **Market + Racing flow redesign (sheet-style detail views)**         | `FEATURE-PLANS.md`, `USER-GUIDE.md`, `TESTING.md`    |
+| **Phase 4** | **Component system cleanup + theming + QA pass**                     | `AUDIT-AND-STATUS.md`, `TESTING.md`, `OPERATIONS.md` |
 
 Use this phase table first, then continue with the full user guide below.
 
@@ -23,28 +23,28 @@ Use this phase table first, then continue with the full user guide below.
 
 ### Contents
 
-1. Opening the Game  
-2. How the App Is Organized (Tabs)  
-3. Connect Your Wallet  
-4. Get Your First Broker  
-5. Choose Arena and Run a Battle  
-6. Balances (NEUR, AIBA, Stars, Diamonds)  
-7. Guilds (Groups)  
-8. Withdrawing AIBA to Your Wallet (On-Chain Claim)  
-9. Super Futuristic Unified Marketplace (Create Broker, List, Buy, Boosts)  
-10. Boost your profile  
-11. Gifts  
-12. Referrals  
-13. Brokers Tab: Combine and Mint as NFT  
-14. NFT Multiverse (Own, Stake, Earn)  
-15. Leaderboard  
-16. Charity (Unite for Good)  
-17. University  
-18. Updates (Announcements)  
-19. Wallet Tab (Full Picture)  
-20. Ads and Tasks  
-21. Vault Inventory  
-22. Troubleshooting  
+1. Opening the Game
+2. How the App Is Organized (Tabs)
+3. Connect Your Wallet
+4. Get Your First Broker
+5. Choose Arena and Run a Battle
+6. Balances (NEUR, AIBA, Stars, Diamonds)
+7. Guilds (Groups)
+8. Withdrawing AIBA to Your Wallet (On-Chain Claim)
+9. Super Futuristic Unified Marketplace (Create Broker, List, Buy, Boosts)
+10. Boost your profile
+11. Gifts
+12. Referrals
+13. Brokers Tab: Combine and Mint as NFT
+14. NFT Multiverse (Own, Stake, Earn)
+15. Leaderboard
+16. Charity (Unite for Good)
+17. University
+18. Updates (Announcements)
+19. Wallet Tab (Full Picture)
+20. Ads and Tasks
+21. Vault Inventory
+22. Troubleshooting
 23. Quick Checklist (First Session)
 
 ---
@@ -59,33 +59,33 @@ Use this phase table first, then continue with the full user guide below.
 
 ## 2. How the App Is Organized (Tabs)
 
-| Tab | What’s there |
-|-----|--------------|
-| **Home** | TonConnect, Vault info, Arena & battle (pick broker, arena, Run battle), Battle result, Referrals, Leaderboard. |
-| **Brokers** | My brokers (select, combine two for NEUR, mint one as NFT for AIBA). |
-| **Super Futuristic Unified Marketplace** | Brokers, assets, rentals, system shop, boosts. Create broker with TON; list/buy with AIBA. |
-| **Car Racing** | Autonomous car racing: tracks, races, my cars, create car (AIBA or TON), **list car for sale** or **buy** from players/system, enter race, leaderboard. |
-| **Bike Racing** | Autonomous bike racing: tracks, races, my bikes, create bike (AIBA or TON), **list bike for sale** or **buy** from players/system, enter race, leaderboard. |
-| **Multiverse** | NFT universes, **My NFTs** (Broker NFTs you own), **stake** to earn AIBA daily, **claim** staking rewards. Mint Broker NFTs from the Brokers tab (pay AIBA). |
-| **Arenas** | Arena selector, Run battle, Battle result (score, rewards, Stars/Diamond). |
-| **Guilds** | Groups (leaderboard rank, create or join, pay TON to create if not top N, boost group with TON), My groups, deposit/withdraw broker. |
-| **Charity** | Unite for Good: campaigns, donate NEUR or AIBA, your impact, charity leaderboard. |
-| **University** | Courses and modules, progress, graduate badge, mint course badge / full certificate (pay TON). |
-| **Updates** | Announcements (read/unread), system status, in-app support form (subject + message). |
-| **Wallet** | Profile & badges, Boost your profile (TON), Gifts (TON), Daily reward (NEUR), Vault, Staking (flexible + locked periods, min stake from config, cancel-early with fee), DAO (proposals, vote; create requires staked AIBA), on-chain claim, Stars & Diamonds. |
-| **Yield Vault** | Dedicated staking tab: hero shows **minimum stake** (e.g. 100 AIBA, ecosystem-aligned); locked + flexible staking both show and enforce min; periods (30/90/180/365d), reward preview, countdown, cancel-early (5% fee). Wallet tab staking flow shows the same minimum. |
+| Tab                                      | What’s there                                                                                                                                                                                                                                                             |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Home**                                 | TonConnect, Vault info, Arena & battle (pick broker, arena, Run battle), Battle result, Referrals, Leaderboard.                                                                                                                                                          |
+| **Brokers**                              | My brokers (select, combine two for NEUR, mint one as NFT for AIBA).                                                                                                                                                                                                     |
+| **Super Futuristic Unified Marketplace** | Brokers, assets, rentals, system shop, boosts. Create broker with TON; list/buy with AIBA.                                                                                                                                                                               |
+| **Car Racing**                           | Autonomous car racing: tracks, races, my cars, create car (AIBA or TON), **list car for sale** or **buy** from players/system, enter race, leaderboard.                                                                                                                  |
+| **Bike Racing**                          | Autonomous bike racing: tracks, races, my bikes, create bike (AIBA or TON), **list bike for sale** or **buy** from players/system, enter race, leaderboard.                                                                                                              |
+| **Multiverse**                           | NFT universes, **My NFTs** (Broker NFTs you own), **stake** to earn AIBA daily, **claim** staking rewards. Mint Broker NFTs from the Brokers tab (pay AIBA).                                                                                                             |
+| **Arenas**                               | Arena selector, Run battle, Battle result (score, rewards, Stars/Diamond).                                                                                                                                                                                               |
+| **Guilds**                               | Groups (leaderboard rank, create or join, pay TON to create if not top N, boost group with TON), My groups, deposit/withdraw broker.                                                                                                                                     |
+| **Charity**                              | Unite for Good: campaigns, donate NEUR or AIBA, your impact, charity leaderboard.                                                                                                                                                                                        |
+| **University**                           | Courses and modules, progress, graduate badge, mint course badge / full certificate (pay TON).                                                                                                                                                                           |
+| **Updates**                              | Announcements (read/unread), system status, in-app support form (subject + message).                                                                                                                                                                                     |
+| **Wallet**                               | Profile & badges, Boost your profile (TON), Gifts (TON), Daily reward (NEUR), Vault, Staking (flexible + locked periods, min stake from config, cancel-early with fee), DAO (proposals, vote; create requires staked AIBA), on-chain claim, Stars & Diamonds.            |
+| **Yield Vault**                          | Dedicated staking tab: hero shows **minimum stake** (e.g. 100 AIBA, ecosystem-aligned); locked + flexible staking both show and enforce min; periods (30/90/180/365d), reward preview, countdown, cancel-early (5% fee). Wallet tab staking flow shows the same minimum. |
 
 ---
 
 ## 3. Connect Your Wallet (Recommended)
 
 - **Why:** Your TON address is used to:
-  - Save your progress (linked to Telegram + wallet).
-  - **Withdraw AIBA** on-chain: claims are tied to your wallet; you send one transaction to the vault to receive AIBA jettons.
+    - Save your progress (linked to Telegram + wallet).
+    - **Withdraw AIBA** on-chain: claims are tied to your wallet; you send one transaction to the vault to receive AIBA jettons.
 - **How:**
-  1. Tap **TonConnect** (or “Connect wallet”).
-  2. Choose your TON wallet (e.g. Tonkeeper, Telegram Wallet).
-  3. Approve the connection in the wallet.
+    1. Tap **TonConnect** (or “Connect wallet”).
+    2. Choose your TON wallet (e.g. Tonkeeper, Telegram Wallet).
+    3. Approve the connection in the wallet.
 - **Result:** The app shows “Wallet connected.” The backend stores your address for claims. If you don’t connect, you can still play and earn NEUR/AIBA credits, but you won’t be able to withdraw AIBA to the chain until you connect.
 
 ---
@@ -94,9 +94,9 @@ Use this phase table first, then continue with the full user guide below.
 
 - **What:** A **broker** is your in-game agent. Each has stats (Intelligence, Speed, Risk), level, energy, and cooldowns.
 - **Steps:**
-  1. Tap **Create starter broker**.
-  2. Wait for “Refresh brokers” to finish (or tap it once).
-  3. In **My brokers**, you should see one broker (e.g. “#… | INT 50 SPD 50 RISK 50 | energy 10”).
+    1. Tap **Create starter broker**.
+    2. Wait for “Refresh brokers” to finish (or tap it once).
+    3. In **My brokers**, you should see one broker (e.g. “#… | INT 50 SPD 50 RISK 50 | energy 10”).
 - **Tip:** You can have multiple brokers later; for now one is enough. Select it in the **My brokers** dropdown before every battle.
 
 ---
@@ -104,19 +104,19 @@ Use this phase table first, then continue with the full user guide below.
 ## 5. Choose Arena and Run a Battle
 
 - **Arena:** In the **Arena** dropdown you can choose:
-  - **prediction** — favors Intelligence.
-  - **simulation** — more balanced.
-  - **strategyWars** — more Risk.
-  - **guildWars** — requires guild membership; rewards split with guild.
+    - **prediction** — favors Intelligence.
+    - **simulation** — more balanced.
+    - **strategyWars** — more Risk.
+    - **guildWars** — requires guild membership; rewards split with guild.
 - **League:** The app typically uses **rookie** by default. Pro/elite may require higher broker level and cost more energy/cooldown.
 - **Run a battle:**
-  1. Select **one broker** in My brokers.
-  2. Select **arena** (and league if shown).
-  3. Tap **Run battle**.
-  4. Wait a moment; you’ll see **Battle result** with **Score**, **Reward AIBA (credits)**, and **Reward NEUR**. On a win you also earn **Stars** (every win) and **one Diamond** on your **first ever** win.
+    1. Select **one broker** in My brokers.
+    2. Select **arena** (and league if shown).
+    3. Tap **Run battle**.
+    4. Wait a moment; you’ll see **Battle result** with **Score**, **Reward AIBA (credits)**, and **Reward NEUR**. On a win you also earn **Stars** (every win) and **one Diamond** on your **first ever** win.
 - **Limits:**
-  - **Energy:** Each battle costs energy (e.g. 10–20 per battle). Energy regenerates over time (e.g. 1 per minute, cap 100). If you see “no energy,” wait or try again later.
-  - **Cooldown:** After a battle in an arena, you must wait (e.g. 30–60 seconds) before the next battle in that same arena/mode.
+    - **Energy:** Each battle costs energy (e.g. 10–20 per battle). Energy regenerates over time (e.g. 1 per minute, cap 100). If you see “no energy,” wait or try again later.
+    - **Cooldown:** After a battle in an arena, you must wait (e.g. 30–60 seconds) before the next battle in that same arena/mode.
 - **Optional:** Check **Auto-claim AIBA on battle** if you want the server to prepare a claim right after the battle so you can withdraw that battle’s AIBA in one step (see section 8).
 
 ---
@@ -138,8 +138,8 @@ Use this phase table first, then continue with the full user guide below.
 - **Your rank:** The Guilds tab shows **Your leaderboard rank** (e.g. #42 by score). **Top N** leaders (e.g. top 50) can **create a group for free**; everyone else must **pay TON** to create.
 - **My groups:** Tap **Refresh my guilds** to load your memberships. In the **My guilds** dropdown you’ll see guild name, member count, vault NEUR, and boost count.
 - **Create a group:**
-  - If you’re in the **top N** (e.g. top 50): enter **Name** (3–24 characters) and optional **Bio**, then tap **Create**. No payment.
-  - If you’re **not** in the top N: the app shows the **cost in TON** (e.g. 1–10 TON). Send that amount to the project’s **Leader Board** wallet, then **paste the transaction hash** in the box and tap **Create**. Refresh; select the new group.
+    - If you’re in the **top N** (e.g. top 50): enter **Name** (3–24 characters) and optional **Bio**, then tap **Create**. No payment.
+    - If you’re **not** in the top N: the app shows the **cost in TON** (e.g. 1–10 TON). Send that amount to the project’s **Leader Board** wallet, then **paste the transaction hash** in the box and tap **Create**. Refresh; select the new group.
 - **Join a group:** Get the **Guild ID** from someone (e.g. from the group’s invite). Paste it into **Join guild** and tap **Join**. Anyone can join any group.
 - **Boost a group:** To give a group more visibility, **pay TON** (cost shown, e.g. 1–10 TON) to the **Boost Group** wallet, then paste the **tx hash** next to that group and tap **Boost**. Each group shows its boost count.
 - **Deposit / withdraw broker:** Select a **guild** and a **broker**, then tap **Deposit selected broker** to put that broker in the guild pool (for guild wars). Tap **Withdraw selected broker** to take it back. You must withdraw a broker before you can list it on the marketplace.
@@ -151,9 +151,9 @@ Use this phase table first, then continue with the full user guide below.
 
 To turn **AIBA credits** into **real AIBA jettons** in your TON wallet:
 
-- **Prerequisites:**  
-  - Wallet **connected** (TonConnect).  
-  - Backend and vault configured (ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON provider). If not, “Create claim” or “Claim on-chain” may fail or show a message about backend config.
+- **Prerequisites:**
+    - Wallet **connected** (TonConnect).
+    - Backend and vault configured (ARENA_VAULT_ADDRESS, AIBA_JETTON_MASTER, ORACLE_PRIVATE_KEY_HEX, TON provider). If not, “Create claim” or “Claim on-chain” may fail or show a message about backend config.
 - **Two ways:**
 
 ### 8.1 Auto-claim after a battle
@@ -169,17 +169,17 @@ To turn **AIBA credits** into **real AIBA jettons** in your TON wallet:
 
 1. After one or more battles you have **AIBA credits** (see Balances).
 2. In **On-chain claim**, in the “Create a claim” section:
-   - Optionally enter an **Amount** (blank = all your AIBA credits).
-   - Tap **Create claim**.
+    - Optionally enter an **Amount** (blank = all your AIBA credits).
+    - Tap **Create claim**.
 3. You’ll see vault, to, amount, seqno, validUntil (and the backend stores the signed claim).
 4. Tap **Claim on-chain (TonConnect)**.
 5. Confirm in your wallet (you send one tx to the vault; the vault sends AIBA to your address).
 6. Wait for “Claim confirmed on-chain” (or use **Check claim status** if the app offers it).
 
 - **Important:**
-  - The **connected wallet** must match the claim’s **to** address. If you changed wallets, reconnect the correct one.
-  - Claims have a **validUntil** time (e.g. 10 minutes). If it expires, create a new claim (e.g. run another battle or create claim again).
-  - If you see “Vault inventory too low” or “Vault has insufficient TON,” the project needs to top up the vault; you can try again later.
+    - The **connected wallet** must match the claim’s **to** address. If you changed wallets, reconnect the correct one.
+    - Claims have a **validUntil** time (e.g. 10 minutes). If it expires, create a new claim (e.g. run another battle or create claim again).
+    - If you see “Vault inventory too low” or “Vault has insufficient TON,” the project needs to top up the vault; you can try again later.
 
 ---
 
@@ -192,10 +192,10 @@ The **Market** tab is the **Super Futuristic Unified Marketplace**: one hub for 
 - **What:** Pay TON once to create a **new broker** that is **automatically listed** on the global marketplace. You get **global recognition** as the seller.
 - **Where:** Market tab → **Create your broker (pay TON)** card (shown only when the feature is configured).
 - **Steps:**
-  1. Note the **cost** (e.g. 1–10 TON; set by admins).
-  2. Send that exact amount of TON to the **wallet address** shown or communicated by the project (Super Admin “Created Brokers” wallet).
-  3. After the transaction confirms, copy the **transaction hash** (tx hash).
-  4. Paste the tx hash into the input and tap **Create broker**.
+    1. Note the **cost** (e.g. 1–10 TON; set by admins).
+    2. Send that exact amount of TON to the **wallet address** shown or communicated by the project (Super Admin “Created Brokers” wallet).
+    3. After the transaction confirms, copy the **transaction hash** (tx hash).
+    4. Paste the tx hash into the input and tap **Create broker**.
 - **Result:** A new broker is created and listed on the marketplace at the default AIBA price. Everyone can see it; you appear as the seller.
 - **Tip:** If you see “txHash already used,” that payment was already applied. Use a new TON payment for another broker.
 
@@ -224,9 +224,9 @@ The **Market** tab is the **Super Futuristic Unified Marketplace**: one hub for 
 - **What:** Pay TON to **boost your profile** so you get higher visibility (e.g. “Boosted” badge, better placement).
 - **Where:** Wallet tab → **Boost your profile** card (shown when the feature is configured).
 - **Steps:**
-  1. Note the **cost** (e.g. 1–10 TON).
-  2. Send that amount of TON to the project’s **Boost Profile** wallet.
-  3. Paste the **transaction hash** and tap **Boost profile**.
+    1. Note the **cost** (e.g. 1–10 TON).
+    2. Send that amount of TON to the project’s **Boost Profile** wallet.
+    3. Paste the **transaction hash** and tap **Boost profile**.
 - **Result:** Your profile is boosted until the configured end date. The Profile card shows “Profile boosted until &lt;date&gt;.”
 
 ---
@@ -236,10 +236,10 @@ The **Market** tab is the **Super Futuristic Unified Marketplace**: one hub for 
 - **What:** Send a **gift** to another user by paying TON. The recipient sees it in “Gifts received”; you see yours in “Gifts sent.”
 - **Where:** Wallet tab → **Gifts** card.
 - **Send a gift:**
-  1. Enter the recipient: **Telegram ID** (numeric) or **@username**.
-  2. Note the **cost** (e.g. 1–10 TON per gift).
-  3. Send that amount of TON to the project’s **Gifts** wallet.
-  4. Paste the **transaction hash**, optionally add a **message**, and tap **Send gift**.
+    1. Enter the recipient: **Telegram ID** (numeric) or **@username**.
+    2. Note the **cost** (e.g. 1–10 TON per gift).
+    3. Send that amount of TON to the project’s **Gifts** wallet.
+    4. Paste the **transaction hash**, optionally add a **message**, and tap **Send gift**.
 - **Received / Sent:** The same card shows **Received** (gifts you got) and **Sent** (gifts you sent). You can’t send a gift to yourself.
 
 ---
@@ -332,30 +332,30 @@ The **Wallet** tab contains:
 
 ## 22. Troubleshooting
 
-| Problem | What to do |
-|--------|------------|
-| “Select a broker first” | Create a broker and select it in **My brokers** before **Run battle**. |
-| “No energy” / “need X have Y” | Wait for energy to regen (e.g. 1 per minute), or try a different broker if you have one. |
-| “Cooldown” / “retryAfterMs” | Wait the shown time before running another battle in the same arena/mode. |
-| “Battle failed. Is backend running…?” | Backend may be down or not reachable; try again later or check project status. |
-| “Wallet connected” never appears | Retry TonConnect; ensure wallet is unlocked and network is OK. |
-| “Connect wallet first” when claiming | Connect TonConnect; the claim is tied to your wallet address. |
-| “Connected wallet does not match claim recipient” | Reconnect the same wallet that was used when the claim was created. |
-| “Claim expired” | Create a new claim (run a battle with auto-claim or use “Create claim” again). |
-| “Vault inventory too low” / “insufficient TON” | Project must top up the vault; you can’t fix this from the app. |
-| “No claim created” / “Could not create claim” | Backend may not have vault/oracle configured, or your AIBA balance is 0; check Balances and try again after earning more. |
-| “Guild required” for guildWars | Join or create a guild, then run battle in **guildWars**. |
-| “Referral failed (already used?…)” | Ensure wallet is connected, code is correct, and you haven’t already applied a referral. |
-| “Create failed” / “TON payment verification failed” (create broker) | Ensure you sent the exact cost in TON to the correct wallet and paste the tx hash for that transfer; each tx hash can only be used once. |
-| “txHash already used” (create broker / boost / gift) | That payment was already applied; use a new TON transfer and new tx hash for another action. |
-| “recipient not found” (gift) | The Telegram ID or @username doesn’t exist in the system; they may need to open the app once. |
-| “Gifts not configured” / “Create broker with TON not configured” | The project hasn’t set the wallet and cost in the backend; the feature is disabled. |
-| “Combine failed” / “insufficient NEUR” | Ensure you have enough NEUR (battles, daily claim, referrals); select two different brokers (base and sacrifice). |
-| “Mint failed” / “insufficient AIBA” | You need enough AIBA credits (battles, marketplace sell); one broker at a time for mint. |
-| “Stake failed” / “Unstake failed” | Check AIBA balance; **minimum stake** applies (e.g. 100 AIBA; shown in Yield Vault / Wallet staking). For unstake, amount must be ≤ staked amount. |
-| “Daily claim failed” / “Already claimed today” | You can claim daily NEUR only once per day (UTC). Wait until the next day. |
-| “Vote failed” / “Create failed” (DAO) | Proposal may be closed; check you’re voting on an active proposal or that title is non-empty for create. |
-| “Donate failed” (charity) | Check campaign is active; ensure you have enough NEUR/AIBA and selected a campaign. |
+| Problem                                                             | What to do                                                                                                                                         |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| “Select a broker first”                                             | Create a broker and select it in **My brokers** before **Run battle**.                                                                             |
+| “No energy” / “need X have Y”                                       | Wait for energy to regen (e.g. 1 per minute), or try a different broker if you have one.                                                           |
+| “Cooldown” / “retryAfterMs”                                         | Wait the shown time before running another battle in the same arena/mode.                                                                          |
+| “Battle failed. Is backend running…?”                               | Backend may be down or not reachable; try again later or check project status.                                                                     |
+| “Wallet connected” never appears                                    | Retry TonConnect; ensure wallet is unlocked and network is OK.                                                                                     |
+| “Connect wallet first” when claiming                                | Connect TonConnect; the claim is tied to your wallet address.                                                                                      |
+| “Connected wallet does not match claim recipient”                   | Reconnect the same wallet that was used when the claim was created.                                                                                |
+| “Claim expired”                                                     | Create a new claim (run a battle with auto-claim or use “Create claim” again).                                                                     |
+| “Vault inventory too low” / “insufficient TON”                      | Project must top up the vault; you can’t fix this from the app.                                                                                    |
+| “No claim created” / “Could not create claim”                       | Backend may not have vault/oracle configured, or your AIBA balance is 0; check Balances and try again after earning more.                          |
+| “Guild required” for guildWars                                      | Join or create a guild, then run battle in **guildWars**.                                                                                          |
+| “Referral failed (already used?…)”                                  | Ensure wallet is connected, code is correct, and you haven’t already applied a referral.                                                           |
+| “Create failed” / “TON payment verification failed” (create broker) | Ensure you sent the exact cost in TON to the correct wallet and paste the tx hash for that transfer; each tx hash can only be used once.           |
+| “txHash already used” (create broker / boost / gift)                | That payment was already applied; use a new TON transfer and new tx hash for another action.                                                       |
+| “recipient not found” (gift)                                        | The Telegram ID or @username doesn’t exist in the system; they may need to open the app once.                                                      |
+| “Gifts not configured” / “Create broker with TON not configured”    | The project hasn’t set the wallet and cost in the backend; the feature is disabled.                                                                |
+| “Combine failed” / “insufficient NEUR”                              | Ensure you have enough NEUR (battles, daily claim, referrals); select two different brokers (base and sacrifice).                                  |
+| “Mint failed” / “insufficient AIBA”                                 | You need enough AIBA credits (battles, marketplace sell); one broker at a time for mint.                                                           |
+| “Stake failed” / “Unstake failed”                                   | Check AIBA balance; **minimum stake** applies (e.g. 100 AIBA; shown in Yield Vault / Wallet staking). For unstake, amount must be ≤ staked amount. |
+| “Daily claim failed” / “Already claimed today”                      | You can claim daily NEUR only once per day (UTC). Wait until the next day.                                                                         |
+| “Vote failed” / “Create failed” (DAO)                               | Proposal may be closed; check you’re voting on an active proposal or that title is non-empty for create.                                           |
+| “Donate failed” (charity)                                           | Check campaign is active; ensure you have enough NEUR/AIBA and selected a campaign.                                                                |
 
 ---
 

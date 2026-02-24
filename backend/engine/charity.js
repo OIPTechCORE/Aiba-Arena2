@@ -7,18 +7,16 @@ const { debitNeurFromUser, debitAibaFromUserNoBurn } = require('./economy');
  * Debits user, updates campaign raised/donorCount, creates CharityDonation.
  * Idempotent when requestId is provided (same requestId returns existing donation).
  */
-async function donateToCampaign(
-    {
-        telegramId,
-        campaignId,
-        amountNeur = 0,
-        amountAiba = 0,
-        requestId = null,
-        message = '',
-        anonymous = false,
-        source = 'balance',
-    } = {},
-) {
+async function donateToCampaign({
+    telegramId,
+    campaignId,
+    amountNeur = 0,
+    amountAiba = 0,
+    requestId = null,
+    message = '',
+    anonymous = false,
+    source = 'balance',
+} = {}) {
     const amtNeur = Math.floor(Number(amountNeur)) || 0;
     const amtAiba = Math.floor(Number(amountAiba)) || 0;
     if (amtNeur <= 0 && amtAiba <= 0) {
@@ -64,7 +62,8 @@ async function donateToCampaign(
             return {
                 ok: false,
                 error: debNeur.reason === 'insufficient' ? 'insufficient_neur' : 'debit_failed',
-                detail: debNeur.reason === 'insufficient' ? 'Insufficient NEUR' : (debNeur.error?.message || 'Debit failed'),
+                detail:
+                    debNeur.reason === 'insufficient' ? 'Insufficient NEUR' : debNeur.error?.message || 'Debit failed',
             };
         }
     }
@@ -84,13 +83,13 @@ async function donateToCampaign(
             return {
                 ok: false,
                 error: debAiba.reason === 'insufficient' ? 'insufficient_aiba' : 'debit_failed',
-                detail: debAiba.reason === 'insufficient' ? 'Insufficient AIBA' : (debAiba.error?.message || 'Debit failed'),
+                detail:
+                    debAiba.reason === 'insufficient' ? 'Insufficient AIBA' : debAiba.error?.message || 'Debit failed',
             };
         }
     }
 
-    const isFirstDonation =
-        (await CharityDonation.countDocuments({ campaignId, telegramId })) === 0;
+    const isFirstDonation = (await CharityDonation.countDocuments({ campaignId, telegramId })) === 0;
 
     const donation = await CharityDonation.create({
         campaignId,

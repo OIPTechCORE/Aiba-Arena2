@@ -20,7 +20,9 @@ export async function run(provider: NetworkProvider) {
     const burnBps = BigInt(burnBpsStr.trim());
 
     ui.write('Deploying AiAssetMarketplaceEscrowJetton…');
-    const escrow = provider.open(await AiAssetMarketplaceEscrowJetton.fromInit(owner, registry, jetton, treasury, feeBps, burnBps));
+    const escrow = provider.open(
+        await AiAssetMarketplaceEscrowJetton.fromInit(owner, registry, jetton, treasury, feeBps, burnBps),
+    );
     await escrow.send(provider.sender(), { value: toNano('0.1') }, null);
     await provider.waitForDeploy(escrow.address);
     ui.write(`AiAssetMarketplaceEscrowJetton deployed: ${escrow.address.toString()}`);

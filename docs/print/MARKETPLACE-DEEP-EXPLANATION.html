@@ -1,250 +1,341 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>MARKETPLACE DEEP EXPLANATION — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>MARKETPLACE DEEP EXPLANATION</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Super Futuristic Unified Marketplace — Deep Explanation &amp; Readiness Audit</h1>
-<p>A full technical and product explanation of the <strong>Super Futuristic Unified Marketplace</strong>: super, futuristic, <strong>multi-tabbed</strong>, <strong>seamlessly extensible</strong>, <strong>full fledged</strong>. One place for brokers, assets, rentals, system shop, and boosts. Trade with TON + AIBA. List, buy, create — all in one hub.</p>
-<hr/>
-<h2>1. Spec vs implementation (deeply operational, full fledged?)</h2>
-<table>
-<thead><tr>
-<th>Requirement</th>
-<th>Status</th>
-<th>Notes</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>One place (hub)</strong></td>
-<td>✅</td>
-<td>Single tab “Market” with flow switches: Overview, Trade, Rental, System, Boosts. Assets accessible via “Go to AI Assets” from Overview.</td>
-</tr>
-<tr>
-<td><strong>Brokers</strong></td>
-<td>✅</td>
-<td>Create with TON (Overview); list/buy with AIBA (Trade); buy from system for AIBA (System).</td>
-</tr>
-<tr>
-<td><strong>Assets</strong></td>
-<td>✅</td>
-<td>In hub via shortcut to AI Assets tab (mint, list, buy, rent). Full flows on Assets tab.</td>
-</tr>
-<tr>
-<td><strong>Rentals</strong></td>
-<td>✅</td>
-<td>List broker for rent (AIBA/hour), rent, unlist — all in Rental flow.</td>
-</tr>
-<tr>
-<td><strong>System shop</strong></td>
-<td>✅</td>
-<td>Buy system brokers for AIBA (System flow). Stars Store in Overview (AIBA or TON).</td>
-</tr>
-<tr>
-<td><strong>Boosts</strong></td>
-<td>✅</td>
-<td>Buy with NEUR or TON in Boosts flow (config-driven; TON when boostCostTonNano + BOOST_TON_WALLET set).</td>
-</tr>
-<tr>
-<td><strong>Trade with TON + AIBA</strong></td>
-<td>✅</td>
-<td>TON: create broker, Stars Store, boosts. AIBA: broker list/buy, system brokers, rentals, boosts (NEUR in-app).</td>
-</tr>
-<tr>
-<td><strong>List, buy, create</strong></td>
-<td>✅</td>
-<td>List: brokers (Trade), rentals (Rental). Buy: listings (Trade), system (System), rentals (Rental), boosts (Boosts). Create: broker with TON (Overview).</td>
-</tr>
-</tbody></table>
-<p><strong>Verdict: Deeply operational, full fledged.</strong> Multi-tabbed and seamlessly extensible via <code>MARKET_FLOWS</code>; all pillars implemented; TON + AIBA; list, buy, create across the hub.</p>
-<hr/>
-<h2>2. Hub structure (miniapp)</h2>
-<p><strong>Tab:</strong> <code>market</code> — “Super Futuristic Unified Marketplace”.</p>
-<p><strong>Multi-tabbed bar:</strong> Driven by <code>MARKET_FLOWS</code> (id, label, optional badge). <strong>Seamlessly extensible:</strong> add entry + one panel <code>marketFlow === id</code>. <strong>Flows:</strong> <code>overview</code> | <code>trade</code> | <code>rental</code> | <code>system</code> | <code>boosts</code>.</p>
-<h3>2.1 Overview</h3>
-<ul>
-<li><strong>Stars Store:</strong> Buy Stars with AIBA or TON (<code>/api/stars-store/*</code>). Shown when <code>starsStoreConfig?.enabled</code>.</li>
-<li><strong>AI Assets:</strong> Card with “Go to AI Assets” → <code>setTab('assets')</code> for mint, list, buy, rent.</li>
-</ul>
-<h3>2.2 Trade</h3>
-<ul>
-<li><strong>Buy listing:</strong> <code>POST /api/marketplace/buy</code> (requestId, listingId). Debit buyer, credit seller minus fee, transfer ownership.</li>
-<li><strong>Delist:</strong> <code>POST /api/marketplace/delist</code> (seller only).</li>
-<li><strong>Data:</strong> <code>GET /api/marketplace/listings</code> (with broker snapshot). Refreshed on tab open and on Refresh.</li>
-</ul>
-<h3>2.3 Rental</h3>
-<ul>
-<li><strong>Rent:</strong> <code>POST /api/broker-rental/:id/rent</code> — pay for 1 hour; owner gets amount minus fee; broker gets <code>rentedByTelegramId</code> / <code>rentedUntil</code>.</li>
-<li><strong>Unlist:</strong> <code>POST /api/broker-rental/:id/unlist</code> (owner, only when not rented).</li>
-<li><strong>Data:</strong> <code>GET /api/broker-rental</code> (listed rentals, broker populated). Refreshed on tab open and Refresh.</li>
-</ul>
-<h3>2.4 System</h3>
-<ul>
-</ul>
-<h3>2.5 Boosts</h3>
-<ul>
-<li><strong>Buy with TON:</strong> When <code>GET /api/boosts/config</code> returns <code>boostCostTonNano &gt; 0</code> and <code>walletForTon</code>: input tx hash → <code>POST /api/boosts/buy-with-ton</code> (boostKey, txHash).</li>
-<li><strong>Active boosts:</strong> <code>GET /api/boosts/mine</code>. Display multiplier and expiresAt.</li>
-</ul>
-<hr/>
-<h2>3. Backend APIs</h2>
-<h3>3.1 Marketplace (<code>/api/marketplace</code>)</h3>
-<table>
-<thead><tr>
-<th>Method</th>
-<th>Path</th>
-<th>Auth</th>
-<th>Purpose</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>GET</td>
-<td>/system-brokers</td>
-<td>—</td>
-<td>Catalog of system brokers (AIBA).</td>
-</tr>
-<tr>
-<td>GET</td>
-<td>/listings</td>
-<td>Telegram</td>
-<td>Active broker listings with broker snapshot.</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/list</td>
-<td>Telegram</td>
-<td>List broker (brokerId, priceAIBA, priceNEUR?).</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/delist</td>
-<td>Telegram</td>
-<td>Cancel own listing.</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/buy</td>
-<td>Telegram</td>
-<td>Buy listing (AIBA); transfer broker; fee to platform.</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/buy-system-broker</td>
-<td>Telegram</td>
-<td>Buy from system (catalogId); debit AIBA, create Broker.</td>
-</tr>
-</tbody></table>
-<p><strong>Models:</strong> <code>Listing</code> (brokerId, sellerTelegramId, priceAIBA, priceNEUR, status). <code>Broker</code> (owner transfer on buy).</p>
-<h3>3.2 Broker rental (<code>/api/broker-rental</code>)</h3>
-<table>
-<thead><tr>
-<th>Method</th>
-<th>Path</th>
-<th>Auth</th>
-<th>Purpose</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>GET</td>
-<td>/</td>
-<td>—</td>
-<td>List available rentals (status 'listed'), broker populated.</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/list</td>
-<td>Telegram</td>
-<td>List broker for rent (brokerId, priceAibaPerHour).</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/:id/rent</td>
-<td>Telegram</td>
-<td>Rent for 1 hour (debit AIBA, credit owner minus fee, set rentedBy/rentedUntil).</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/:id/unlist</td>
-<td>Telegram</td>
-<td>Unlist own rental (only if not rented).</td>
-</tr>
-</tbody></table>
-<p><strong>Models:</strong> <code>BrokerRental</code> (brokerId, ownerTelegramId, priceAibaPerHour, status: listed|rented|unlisted, rentedByTelegramId, returnAt). Fee from <code>economy.brokerRentalFeeBps</code>.</p>
-<h3>3.3 Boosts (<code>/api/boosts</code>)</h3>
-<table>
-<thead><tr>
-<th>Method</th>
-<th>Path</th>
-<th>Auth</th>
-<th>Purpose</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>GET</td>
-<td>/config</td>
-<td>—</td>
-<td>boostCostTonNano, walletForTon, boostCostNeur, duration, multiplier (for UI).</td>
-</tr>
-<tr>
-<td>GET</td>
-<td>/mine</td>
-<td>Telegram</td>
-<td>Active boosts for user.</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/buy</td>
-<td>Telegram</td>
-<td>Buy boost with NEUR (boostKey, requestId).</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/buy-with-ton</td>
-<td>Telegram</td>
-<td>Buy boost with TON (boostKey, txHash); verify payment to BOOST_TON_WALLET.</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>/buy-profile-with-ton</td>
-<td>Telegram</td>
-<td>Profile visibility boost (separate product).</td>
-</tr>
-</tbody></table>
-<h3>3.4 Assets (separate tab, same “one hub” concept)</h3>
-<ul>
-<li><strong>Assets:</strong> <code>/api/assets/mine</code>, <code>/mint</code>, <code>/upgrade</code>. Accessible from hub via “Go to AI Assets”.</li>
-</ul>
-<hr/>
-<h2>4. Data flow on tab open</h2>
-<p>When <code>tab === 'market'</code>:</p>
-<ul>
-<li><code>refreshStarsStoreConfig()</code> — Stars Store config.</li>
-<li><code>refreshReferralMe()</code> — referral state if used in UI.</li>
-<li><code>refreshBrokerRentals()</code> — available rentals.</li>
-<li><code>refreshBoostConfig()</code> — boost costs and TON wallet for Boosts flow.</li>
-</ul>
-<hr/>
-<h2>5. Economy and fees</h2>
-<ul>
-<li><strong>System broker buy:</strong> Full price in AIBA; no fee (system receives via debit).</li>
-<li><strong>Rental:</strong> Renter pays <code>priceAibaPerHour</code>; platform takes <code>brokerRentalFeeBps</code> (e.g. 2000 = 20%); owner receives the rest.</li>
-<li><strong>Boost (NEUR):</strong> Full cost in NEUR. <strong>Boost (TON):</strong> TON sent to BOOST_TON_WALLET; cost from <code>boostCostTonNano</code>.</li>
-</ul>
-<hr/>
-<h2>6. Optional improvements (not blocking)</h2>
-<ul>
-<li><strong>Assets inside hub:</strong> Optionally add an “Assets” flow in the same tab (e.g. embed or iframe) instead of only a shortcut to the Assets tab.</li>
-</ul>
-<hr/>
-<p><strong>Conclusion:</strong> The Super Futuristic Unified Marketplace is <strong>deeply operational and full fledged</strong>: super, futuristic, <strong>multi-tabbed</strong> (data-driven <code>MARKET_FLOWS</code>), <strong>seamlessly extensible</strong> (add flow + panel), and <strong>unified</strong> in one hub. Overview (create broker TON, Stars Store, AI Assets shortcut), Trade (list/buy brokers AIBA), Rental (list/rent/unlist AIBA), System (buy brokers AIBA), Boosts (NEUR + TON). List, buy, and create everywhere; TON and AIBA throughout; Refresh all in hero.</p>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>MARKETPLACE DEEP EXPLANATION — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>MARKETPLACE DEEP EXPLANATION</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Super Futuristic Unified Marketplace — Deep Explanation &amp; Readiness Audit</h1>
+            <p>
+                A full technical and product explanation of the <strong>Super Futuristic Unified Marketplace</strong>:
+                super, futuristic, <strong>multi-tabbed</strong>, <strong>seamlessly extensible</strong>,
+                <strong>full fledged</strong>. One place for brokers, assets, rentals, system shop, and boosts. Trade
+                with TON + AIBA. List, buy, create — all in one hub.
+            </p>
+            <hr />
+            <h2>1. Spec vs implementation (deeply operational, full fledged?)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Requirement</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>One place (hub)</strong></td>
+                        <td>✅</td>
+                        <td>
+                            Single tab “Market” with flow switches: Overview, Trade, Rental, System, Boosts. Assets
+                            accessible via “Go to AI Assets” from Overview.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Brokers</strong></td>
+                        <td>✅</td>
+                        <td>
+                            Create with TON (Overview); list/buy with AIBA (Trade); buy from system for AIBA (System).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Assets</strong></td>
+                        <td>✅</td>
+                        <td>In hub via shortcut to AI Assets tab (mint, list, buy, rent). Full flows on Assets tab.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rentals</strong></td>
+                        <td>✅</td>
+                        <td>List broker for rent (AIBA/hour), rent, unlist — all in Rental flow.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>System shop</strong></td>
+                        <td>✅</td>
+                        <td>Buy system brokers for AIBA (System flow). Stars Store in Overview (AIBA or TON).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Boosts</strong></td>
+                        <td>✅</td>
+                        <td>
+                            Buy with NEUR or TON in Boosts flow (config-driven; TON when boostCostTonNano +
+                            BOOST_TON_WALLET set).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Trade with TON + AIBA</strong></td>
+                        <td>✅</td>
+                        <td>
+                            TON: create broker, Stars Store, boosts. AIBA: broker list/buy, system brokers, rentals,
+                            boosts (NEUR in-app).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>List, buy, create</strong></td>
+                        <td>✅</td>
+                        <td>
+                            List: brokers (Trade), rentals (Rental). Buy: listings (Trade), system (System), rentals
+                            (Rental), boosts (Boosts). Create: broker with TON (Overview).
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Verdict: Deeply operational, full fledged.</strong> Multi-tabbed and seamlessly extensible via
+                <code>MARKET_FLOWS</code>; all pillars implemented; TON + AIBA; list, buy, create across the hub.
+            </p>
+            <hr />
+            <h2>2. Hub structure (miniapp)</h2>
+            <p><strong>Tab:</strong> <code>market</code> — “Super Futuristic Unified Marketplace”.</p>
+            <p>
+                <strong>Multi-tabbed bar:</strong> Driven by <code>MARKET_FLOWS</code> (id, label, optional badge).
+                <strong>Seamlessly extensible:</strong> add entry + one panel <code>marketFlow === id</code>.
+                <strong>Flows:</strong> <code>overview</code> | <code>trade</code> | <code>rental</code> |
+                <code>system</code> | <code>boosts</code>.
+            </p>
+            <h3>2.1 Overview</h3>
+            <ul>
+                <li>
+                    <strong>Stars Store:</strong> Buy Stars with AIBA or TON (<code>/api/stars-store/*</code>). Shown
+                    when <code>starsStoreConfig?.enabled</code>.
+                </li>
+                <li>
+                    <strong>AI Assets:</strong> Card with “Go to AI Assets” → <code>setTab('assets')</code> for mint,
+                    list, buy, rent.
+                </li>
+            </ul>
+            <h3>2.2 Trade</h3>
+            <ul>
+                <li>
+                    <strong>Buy listing:</strong> <code>POST /api/marketplace/buy</code> (requestId, listingId). Debit
+                    buyer, credit seller minus fee, transfer ownership.
+                </li>
+                <li><strong>Delist:</strong> <code>POST /api/marketplace/delist</code> (seller only).</li>
+                <li>
+                    <strong>Data:</strong> <code>GET /api/marketplace/listings</code> (with broker snapshot). Refreshed
+                    on tab open and on Refresh.
+                </li>
+            </ul>
+            <h3>2.3 Rental</h3>
+            <ul>
+                <li>
+                    <strong>Rent:</strong> <code>POST /api/broker-rental/:id/rent</code> — pay for 1 hour; owner gets
+                    amount minus fee; broker gets <code>rentedByTelegramId</code> / <code>rentedUntil</code>.
+                </li>
+                <li>
+                    <strong>Unlist:</strong> <code>POST /api/broker-rental/:id/unlist</code> (owner, only when not
+                    rented).
+                </li>
+                <li>
+                    <strong>Data:</strong> <code>GET /api/broker-rental</code> (listed rentals, broker populated).
+                    Refreshed on tab open and Refresh.
+                </li>
+            </ul>
+            <h3>2.4 System</h3>
+            <ul></ul>
+            <h3>2.5 Boosts</h3>
+            <ul>
+                <li>
+                    <strong>Buy with TON:</strong> When <code>GET /api/boosts/config</code> returns
+                    <code>boostCostTonNano &gt; 0</code> and <code>walletForTon</code>: input tx hash →
+                    <code>POST /api/boosts/buy-with-ton</code> (boostKey, txHash).
+                </li>
+                <li>
+                    <strong>Active boosts:</strong> <code>GET /api/boosts/mine</code>. Display multiplier and expiresAt.
+                </li>
+            </ul>
+            <hr />
+            <h2>3. Backend APIs</h2>
+            <h3>3.1 Marketplace (<code>/api/marketplace</code>)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Path</th>
+                        <th>Auth</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GET</td>
+                        <td>/system-brokers</td>
+                        <td>—</td>
+                        <td>Catalog of system brokers (AIBA).</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/listings</td>
+                        <td>Telegram</td>
+                        <td>Active broker listings with broker snapshot.</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/list</td>
+                        <td>Telegram</td>
+                        <td>List broker (brokerId, priceAIBA, priceNEUR?).</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/delist</td>
+                        <td>Telegram</td>
+                        <td>Cancel own listing.</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/buy</td>
+                        <td>Telegram</td>
+                        <td>Buy listing (AIBA); transfer broker; fee to platform.</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/buy-system-broker</td>
+                        <td>Telegram</td>
+                        <td>Buy from system (catalogId); debit AIBA, create Broker.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Models:</strong> <code>Listing</code> (brokerId, sellerTelegramId, priceAIBA, priceNEUR,
+                status). <code>Broker</code> (owner transfer on buy).
+            </p>
+            <h3>3.2 Broker rental (<code>/api/broker-rental</code>)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Path</th>
+                        <th>Auth</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GET</td>
+                        <td>/</td>
+                        <td>—</td>
+                        <td>List available rentals (status 'listed'), broker populated.</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/list</td>
+                        <td>Telegram</td>
+                        <td>List broker for rent (brokerId, priceAibaPerHour).</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/:id/rent</td>
+                        <td>Telegram</td>
+                        <td>Rent for 1 hour (debit AIBA, credit owner minus fee, set rentedBy/rentedUntil).</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/:id/unlist</td>
+                        <td>Telegram</td>
+                        <td>Unlist own rental (only if not rented).</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Models:</strong> <code>BrokerRental</code> (brokerId, ownerTelegramId, priceAibaPerHour, status:
+                listed|rented|unlisted, rentedByTelegramId, returnAt). Fee from <code>economy.brokerRentalFeeBps</code>.
+            </p>
+            <h3>3.3 Boosts (<code>/api/boosts</code>)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Path</th>
+                        <th>Auth</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GET</td>
+                        <td>/config</td>
+                        <td>—</td>
+                        <td>boostCostTonNano, walletForTon, boostCostNeur, duration, multiplier (for UI).</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/mine</td>
+                        <td>Telegram</td>
+                        <td>Active boosts for user.</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/buy</td>
+                        <td>Telegram</td>
+                        <td>Buy boost with NEUR (boostKey, requestId).</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/buy-with-ton</td>
+                        <td>Telegram</td>
+                        <td>Buy boost with TON (boostKey, txHash); verify payment to BOOST_TON_WALLET.</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/buy-profile-with-ton</td>
+                        <td>Telegram</td>
+                        <td>Profile visibility boost (separate product).</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>3.4 Assets (separate tab, same “one hub” concept)</h3>
+            <ul>
+                <li>
+                    <strong>Assets:</strong> <code>/api/assets/mine</code>, <code>/mint</code>, <code>/upgrade</code>.
+                    Accessible from hub via “Go to AI Assets”.
+                </li>
+            </ul>
+            <hr />
+            <h2>4. Data flow on tab open</h2>
+            <p>When <code>tab === 'market'</code>:</p>
+            <ul>
+                <li><code>refreshStarsStoreConfig()</code> — Stars Store config.</li>
+                <li><code>refreshReferralMe()</code> — referral state if used in UI.</li>
+                <li><code>refreshBrokerRentals()</code> — available rentals.</li>
+                <li><code>refreshBoostConfig()</code> — boost costs and TON wallet for Boosts flow.</li>
+            </ul>
+            <hr />
+            <h2>5. Economy and fees</h2>
+            <ul>
+                <li><strong>System broker buy:</strong> Full price in AIBA; no fee (system receives via debit).</li>
+                <li>
+                    <strong>Rental:</strong> Renter pays <code>priceAibaPerHour</code>; platform takes
+                    <code>brokerRentalFeeBps</code> (e.g. 2000 = 20%); owner receives the rest.
+                </li>
+                <li>
+                    <strong>Boost (NEUR):</strong> Full cost in NEUR. <strong>Boost (TON):</strong> TON sent to
+                    BOOST_TON_WALLET; cost from <code>boostCostTonNano</code>.
+                </li>
+            </ul>
+            <hr />
+            <h2>6. Optional improvements (not blocking)</h2>
+            <ul>
+                <li>
+                    <strong>Assets inside hub:</strong> Optionally add an “Assets” flow in the same tab (e.g. embed or
+                    iframe) instead of only a shortcut to the Assets tab.
+                </li>
+            </ul>
+            <hr />
+            <p>
+                <strong>Conclusion:</strong> The Super Futuristic Unified Marketplace is
+                <strong>deeply operational and full fledged</strong>: super, futuristic,
+                <strong>multi-tabbed</strong> (data-driven <code>MARKET_FLOWS</code>),
+                <strong>seamlessly extensible</strong> (add flow + panel), and <strong>unified</strong> in one hub.
+                Overview (create broker TON, Stars Store, AI Assets shortcut), Trade (list/buy brokers AIBA), Rental
+                (list/rent/unlist AIBA), System (buy brokers AIBA), Boosts (NEUR + TON). List, buy, and create
+                everywhere; TON and AIBA throughout; Refresh all in hero.
+            </p>
+        </div>
+    </body>
 </html>

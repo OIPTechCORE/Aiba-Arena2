@@ -29,7 +29,10 @@ async function sendTelegramMessage(chatId, text, options = {}) {
 }
 
 /** Notify user that their broker won a battle (push notification). */
-async function notifyBattleWin(telegramId, { score, arena, rewardAiba, rewardNeur, starsGranted = 0, firstWinDiamond = 0 }) {
+async function notifyBattleWin(
+    telegramId,
+    { score, arena, rewardAiba, rewardNeur, starsGranted = 0, firstWinDiamond = 0 },
+) {
     let text = `🏆 <b>Your AI broker just won!</b>\n\nScore: ${score}\nArena: ${arena}\nReward: ${rewardAiba ?? 0} AIBA, ${rewardNeur ?? 0} NEUR`;
     if (Number(starsGranted) > 0) text += `\n⭐ +${starsGranted} Stars`;
     if (Number(firstWinDiamond) > 0) text += `\n💎 +${firstWinDiamond} Diamond (first win!)`;

@@ -1,79 +1,161 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>SHIP READY GAP CLOSURE — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>SHIP READY GAP CLOSURE</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Ship-Ready Gap Closure — Implementation Summary</h1>
-<p><strong>Scope:</strong> Backend (predict, adminPredict, staking, models), admin panel, miniapp, ops scripts. <strong>Execution order:</strong> Phase 1 → Phase 2 → Phase 3 (incremental, no broad refactors).</p>
-<hr/>
-<h2>Phase 1 (P0): Ship Blockers and Data Integrity</h2>
-<h3>Backend transaction safety</h3>
-<ul>
-<li>- Idempotency: <code>requestId</code> stored on <code>PredictBet</code>; at start of handler, if a bet with same <code>requestId</code> exists, return <code>201</code> with same payload.</li>
-<li>- Debit duplicate: if <code>debitAibaFromUser</code> returns <code>duplicate: true</code>, return <code>201</code> with same payload.</li>
-<li>- Bet create + pool update remain in a single Mongo transaction; <code>requestId</code> included in created bet.</li>
-</ul>
-<ul>
-<li>- Atomic order: <strong>transaction first</strong> (event status → resolved + <code>TreasuryOp</code> create), <strong>then</strong> payouts (idempotent by <code>sourceId</code>). Payout failures are logged and rethrown (no silent swallow).</li>
-<li>- Fixed payout loop: <code>credited</code> is now assigned from <code>creditAibaNoCap</code> and checked; payout failure is logged with <code>eventId</code>, <code>betId</code>, <code>share</code>, <code>telegramId</code>.</li>
-</ul>
-<ul>
-<li>- <strong>Stake:</strong> If <code>debitAibaFromUser</code> returns <code>duplicate: true</code>, return existing summary (no double-increment).</li>
-<li>- <strong>Stake-locked:</strong> Same; on duplicate return <code>201</code> with existing lock if found.</li>
-<li>- <strong>Claim:</strong> Capture <code>credited</code> from <code>creditAibaNoCap</code>; if <code>!credited?.ok</code> return 500; if <code>credited.duplicate</code> return 200 without updating <code>lastClaimedAt</code>.</li>
-<li>- <strong>Claim-lock:</strong> If <code>credited.duplicate</code> return success payload without further side effects.</li>
-</ul>
-<h3>Backend validation and idempotency</h3>
-<ul>
-<li><strong>predict:</strong> Bet route already uses <code>validateBody</code> (brokerId, amountAiba, requestId) and <code>validateParams</code> for event id; idempotency via <code>requestId</code> and duplicate debit handling.</li>
-</ul>
-<h3>Observability and runtime correctness</h3>
-<ul>
-<li><strong>Health/monitoring scripts:</strong> <code>scripts/health-check.js</code> and <code>scripts/monitoring-check.js</code> use <code>BACKEND_URL || NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'</code>. Comment added: default is <code>http://localhost:5000</code>; set env for production.</li>
-</ul>
-<h3>Models</h3>
-<ul>
-<li>- Added <code>requestId</code> (string, sparse).</li>
-<li>- Index for resolve path: <code>{ eventId: 1, brokerId: 1 }</code> (already present).</li>
-<li>- Idempotency index: <code>{ requestId: 1 }</code> unique, sparse.</li>
-</ul>
-<hr/>
-<h2>Phase 2 (P1): Frontend Stability and Auth/Error Recovery</h2>
-<h3>Admin panel</h3>
-<ul>
-<li><strong>Error state:</strong> Global error banner has a &quot;Dismiss&quot; button; <code>handleApiError</code> used across fetch paths.</li>
-<li><strong>Loading:</strong> <code>tabLoading</code> set in the tab <code>useEffect</code> for all high-impact tabs.</li>
-<li><strong>Error boundary:</strong> <code>AdminErrorBoundary</code> in <code>admin-panel/src/app/layout.js</code> wraps children; renders a simple &quot;Something went wrong&quot; UI on render error.</li>
-</ul>
-<h3>Miniapp</h3>
-<ul>
-<li><strong>Trainer page:</strong> Hook dependencies already correct (<code>api</code>, <code>tab</code>, <code>leaderboardBy</code>, <code>leaderboardPeriod</code>, <code>trainer?.isTrainer</code>, <code>trainer?.status</code>).</li>
-<li><strong>Providers:</strong> Comment added that production should set <code>NEXT_PUBLIC_APP_URL</code> and optionally <code>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</code>; logic remains env-driven.</li>
-<li><strong>Brokers proxy:</strong> <code>miniapp/src/app/api/brokers/[[...path]]/route.js</code> already implements GET and POST proxy to backend.</li>
-</ul>
-<hr/>
-<h2>Phase 3 (P2): Hardening and Guardrails</h2>
-<ul>
-<li><strong>Admin audit:</strong> <code>adminPredict</code> router uses <code>adminAudit()</code> middleware for all admin predict routes.</li>
-<li><strong>Treasury op failures:</strong> In resolve, <code>TreasuryOp.create</code> is wrapped in try/catch; on failure, error is logged with <code>eventId</code>, <code>vigAiba</code>, and rethrown so the transaction aborts and the client receives 500.</li>
-<li><strong>PredictBet index:</strong> Supporting index for resolve path <code>{ eventId: 1, brokerId: 1 }</code> is present; added <code>{ requestId: 1 }</code> unique sparse for idempotency.</li>
-</ul>
-<hr/>
-<h2>Verification (recommended)</h2>
-<ul>
-<li><strong>Admin:</strong> Expired/invalid token → 401/403 → token cleared and re-auth message; trigger an API error and confirm global error banner and Dismiss.</li>
-<li><strong>Miniapp:</strong> Switch to Brokers, Leaderboard, Tasks, Charity, University and force a backend error to confirm status/task message shows.</li>
-<li><strong>Regression:</strong> Run existing lint/tests for backend and frontends.</li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>SHIP READY GAP CLOSURE — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>SHIP READY GAP CLOSURE</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Ship-Ready Gap Closure — Implementation Summary</h1>
+            <p>
+                <strong>Scope:</strong> Backend (predict, adminPredict, staking, models), admin panel, miniapp, ops
+                scripts. <strong>Execution order:</strong> Phase 1 → Phase 2 → Phase 3 (incremental, no broad
+                refactors).
+            </p>
+            <hr />
+            <h2>Phase 1 (P0): Ship Blockers and Data Integrity</h2>
+            <h3>Backend transaction safety</h3>
+            <ul>
+                <li>
+                    - Idempotency: <code>requestId</code> stored on <code>PredictBet</code>; at start of handler, if a
+                    bet with same <code>requestId</code> exists, return <code>201</code> with same payload.
+                </li>
+                <li>
+                    - Debit duplicate: if <code>debitAibaFromUser</code> returns <code>duplicate: true</code>, return
+                    <code>201</code> with same payload.
+                </li>
+                <li>
+                    - Bet create + pool update remain in a single Mongo transaction; <code>requestId</code> included in
+                    created bet.
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    - Atomic order: <strong>transaction first</strong> (event status → resolved +
+                    <code>TreasuryOp</code> create), <strong>then</strong> payouts (idempotent by
+                    <code>sourceId</code>). Payout failures are logged and rethrown (no silent swallow).
+                </li>
+                <li>
+                    - Fixed payout loop: <code>credited</code> is now assigned from <code>creditAibaNoCap</code> and
+                    checked; payout failure is logged with <code>eventId</code>, <code>betId</code>, <code>share</code>,
+                    <code>telegramId</code>.
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    - <strong>Stake:</strong> If <code>debitAibaFromUser</code> returns <code>duplicate: true</code>,
+                    return existing summary (no double-increment).
+                </li>
+                <li>
+                    - <strong>Stake-locked:</strong> Same; on duplicate return <code>201</code> with existing lock if
+                    found.
+                </li>
+                <li>
+                    - <strong>Claim:</strong> Capture <code>credited</code> from <code>creditAibaNoCap</code>; if
+                    <code>!credited?.ok</code> return 500; if <code>credited.duplicate</code> return 200 without
+                    updating <code>lastClaimedAt</code>.
+                </li>
+                <li>
+                    - <strong>Claim-lock:</strong> If <code>credited.duplicate</code> return success payload without
+                    further side effects.
+                </li>
+            </ul>
+            <h3>Backend validation and idempotency</h3>
+            <ul>
+                <li>
+                    <strong>predict:</strong> Bet route already uses <code>validateBody</code> (brokerId, amountAiba,
+                    requestId) and <code>validateParams</code> for event id; idempotency via <code>requestId</code> and
+                    duplicate debit handling.
+                </li>
+            </ul>
+            <h3>Observability and runtime correctness</h3>
+            <ul>
+                <li>
+                    <strong>Health/monitoring scripts:</strong> <code>scripts/health-check.js</code> and
+                    <code>scripts/monitoring-check.js</code> use
+                    <code>BACKEND_URL || NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'</code>. Comment added:
+                    default is <code>http://localhost:5000</code>; set env for production.
+                </li>
+            </ul>
+            <h3>Models</h3>
+            <ul>
+                <li>- Added <code>requestId</code> (string, sparse).</li>
+                <li>- Index for resolve path: <code>{ eventId: 1, brokerId: 1 }</code> (already present).</li>
+                <li>- Idempotency index: <code>{ requestId: 1 }</code> unique, sparse.</li>
+            </ul>
+            <hr />
+            <h2>Phase 2 (P1): Frontend Stability and Auth/Error Recovery</h2>
+            <h3>Admin panel</h3>
+            <ul>
+                <li>
+                    <strong>Error state:</strong> Global error banner has a &quot;Dismiss&quot; button;
+                    <code>handleApiError</code> used across fetch paths.
+                </li>
+                <li>
+                    <strong>Loading:</strong> <code>tabLoading</code> set in the tab <code>useEffect</code> for all
+                    high-impact tabs.
+                </li>
+                <li>
+                    <strong>Error boundary:</strong> <code>AdminErrorBoundary</code> in
+                    <code>admin-panel/src/app/layout.js</code> wraps children; renders a simple &quot;Something went
+                    wrong&quot; UI on render error.
+                </li>
+            </ul>
+            <h3>Miniapp</h3>
+            <ul>
+                <li>
+                    <strong>Trainer page:</strong> Hook dependencies already correct (<code>api</code>,
+                    <code>tab</code>, <code>leaderboardBy</code>, <code>leaderboardPeriod</code>,
+                    <code>trainer?.isTrainer</code>, <code>trainer?.status</code>).
+                </li>
+                <li>
+                    <strong>Providers:</strong> Comment added that production should set
+                    <code>NEXT_PUBLIC_APP_URL</code> and optionally <code>NEXT_PUBLIC_TONCONNECT_MANIFEST_URL</code>;
+                    logic remains env-driven.
+                </li>
+                <li>
+                    <strong>Brokers proxy:</strong>
+                    <code>miniapp/src/app/api/brokers/[[...path]]/route.js</code> already implements GET and POST proxy
+                    to backend.
+                </li>
+            </ul>
+            <hr />
+            <h2>Phase 3 (P2): Hardening and Guardrails</h2>
+            <ul>
+                <li>
+                    <strong>Admin audit:</strong> <code>adminPredict</code> router uses
+                    <code>adminAudit()</code> middleware for all admin predict routes.
+                </li>
+                <li>
+                    <strong>Treasury op failures:</strong> In resolve, <code>TreasuryOp.create</code> is wrapped in
+                    try/catch; on failure, error is logged with <code>eventId</code>, <code>vigAiba</code>, and rethrown
+                    so the transaction aborts and the client receives 500.
+                </li>
+                <li>
+                    <strong>PredictBet index:</strong> Supporting index for resolve path
+                    <code>{ eventId: 1, brokerId: 1 }</code> is present; added <code>{ requestId: 1 }</code> unique
+                    sparse for idempotency.
+                </li>
+            </ul>
+            <hr />
+            <h2>Verification (recommended)</h2>
+            <ul>
+                <li>
+                    <strong>Admin:</strong> Expired/invalid token → 401/403 → token cleared and re-auth message; trigger
+                    an API error and confirm global error banner and Dismiss.
+                </li>
+                <li>
+                    <strong>Miniapp:</strong> Switch to Brokers, Leaderboard, Tasks, Charity, University and force a
+                    backend error to confirm status/task message shows.
+                </li>
+                <li><strong>Regression:</strong> Run existing lint/tests for backend and frontends.</li>
+            </ul>
+        </div>
+    </body>
 </html>

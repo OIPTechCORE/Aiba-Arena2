@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const IntroScreen = require('../models/IntroScreen');
-const { requireAdminAuth } = require('../middleware/requireAdmin');
+const { requireAdmin } = require('../middleware/requireAdmin');
 
 // Apply admin authentication to all routes
-router.use(requireAdminAuth);
+router.use(requireAdmin());
 
 // GET /api/admin/intro-screens - List all intro screens
 router.get('/', async (req, res) => {

@@ -6,10 +6,10 @@ This document confirms that all backend MemeFi/Economy/Schools/Staking features 
 
 ## 1. Memes + Earn visibility (hero, nav, onboarding)
 
-| Backend / Product | Miniapp |
-|-------------------|--------|
+| Backend / Product                   | Miniapp                                                                                                                                 |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | MemeFi feed, create, earn endpoints | **Home**: Dismissible “Create & Earn” onboarding card; quick-access strip with **Memes** and **Earn** first; “Create & Earn” hero card. |
-| Tab structure | **Memes** and **Earn** in main tab list (positions 4–5) with NEW badges. |
+| Tab structure                       | **Memes** and **Earn** in main tab list (positions 4–5) with NEW badges.                                                                |
 
 **Status:** Implemented. No gap.
 
@@ -17,9 +17,9 @@ This document confirms that all backend MemeFi/Economy/Schools/Staking features 
 
 ## 2. Sharing UX and redemption prominence
 
-| Backend / Product | Miniapp |
-|-------------------|--------|
-| Share copy / CTA | Meme share uses: “Create memes & earn AIBA/NEUR in AIBA Arena”. Detail view: “Shared! More shares = higher score = more rewards.” |
+| Backend / Product                          | Miniapp                                                                                                                                             |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Share copy / CTA                           | Meme share uses: “Create memes & earn AIBA/NEUR in AIBA Arena”. Detail view: “Shared! More shares = higher score = more rewards.”                   |
 | Redemption API (idempotencyKey, expiresAt) | Earn tab: “Turn AIBA & NEUR into real value” card; Redeem section; redeem flow sends `idempotencyKey`; success and My redemptions show `expiresAt`. |
 
 **Status:** Implemented. No gap.
@@ -28,11 +28,11 @@ This document confirms that all backend MemeFi/Economy/Schools/Staking features 
 
 ## 3. Creator tiers (config, job multipliers)
 
-| Backend | Miniapp |
-|---------|--------|
-| `MemeFiConfig.creatorTiers` (bronze/silver/gold/platinum, minMemes, minTotalScore, rewardMultiplier) | Config editable in Admin → MemeFi. |
-| Daily job applies tier multiplier for top10 + mining | `memefiDailyRewards.js` uses tier from config. |
-| `GET /api/memefi/earn-summary` returns `creatorTier` | Earn tab shows “Creator tier: BRONZE/SILVER/GOLD/PLATINUM” and short explanation. |
+| Backend                                                                                              | Miniapp                                                                           |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `MemeFiConfig.creatorTiers` (bronze/silver/gold/platinum, minMemes, minTotalScore, rewardMultiplier) | Config editable in Admin → MemeFi.                                                |
+| Daily job applies tier multiplier for top10 + mining                                                 | `memefiDailyRewards.js` uses tier from config.                                    |
+| `GET /api/memefi/earn-summary` returns `creatorTier`                                                 | Earn tab shows “Creator tier: BRONZE/SILVER/GOLD/PLATINUM” and short explanation. |
 
 **Status:** Implemented. No gap.
 
@@ -40,10 +40,10 @@ This document confirms that all backend MemeFi/Economy/Schools/Staking features 
 
 ## 4. Templates (model, API, picker in create)
 
-| Backend | Miniapp |
-|---------|--------|
-| `MemeTemplate` model, `GET /api/memefi/templates` | Miniapp calls `refreshMemefiTemplates()` (e.g. when Memes tab is active). |
-| `POST /api/memefi/upload` accepts `templateId` | Create form has optional template picker; `templateId` sent on upload when set. |
+| Backend                                           | Miniapp                                                                         |
+| ------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `MemeTemplate` model, `GET /api/memefi/templates` | Miniapp calls `refreshMemefiTemplates()` (e.g. when Memes tab is active).       |
+| `POST /api/memefi/upload` accepts `templateId`    | Create form has optional template picker; `templateId` sent on upload when set. |
 
 **Status:** Implemented. No gap.
 
@@ -51,11 +51,11 @@ This document confirms that all backend MemeFi/Economy/Schools/Staking features 
 
 ## 5. School selector (profile + meme create)
 
-| Backend | Miniapp |
-|---------|--------|
-| `GET /api/schools` | `refreshSchoolsList()`; used in Profile and Meme create. |
-| `GET /api/economy/me` → `schoolId`; `PATCH /api/economy/me` with `schoolId` | Profile: “School (MemeFi / LMS)” dropdown; selection saved via PATCH. |
-| Meme upload can accept `schoolId` | Meme create: School dropdown; `schoolId` sent on upload when set. Memes tab syncs `memefiCreateSchoolId` from `economyMe?.schoolId` when missing. |
+| Backend                                                                     | Miniapp                                                                                                                                           |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/schools`                                                          | `refreshSchoolsList()`; used in Profile and Meme create.                                                                                          |
+| `GET /api/economy/me` → `schoolId`; `PATCH /api/economy/me` with `schoolId` | Profile: “School (MemeFi / LMS)” dropdown; selection saved via PATCH.                                                                             |
+| Meme upload can accept `schoolId`                                           | Meme create: School dropdown; `schoolId` sent on upload when set. Memes tab syncs `memefiCreateSchoolId` from `economyMe?.schoolId` when missing. |
 
 **Status:** Implemented. No gap.
 

@@ -1,379 +1,532 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>BROKERS DEEP EXPLANATION — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>BROKERS DEEP EXPLANATION</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Brokers — Deep Explanation</h1>
-<p>A full technical and product explanation of <strong>Brokers</strong> in AIBA Arena: what they are, how they work, and how they tie into battles, economy, and the rest of the app.</p>
-<hr/>
-<h2>1. What is a Broker?</h2>
-<p>A <strong>Broker</strong> is your in-game <strong>AI agent</strong>. It is the unit you use to compete in every battle. Think of it as a character with <strong>stats</strong>, <strong>energy</strong>, <strong>progression</strong>, and optional <strong>on-chain representation</strong> (NFT).</p>
-<ul>
-<li><strong>Identity:</strong> Stored in the backend (MongoDB). Optionally backed by an on-chain NFT (Broker NFT collection) after minting.</li>
-<li><strong>Role in the loop:</strong> You pick a broker → choose an arena and league → run a battle → the server runs a <strong>deterministic simulation</strong> using the broker’s stats and a seed → you get a <strong>score</strong> and rewards (NEUR, AIBA, Stars, Diamonds).</li>
-</ul>
-<p>Brokers do <strong>not</strong> execute real trades. “Battle” is a <strong>simulated</strong> outcome based on stats and a server-controlled seed, not live market data.</p>
-<hr/>
-<h2>2. Broker model (data)</h2>
-<p>Defined in <code>backend/models/Broker.js</code>.</p>
-<h3>2.1 Core traits (0–100)</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>risk</strong></td>
-<td>50</td>
-<td>Affects <strong>score variance</strong>: higher risk → more swing (high/low scores). Still used in the base score via arena weights.</td>
-</tr>
-<tr>
-<td><strong>intelligence</strong></td>
-<td>50</td>
-<td>Weighted in the score formula; <strong>prediction</strong> arena favors it most (0.7).</td>
-</tr>
-<tr>
-<td><strong>speed</strong></td>
-<td>50</td>
-<td>Weighted in the score formula; <strong>simulation</strong> and <strong>guildWars</strong> use it (0.3).</td>
-</tr>
-<tr>
-<td><strong>specialty</strong></td>
-<td>'crypto'</td>
-<td>Display / future use; not used in the battle math today.</td>
-</tr>
-</tbody></table>
-<h3>2.2 Progression</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>level</strong></td>
-<td>1</td>
-<td>Unlocks leagues; adds a <strong>score multiplier</strong> (+2% per level, cap +50%).</td>
-</tr>
-<tr>
-<td><strong>xp</strong></td>
-<td>0</td>
-<td>Earned from train, upgrade, combine; used for display and future systems.</td>
-</tr>
-</tbody></table>
-<h3>2.3 Battle resources and anti-spam</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>energy</strong></td>
-<td>Consumed per battle (configurable, e.g. 1). Must be &amp;gt; 0 to run a battle.</td>
-</tr>
-<tr>
-<td><strong>energyUpdatedAt</strong></td>
-<td>Timestamp used to compute <strong>energy regeneration</strong> (e.g. 1 energy per 60 seconds, up to a max).</td>
-</tr>
-<tr>
-<td><strong>lastBattleAt</strong></td>
-<td>Last time this broker was used in any battle.</td>
-</tr>
-<tr>
-<td><strong>cooldowns</strong></td>
-<td>Map: <code>arenaKey</code> or <code>modeKey</code> → last run time. Per-arena/mode cooldown so you can’t spam the same mode.</td>
-</tr>
-</tbody></table>
-<h3>2.4 Moderation and safety</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>anomalyFlags</strong></td>
-<td>Incremented when a battle score is out of range; can trigger auto-ban.</td>
-</tr>
-<tr>
-<td><strong>banned</strong></td>
-<td>If true, broker cannot be used.</td>
-</tr>
-<tr>
-<td><strong>banReason</strong></td>
-<td>Reason for moderation.</td>
-</tr>
-<tr>
-<td><strong>lastRequestId</strong></td>
-<td>Idempotency: prevents replay of the same battle request.</td>
-</tr>
-</tbody></table>
-<h3>2.5 On-chain (optional)</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>nftCollectionAddress</strong></td>
-<td>Broker NFT collection contract address.</td>
-</tr>
-<tr>
-<td><strong>nftItemAddress</strong></td>
-<td>This broker’s NFT item address.</td>
-</tr>
-<tr>
-<td><strong>nftItemIndex</strong></td>
-<td>Index in the collection.</td>
-</tr>
-<tr>
-<td><strong>metadataUri</strong></td>
-<td>URL to metadata (e.g. <code>/api/metadata/brokers/:id</code>).</td>
-</tr>
-</tbody></table>
-<h3>2.6 Social and rental</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>guildId</strong></td>
-<td>If set, broker is in a <strong>guild pool</strong> and can be used in <strong>guild wars</strong>.</td>
-</tr>
-<tr>
-<td><strong>rentedByTelegramId</strong></td>
-<td>If set, someone is <strong>renting</strong> this broker until <strong>rentedUntil</strong>.</td>
-</tr>
-<tr>
-<td><strong>rentedUntil</strong></td>
-<td>End of rental period.</td>
-</tr>
-<tr>
-<td><strong>createdWithTonTxHash</strong></td>
-<td>When the broker was created by paying TON; one broker per tx (idempotency).</td>
-</tr>
-</tbody></table>
-<p><strong>Using a rented broker:</strong> During the rental period, the renter (<code>rentedByTelegramId</code>) may use the broker in battles, predict/bet, and other flows the same way as the owner. Ownership stays with the lender; when the rental ends, only the owner can use it again.</p>
-<hr/>
-<h2>3. How battles use brokers</h2>
-<p>Flow: <strong>Auth → ban check → idempotency → lock (BattleRunKey) → resolve game mode → check broker (ownership, energy, cooldown, level) → optional entry fees → seed → simulate → rewards → update broker (energy, cooldowns, lastBattleAt) → save Battle.</strong></p>
-<h3>3.1 Seed (determinism)</h3>
-<p>From <code>backend/engine/battleSeed.js</code>:</p>
-<pre><code>message = `${telegramId}:${brokerId}:${modeKey}:${arena}:${league}:${requestId}:${opponentId}`;</code></pre>
-<p>Same inputs ⇒ same seed ⇒ same score. No client-controlled randomness.</p>
-<h3>3.2 Score formula (<code>backend/engine/battleEngine.js</code>)</h3>
-<ul>
-<li><strong>level:</strong> 1–10000; <strong>levelMul</strong> = 1 + min(0.5, (level−1)×0.02) → up to +50% to score.</li>
-<li><strong>leagueMul:</strong> rookie 1.0, pro 1.1, elite 1.2 (or from game mode rules).</li>
-<li><strong>Arena weights</strong> (defaults):</li>
-</ul>
-<table>
-<thead><tr>
-<th>Arena</th>
-<th>Intelligence</th>
-<th>Speed</th>
-<th>Risk</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>prediction</td>
-<td>0.7</td>
-<td>0.2</td>
-<td>0.1</td>
-</tr>
-<tr>
-<td>simulation</td>
-<td>0.5</td>
-<td>0.3</td>
-<td>0.2</td>
-</tr>
-<tr>
-<td>strategyWars</td>
-<td>0.6</td>
-<td>0.1</td>
-<td>0.3</td>
-</tr>
-<tr>
-<td>guildWars</td>
-<td>0.4</td>
-<td>0.3</td>
-<td>0.3</td>
-</tr>
-<tr>
-<td>arbitrage (default)</td>
-<td>0.5</td>
-<td>0.3</td>
-<td>0.2</td>
-</tr>
-</tbody></table>
-<ul>
-<li>- <code>base = 100 × leagueMul × levelMul × (INT_weight×int + SPD_weight×spd + RISK_weight×risk)</code>.</li>
-<li><strong>Variance (risk increases swing):</strong></li>
-<li>- <code>variance = varianceBase × leagueMul × (0.2 + risk)</code></li>
-<li>- <code>noise = (rand() - 0.5) × 2 × variance</code></li>
-<li>- <code>score = max(0, round(base + noise))</code></li>
-</ul>
-<p>So: <strong>intelligence/speed/risk</strong> define your “power” and which arena suits the broker; <strong>risk</strong> adds variance; <strong>level</strong> adds a stable bonus.</p>
-<h3>3.3 Energy and cooldowns</h3>
-<ul>
-<li><strong>Cooldowns:</strong> Per <strong>mode/arena</strong> (e.g. <code>prediction:rookie</code>). After a battle, that key is set to “now”; the next battle in the same mode is allowed only after the cooldown period. Prevents spamming one mode.</li>
-</ul>
-<hr/>
-<h2>4. How you get brokers</h2>
-<table>
-<thead><tr>
-<th>Method</th>
-<th>API / flow</th>
-<th>Cost</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Starter</strong></td>
-<td><code>POST /api/brokers/starter</code></td>
-<td><strong>Free</strong> (first broker). Stats 50/50/50, 10 energy.</td>
-</tr>
-<tr>
-<td><strong>Create with TON</strong></td>
-<td><code>POST /api/brokers/create-with-ton</code> with <code>txHash</code></td>
-<td><strong>TON</strong> (e.g. 1 TON, configurable). Payment verified → CREATED_BROKERS_WALLET. One broker per tx. Can auto-list on marketplace.</td>
-</tr>
-<tr>
-<td><strong>System shop</strong></td>
-<td>Buy from catalog (Scout, Pro, Elite, Champion)</td>
-<td><strong>AIBA</strong> (50–500). New broker created and assigned to you.</td>
-</tr>
-<tr>
-<td><strong>Marketplace</strong></td>
-<td>Buy from another player’s listing</td>
-<td><strong>AIBA</strong> (seller-defined). Ownership transfers.</td>
-</tr>
-<tr>
-<td><strong>Rental</strong></td>
-<td>Rent from <code>BrokerRental</code> listings</td>
-<td><strong>AIBA per hour</strong>. You get use of the broker until return; owner keeps ownership.</td>
-</tr>
-</tbody></table>
-<p>System shop brokers (<code>backend/config/systemShop.js</code>): Scout (55/55/45, 50 AIBA), Pro (65/65/55, 120 AIBA), Elite (75/75/65, 250 AIBA), Champion (85/85/75, 500 AIBA).</p>
-<hr/>
-<h2>5. What you can do with a broker (actions)</h2>
-<table>
-<thead><tr>
-<th>Action</th>
-<th>API</th>
-<th>Cost</th>
-<th>Effect</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Train</strong></td>
-<td><code>POST /api/brokers/train</code> (brokerId, stat)</td>
-<td><strong>NEUR</strong> (config: <code>trainNeurCost</code>)</td>
-<td>+1 to one stat (intelligence/speed/risk), +5 XP. Stat capped 0–100.</td>
-</tr>
-<tr>
-<td><strong>Repair</strong></td>
-<td><code>POST /api/brokers/repair</code> (brokerId)</td>
-<td><strong>NEUR</strong> (config: <code>repairNeurCost</code>)</td>
-<td>Energy → 100, cooldowns cleared.</td>
-</tr>
-<tr>
-<td><strong>Upgrade</strong></td>
-<td><code>POST /api/brokers/upgrade</code> (brokerId, stat)</td>
-<td><strong>AIBA</strong> (config: <code>upgradeAibaCost</code>)</td>
-<td>+2 to one stat, +1 level, +10 XP. Permanent.</td>
-</tr>
-<tr>
-<td><strong>Combine</strong></td>
-<td><code>POST /api/brokers/combine</code> (baseBrokerId, sacrificeBrokerId)</td>
-<td><strong>50 NEUR</strong> (config: <code>combineNeurCost</code>)</td>
-<td>Base gets <strong>blended</strong> stats with sacrifice (average of each stat), base.xp += sacrifice.xp + 20. Sacrifice broker is <strong>deleted</strong>.</td>
-</tr>
-<tr>
-<td><strong>Mint NFT</strong></td>
-<td><code>POST /api/brokers/mint-nft</code> (brokerId)</td>
-<td><strong>AIBA</strong> (e.g. 100, from NftUniverse <code>mintAibaCost</code> for slug <code>broker</code>)</td>
-<td>Queues BrokerMintJob; when minted, broker gets <code>nftItemAddress</code> etc.</td>
-</tr>
-<tr>
-<td><strong>List</strong></td>
-<td>Marketplace list</td>
-<td>—</td>
-<td>Broker listed for sale (AIBA) or for rent (AIBA/hour). If in a guild, must withdraw from guild first.</td>
-</tr>
-<tr>
-<td><strong>Guild pool</strong></td>
-<td>Guild flows</td>
-<td>—</td>
-<td>Assign broker to a guild for <strong>guild wars</strong>; it counts in guild power and can be used in that mode.</td>
-</tr>
-</tbody></table>
-<p>Combine formula: for each stat, <code>newStat = clamp(0, 100, round((base + sacrifice) / 2))</code>; base keeps its identity and gains XP; sacrifice is removed.</p>
-<hr/>
-<h2>6. Brokers elsewhere in the app</h2>
-<ul>
-<li><strong>Guild wars:</strong> Brokers in the guild pool are used; guild vs guild outcome can factor in pooled broker count (e.g. small bonus/penalty).</li>
-<li><strong>Global Boss:</strong> You run a battle with a broker; damage dealt to the boss is derived from that battle (e.g. score).</li>
-<li><strong>Tournaments:</strong> You register a broker for a tournament; battles in that tournament use that broker.</li>
-<li><strong>Racing:</strong> Cars and bikes are separate entities; brokers are not used in car/bike race simulation.</li>
-<li><strong>Multiverse / NFT:</strong> The “broker” universe lets you mint a broker as an on-chain NFT, stake it, and earn AIBA from staking.</li>
-</ul>
-<hr/>
-<h2>7. Economy and config</h2>
-<p>Broker-related costs and limits are in <strong>EconomyConfig</strong> (and env):</p>
-<ul>
-<li><strong>upgradeAibaCost</strong> — AIBA per upgrade.</li>
-<li><strong>createBrokerCostTonNano</strong> — TON (in nanoton) to create a broker with TON.</li>
-<li><strong>battleEnergyCost</strong> — default energy consumed per battle when the game mode does not set <code>energyCost</code> (e.g. 1).</li>
-<li><strong>battleMaxEnergy</strong>, <strong>battleEnergyRegenSecondsPerEnergy</strong> — energy cap and regen rate.</li>
-<li><strong>battleAnomalyScoreMax</strong> — score above this (or invalid) can set anomaly and eventually ban.</li>
-</ul>
-<p>Wallets: TON for “create broker” goes to <strong>CREATED_BROKERS_WALLET</strong>. AIBA/NEUR flows are ledger-based (credits/debits in the backend).</p>
-<hr/>
-<h2>8. Summary</h2>
-<table>
-<thead><tr>
-<th>Concept</th>
-<th>Short answer</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>What is a broker?</strong></td>
-<td>Your AI agent: stats (risk, intelligence, speed), energy, level, optional NFT. Used in every battle.</td>
-</tr>
-<tr>
-<td><strong>How is score decided?</strong></td>
-<td>Deterministic simulation: seed from (user, broker, mode, requestId, …); formula uses broker stats + arena weights + level + league; risk adds variance.</td>
-</tr>
-<tr>
-<td><strong>How do you get one?</strong></td>
-<td>Free starter, pay TON, buy with AIBA (system shop or marketplace), or rent.</td>
-</tr>
-<tr>
-<td><strong>How do you improve one?</strong></td>
-<td>Train (NEUR, +1 stat), Upgrade (AIBA, +2 stat, +1 level), Combine (NEUR, merge two into one). Repair (NEUR) restores energy and cooldowns.</td>
-</tr>
-<tr>
-<td><strong>Can you trade?</strong></td>
-<td>Yes: list/buy with AIBA on the marketplace; or rent; or mint as NFT and trade on-chain.</td>
-</tr>
-</tbody></table>
-<p>For exact API contracts and request/response shapes, see <strong>API-CONTRACT.md</strong> and <strong>GAME-FUNCTIONALITY.md</strong>.</p>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>BROKERS DEEP EXPLANATION — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>BROKERS DEEP EXPLANATION</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Brokers — Deep Explanation</h1>
+            <p>
+                A full technical and product explanation of <strong>Brokers</strong> in AIBA Arena: what they are, how
+                they work, and how they tie into battles, economy, and the rest of the app.
+            </p>
+            <hr />
+            <h2>1. What is a Broker?</h2>
+            <p>
+                A <strong>Broker</strong> is your in-game <strong>AI agent</strong>. It is the unit you use to compete
+                in every battle. Think of it as a character with <strong>stats</strong>, <strong>energy</strong>,
+                <strong>progression</strong>, and optional <strong>on-chain representation</strong> (NFT).
+            </p>
+            <ul>
+                <li>
+                    <strong>Identity:</strong> Stored in the backend (MongoDB). Optionally backed by an on-chain NFT
+                    (Broker NFT collection) after minting.
+                </li>
+                <li>
+                    <strong>Role in the loop:</strong> You pick a broker → choose an arena and league → run a battle →
+                    the server runs a <strong>deterministic simulation</strong> using the broker’s stats and a seed →
+                    you get a <strong>score</strong> and rewards (NEUR, AIBA, Stars, Diamonds).
+                </li>
+            </ul>
+            <p>
+                Brokers do <strong>not</strong> execute real trades. “Battle” is a <strong>simulated</strong> outcome
+                based on stats and a server-controlled seed, not live market data.
+            </p>
+            <hr />
+            <h2>2. Broker model (data)</h2>
+            <p>Defined in <code>backend/models/Broker.js</code>.</p>
+            <h3>2.1 Core traits (0–100)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>risk</strong></td>
+                        <td>50</td>
+                        <td>
+                            Affects <strong>score variance</strong>: higher risk → more swing (high/low scores). Still
+                            used in the base score via arena weights.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>intelligence</strong></td>
+                        <td>50</td>
+                        <td>Weighted in the score formula; <strong>prediction</strong> arena favors it most (0.7).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>speed</strong></td>
+                        <td>50</td>
+                        <td>
+                            Weighted in the score formula; <strong>simulation</strong> and
+                            <strong>guildWars</strong> use it (0.3).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>specialty</strong></td>
+                        <td>'crypto'</td>
+                        <td>Display / future use; not used in the battle math today.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.2 Progression</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>level</strong></td>
+                        <td>1</td>
+                        <td>Unlocks leagues; adds a <strong>score multiplier</strong> (+2% per level, cap +50%).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>xp</strong></td>
+                        <td>0</td>
+                        <td>Earned from train, upgrade, combine; used for display and future systems.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.3 Battle resources and anti-spam</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>energy</strong></td>
+                        <td>Consumed per battle (configurable, e.g. 1). Must be &amp;gt; 0 to run a battle.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>energyUpdatedAt</strong></td>
+                        <td>
+                            Timestamp used to compute <strong>energy regeneration</strong> (e.g. 1 energy per 60
+                            seconds, up to a max).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>lastBattleAt</strong></td>
+                        <td>Last time this broker was used in any battle.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>cooldowns</strong></td>
+                        <td>
+                            Map: <code>arenaKey</code> or <code>modeKey</code> → last run time. Per-arena/mode cooldown
+                            so you can’t spam the same mode.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.4 Moderation and safety</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>anomalyFlags</strong></td>
+                        <td>Incremented when a battle score is out of range; can trigger auto-ban.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>banned</strong></td>
+                        <td>If true, broker cannot be used.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>banReason</strong></td>
+                        <td>Reason for moderation.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>lastRequestId</strong></td>
+                        <td>Idempotency: prevents replay of the same battle request.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.5 On-chain (optional)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>nftCollectionAddress</strong></td>
+                        <td>Broker NFT collection contract address.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>nftItemAddress</strong></td>
+                        <td>This broker’s NFT item address.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>nftItemIndex</strong></td>
+                        <td>Index in the collection.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>metadataUri</strong></td>
+                        <td>URL to metadata (e.g. <code>/api/metadata/brokers/:id</code>).</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.6 Social and rental</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>guildId</strong></td>
+                        <td>
+                            If set, broker is in a <strong>guild pool</strong> and can be used in
+                            <strong>guild wars</strong>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>rentedByTelegramId</strong></td>
+                        <td>
+                            If set, someone is <strong>renting</strong> this broker until <strong>rentedUntil</strong>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>rentedUntil</strong></td>
+                        <td>End of rental period.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>createdWithTonTxHash</strong></td>
+                        <td>When the broker was created by paying TON; one broker per tx (idempotency).</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Using a rented broker:</strong> During the rental period, the renter
+                (<code>rentedByTelegramId</code>) may use the broker in battles, predict/bet, and other flows the same
+                way as the owner. Ownership stays with the lender; when the rental ends, only the owner can use it
+                again.
+            </p>
+            <hr />
+            <h2>3. How battles use brokers</h2>
+            <p>
+                Flow:
+                <strong
+                    >Auth → ban check → idempotency → lock (BattleRunKey) → resolve game mode → check broker (ownership,
+                    energy, cooldown, level) → optional entry fees → seed → simulate → rewards → update broker (energy,
+                    cooldowns, lastBattleAt) → save Battle.</strong
+                >
+            </p>
+            <h3>3.1 Seed (determinism)</h3>
+            <p>From <code>backend/engine/battleSeed.js</code>:</p>
+            <pre><code>message = `${telegramId}:${brokerId}:${modeKey}:${arena}:${league}:${requestId}:${opponentId}`;</code></pre>
+            <p>Same inputs ⇒ same seed ⇒ same score. No client-controlled randomness.</p>
+            <h3>3.2 Score formula (<code>backend/engine/battleEngine.js</code>)</h3>
+            <ul>
+                <li>
+                    <strong>level:</strong> 1–10000; <strong>levelMul</strong> = 1 + min(0.5, (level−1)×0.02) → up to
+                    +50% to score.
+                </li>
+                <li><strong>leagueMul:</strong> rookie 1.0, pro 1.1, elite 1.2 (or from game mode rules).</li>
+                <li><strong>Arena weights</strong> (defaults):</li>
+            </ul>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Arena</th>
+                        <th>Intelligence</th>
+                        <th>Speed</th>
+                        <th>Risk</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>prediction</td>
+                        <td>0.7</td>
+                        <td>0.2</td>
+                        <td>0.1</td>
+                    </tr>
+                    <tr>
+                        <td>simulation</td>
+                        <td>0.5</td>
+                        <td>0.3</td>
+                        <td>0.2</td>
+                    </tr>
+                    <tr>
+                        <td>strategyWars</td>
+                        <td>0.6</td>
+                        <td>0.1</td>
+                        <td>0.3</td>
+                    </tr>
+                    <tr>
+                        <td>guildWars</td>
+                        <td>0.4</td>
+                        <td>0.3</td>
+                        <td>0.3</td>
+                    </tr>
+                    <tr>
+                        <td>arbitrage (default)</td>
+                        <td>0.5</td>
+                        <td>0.3</td>
+                        <td>0.2</td>
+                    </tr>
+                </tbody>
+            </table>
+            <ul>
+                <li>
+                    -
+                    <code>base = 100 × leagueMul × levelMul × (INT_weight×int + SPD_weight×spd + RISK_weight×risk)</code
+                    >.
+                </li>
+                <li><strong>Variance (risk increases swing):</strong></li>
+                <li>- <code>variance = varianceBase × leagueMul × (0.2 + risk)</code></li>
+                <li>- <code>noise = (rand() - 0.5) × 2 × variance</code></li>
+                <li>- <code>score = max(0, round(base + noise))</code></li>
+            </ul>
+            <p>
+                So: <strong>intelligence/speed/risk</strong> define your “power” and which arena suits the broker;
+                <strong>risk</strong> adds variance; <strong>level</strong> adds a stable bonus.
+            </p>
+            <h3>3.3 Energy and cooldowns</h3>
+            <ul>
+                <li>
+                    <strong>Cooldowns:</strong> Per <strong>mode/arena</strong> (e.g. <code>prediction:rookie</code>).
+                    After a battle, that key is set to “now”; the next battle in the same mode is allowed only after the
+                    cooldown period. Prevents spamming one mode.
+                </li>
+            </ul>
+            <hr />
+            <h2>4. How you get brokers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>API / flow</th>
+                        <th>Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Starter</strong></td>
+                        <td><code>POST /api/brokers/starter</code></td>
+                        <td><strong>Free</strong> (first broker). Stats 50/50/50, 10 energy.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Create with TON</strong></td>
+                        <td><code>POST /api/brokers/create-with-ton</code> with <code>txHash</code></td>
+                        <td>
+                            <strong>TON</strong> (e.g. 1 TON, configurable). Payment verified → CREATED_BROKERS_WALLET.
+                            One broker per tx. Can auto-list on marketplace.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>System shop</strong></td>
+                        <td>Buy from catalog (Scout, Pro, Elite, Champion)</td>
+                        <td><strong>AIBA</strong> (50–500). New broker created and assigned to you.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Marketplace</strong></td>
+                        <td>Buy from another player’s listing</td>
+                        <td><strong>AIBA</strong> (seller-defined). Ownership transfers.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rental</strong></td>
+                        <td>Rent from <code>BrokerRental</code> listings</td>
+                        <td>
+                            <strong>AIBA per hour</strong>. You get use of the broker until return; owner keeps
+                            ownership.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                System shop brokers (<code>backend/config/systemShop.js</code>): Scout (55/55/45, 50 AIBA), Pro
+                (65/65/55, 120 AIBA), Elite (75/75/65, 250 AIBA), Champion (85/85/75, 500 AIBA).
+            </p>
+            <hr />
+            <h2>5. What you can do with a broker (actions)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>API</th>
+                        <th>Cost</th>
+                        <th>Effect</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Train</strong></td>
+                        <td><code>POST /api/brokers/train</code> (brokerId, stat)</td>
+                        <td><strong>NEUR</strong> (config: <code>trainNeurCost</code>)</td>
+                        <td>+1 to one stat (intelligence/speed/risk), +5 XP. Stat capped 0–100.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Repair</strong></td>
+                        <td><code>POST /api/brokers/repair</code> (brokerId)</td>
+                        <td><strong>NEUR</strong> (config: <code>repairNeurCost</code>)</td>
+                        <td>Energy → 100, cooldowns cleared.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Upgrade</strong></td>
+                        <td><code>POST /api/brokers/upgrade</code> (brokerId, stat)</td>
+                        <td><strong>AIBA</strong> (config: <code>upgradeAibaCost</code>)</td>
+                        <td>+2 to one stat, +1 level, +10 XP. Permanent.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Combine</strong></td>
+                        <td><code>POST /api/brokers/combine</code> (baseBrokerId, sacrificeBrokerId)</td>
+                        <td><strong>50 NEUR</strong> (config: <code>combineNeurCost</code>)</td>
+                        <td>
+                            Base gets <strong>blended</strong> stats with sacrifice (average of each stat), base.xp +=
+                            sacrifice.xp + 20. Sacrifice broker is <strong>deleted</strong>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mint NFT</strong></td>
+                        <td><code>POST /api/brokers/mint-nft</code> (brokerId)</td>
+                        <td>
+                            <strong>AIBA</strong> (e.g. 100, from NftUniverse <code>mintAibaCost</code> for slug
+                            <code>broker</code>)
+                        </td>
+                        <td>Queues BrokerMintJob; when minted, broker gets <code>nftItemAddress</code> etc.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>List</strong></td>
+                        <td>Marketplace list</td>
+                        <td>—</td>
+                        <td>
+                            Broker listed for sale (AIBA) or for rent (AIBA/hour). If in a guild, must withdraw from
+                            guild first.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Guild pool</strong></td>
+                        <td>Guild flows</td>
+                        <td>—</td>
+                        <td>
+                            Assign broker to a guild for <strong>guild wars</strong>; it counts in guild power and can
+                            be used in that mode.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                Combine formula: for each stat, <code>newStat = clamp(0, 100, round((base + sacrifice) / 2))</code>;
+                base keeps its identity and gains XP; sacrifice is removed.
+            </p>
+            <hr />
+            <h2>6. Brokers elsewhere in the app</h2>
+            <ul>
+                <li>
+                    <strong>Guild wars:</strong> Brokers in the guild pool are used; guild vs guild outcome can factor
+                    in pooled broker count (e.g. small bonus/penalty).
+                </li>
+                <li>
+                    <strong>Global Boss:</strong> You run a battle with a broker; damage dealt to the boss is derived
+                    from that battle (e.g. score).
+                </li>
+                <li>
+                    <strong>Tournaments:</strong> You register a broker for a tournament; battles in that tournament use
+                    that broker.
+                </li>
+                <li>
+                    <strong>Racing:</strong> Cars and bikes are separate entities; brokers are not used in car/bike race
+                    simulation.
+                </li>
+                <li>
+                    <strong>Multiverse / NFT:</strong> The “broker” universe lets you mint a broker as an on-chain NFT,
+                    stake it, and earn AIBA from staking.
+                </li>
+            </ul>
+            <hr />
+            <h2>7. Economy and config</h2>
+            <p>Broker-related costs and limits are in <strong>EconomyConfig</strong> (and env):</p>
+            <ul>
+                <li><strong>upgradeAibaCost</strong> — AIBA per upgrade.</li>
+                <li><strong>createBrokerCostTonNano</strong> — TON (in nanoton) to create a broker with TON.</li>
+                <li>
+                    <strong>battleEnergyCost</strong> — default energy consumed per battle when the game mode does not
+                    set <code>energyCost</code> (e.g. 1).
+                </li>
+                <li>
+                    <strong>battleMaxEnergy</strong>, <strong>battleEnergyRegenSecondsPerEnergy</strong> — energy cap
+                    and regen rate.
+                </li>
+                <li>
+                    <strong>battleAnomalyScoreMax</strong> — score above this (or invalid) can set anomaly and
+                    eventually ban.
+                </li>
+            </ul>
+            <p>
+                Wallets: TON for “create broker” goes to <strong>CREATED_BROKERS_WALLET</strong>. AIBA/NEUR flows are
+                ledger-based (credits/debits in the backend).
+            </p>
+            <hr />
+            <h2>8. Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Concept</th>
+                        <th>Short answer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>What is a broker?</strong></td>
+                        <td>
+                            Your AI agent: stats (risk, intelligence, speed), energy, level, optional NFT. Used in every
+                            battle.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>How is score decided?</strong></td>
+                        <td>
+                            Deterministic simulation: seed from (user, broker, mode, requestId, …); formula uses broker
+                            stats + arena weights + level + league; risk adds variance.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>How do you get one?</strong></td>
+                        <td>Free starter, pay TON, buy with AIBA (system shop or marketplace), or rent.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>How do you improve one?</strong></td>
+                        <td>
+                            Train (NEUR, +1 stat), Upgrade (AIBA, +2 stat, +1 level), Combine (NEUR, merge two into
+                            one). Repair (NEUR) restores energy and cooldowns.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Can you trade?</strong></td>
+                        <td>Yes: list/buy with AIBA on the marketplace; or rent; or mint as NFT and trade on-chain.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                For exact API contracts and request/response shapes, see <strong>API-CONTRACT.md</strong> and
+                <strong>GAME-FUNCTIONALITY.md</strong>.
+            </p>
+        </div>
+    </body>
 </html>

@@ -31,54 +31,54 @@ flowchart LR
 
 ### 1.3 Primary user loop
 
-1. **Learn** in a realm  
-2. **Build** AI assets  
-3. **Compete** in arenas  
-4. **Earn** AIBA  
-5. **Reinvest** into learning/assets  
+1. **Learn** in a realm
+2. **Build** AI assets
+3. **Compete** in arenas
+4. **Earn** AIBA
+5. **Reinvest** into learning/assets
 
 ---
 
 ## 2) Domain Model Glossary
 
-| Entity | Purpose | Key lifecycle states |
-|--------|---------|----------------------|
-| **User** | identity, balances, badges, roles | new → active → suspended |
-| **Realm** | themed AI learning world | draft → active → archived |
-| **Course** | realm learning unit | draft → active → deprecated |
-| **Mission** | task/quest within a realm | available → in_progress → completed |
-| **Mentor** | AI guide entity | base → upgraded → elite |
-| **Asset** | AI agent/module/system | minted → listed → owned → rented |
-| **AssetListing** | market entry | active → sold → cancelled |
-| **Rental** | time‑bound asset usage | active → expired |
-| **Arena** | competition mode | open → active → settled |
-| **Battle** | single run | pending → resolved |
-| **EconomyConfig** | tuning parameters | active → superseded |
-| **TreasuryOp** | treasury/burn ledger | recorded |
-| **GovernanceProposal** | DAO decision item | draft → voting → executed |
+| Entity                 | Purpose                           | Key lifecycle states                |
+| ---------------------- | --------------------------------- | ----------------------------------- |
+| **User**               | identity, balances, badges, roles | new → active → suspended            |
+| **Realm**              | themed AI learning world          | draft → active → archived           |
+| **Course**             | realm learning unit               | draft → active → deprecated         |
+| **Mission**            | task/quest within a realm         | available → in_progress → completed |
+| **Mentor**             | AI guide entity                   | base → upgraded → elite             |
+| **Asset**              | AI agent/module/system            | minted → listed → owned → rented    |
+| **AssetListing**       | market entry                      | active → sold → cancelled           |
+| **Rental**             | time‑bound asset usage            | active → expired                    |
+| **Arena**              | competition mode                  | open → active → settled             |
+| **Battle**             | single run                        | pending → resolved                  |
+| **EconomyConfig**      | tuning parameters                 | active → superseded                 |
+| **TreasuryOp**         | treasury/burn ledger              | recorded                            |
+| **GovernanceProposal** | DAO decision item                 | draft → voting → executed           |
 
 ---
 
 ## 3) Feature Matrix by Phase
 
-| Phase | Key features |
-|------|---------------|
-| **Phase 0** | Unified spec, architecture, glossary, feature matrix |
-| **Phase 1** | Data models, API contracts, contract interfaces |
-| **Phase 2** | Tact contracts: mint/burn/upgrade, escrow splits, staking |
-| **Phase 3** | Backend: realms/missions/mentors, marketplace, token flows, governance |
-| **Phase 4** | Miniapp UX: realms, assets, mentors, governance, wallet flows |
-| **Phase 5** | Admin: realm config, fee tuning, treasury & burn telemetry |
-| **Phase 6/7** | Docs, deployment, tests, functional validation |
+| Phase         | Key features                                                           |
+| ------------- | ---------------------------------------------------------------------- |
+| **Phase 0**   | Unified spec, architecture, glossary, feature matrix                   |
+| **Phase 1**   | Data models, API contracts, contract interfaces                        |
+| **Phase 2**   | Tact contracts: mint/burn/upgrade, escrow splits, staking              |
+| **Phase 3**   | Backend: realms/missions/mentors, marketplace, token flows, governance |
+| **Phase 4**   | Miniapp UX: realms, assets, mentors, governance, wallet flows          |
+| **Phase 5**   | Admin: realm config, fee tuning, treasury & burn telemetry             |
+| **Phase 6/7** | Docs, deployment, tests, functional validation                         |
 
 ---
 
 ## 4) Economy Principles
 
-- **Learning = Production = Wealth**  
-- **Token sinks** (burns, staking) are required to avoid inflation.  
-- **Rewards are performance‑based**, not random.  
-- **Treasury** funds ops, market stabilization, competitions.  
+- **Learning = Production = Wealth**
+- **Token sinks** (burns, staking) are required to avoid inflation.
+- **Rewards are performance‑based**, not random.
+- **Treasury** funds ops, market stabilization, competitions.
 
 ---
 
@@ -92,9 +92,9 @@ flowchart LR
 
 ### 5.2 Contracts
 
-- **Mint/burn/upgrade** primitives for assets.  
-- **Escrow** with fee splits.  
-- **Staking** for governance & mentor tiers.  
+- **Mint/burn/upgrade** primitives for assets.
+- **Escrow** with fee splits.
+- **Staking** for governance & mentor tiers.
 - **Reward vault** remains source of claim‑based payouts.
 
 ### 5.3 Backend routes

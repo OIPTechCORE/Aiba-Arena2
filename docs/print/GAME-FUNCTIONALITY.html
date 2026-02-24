@@ -1,279 +1,296 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>GAME FUNCTIONALITY — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>GAME FUNCTIONALITY</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>AIBA Arena — Game Functionality (Expanded)</h1>
-<p><strong>Last updated:</strong> Feb 2026 <strong>Scope:</strong> Core loop, brokers, battles, economy, racing, security, API mapping, config, data flows.</p>
-<hr/>
-<h2>Table of Contents</h2>
-<ol>
-<li><a href="#2-brokers">Brokers</a></li>
-<li><a href="#3-battle-system">Battle System</a></li>
-<li><a href="#4-technical-specs--battle-engine">Technical Specs — Battle Engine</a></li>
-<li><a href="#5-rewards--economy">Rewards &amp; Economy</a></li>
-<li><a href="#6-economyconfig-fields">EconomyConfig Fields</a></li>
-<li><a href="#7-arenas--game-modes">Arenas &amp; Game Modes</a></li>
-<li><a href="#8-autonomous-racing">Autonomous Racing</a></li>
-<li><a href="#9-security--fairness">Security &amp; Fairness</a></li>
-<li><a href="#10-data-flows">Data Flows</a></li>
-<li><a href="#11-edge-cases">Edge Cases</a></li>
-<li><a href="#12-api-mapping">API Mapping</a></li>
-</ol>
-<hr/>
-<h2>1. Core Loop</h2>
-<p><strong>Connect → Broker → Arena → Battle → Earn → Claim</strong></p>
-<table>
-<thead><tr>
-<th>Step</th>
-<th>Action</th>
-<th>Result</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>Connect wallet (TonConnect)</td>
-<td>Backend saves TON address for claims</td>
-</tr>
-<tr>
-<td>2</td>
-<td>Create broker (starter or buy/create with TON)</td>
-<td>First broker free; additional via AIBA or TON</td>
-</tr>
-<tr>
-<td>3</td>
-<td>Choose arena + league</td>
-<td>prediction, simulation, strategyWars, arbitrage, guildWars</td>
-</tr>
-<tr>
-<td>4</td>
-<td>Run battle</td>
-<td>Deterministic simulation → score</td>
-</tr>
-<tr>
-<td>5</td>
-<td>Earn NEUR &amp; AIBA</td>
-<td>Off-chain credits; Stars on win; Diamonds on first win</td>
-</tr>
-<tr>
-<td>6</td>
-<td>Claim AIBA on-chain</td>
-<td>Wallet → Vault → signed claim → TonConnect tx</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>2. Brokers</h2>
-<h3>2.1 Model (<code>backend/models/Broker.js</code>)</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Type</th>
-<th>Default</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>ownerTelegramId</code></td>
-<td>String</td>
-<td>required</td>
-<td>Telegram user ID</td>
-</tr>
-<tr>
-<td><code>risk</code></td>
-<td>Number</td>
-<td>50</td>
-<td>0–100; affects score variance</td>
-</tr>
-<tr>
-<td><code>intelligence</code></td>
-<td>Number</td>
-<td>50</td>
-<td>0–100; weighted in prediction</td>
-</tr>
-<tr>
-<td><code>speed</code></td>
-<td>Number</td>
-<td>50</td>
-<td>0–100; weighted in simulation</td>
-</tr>
-<tr>
-<td><code>specialty</code></td>
-<td>String</td>
-<td>'crypto'</td>
-<td>Display / future use</td>
-</tr>
-<tr>
-<td><code>level</code></td>
-<td>Number</td>
-<td>1</td>
-<td>Unlocks leagues; score bonus</td>
-</tr>
-<tr>
-<td><code>xp</code></td>
-<td>Number</td>
-<td>0</td>
-<td>Progression</td>
-</tr>
-<tr>
-<td><code>energy</code></td>
-<td>Number</td>
-<td>10</td>
-<td>Per-battle cost; regens over time</td>
-</tr>
-<tr>
-<td><code>energyUpdatedAt</code></td>
-<td>Date</td>
-<td>now</td>
-<td>Last energy regen tick</td>
-</tr>
-<tr>
-<td><code>lastBattleAt</code></td>
-<td>Date</td>
-<td>null</td>
-<td>Last battle timestamp</td>
-</tr>
-<tr>
-<td><code>cooldowns</code></td>
-<td>Map&amp;lt;String, Date&amp;gt;</td>
-<td>{}</td>
-<td>modeKey/arena → last run</td>
-</tr>
-<tr>
-<td><code>anomalyFlags</code></td>
-<td>Number</td>
-<td>0</td>
-<td>Auto-ban threshold</td>
-</tr>
-<tr>
-<td><code>banned</code></td>
-<td>Boolean</td>
-<td>false</td>
-<td>Broker banned</td>
-</tr>
-<tr>
-<td><code>banReason</code></td>
-<td>String</td>
-<td>''</td>
-<td>Moderation reason</td>
-</tr>
-<tr>
-<td><code>lastRequestId</code></td>
-<td>String</td>
-<td>''</td>
-<td>Idempotency</td>
-</tr>
-<tr>
-<td><code>nftCollectionAddress</code></td>
-<td>String</td>
-<td>''</td>
-<td>On-chain NFT</td>
-</tr>
-<tr>
-<td><code>nftItemAddress</code></td>
-<td>String</td>
-<td>''</td>
-<td>On-chain NFT</td>
-</tr>
-<tr>
-<td><code>guildId</code></td>
-<td>ObjectId</td>
-<td>null</td>
-<td>Guild pool (guild wars)</td>
-</tr>
-<tr>
-<td><code>createdWithTonTxHash</code></td>
-<td>String</td>
-<td>''</td>
-<td>One broker per TON tx</td>
-</tr>
-</tbody></table>
-<h3>2.2 Actions</h3>
-<table>
-<thead><tr>
-<th>Action</th>
-<th>API</th>
-<th>Cost</th>
-<th>Notes</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Create starter</td>
-<td><code>POST /api/brokers/starter</code></td>
-<td>Free</td>
-<td>First broker; 50/50/50 stats, 10 energy</td>
-</tr>
-<tr>
-<td>Create with TON</td>
-<td><code>POST /api/brokers/create-with-ton</code></td>
-<td>1 TON (config)</td>
-<td>Verify tx → CREATED_BROKERS_WALLET; auto-list</td>
-</tr>
-<tr>
-<td>Combine</td>
-<td><code>POST /api/brokers/combine</code></td>
-<td>50 NEUR</td>
-<td>Base absorbs sacrifice; blended stats; +20 XP</td>
-</tr>
-<tr>
-<td>Mint NFT</td>
-<td><code>POST /api/brokers/mint-nft</code></td>
-<td>100 AIBA</td>
-<td>BrokerMintJob queued</td>
-</tr>
-<tr>
-<td>List / Buy</td>
-<td><code>POST /api/marketplace/list</code>, <code>/buy</code></td>
-<td>AIBA</td>
-<td>Withdraw from guild first</td>
-</tr>
-</tbody></table>
-<h3>2.3 Combine Formula</h3>
-<ul>
-<li>Base: <code>risk</code>, <code>intelligence</code>, <code>speed</code> = blend(base, sacrifice)</li>
-<li>Base: <code>xp += sacrifice.xp + 20</code></li>
-<li>Sacrifice: deleted</li>
-</ul>
-<hr/>
-<h2>3. Battle System</h2>
-<h3>3.1 Flow Overview</h3>
-<ol>
-<li><strong>Ban check</strong> — User and broker not banned</li>
-<li><strong>Idempotency</strong> — <code>requestId</code>; return existing battle if seen</li>
-<li><strong>Lock</strong> — <code>BattleRunKey</code> prevents concurrent double-charge</li>
-<li><strong>Mode resolution</strong> — <code>GameMode</code> by <code>arena</code>+<code>league</code> or <code>modeKey</code></li>
-<li><strong>Guild</strong> — Guild wars requires guild membership</li>
-<li><strong>Broker</strong> — Ownership, energy, cooldown, level</li>
-<li><strong>Entry fees</strong> — Optional NEUR/AIBA debit</li>
-<li><strong>Seed</strong> — <code>HMAC-SHA256(secret, message)</code></li>
-<li><strong>Simulation</strong> — <code>simulateBattle({ broker, seed, arena, league, rules })</code></li>
-<li><strong>Rewards</strong> — tryEmitNeur, tryEmitAiba; caps/windows applied</li>
-<li><strong>Broker update</strong> — Energy, cooldown, lastBattleAt</li>
-<li><strong>Battle save</strong> — <code>Battle</code> document</li>
-<li><strong>Auto-claim</strong> — If requested and vault configured: signed claim in response</li>
-</ol>
-<hr/>
-<h2>4. Technical Specs — Battle Engine</h2>
-<h3>4.1 Seed Message (<code>backend/engine/battleSeed.js</code>)</h3>
-<pre><code>message = `${telegramId}:${brokerId}:${modeKey}:${arena}:${league}:${requestId}:${opponentId}`;</code></pre>
-<ul>
-<li><code>opponentId</code> = opponent guild ID in guild wars (or '')</li>
-</ul>
-<h3>4.2 RNG (<code>backend/engine/deterministicRandom.js</code>)</h3>
-<ul>
-<li><code>seedFromHex(hex)</code> → first 8 hex chars as 32-bit uint</li>
-<li><code>mulberry32(seed)</code> → PRNG returning [0, 1)</li>
-</ul>
-<h3>4.3 Score Formula (<code>backend/engine/battleEngine.js</code>)</h3>
-<pre><code>int   = clamp01(broker.intelligence / 100)
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>GAME FUNCTIONALITY — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>GAME FUNCTIONALITY</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>AIBA Arena — Game Functionality (Expanded)</h1>
+            <p>
+                <strong>Last updated:</strong> Feb 2026 <strong>Scope:</strong> Core loop, brokers, battles, economy,
+                racing, security, API mapping, config, data flows.
+            </p>
+            <hr />
+            <h2>Table of Contents</h2>
+            <ol>
+                <li><a href="#2-brokers">Brokers</a></li>
+                <li><a href="#3-battle-system">Battle System</a></li>
+                <li><a href="#4-technical-specs--battle-engine">Technical Specs — Battle Engine</a></li>
+                <li><a href="#5-rewards--economy">Rewards &amp; Economy</a></li>
+                <li><a href="#6-economyconfig-fields">EconomyConfig Fields</a></li>
+                <li><a href="#7-arenas--game-modes">Arenas &amp; Game Modes</a></li>
+                <li><a href="#8-autonomous-racing">Autonomous Racing</a></li>
+                <li><a href="#9-security--fairness">Security &amp; Fairness</a></li>
+                <li><a href="#10-data-flows">Data Flows</a></li>
+                <li><a href="#11-edge-cases">Edge Cases</a></li>
+                <li><a href="#12-api-mapping">API Mapping</a></li>
+            </ol>
+            <hr />
+            <h2>1. Core Loop</h2>
+            <p><strong>Connect → Broker → Arena → Battle → Earn → Claim</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Step</th>
+                        <th>Action</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Connect wallet (TonConnect)</td>
+                        <td>Backend saves TON address for claims</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Create broker (starter or buy/create with TON)</td>
+                        <td>First broker free; additional via AIBA or TON</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Choose arena + league</td>
+                        <td>prediction, simulation, strategyWars, arbitrage, guildWars</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Run battle</td>
+                        <td>Deterministic simulation → score</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Earn NEUR &amp; AIBA</td>
+                        <td>Off-chain credits; Stars on win; Diamonds on first win</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Claim AIBA on-chain</td>
+                        <td>Wallet → Vault → signed claim → TonConnect tx</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>2. Brokers</h2>
+            <h3>2.1 Model (<code>backend/models/Broker.js</code>)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ownerTelegramId</code></td>
+                        <td>String</td>
+                        <td>required</td>
+                        <td>Telegram user ID</td>
+                    </tr>
+                    <tr>
+                        <td><code>risk</code></td>
+                        <td>Number</td>
+                        <td>50</td>
+                        <td>0–100; affects score variance</td>
+                    </tr>
+                    <tr>
+                        <td><code>intelligence</code></td>
+                        <td>Number</td>
+                        <td>50</td>
+                        <td>0–100; weighted in prediction</td>
+                    </tr>
+                    <tr>
+                        <td><code>speed</code></td>
+                        <td>Number</td>
+                        <td>50</td>
+                        <td>0–100; weighted in simulation</td>
+                    </tr>
+                    <tr>
+                        <td><code>specialty</code></td>
+                        <td>String</td>
+                        <td>'crypto'</td>
+                        <td>Display / future use</td>
+                    </tr>
+                    <tr>
+                        <td><code>level</code></td>
+                        <td>Number</td>
+                        <td>1</td>
+                        <td>Unlocks leagues; score bonus</td>
+                    </tr>
+                    <tr>
+                        <td><code>xp</code></td>
+                        <td>Number</td>
+                        <td>0</td>
+                        <td>Progression</td>
+                    </tr>
+                    <tr>
+                        <td><code>energy</code></td>
+                        <td>Number</td>
+                        <td>10</td>
+                        <td>Per-battle cost; regens over time</td>
+                    </tr>
+                    <tr>
+                        <td><code>energyUpdatedAt</code></td>
+                        <td>Date</td>
+                        <td>now</td>
+                        <td>Last energy regen tick</td>
+                    </tr>
+                    <tr>
+                        <td><code>lastBattleAt</code></td>
+                        <td>Date</td>
+                        <td>null</td>
+                        <td>Last battle timestamp</td>
+                    </tr>
+                    <tr>
+                        <td><code>cooldowns</code></td>
+                        <td>Map&amp;lt;String, Date&amp;gt;</td>
+                        <td>{}</td>
+                        <td>modeKey/arena → last run</td>
+                    </tr>
+                    <tr>
+                        <td><code>anomalyFlags</code></td>
+                        <td>Number</td>
+                        <td>0</td>
+                        <td>Auto-ban threshold</td>
+                    </tr>
+                    <tr>
+                        <td><code>banned</code></td>
+                        <td>Boolean</td>
+                        <td>false</td>
+                        <td>Broker banned</td>
+                    </tr>
+                    <tr>
+                        <td><code>banReason</code></td>
+                        <td>String</td>
+                        <td>''</td>
+                        <td>Moderation reason</td>
+                    </tr>
+                    <tr>
+                        <td><code>lastRequestId</code></td>
+                        <td>String</td>
+                        <td>''</td>
+                        <td>Idempotency</td>
+                    </tr>
+                    <tr>
+                        <td><code>nftCollectionAddress</code></td>
+                        <td>String</td>
+                        <td>''</td>
+                        <td>On-chain NFT</td>
+                    </tr>
+                    <tr>
+                        <td><code>nftItemAddress</code></td>
+                        <td>String</td>
+                        <td>''</td>
+                        <td>On-chain NFT</td>
+                    </tr>
+                    <tr>
+                        <td><code>guildId</code></td>
+                        <td>ObjectId</td>
+                        <td>null</td>
+                        <td>Guild pool (guild wars)</td>
+                    </tr>
+                    <tr>
+                        <td><code>createdWithTonTxHash</code></td>
+                        <td>String</td>
+                        <td>''</td>
+                        <td>One broker per TON tx</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.2 Actions</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>API</th>
+                        <th>Cost</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Create starter</td>
+                        <td><code>POST /api/brokers/starter</code></td>
+                        <td>Free</td>
+                        <td>First broker; 50/50/50 stats, 10 energy</td>
+                    </tr>
+                    <tr>
+                        <td>Create with TON</td>
+                        <td><code>POST /api/brokers/create-with-ton</code></td>
+                        <td>1 TON (config)</td>
+                        <td>Verify tx → CREATED_BROKERS_WALLET; auto-list</td>
+                    </tr>
+                    <tr>
+                        <td>Combine</td>
+                        <td><code>POST /api/brokers/combine</code></td>
+                        <td>50 NEUR</td>
+                        <td>Base absorbs sacrifice; blended stats; +20 XP</td>
+                    </tr>
+                    <tr>
+                        <td>Mint NFT</td>
+                        <td><code>POST /api/brokers/mint-nft</code></td>
+                        <td>100 AIBA</td>
+                        <td>BrokerMintJob queued</td>
+                    </tr>
+                    <tr>
+                        <td>List / Buy</td>
+                        <td><code>POST /api/marketplace/list</code>, <code>/buy</code></td>
+                        <td>AIBA</td>
+                        <td>Withdraw from guild first</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.3 Combine Formula</h3>
+            <ul>
+                <li>Base: <code>risk</code>, <code>intelligence</code>, <code>speed</code> = blend(base, sacrifice)</li>
+                <li>Base: <code>xp += sacrifice.xp + 20</code></li>
+                <li>Sacrifice: deleted</li>
+            </ul>
+            <hr />
+            <h2>3. Battle System</h2>
+            <h3>3.1 Flow Overview</h3>
+            <ol>
+                <li><strong>Ban check</strong> — User and broker not banned</li>
+                <li><strong>Idempotency</strong> — <code>requestId</code>; return existing battle if seen</li>
+                <li><strong>Lock</strong> — <code>BattleRunKey</code> prevents concurrent double-charge</li>
+                <li>
+                    <strong>Mode resolution</strong> — <code>GameMode</code> by <code>arena</code>+<code>league</code>
+                    or <code>modeKey</code>
+                </li>
+                <li><strong>Guild</strong> — Guild wars requires guild membership</li>
+                <li><strong>Broker</strong> — Ownership, energy, cooldown, level</li>
+                <li><strong>Entry fees</strong> — Optional NEUR/AIBA debit</li>
+                <li><strong>Seed</strong> — <code>HMAC-SHA256(secret, message)</code></li>
+                <li>
+                    <strong>Simulation</strong> — <code>simulateBattle({ broker, seed, arena, league, rules })</code>
+                </li>
+                <li><strong>Rewards</strong> — tryEmitNeur, tryEmitAiba; caps/windows applied</li>
+                <li><strong>Broker update</strong> — Energy, cooldown, lastBattleAt</li>
+                <li><strong>Battle save</strong> — <code>Battle</code> document</li>
+                <li><strong>Auto-claim</strong> — If requested and vault configured: signed claim in response</li>
+            </ol>
+            <hr />
+            <h2>4. Technical Specs — Battle Engine</h2>
+            <h3>4.1 Seed Message (<code>backend/engine/battleSeed.js</code>)</h3>
+            <pre><code>message = `${telegramId}:${brokerId}:${modeKey}:${arena}:${league}:${requestId}:${opponentId}`;</code></pre>
+            <ul>
+                <li><code>opponentId</code> = opponent guild ID in guild wars (or '')</li>
+            </ul>
+            <h3>4.2 RNG (<code>backend/engine/deterministicRandom.js</code>)</h3>
+            <ul>
+                <li><code>seedFromHex(hex)</code> → first 8 hex chars as 32-bit uint</li>
+                <li><code>mulberry32(seed)</code> → PRNG returning [0, 1)</li>
+            </ul>
+            <h3>4.3 Score Formula (<code>backend/engine/battleEngine.js</code>)</h3>
+            <pre><code>int   = clamp01(broker.intelligence / 100)
 spd   = clamp01(broker.speed / 100)
 risk  = clamp01(broker.risk / 100)
 level = clampInt(broker.level, 1, 10000)
@@ -286,497 +303,562 @@ varianceBase = rules.varianceBase ?? 30
 variance     = varianceBase * leagueMul * (0.2 + risk)
 noise        = (rand() - 0.5) * 2 * variance
 score = max(0, round(base + noise))</code></pre>
-<h3>4.4 Arena Weights (defaults)</h3>
-<table>
-<thead><tr>
-<th>Arena</th>
-<th>INT</th>
-<th>SPD</th>
-<th>RISK</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>prediction</td>
-<td>0.7</td>
-<td>0.2</td>
-<td>0.1</td>
-</tr>
-<tr>
-<td>simulation</td>
-<td>0.5</td>
-<td>0.3</td>
-<td>0.2</td>
-</tr>
-<tr>
-<td>strategyWars</td>
-<td>0.6</td>
-<td>0.1</td>
-<td>0.3</td>
-</tr>
-<tr>
-<td>guildWars</td>
-<td>0.4</td>
-<td>0.3</td>
-<td>0.3</td>
-</tr>
-<tr>
-<td>arbitrage (default)</td>
-<td>0.5</td>
-<td>0.3</td>
-<td>0.2</td>
-</tr>
-</tbody></table>
-<p>Override via <code>mode.rules.arenaWeights</code>.</p>
-<h3>4.5 Guild Wars Adjustment</h3>
-<ul>
-<li>Bonus: <code>max(-15, min(15, (myPoolCount - oppPoolCount) * 3))</code></li>
-<li><code>score = max(0, round(score + bonus))</code></li>
-</ul>
-<hr/>
-<h2>5. Rewards &amp; Economy</h2>
-<h3>5.1 Reward Calculation</h3>
-<pre><code>proposedAiba = score * baseRewardAibaPerScore * mode.rewardMultiplierAiba
+            <h3>4.4 Arena Weights (defaults)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Arena</th>
+                        <th>INT</th>
+                        <th>SPD</th>
+                        <th>RISK</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>prediction</td>
+                        <td>0.7</td>
+                        <td>0.2</td>
+                        <td>0.1</td>
+                    </tr>
+                    <tr>
+                        <td>simulation</td>
+                        <td>0.5</td>
+                        <td>0.3</td>
+                        <td>0.2</td>
+                    </tr>
+                    <tr>
+                        <td>strategyWars</td>
+                        <td>0.6</td>
+                        <td>0.1</td>
+                        <td>0.3</td>
+                    </tr>
+                    <tr>
+                        <td>guildWars</td>
+                        <td>0.4</td>
+                        <td>0.3</td>
+                        <td>0.3</td>
+                    </tr>
+                    <tr>
+                        <td>arbitrage (default)</td>
+                        <td>0.5</td>
+                        <td>0.3</td>
+                        <td>0.2</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Override via <code>mode.rules.arenaWeights</code>.</p>
+            <h3>4.5 Guild Wars Adjustment</h3>
+            <ul>
+                <li>Bonus: <code>max(-15, min(15, (myPoolCount - oppPoolCount) * 3))</code></li>
+                <li><code>score = max(0, round(score + bonus))</code></li>
+            </ul>
+            <hr />
+            <h2>5. Rewards &amp; Economy</h2>
+            <h3>5.1 Reward Calculation</h3>
+            <pre><code>proposedAiba = score * baseRewardAibaPerScore * mode.rewardMultiplierAiba
 proposedNeur = score * baseRewardNeurPerScore * mode.rewardMultiplierNeur
 If active Boost: multiply both by boost.multiplier (e.g. 1.2x)</code></pre>
-<ul>
-<li>Guild wars: 80% to user, 20% to guild vault (NEUR only)</li>
-</ul>
-<h3>5.2 Currencies</h3>
-<table>
-<thead><tr>
-<th>Currency</th>
-<th>Earned</th>
-<th>Spent</th>
-<th>On-chain</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>NEUR</td>
-<td>Battle, referrals, daily</td>
-<td>Entry fees, combine</td>
-<td>No</td>
-</tr>
-<tr>
-<td>AIBA</td>
-<td>Battle, referrals</td>
-<td>Mint, staking, marketplace</td>
-<td>Yes (claim)</td>
-</tr>
-<tr>
-<td>Stars</td>
-<td>Battle win</td>
-<td>Stars Store</td>
-<td>No</td>
-</tr>
-<tr>
-<td>Diamonds</td>
-<td>First battle win</td>
-<td>—</td>
-<td>No</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>6. EconomyConfig Fields</h2>
-<p><strong>Model:</strong> <code>backend/models/EconomyConfig.js</code></p>
-<h3>6.1 Emission &amp; Caps</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>dailyCapAiba</code></td>
-<td>1_000_000</td>
-<td>Global daily AIBA cap</td>
-</tr>
-<tr>
-<td><code>dailyCapNeur</code></td>
-<td>10_000_000</td>
-<td>Global daily NEUR cap</td>
-</tr>
-<tr>
-<td><code>dailyCapAibaByArena</code></td>
-<td>Map</td>
-<td>Per-arena AIBA cap</td>
-</tr>
-<tr>
-<td><code>dailyCapNeurByArena</code></td>
-<td>Map</td>
-<td>Per-arena NEUR cap</td>
-</tr>
-<tr>
-<td><code>emissionStartHourUtc</code></td>
-<td>0</td>
-<td>Start hour (0–23)</td>
-</tr>
-<tr>
-<td><code>emissionEndHourUtc</code></td>
-<td>24</td>
-<td>End hour (1–24)</td>
-</tr>
-<tr>
-<td><code>emissionWindowsUtc</code></td>
-<td>Object</td>
-<td>Override per arena or <code>arena:league</code></td>
-</tr>
-</tbody></table>
-<h3>6.2 Reward Knobs</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>baseRewardAibaPerScore</code></td>
-<td>2</td>
-<td>AIBA per score point</td>
-</tr>
-<tr>
-<td><code>baseRewardNeurPerScore</code></td>
-<td>0</td>
-<td>NEUR per score point</td>
-</tr>
-</tbody></table>
-<h3>6.3 Broker Sinks</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>combineNeurCost</code></td>
-<td>50</td>
-</tr>
-<tr>
-<td><code>upgradeAibaCost</code></td>
-<td>50</td>
-</tr>
-<tr>
-<td><code>trainNeurCost</code></td>
-<td>25</td>
-</tr>
-<tr>
-<td><code>repairNeurCost</code></td>
-<td>15</td>
-</tr>
-<tr>
-<td><code>mintAibaCost</code></td>
-<td>100</td>
-</tr>
-</tbody></table>
-<h3>6.4 Battle Hardening</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>battleMaxEnergy</code></td>
-<td>100</td>
-<td>Energy cap</td>
-</tr>
-<tr>
-<td><code>battleEnergyRegenSecondsPerEnergy</code></td>
-<td>60</td>
-<td>1 energy / minute</td>
-</tr>
-<tr>
-<td><code>battleAnomalyScoreMax</code></td>
-<td>220</td>
-<td>Score &gt; this flags anomaly</td>
-</tr>
-<tr>
-<td><code>battleAutoBanBrokerAnomalyFlags</code></td>
-<td>5</td>
-<td>Broker auto-ban</td>
-</tr>
-<tr>
-<td><code>battleAutoBanUserAnomalyFlags</code></td>
-<td>25</td>
-<td>User auto-ban</td>
-</tr>
-<tr>
-<td><code>battleAutoBanUserMinutes</code></td>
-<td>1440</td>
-<td>24h ban duration</td>
-</tr>
-</tbody></table>
-<h3>6.5 TON Payments (Super Admin)</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-<th>Env Wallet</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>createBrokerCostTonNano</code></td>
-<td>1e9</td>
-<td>CREATED_BROKERS_WALLET</td>
-</tr>
-<tr>
-<td><code>boostProfileCostTonNano</code></td>
-<td>1e9</td>
-<td>BOOST_PROFILE_WALLET</td>
-</tr>
-<tr>
-<td><code>boostProfileDurationDays</code></td>
-<td>7</td>
-<td>—</td>
-</tr>
-<tr>
-<td><code>giftCostTonNano</code></td>
-<td>1e9</td>
-<td>GIFTS_WALLET</td>
-</tr>
-<tr>
-<td><code>createGroupCostTonNano</code></td>
-<td>1e9</td>
-<td>LEADER_BOARD_WALLET</td>
-</tr>
-<tr>
-<td><code>boostGroupCostTonNano</code></td>
-<td>1e9</td>
-<td>BOOST_GROUP_WALLET</td>
-</tr>
-<tr>
-<td><code>leaderboardTopFreeCreate</code></td>
-<td>50</td>
-<td>Top N create guild free</td>
-</tr>
-</tbody></table>
-<h3>6.6a Staking &amp; DAO</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>stakingMinAiba</code></td>
-<td>100</td>
-<td>Min AIBA to stake (flexible + locked). Ecosystem-aligned: broker mint cost, 1T AIBA supply.</td>
-</tr>
-<tr>
-<td><code>stakingApyPercent</code></td>
-<td>15</td>
-<td>APY for flexible staking</td>
-</tr>
-<tr>
-<td><code>stakingPeriods</code></td>
-<td>[{ days: 30, apyPercent: 10 }, ...]</td>
-<td>Period-based locks: 30/90/180/365 days with tiered APY</td>
-</tr>
-<tr>
-<td><code>stakingCancelEarlyFeeBps</code></td>
-<td>500</td>
-<td>5% fee when cancelling lock early → Treasury (CANCELLED_STAKES_WALLET)</td>
-</tr>
-<tr>
-<td><code>daoProposalMinStakedAiba</code></td>
-<td>10_000</td>
-<td>Min AIBA staked to create proposals</td>
-</tr>
-<tr>
-<td><code>daoProposalMinStakeDays</code></td>
-<td>30</td>
-<td>Min days staked (flexible or lock) to create proposals</td>
-</tr>
-</tbody></table>
-<p>Wallet tab: Overview | Staking flow; period selection, preview, countdown; cancel-early with fee. Yield Vault tab: hero shows min (ecosystem-aligned); locked + flexible staking both show min and enforce it. Wallet tab staking flow: same min displayed and enforced. <code>stakingMinAiba</code> configurable via Admin → Economy (PATCH).</p>
-<h3>6.6 Stars, Diamonds, Referrals</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>starRewardPerBattle</code></td>
-<td>1</td>
-</tr>
-<tr>
-<td><code>diamondRewardFirstWin</code></td>
-<td>1</td>
-</tr>
-<tr>
-<td><code>referralRewardNeurReferrer</code></td>
-<td>250</td>
-</tr>
-<tr>
-<td><code>referralRewardNeurReferee</code></td>
-<td>150</td>
-</tr>
-<tr>
-<td><code>referralRewardAibaReferrer</code></td>
-<td>10</td>
-</tr>
-<tr>
-<td><code>referralRewardAibaReferee</code></td>
-<td>5</td>
-</tr>
-<tr>
-<td><code>referralUnlock3BonusBps</code></td>
-<td>100 (1% battle bonus when 3+ referrals)</td>
-</tr>
-</tbody></table>
-<h3>6.7 Trainers &amp; Automation</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Default</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>trainerRewardAibaPerUser</code></td>
-<td>5</td>
-<td>AIBA per referred user with 3+ battles</td>
-</tr>
-<tr>
-<td><code>trainerRewardAibaPerRecruitedTrainer</code></td>
-<td>20</td>
-<td>AIBA per trainer recruited (when approved)</td>
-</tr>
-<tr>
-<td><code>automationEnabled</code></td>
-<td>false</td>
-<td>Dynamic dailyCapAiba via economy-automation</td>
-</tr>
-<tr>
-<td><code>automationTargetEmissionPercentPerYear</code></td>
-<td>10</td>
-<td>Target % of supply/year</td>
-</tr>
-<tr>
-<td><code>automationMinCapAiba</code> / <code>automationMaxCapAiba</code></td>
-<td>500k / 5M</td>
-<td>Bounds for automation</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>7. Arenas &amp; Game Modes</h2>
-<h3>7.1 GameMode Model (<code>backend/models/GameMode.js</code>)</h3>
-<table>
-<thead><tr>
-<th>Field</th>
-<th>Type</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>key</code></td>
-<td>String</td>
-<td>Unique, e.g. <code>prediction_rookie</code></td>
-</tr>
-<tr>
-<td><code>arena</code></td>
-<td>String</td>
-<td>prediction, simulation, etc.</td>
-</tr>
-<tr>
-<td><code>league</code></td>
-<td>String</td>
-<td>rookie, pro, elite</td>
-</tr>
-<tr>
-<td><code>enabled</code></td>
-<td>Boolean</td>
-<td>If false, 403</td>
-</tr>
-<tr>
-<td><code>energyCost</code></td>
-<td>Number</td>
-<td>Per battle</td>
-</tr>
-<tr>
-<td><code>cooldownSeconds</code></td>
-<td>Number</td>
-<td>Between battles</td>
-</tr>
-<tr>
-<td><code>entryNeurCost</code></td>
-<td>Number</td>
-<td>Optional</td>
-</tr>
-<tr>
-<td><code>entryAibaCost</code></td>
-<td>Number</td>
-<td>Optional</td>
-</tr>
-<tr>
-<td><code>rewardMultiplierAiba</code></td>
-<td>Number</td>
-<td>1.0</td>
-</tr>
-<tr>
-<td><code>rewardMultiplierNeur</code></td>
-<td>Number</td>
-<td>1.0</td>
-</tr>
-<tr>
-<td><code>rules</code></td>
-<td>Object</td>
-<td>requiresGuild, minBrokerLevel, arenaWeights, etc.</td>
-</tr>
-</tbody></table>
-<h3>7.2 Cooldown Key (<code>backend/engine/battleCooldown.js</code>)</h3>
-<ul>
-<li>Cooldown stored in <code>broker.cooldowns[modeKey]</code> or <code>broker.cooldowns[arena]</code> (legacy)</li>
-</ul>
-<hr/>
-<h2>8. Autonomous Racing</h2>
-<h3>8.1 Race Simulation (<code>backend/engine/raceEngine.js</code>)</h3>
-<pre><code>simulateRace({ vehicles, trackLength, trackDifficulty, seed })</code></pre>
-<ul>
-<li>Weights: speed 35%, accel 35%, handling 15%+difficulty*20%, durability 15%</li>
-<li>Level bonus: <code>1 + (level-1)*0.01</code></li>
-<li>Finish order by <code>rawPerformance</code>; variance from durability</li>
-<li>Points: [25, 18, 15, 12, 10, 8, 6, 4, 2, 1] by position</li>
-</ul>
-<h3>8.2 Config (EconomyConfig)</h3>
-<ul>
-<li>Bike: same pattern</li>
-</ul>
-<h3>8.3 Car Racing — Practically Ready</h3>
-<ul>
-<li><strong>Enter open races:</strong> Open races per track (seeded on startup); entry fee AIBA; select race + car → enter.</li>
-<li><strong>Earn AIBA by finish position:</strong> Race runs when ≥2 entries; deterministic <code>simulateRace</code>; reward pool from entry fees distributed by position (1st gets largest share); AIBA credited to each entrant.</li>
-<li><strong>Inspired by:</strong> Car classes and labels (Formula 1, Le Mans, Can-Am, IndyCar, Group B, GT1, Electric, Drag, Touring/DTM, Hillclimb, NASCAR, Historic, Hypercar, Extreme) in model and config; system shop offers Touring, GT1, Formula 1, Le Mans.</li>
-<li><strong>Flow:</strong> Races run when at least 2 have entered; on completion a new open race is created for the same track so races stay available.</li>
-</ul>
-<hr/>
-<h2>9. Security &amp; Fairness</h2>
-<h3>9.1 Idempotency</h3>
-<ul>
-<li><strong>Combine:</strong> <code>ActionRunKey</code> scope <code>broker_combine</code></li>
-<li><strong>Claim:</strong> <code>ActionRunKey</code> scope <code>aiba_claim_mutex</code>; 1-min lock</li>
-</ul>
-<h3>9.2 Rate Limits</h3>
-<ul>
-<li><strong>Global:</strong> 600 req/min per IP (configurable via <code>RATE_LIMIT_PER_MINUTE</code>)</li>
-<li>Redis: shared store when <code>REDIS_URL</code> set; else in-memory</li>
-</ul>
-<h3>9.3 Anomaly Detection</h3>
-<ul>
-<li>Broker: <code>anomalyFlags++</code>; at <code>battleAutoBanBrokerAnomalyFlags</code> → broker banned</li>
-<li>User: <code>anomalyFlags++</code>; at <code>battleAutoBanUserAnomalyFlags</code> → user banned for <code>battleAutoBanUserMinutes</code></li>
-</ul>
-<h3>9.4 Auth</h3>
-<ul>
-</ul>
-<hr/>
-<h2>10. Data Flows</h2>
-<h3>10.1 Battle Flow</h3>
-<pre><code>User → POST /api/battle/run { requestId, brokerId, arena, league, autoClaim? }
+            <ul>
+                <li>Guild wars: 80% to user, 20% to guild vault (NEUR only)</li>
+            </ul>
+            <h3>5.2 Currencies</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Currency</th>
+                        <th>Earned</th>
+                        <th>Spent</th>
+                        <th>On-chain</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>NEUR</td>
+                        <td>Battle, referrals, daily</td>
+                        <td>Entry fees, combine</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td>AIBA</td>
+                        <td>Battle, referrals</td>
+                        <td>Mint, staking, marketplace</td>
+                        <td>Yes (claim)</td>
+                    </tr>
+                    <tr>
+                        <td>Stars</td>
+                        <td>Battle win</td>
+                        <td>Stars Store</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td>Diamonds</td>
+                        <td>First battle win</td>
+                        <td>—</td>
+                        <td>No</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>6. EconomyConfig Fields</h2>
+            <p><strong>Model:</strong> <code>backend/models/EconomyConfig.js</code></p>
+            <h3>6.1 Emission &amp; Caps</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>dailyCapAiba</code></td>
+                        <td>1_000_000</td>
+                        <td>Global daily AIBA cap</td>
+                    </tr>
+                    <tr>
+                        <td><code>dailyCapNeur</code></td>
+                        <td>10_000_000</td>
+                        <td>Global daily NEUR cap</td>
+                    </tr>
+                    <tr>
+                        <td><code>dailyCapAibaByArena</code></td>
+                        <td>Map</td>
+                        <td>Per-arena AIBA cap</td>
+                    </tr>
+                    <tr>
+                        <td><code>dailyCapNeurByArena</code></td>
+                        <td>Map</td>
+                        <td>Per-arena NEUR cap</td>
+                    </tr>
+                    <tr>
+                        <td><code>emissionStartHourUtc</code></td>
+                        <td>0</td>
+                        <td>Start hour (0–23)</td>
+                    </tr>
+                    <tr>
+                        <td><code>emissionEndHourUtc</code></td>
+                        <td>24</td>
+                        <td>End hour (1–24)</td>
+                    </tr>
+                    <tr>
+                        <td><code>emissionWindowsUtc</code></td>
+                        <td>Object</td>
+                        <td>Override per arena or <code>arena:league</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>6.2 Reward Knobs</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>baseRewardAibaPerScore</code></td>
+                        <td>2</td>
+                        <td>AIBA per score point</td>
+                    </tr>
+                    <tr>
+                        <td><code>baseRewardNeurPerScore</code></td>
+                        <td>0</td>
+                        <td>NEUR per score point</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>6.3 Broker Sinks</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>combineNeurCost</code></td>
+                        <td>50</td>
+                    </tr>
+                    <tr>
+                        <td><code>upgradeAibaCost</code></td>
+                        <td>50</td>
+                    </tr>
+                    <tr>
+                        <td><code>trainNeurCost</code></td>
+                        <td>25</td>
+                    </tr>
+                    <tr>
+                        <td><code>repairNeurCost</code></td>
+                        <td>15</td>
+                    </tr>
+                    <tr>
+                        <td><code>mintAibaCost</code></td>
+                        <td>100</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>6.4 Battle Hardening</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>battleMaxEnergy</code></td>
+                        <td>100</td>
+                        <td>Energy cap</td>
+                    </tr>
+                    <tr>
+                        <td><code>battleEnergyRegenSecondsPerEnergy</code></td>
+                        <td>60</td>
+                        <td>1 energy / minute</td>
+                    </tr>
+                    <tr>
+                        <td><code>battleAnomalyScoreMax</code></td>
+                        <td>220</td>
+                        <td>Score &gt; this flags anomaly</td>
+                    </tr>
+                    <tr>
+                        <td><code>battleAutoBanBrokerAnomalyFlags</code></td>
+                        <td>5</td>
+                        <td>Broker auto-ban</td>
+                    </tr>
+                    <tr>
+                        <td><code>battleAutoBanUserAnomalyFlags</code></td>
+                        <td>25</td>
+                        <td>User auto-ban</td>
+                    </tr>
+                    <tr>
+                        <td><code>battleAutoBanUserMinutes</code></td>
+                        <td>1440</td>
+                        <td>24h ban duration</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>6.5 TON Payments (Super Admin)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                        <th>Env Wallet</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>createBrokerCostTonNano</code></td>
+                        <td>1e9</td>
+                        <td>CREATED_BROKERS_WALLET</td>
+                    </tr>
+                    <tr>
+                        <td><code>boostProfileCostTonNano</code></td>
+                        <td>1e9</td>
+                        <td>BOOST_PROFILE_WALLET</td>
+                    </tr>
+                    <tr>
+                        <td><code>boostProfileDurationDays</code></td>
+                        <td>7</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td><code>giftCostTonNano</code></td>
+                        <td>1e9</td>
+                        <td>GIFTS_WALLET</td>
+                    </tr>
+                    <tr>
+                        <td><code>createGroupCostTonNano</code></td>
+                        <td>1e9</td>
+                        <td>LEADER_BOARD_WALLET</td>
+                    </tr>
+                    <tr>
+                        <td><code>boostGroupCostTonNano</code></td>
+                        <td>1e9</td>
+                        <td>BOOST_GROUP_WALLET</td>
+                    </tr>
+                    <tr>
+                        <td><code>leaderboardTopFreeCreate</code></td>
+                        <td>50</td>
+                        <td>Top N create guild free</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>6.6a Staking &amp; DAO</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>stakingMinAiba</code></td>
+                        <td>100</td>
+                        <td>
+                            Min AIBA to stake (flexible + locked). Ecosystem-aligned: broker mint cost, 1T AIBA supply.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>stakingApyPercent</code></td>
+                        <td>15</td>
+                        <td>APY for flexible staking</td>
+                    </tr>
+                    <tr>
+                        <td><code>stakingPeriods</code></td>
+                        <td>[{ days: 30, apyPercent: 10 }, ...]</td>
+                        <td>Period-based locks: 30/90/180/365 days with tiered APY</td>
+                    </tr>
+                    <tr>
+                        <td><code>stakingCancelEarlyFeeBps</code></td>
+                        <td>500</td>
+                        <td>5% fee when cancelling lock early → Treasury (CANCELLED_STAKES_WALLET)</td>
+                    </tr>
+                    <tr>
+                        <td><code>daoProposalMinStakedAiba</code></td>
+                        <td>10_000</td>
+                        <td>Min AIBA staked to create proposals</td>
+                    </tr>
+                    <tr>
+                        <td><code>daoProposalMinStakeDays</code></td>
+                        <td>30</td>
+                        <td>Min days staked (flexible or lock) to create proposals</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                Wallet tab: Overview | Staking flow; period selection, preview, countdown; cancel-early with fee. Yield
+                Vault tab: hero shows min (ecosystem-aligned); locked + flexible staking both show min and enforce it.
+                Wallet tab staking flow: same min displayed and enforced. <code>stakingMinAiba</code> configurable via
+                Admin → Economy (PATCH).
+            </p>
+            <h3>6.6 Stars, Diamonds, Referrals</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>starRewardPerBattle</code></td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td><code>diamondRewardFirstWin</code></td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td><code>referralRewardNeurReferrer</code></td>
+                        <td>250</td>
+                    </tr>
+                    <tr>
+                        <td><code>referralRewardNeurReferee</code></td>
+                        <td>150</td>
+                    </tr>
+                    <tr>
+                        <td><code>referralRewardAibaReferrer</code></td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td><code>referralRewardAibaReferee</code></td>
+                        <td>5</td>
+                    </tr>
+                    <tr>
+                        <td><code>referralUnlock3BonusBps</code></td>
+                        <td>100 (1% battle bonus when 3+ referrals)</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>6.7 Trainers &amp; Automation</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>trainerRewardAibaPerUser</code></td>
+                        <td>5</td>
+                        <td>AIBA per referred user with 3+ battles</td>
+                    </tr>
+                    <tr>
+                        <td><code>trainerRewardAibaPerRecruitedTrainer</code></td>
+                        <td>20</td>
+                        <td>AIBA per trainer recruited (when approved)</td>
+                    </tr>
+                    <tr>
+                        <td><code>automationEnabled</code></td>
+                        <td>false</td>
+                        <td>Dynamic dailyCapAiba via economy-automation</td>
+                    </tr>
+                    <tr>
+                        <td><code>automationTargetEmissionPercentPerYear</code></td>
+                        <td>10</td>
+                        <td>Target % of supply/year</td>
+                    </tr>
+                    <tr>
+                        <td><code>automationMinCapAiba</code> / <code>automationMaxCapAiba</code></td>
+                        <td>500k / 5M</td>
+                        <td>Bounds for automation</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>7. Arenas &amp; Game Modes</h2>
+            <h3>7.1 GameMode Model (<code>backend/models/GameMode.js</code>)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>key</code></td>
+                        <td>String</td>
+                        <td>Unique, e.g. <code>prediction_rookie</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>arena</code></td>
+                        <td>String</td>
+                        <td>prediction, simulation, etc.</td>
+                    </tr>
+                    <tr>
+                        <td><code>league</code></td>
+                        <td>String</td>
+                        <td>rookie, pro, elite</td>
+                    </tr>
+                    <tr>
+                        <td><code>enabled</code></td>
+                        <td>Boolean</td>
+                        <td>If false, 403</td>
+                    </tr>
+                    <tr>
+                        <td><code>energyCost</code></td>
+                        <td>Number</td>
+                        <td>Per battle</td>
+                    </tr>
+                    <tr>
+                        <td><code>cooldownSeconds</code></td>
+                        <td>Number</td>
+                        <td>Between battles</td>
+                    </tr>
+                    <tr>
+                        <td><code>entryNeurCost</code></td>
+                        <td>Number</td>
+                        <td>Optional</td>
+                    </tr>
+                    <tr>
+                        <td><code>entryAibaCost</code></td>
+                        <td>Number</td>
+                        <td>Optional</td>
+                    </tr>
+                    <tr>
+                        <td><code>rewardMultiplierAiba</code></td>
+                        <td>Number</td>
+                        <td>1.0</td>
+                    </tr>
+                    <tr>
+                        <td><code>rewardMultiplierNeur</code></td>
+                        <td>Number</td>
+                        <td>1.0</td>
+                    </tr>
+                    <tr>
+                        <td><code>rules</code></td>
+                        <td>Object</td>
+                        <td>requiresGuild, minBrokerLevel, arenaWeights, etc.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>7.2 Cooldown Key (<code>backend/engine/battleCooldown.js</code>)</h3>
+            <ul>
+                <li>
+                    Cooldown stored in <code>broker.cooldowns[modeKey]</code> or
+                    <code>broker.cooldowns[arena]</code> (legacy)
+                </li>
+            </ul>
+            <hr />
+            <h2>8. Autonomous Racing</h2>
+            <h3>8.1 Race Simulation (<code>backend/engine/raceEngine.js</code>)</h3>
+            <pre><code>simulateRace({ vehicles, trackLength, trackDifficulty, seed })</code></pre>
+            <ul>
+                <li>Weights: speed 35%, accel 35%, handling 15%+difficulty*20%, durability 15%</li>
+                <li>Level bonus: <code>1 + (level-1)*0.01</code></li>
+                <li>Finish order by <code>rawPerformance</code>; variance from durability</li>
+                <li>Points: [25, 18, 15, 12, 10, 8, 6, 4, 2, 1] by position</li>
+            </ul>
+            <h3>8.2 Config (EconomyConfig)</h3>
+            <ul>
+                <li>Bike: same pattern</li>
+            </ul>
+            <h3>8.3 Car Racing — Practically Ready</h3>
+            <ul>
+                <li>
+                    <strong>Enter open races:</strong> Open races per track (seeded on startup); entry fee AIBA; select
+                    race + car → enter.
+                </li>
+                <li>
+                    <strong>Earn AIBA by finish position:</strong> Race runs when ≥2 entries; deterministic
+                    <code>simulateRace</code>; reward pool from entry fees distributed by position (1st gets largest
+                    share); AIBA credited to each entrant.
+                </li>
+                <li>
+                    <strong>Inspired by:</strong> Car classes and labels (Formula 1, Le Mans, Can-Am, IndyCar, Group B,
+                    GT1, Electric, Drag, Touring/DTM, Hillclimb, NASCAR, Historic, Hypercar, Extreme) in model and
+                    config; system shop offers Touring, GT1, Formula 1, Le Mans.
+                </li>
+                <li>
+                    <strong>Flow:</strong> Races run when at least 2 have entered; on completion a new open race is
+                    created for the same track so races stay available.
+                </li>
+            </ul>
+            <hr />
+            <h2>9. Security &amp; Fairness</h2>
+            <h3>9.1 Idempotency</h3>
+            <ul>
+                <li><strong>Combine:</strong> <code>ActionRunKey</code> scope <code>broker_combine</code></li>
+                <li>
+                    <strong>Claim:</strong> <code>ActionRunKey</code> scope <code>aiba_claim_mutex</code>; 1-min lock
+                </li>
+            </ul>
+            <h3>9.2 Rate Limits</h3>
+            <ul>
+                <li>
+                    <strong>Global:</strong> 600 req/min per IP (configurable via <code>RATE_LIMIT_PER_MINUTE</code>)
+                </li>
+                <li>Redis: shared store when <code>REDIS_URL</code> set; else in-memory</li>
+            </ul>
+            <h3>9.3 Anomaly Detection</h3>
+            <ul>
+                <li>
+                    Broker: <code>anomalyFlags++</code>; at <code>battleAutoBanBrokerAnomalyFlags</code> → broker banned
+                </li>
+                <li>
+                    User: <code>anomalyFlags++</code>; at <code>battleAutoBanUserAnomalyFlags</code> → user banned for
+                    <code>battleAutoBanUserMinutes</code>
+                </li>
+            </ul>
+            <h3>9.4 Auth</h3>
+            <ul></ul>
+            <hr />
+            <h2>10. Data Flows</h2>
+            <h3>10.1 Battle Flow</h3>
+            <pre><code>User → POST /api/battle/run { requestId, brokerId, arena, league, autoClaim? }
   → requireTelegram, rateLimit(25/min)
   → Idempotency check (Battle by requestId)
   → BattleRunKey lock
@@ -793,8 +875,8 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)</code></pre>
   → Auto-claim? createSignedClaim → debit AIBA → return claim
   → notifyBattleWin (Telegram)
   → res.json(battle)</code></pre>
-<h3>10.2 Claim Flow</h3>
-<pre><code>Credits (off-chain) → User requests claim (Wallet tab or autoClaim)
+            <h3>10.2 Claim Flow</h3>
+            <pre><code>Credits (off-chain) → User requests claim (Wallet tab or autoClaim)
   → acquireClaimMutex
   → getVaultLastSeqno (on-chain)
   → lastIssued vs lastOnchain → nextSeqno
@@ -803,341 +885,371 @@ If active Boost: multiply both by boost.multiplier (e.g. 1.2x)</code></pre>
   → Return { payloadBocBase64, signatureBase64, ... }
   → User sends TonConnect tx to ArenaRewardVault
   → Vault verifies signature, transfers AIBA jettons</code></pre>
-<h3>10.3 Racing Flow</h3>
-<pre><code>Create car/bike (AIBA or TON) → Enter race (AIBA entry fee)
+            <h3>10.3 Racing Flow</h3>
+            <pre><code>Create car/bike (AIBA or TON) → Enter race (AIBA entry fee)
   → Race fills or timer → simulateRace
   → Rank by position → AIBA rewards by points</code></pre>
-<hr/>
-<h2>11. Edge Cases</h2>
-<table>
-<thead><tr>
-<th>Case</th>
-<th>Handling</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Cooldown</strong></td>
-<td><code>now - lastBattleAt &lt; cooldownSeconds</code> → 429 retryAfterMs</td>
-</tr>
-<tr>
-<td><strong>Energy</strong></td>
-<td>Regen: <code>deltaSec / regenSecondsPerEnergy</code>; cap at maxEnergy</td>
-</tr>
-<tr>
-<td><strong>Guild Wars no guild</strong></td>
-<td>403 guild required</td>
-</tr>
-<tr>
-<td><strong>Guild Wars no opponent</strong></td>
-<td>Match vs another guild (or fallback)</td>
-</tr>
-<tr>
-<td><strong>Vault claim gap</strong></td>
-<td>If <code>lastIssued &gt; lastOnchain</code>, skip claim (outstanding unconfirmed)</td>
-</tr>
-<tr>
-<td><strong>Duplicate requestId</strong></td>
-<td>Return existing Battle; 409 if used by different user</td>
-</tr>
-<tr>
-<td><strong>Concurrent battle</strong></td>
-<td>BattleRunKey → 409 in_progress</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>12. API Mapping</h2>
-<h3>12.1 Game Core</h3>
-<table>
-<thead><tr>
-<th>Endpoint</th>
-<th>Method</th>
-<th>Purpose</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>/api/battle/run</code></td>
-<td>POST</td>
-<td>Run battle</td>
-</tr>
-<tr>
-<td><code>/api/brokers/starter</code></td>
-<td>POST</td>
-<td>Create starter broker</td>
-</tr>
-<tr>
-<td><code>/api/brokers/mine</code></td>
-<td>GET</td>
-<td>List user brokers</td>
-</tr>
-<tr>
-<td><code>/api/brokers/combine</code></td>
-<td>POST</td>
-<td>Combine two brokers</td>
-</tr>
-<tr>
-<td><code>/api/brokers/mint-nft</code></td>
-<td>POST</td>
-<td>Mint broker as NFT</td>
-</tr>
-<tr>
-<td><code>/api/brokers/create-with-ton</code></td>
-<td>POST</td>
-<td>Pay TON, create broker</td>
-</tr>
-<tr>
-<td><code>/api/economy/me</code></td>
-<td>GET</td>
-<td>Balances (NEUR, AIBA, Stars, Diamonds)</td>
-</tr>
-<tr>
-<td><code>/api/economy/claim-aiba</code></td>
-<td>POST</td>
-<td>Create claim (manual)</td>
-</tr>
-<tr>
-<td><code>/api/vault/inventory</code></td>
-<td>GET</td>
-<td>Vault TON + jetton balance</td>
-</tr>
-<tr>
-<td><code>/api/vault/claim-status</code></td>
-<td>GET</td>
-<td>Check claim confirmation</td>
-</tr>
-<tr>
-<td><code>/api/wallet/connect</code></td>
-<td>POST</td>
-<td>Save TON address</td>
-</tr>
-</tbody></table>
-<h3>12.2 Leaderboard &amp; Guilds</h3>
-<table>
-<thead><tr>
-<th>Endpoint</th>
-<th>Method</th>
-<th>Purpose</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>/api/leaderboard</code></td>
-<td>GET</td>
-<td>Global ranks (by: score, aiba, neur, battles)</td>
-</tr>
-<tr>
-<td><code>/api/leaderboard/my-rank</code></td>
-<td>GET</td>
-<td>User rank</td>
-</tr>
-<tr>
-<td><code>/api/guilds/list</code></td>
-<td>GET</td>
-<td>All guilds</td>
-</tr>
-<tr>
-<td><code>/api/guilds/mine</code></td>
-<td>GET</td>
-<td>User guilds</td>
-</tr>
-<tr>
-<td><code>/api/guilds/create</code></td>
-<td>POST</td>
-<td>Create guild</td>
-</tr>
-<tr>
-<td><code>/api/guilds/join</code></td>
-<td>POST</td>
-<td>Join guild</td>
-</tr>
-<tr>
-<td><code>/api/guilds/:guildId/boost</code></td>
-<td>POST</td>
-<td>Boost guild (TON)</td>
-</tr>
-<tr>
-<td><code>/api/guilds/deposit-broker</code></td>
-<td>POST</td>
-<td>Deposit broker</td>
-</tr>
-<tr>
-<td><code>/api/guilds/withdraw-broker</code></td>
-<td>POST</td>
-<td>Withdraw broker</td>
-</tr>
-</tbody></table>
-<h3>12.3 Marketplace &amp; Racing</h3>
-<table>
-<thead><tr>
-<th>Endpoint</th>
-<th>Method</th>
-<th>Purpose</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>/api/marketplace/listings</code></td>
-<td>GET</td>
-<td>Broker listings</td>
-</tr>
-<tr>
-<td><code>/api/marketplace/system-brokers</code></td>
-<td>GET</td>
-<td>System catalog</td>
-</tr>
-<tr>
-<td><code>/api/marketplace/list</code></td>
-<td>POST</td>
-<td>List broker</td>
-</tr>
-<tr>
-<td><code>/api/marketplace/buy</code></td>
-<td>POST</td>
-<td>Buy listing</td>
-</tr>
-<tr>
-<td><code>/api/marketplace/buy-system-broker</code></td>
-<td>POST</td>
-<td>Buy from system</td>
-</tr>
-<tr>
-<td><code>/api/broker-rental</code></td>
-<td>GET</td>
-<td>List available rentals</td>
-</tr>
-<tr>
-<td><code>/api/broker-rental/list</code></td>
-<td>POST</td>
-<td>List broker for rent</td>
-</tr>
-<tr>
-<td><code>/api/broker-rental/:id/rent</code></td>
-<td>POST</td>
-<td>Rent broker (AIBA, 1h)</td>
-</tr>
-<tr>
-<td><code>/api/broker-rental/:id/unlist</code></td>
-<td>POST</td>
-<td>Unlist your broker</td>
-</tr>
-<tr>
-<td><code>/api/car-racing/*</code></td>
-<td>Mixed</td>
-<td>Config, tracks, races, cars, enter, buy, list, leaderboard</td>
-</tr>
-<tr>
-<td><code>/api/bike-racing/*</code></td>
-<td>Mixed</td>
-<td>Same for bikes (config, tracks, races, bikes, enter, buy, list, leaderboard)</td>
-</tr>
-</tbody></table>
-<h3>12.4 Extensions</h3>
-<table>
-<thead><tr>
-<th>Endpoint</th>
-<th>Purpose</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>/api/referrals/me</code>, <code>/create</code>, <code>/use</code>, <code>/top</code></td>
-<td>Referrals</td>
-</tr>
-<tr>
-<td><code>/api/tasks</code></td>
-<td>Personalized tasks</td>
-</tr>
-<tr>
-<td><code>/api/daily/status</code>, <code>/claim</code></td>
-<td>Daily NEUR</td>
-</tr>
-<tr>
-<td><code>/api/charity/*</code></td>
-<td>Campaigns, donate (NEUR/AIBA), leaderboard</td>
-</tr>
-<tr>
-<td><code>/api/donate/config</code>, <code>/broker</code>, <code>/car</code>, <code>/bike</code>, <code>/gifts</code></td>
-<td>Donate broker/car/bike/gifts (TON)</td>
-</tr>
-<tr>
-<td><code>/api/university/*</code></td>
-<td>Courses, progress, mint badges</td>
-</tr>
-<tr>
-<td><code>/api/realms</code>, <code>/api/missions</code>, <code>/api/mentors</code></td>
-<td>Realms, missions, mentors (stake/unstake)</td>
-</tr>
-<tr>
-<td><code>/api/assets/</code> (and subtree), <code>/api/asset-marketplace/</code> (and subtree)</td>
-<td>AI assets</td>
-</tr>
-<tr>
-<td><code>/api/governance/*</code></td>
-<td>Proposals, vote</td>
-</tr>
-<tr>
-<td><code>/api/multiverse/*</code></td>
-<td>NFT universes, stake, claim</td>
-</tr>
-<tr>
-<td><code>/api/staking/*</code></td>
-<td>Stake AIBA, claim, cancel-early (fee)</td>
-</tr>
-<tr>
-<td><code>/api/dao/*</code></td>
-<td>Proposals, vote (create requires staked AIBA)</td>
-</tr>
-<tr>
-<td><code>/api/boosts/*</code></td>
-<td>Buy boost (NEUR/TON)</td>
-</tr>
-<tr>
-<td><code>/api/gifts/*</code></td>
-<td>Send/receive gifts</td>
-</tr>
-<tr>
-<td><code>/api/p2p-aiba/config</code>, <code>/send</code>, <code>/buy</code></td>
-<td>P2P AIBA send, Buy AIBA with TON</td>
-</tr>
-<tr>
-<td><code>/api/predict/events</code>, <code>/events/:id</code>, <code>/events/:id/bet</code></td>
-<td>Predict: list events, bet (brokerId, amountAiba)</td>
-</tr>
-<tr>
-<td><code>/api/trainers/me</code>, <code>/apply</code>, <code>/network</code>, <code>/leaderboard</code>, <code>/claim-rewards</code>, etc.</td>
-<td>Trainers: apply, network, leaderboard, claim</td>
-</tr>
-<tr>
-<td><code>/api/tournaments</code>, <code>/api/tournaments/:id</code>, <code>/api/tournaments/:id/enter</code></td>
-<td>Tournaments: list, single, enter</td>
-</tr>
-<tr>
-<td><code>/api/global-boss</code>, <code>/api/global-boss/record-damage</code></td>
-<td>Global boss: state, record damage</td>
-</tr>
-<tr>
-<td><code>/api/premium/status</code>, <code>/api/premium/buy</code></td>
-<td>Premium status, buy (TON)</td>
-</tr>
-<tr>
-<td><code>/api/breeding/breed</code></td>
-<td>Breed two brokers (burns both + AIBA)</td>
-</tr>
-<tr>
-<td><code>/api/game-modes</code></td>
-<td>Game modes config</td>
-</tr>
-<tr>
-<td><code>/api/treasury</code></td>
-<td>Treasury telemetry</td>
-</tr>
-<tr>
-<td><code>/api/oracle</code></td>
-<td>Oracle (AIBA/TON rate, etc.)</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>See Also</h2>
-<ul>
-<li><a href="API-CONTRACT.md">API-CONTRACT.md</a> — Full API specification</li>
-<li><a href="DEPLOYMENT-AND-ENV.md">DEPLOYMENT-AND-ENV.md</a> — Environment configuration</li>
-</ul>
-  </div>
-</body>
+            <hr />
+            <h2>11. Edge Cases</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Case</th>
+                        <th>Handling</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Cooldown</strong></td>
+                        <td><code>now - lastBattleAt &lt; cooldownSeconds</code> → 429 retryAfterMs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Energy</strong></td>
+                        <td>Regen: <code>deltaSec / regenSecondsPerEnergy</code>; cap at maxEnergy</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Guild Wars no guild</strong></td>
+                        <td>403 guild required</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Guild Wars no opponent</strong></td>
+                        <td>Match vs another guild (or fallback)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vault claim gap</strong></td>
+                        <td>If <code>lastIssued &gt; lastOnchain</code>, skip claim (outstanding unconfirmed)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Duplicate requestId</strong></td>
+                        <td>Return existing Battle; 409 if used by different user</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Concurrent battle</strong></td>
+                        <td>BattleRunKey → 409 in_progress</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>12. API Mapping</h2>
+            <h3>12.1 Game Core</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Method</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/api/battle/run</code></td>
+                        <td>POST</td>
+                        <td>Run battle</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/brokers/starter</code></td>
+                        <td>POST</td>
+                        <td>Create starter broker</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/brokers/mine</code></td>
+                        <td>GET</td>
+                        <td>List user brokers</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/brokers/combine</code></td>
+                        <td>POST</td>
+                        <td>Combine two brokers</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/brokers/mint-nft</code></td>
+                        <td>POST</td>
+                        <td>Mint broker as NFT</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/brokers/create-with-ton</code></td>
+                        <td>POST</td>
+                        <td>Pay TON, create broker</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/economy/me</code></td>
+                        <td>GET</td>
+                        <td>Balances (NEUR, AIBA, Stars, Diamonds)</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/economy/claim-aiba</code></td>
+                        <td>POST</td>
+                        <td>Create claim (manual)</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/vault/inventory</code></td>
+                        <td>GET</td>
+                        <td>Vault TON + jetton balance</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/vault/claim-status</code></td>
+                        <td>GET</td>
+                        <td>Check claim confirmation</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/wallet/connect</code></td>
+                        <td>POST</td>
+                        <td>Save TON address</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>12.2 Leaderboard &amp; Guilds</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Method</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/api/leaderboard</code></td>
+                        <td>GET</td>
+                        <td>Global ranks (by: score, aiba, neur, battles)</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/leaderboard/my-rank</code></td>
+                        <td>GET</td>
+                        <td>User rank</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/guilds/list</code></td>
+                        <td>GET</td>
+                        <td>All guilds</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/guilds/mine</code></td>
+                        <td>GET</td>
+                        <td>User guilds</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/guilds/create</code></td>
+                        <td>POST</td>
+                        <td>Create guild</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/guilds/join</code></td>
+                        <td>POST</td>
+                        <td>Join guild</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/guilds/:guildId/boost</code></td>
+                        <td>POST</td>
+                        <td>Boost guild (TON)</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/guilds/deposit-broker</code></td>
+                        <td>POST</td>
+                        <td>Deposit broker</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/guilds/withdraw-broker</code></td>
+                        <td>POST</td>
+                        <td>Withdraw broker</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>12.3 Marketplace &amp; Racing</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Method</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/api/marketplace/listings</code></td>
+                        <td>GET</td>
+                        <td>Broker listings</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/marketplace/system-brokers</code></td>
+                        <td>GET</td>
+                        <td>System catalog</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/marketplace/list</code></td>
+                        <td>POST</td>
+                        <td>List broker</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/marketplace/buy</code></td>
+                        <td>POST</td>
+                        <td>Buy listing</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/marketplace/buy-system-broker</code></td>
+                        <td>POST</td>
+                        <td>Buy from system</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/broker-rental</code></td>
+                        <td>GET</td>
+                        <td>List available rentals</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/broker-rental/list</code></td>
+                        <td>POST</td>
+                        <td>List broker for rent</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/broker-rental/:id/rent</code></td>
+                        <td>POST</td>
+                        <td>Rent broker (AIBA, 1h)</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/broker-rental/:id/unlist</code></td>
+                        <td>POST</td>
+                        <td>Unlist your broker</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/car-racing/*</code></td>
+                        <td>Mixed</td>
+                        <td>Config, tracks, races, cars, enter, buy, list, leaderboard</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/bike-racing/*</code></td>
+                        <td>Mixed</td>
+                        <td>Same for bikes (config, tracks, races, bikes, enter, buy, list, leaderboard)</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>12.4 Extensions</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <code>/api/referrals/me</code>, <code>/create</code>, <code>/use</code>, <code>/top</code>
+                        </td>
+                        <td>Referrals</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/tasks</code></td>
+                        <td>Personalized tasks</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/daily/status</code>, <code>/claim</code></td>
+                        <td>Daily NEUR</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/charity/*</code></td>
+                        <td>Campaigns, donate (NEUR/AIBA), leaderboard</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <code>/api/donate/config</code>, <code>/broker</code>, <code>/car</code>,
+                            <code>/bike</code>, <code>/gifts</code>
+                        </td>
+                        <td>Donate broker/car/bike/gifts (TON)</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/university/*</code></td>
+                        <td>Courses, progress, mint badges</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/realms</code>, <code>/api/missions</code>, <code>/api/mentors</code></td>
+                        <td>Realms, missions, mentors (stake/unstake)</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <code>/api/assets/</code> (and subtree), <code>/api/asset-marketplace/</code> (and subtree)
+                        </td>
+                        <td>AI assets</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/governance/*</code></td>
+                        <td>Proposals, vote</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/multiverse/*</code></td>
+                        <td>NFT universes, stake, claim</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/staking/*</code></td>
+                        <td>Stake AIBA, claim, cancel-early (fee)</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/dao/*</code></td>
+                        <td>Proposals, vote (create requires staked AIBA)</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/boosts/*</code></td>
+                        <td>Buy boost (NEUR/TON)</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/gifts/*</code></td>
+                        <td>Send/receive gifts</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/p2p-aiba/config</code>, <code>/send</code>, <code>/buy</code></td>
+                        <td>P2P AIBA send, Buy AIBA with TON</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <code>/api/predict/events</code>, <code>/events/:id</code>, <code>/events/:id/bet</code>
+                        </td>
+                        <td>Predict: list events, bet (brokerId, amountAiba)</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <code>/api/trainers/me</code>, <code>/apply</code>, <code>/network</code>,
+                            <code>/leaderboard</code>, <code>/claim-rewards</code>, etc.
+                        </td>
+                        <td>Trainers: apply, network, leaderboard, claim</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <code>/api/tournaments</code>, <code>/api/tournaments/:id</code>,
+                            <code>/api/tournaments/:id/enter</code>
+                        </td>
+                        <td>Tournaments: list, single, enter</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/global-boss</code>, <code>/api/global-boss/record-damage</code></td>
+                        <td>Global boss: state, record damage</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/premium/status</code>, <code>/api/premium/buy</code></td>
+                        <td>Premium status, buy (TON)</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/breeding/breed</code></td>
+                        <td>Breed two brokers (burns both + AIBA)</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/game-modes</code></td>
+                        <td>Game modes config</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/treasury</code></td>
+                        <td>Treasury telemetry</td>
+                    </tr>
+                    <tr>
+                        <td><code>/api/oracle</code></td>
+                        <td>Oracle (AIBA/TON rate, etc.)</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>See Also</h2>
+            <ul>
+                <li><a href="API-CONTRACT.md">API-CONTRACT.md</a> — Full API specification</li>
+                <li><a href="DEPLOYMENT-AND-ENV.md">DEPLOYMENT-AND-ENV.md</a> — Environment configuration</li>
+            </ul>
+        </div>
+    </body>
 </html>

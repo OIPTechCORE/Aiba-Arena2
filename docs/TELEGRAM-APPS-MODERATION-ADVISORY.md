@@ -6,11 +6,11 @@ This advisory supports registering **AIBA Arena** in the Telegram Apps Moderatio
 
 ## Submission Channels
 
-| Resource | Link | Purpose |
-|----------|------|---------|
-| **Submit Your App** | [t.me/app_moderation_bot](https://t.me/app_moderation_bot) | Official moderation / submission bot |
-| **Apps Center** | [tapps.center](https://tapps.center) | Browse and discover Telegram mini-apps |
-| **Tapps Bot** | [t.me/tapps_bot](https://t.me/tapps_bot) | Bot for browsing and launching apps |
+| Resource            | Link                                                       | Purpose                                |
+| ------------------- | ---------------------------------------------------------- | -------------------------------------- |
+| **Submit Your App** | [t.me/app_moderation_bot](https://t.me/app_moderation_bot) | Official moderation / submission bot   |
+| **Apps Center**     | [tapps.center](https://tapps.center)                       | Browse and discover Telegram mini-apps |
+| **Tapps Bot**       | [t.me/tapps_bot](https://t.me/tapps_bot)                   | Bot for browsing and launching apps    |
 
 ---
 
@@ -29,8 +29,8 @@ This advisory supports registering **AIBA Arena** in the Telegram Apps Moderatio
 #### Risk factors
 
 1. **Token / earnings** — AIBA and NEUR mechanics may be scrutinized. Ensure:
-   - Clear disclosure (no false promises).
-   - No misleading “guaranteed profit” language.
+    - Clear disclosure (no false promises).
+    - No misleading “guaranteed profit” language.
 2. **Referral rewards** — Tiered bonuses (10×, 100×) are common; keep them transparent.
 3. **Wallet requirement** — Referee must connect wallet to apply a referral; moderators may question if this feels too restrictive.
 
@@ -47,25 +47,25 @@ This advisory supports registering **AIBA Arena** in the Telegram Apps Moderatio
 
 ### Categories that fit AIBA Arena
 
-| Category | Fit | Notes |
-|----------|-----|------|
-| **Games** | ✓ High | Broker battles, arenas, scoring. Primary fit. |
-| **Play to Earn** | ✓ High | Battle rewards (AIBA), referrals, tasks. |
-| **NFT** | ✓ Medium | Brokers as collectibles; marketplace; guild assets. |
-| **Finance** | △ Low–Medium | NEUR/AIBA economy; better as secondary. |
-| **Other** | Fallback | Use if none above feel right. |
+| Category         | Fit          | Notes                                               |
+| ---------------- | ------------ | --------------------------------------------------- |
+| **Games**        | ✓ High       | Broker battles, arenas, scoring. Primary fit.       |
+| **Play to Earn** | ✓ High       | Battle rewards (AIBA), referrals, tasks.            |
+| **NFT**          | ✓ Medium     | Brokers as collectibles; marketplace; guild assets. |
+| **Finance**      | △ Low–Medium | NEUR/AIBA economy; better as secondary.             |
+| **Other**        | Fallback     | Use if none above feel right.                       |
 
 Recommendation: **Primary category “Games”**, optionally tag **Play to Earn** and **NFT** if the submission form allows multiple tags.
 
 ### Realistic positions
 
-| Placement | Probability | Notes |
-|-----------|-------------|-------|
-| **New** badge | High | New apps often appear in “New” section automatically. |
-| **Games** listing | High | Strong match for broker battles + arenas. |
-| **Play to Earn** listing | Medium–High | Earn AIBA/NEUR via battles and referrals. |
-| **Trending** | Low–Medium | Depends on user traction (MAU, DAU). |
-| **Editors’ Choice** | Very Low | Curated (Notcoin, Battles, Gatto, Major, etc.); requires exceptional quality and adoption. |
+| Placement                | Probability | Notes                                                                                      |
+| ------------------------ | ----------- | ------------------------------------------------------------------------------------------ |
+| **New** badge            | High        | New apps often appear in “New” section automatically.                                      |
+| **Games** listing        | High        | Strong match for broker battles + arenas.                                                  |
+| **Play to Earn** listing | Medium–High | Earn AIBA/NEUR via battles and referrals.                                                  |
+| **Trending**             | Low–Medium  | Depends on user traction (MAU, DAU).                                                       |
+| **Editors’ Choice**      | Very Low    | Curated (Notcoin, Battles, Gatto, Major, etc.); requires exceptional quality and adoption. |
 
 ### Summary
 
@@ -91,13 +91,13 @@ Recommendation: **Primary category “Games”**, optionally tag **Play to Earn*
 
 ## Implementation Status (Moderation Advisory Compliance)
 
-| Requirement | Status | Implementation |
-|-------------|--------|----------------|
-| Clear disclosure (no false promises) | ✓ Done | Terms §3, Wallet disclaimer banner, FAQs "Earnings disclaimer?" |
-| No misleading "guaranteed profit" language | ✓ Done | Terms §3, Wallet & FAQ disclaimers |
-| Privacy policy ready | ✓ Done | `docs/PRIVACY-POLICY.md`, `/privacy` page, Settings link |
-| Terms of service ready | ✓ Done | `docs/TERMS-OF-SERVICE.md`, `/terms` page, Settings link |
-| Referral rewards transparent | ✓ Done | Creator tiers (2–7%) shown in UI and FAQs |
+| Requirement                                | Status | Implementation                                                  |
+| ------------------------------------------ | ------ | --------------------------------------------------------------- |
+| Clear disclosure (no false promises)       | ✓ Done | Terms §3, Wallet disclaimer banner, FAQs "Earnings disclaimer?" |
+| No misleading "guaranteed profit" language | ✓ Done | Terms §3, Wallet & FAQ disclaimers                              |
+| Privacy policy ready                       | ✓ Done | `docs/PRIVACY-POLICY.md`, `/privacy` page, Settings link        |
+| Terms of service ready                     | ✓ Done | `docs/TERMS-OF-SERVICE.md`, `/terms` page, Settings link        |
+| Referral rewards transparent               | ✓ Done | Creator tiers (2–7%) shown in UI and FAQs                       |
 
 **In-app links for submission form:**
 

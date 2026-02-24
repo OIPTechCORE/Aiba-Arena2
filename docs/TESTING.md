@@ -100,29 +100,29 @@ This builds contracts and runs Jest tests in `tests/*.spec.ts`.
 ## 4. Recommended CI pipeline
 
 1. **Backend**
-   - `cd backend && npm run test:unit`
-   - `cd backend && npm run test:api`
-   - (Optional) `cd backend && npm run test:api:integration` (with `mongodb-memory-server` installed)
+    - `cd backend && npm run test:unit`
+    - `cd backend && npm run test:api`
+    - (Optional) `cd backend && npm run test:api:integration` (with `mongodb-memory-server` installed)
 2. **Miniapp**
-   - `cd miniapp && npm run build`
+    - `cd miniapp && npm run build`
 3. **Contracts**
-   - `npm run build:contracts && jest --verbose` (from root)
+    - `npm run build:contracts && jest --verbose` (from root)
 
 ---
 
 ## 5. What each test file covers
 
-| File | Purpose |
-|------|--------|
-| `backend/tests/api/health.test.js` | Health, comms status, metrics |
-| `backend/tests/api/catalog.test.js` | System shop catalogs (brokers, cars, bikes) |
-| `backend/tests/api/university.test.js` | University courses endpoint |
-| `backend/tests/api/auth.test.js` | 401 when auth missing on protected routes |
-| `backend/tests/api/validation.test.js` | 400/422 for invalid request bodies |
+| File                                    | Purpose                                                                                                                      |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `backend/tests/api/health.test.js`      | Health, comms status, metrics                                                                                                |
+| `backend/tests/api/catalog.test.js`     | System shop catalogs (brokers, cars, bikes)                                                                                  |
+| `backend/tests/api/university.test.js`  | University courses endpoint                                                                                                  |
+| `backend/tests/api/auth.test.js`        | 401 when auth missing on protected routes                                                                                    |
+| `backend/tests/api/validation.test.js`  | 400/422 for invalid request bodies                                                                                           |
 | `backend/tests/api/integration.test.js` | Full API with DB: brokers, economy, referrals, daily, leaderboard, marketplace, car/bike, university progress, announcements |
-| `backend/tests/battleEngine.test.js` | Battle simulation logic |
-| `backend/tests/economyWindow.test.js` | Economy window logic |
-| … (other engine/unit tests) | Idempotency, rate limit, telegram policy, etc. |
+| `backend/tests/battleEngine.test.js`    | Battle simulation logic                                                                                                      |
+| `backend/tests/economyWindow.test.js`   | Economy window logic                                                                                                         |
+| … (other engine/unit tests)             | Idempotency, rate limit, telegram policy, etc.                                                                               |
 
 ---
 

@@ -1,267 +1,354 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>GAPS SCAN REPORT — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>GAPS SCAN REPORT</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Gaps Scan Report — App &amp; Docs</h1>
-<p><strong>Date:</strong> 2026-02-15 <strong>Scope:</strong> One full pass over app (miniapp + backend) and docs to record gaps; prioritised with recommended actions.</p>
-<hr/>
-<h2>1. Summary</h2>
-<table>
-<thead><tr>
-<th>Category</th>
-<th>Count</th>
-<th>Priority focus</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Docs gaps</strong></td>
-<td>15+</td>
-<td>Missing deep docs, GAME-FUNCTIONALITY §12 incomplete, README index</td>
-</tr>
-<tr>
-<td><strong>App–docs alignment</strong></td>
-<td>6</td>
-<td>API-CONTRACT vs GAME-FUNCTIONALITY, deployment doc duplication</td>
-</tr>
-<tr>
-<td><strong>App behaviour</strong></td>
-<td>4</td>
-<td>Error/empty states, config-driven copy (already improved in SHIP-READY)</td>
-</tr>
-</tbody></table>
-<p>Existing gap material: <strong>GAP-AUDIT.md</strong> (docs vs code), <strong>SHIP-READY-GAP-CLOSURE.md</strong> (implemented fixes). This report consolidates and extends that with a single scan artifact.</p>
-<hr/>
-<h2>2. App Gaps</h2>
-<h3>2.1 API coverage (backend vs frontend)</h3>
-<ul>
-<li><strong>Gap:</strong> No automated test that asserts every <code>api.get</code>/<code>api.post</code> path used by the miniapp has a matching mounted route. Recommendation: add a small contract test (miniapp list of used paths vs backend router list).</li>
-</ul>
-<h3>2.2 Error and empty states</h3>
-<ul>
-<li><strong>Remaining:</strong> Some flows may still show generic errors or blank content; worth a UX pass for &quot;no brokers&quot;, &quot;no listings&quot;, &quot;race failed&quot;, &quot;staking unavailable&quot; etc. (P2).</li>
-</ul>
-<h3>2.3 Config-driven copy</h3>
-<ul>
-<li><strong>Remaining:</strong> Any feature that shows hardcoded &quot;coming soon&quot; or outdated text should eventually be driven by config or feature flags (P2).</li>
-</ul>
-<hr/>
-<h2>3. Docs Gaps</h2>
-<h3>3.1 Missing “deep” explanation docs</h3>
-<p>The following have <strong>no</strong> dedicated deep doc (cf. BROKERS, ARENAS, CAR-RACING, MARKETPLACE):</p>
-<table>
-<thead><tr>
-<th>Feature</th>
-<th>In API-CONTRACT</th>
-<th>In GAME-FUNCTIONALITY</th>
-<th>Deep doc</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Bike Racing</td>
-<td>✓ (car-racing sibling)</td>
-<td>§12.3 (one line)</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>AI Assets + Asset Marketplace</td>
-<td>✓</td>
-<td>§12.4 (one line)</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>University</td>
-<td>✓</td>
-<td>§12.4 (one line)</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Staking / Yield Vault</td>
-<td>✓</td>
-<td>§12.4 (one line)</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>DAO / Governance</td>
-<td>✓</td>
-<td>§12.4 (one line)</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Realms / Missions / Mentors</td>
-<td>✓</td>
-<td>§12.4 (one line)</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Predict</td>
-<td>✓</td>
-<td>Not in §12 table</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Trainers</td>
-<td>✓</td>
-<td>Mentioned elsewhere</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Tournaments</td>
-<td>✓</td>
-<td>Not in §12 table</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Global Boss</td>
-<td>✓</td>
-<td>Not in §12 table</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Referrals</td>
-<td>✓</td>
-<td>§12.4 (one line)</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Gifts / P2P AIBA</td>
-<td>✓</td>
-<td>§12.4 (one line)</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Donate (broker/car/bike/gifts)</td>
-<td>✓</td>
-<td>Not in §12 table</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Multiverse / NFT</td>
-<td>✓</td>
-<td>§12.4 (one line)</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Premium</td>
-<td>✓</td>
-<td>Not in §12 table</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Daily / Combo</td>
-<td>✓</td>
-<td>§12.4 (one line)</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Ads</td>
-<td>✓ (or comms)</td>
-<td>Tasks/ads</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Broker Rental</td>
-<td>✓</td>
-<td>Not in §12 table</td>
-<td><strong>Missing</strong></td>
-</tr>
-<tr>
-<td>Breeding</td>
-<td>✓</td>
-<td>Not in §12 table</td>
-<td><strong>Missing</strong></td>
-</tr>
-</tbody></table>
-<p><strong>Recommendation (P1):</strong> Add at least <strong>Bike Racing</strong> and <strong>Broker Rental</strong> deep docs (parity with Car Racing and Marketplace). Optionally add <strong>Staking</strong>, <strong>DAO</strong>, <strong>Predict</strong>, <strong>Trainers</strong> next.</p>
-<h3>3.2 GAME-FUNCTIONALITY.md §12 API mapping incomplete</h3>
-<ul>
-<li><strong>§12.4</strong> does not explicitly list: <code>/api/broker-rental</code>, <code>/api/predict</code>, <code>/api/trainers</code>, <code>/api/tournaments</code>, <code>/api/global-boss</code>, <code>/api/donate</code>, <code>/api/premium</code>, <code>/api/p2p-aiba</code>, <code>/api/breeding</code>, <code>/api/game-modes</code>, <code>/api/treasury</code>, <code>/api/oracle</code>.</li>
-</ul>
-<p><strong>Recommendation (P1):</strong> Extend §12.3 with a short table of car-racing and bike-racing endpoints (from API-CONTRACT or routes). Extend §12.4 with a row per area: broker-rental, predict, trainers, tournaments, global-boss, donate, premium, p2p-aiba, breeding, game-modes, treasury, oracle.</p>
-<h3>3.3 USER-GUIDE.md</h3>
-<ul>
-<li><strong>Gap:</strong> Section 9 (Marketplace) could explicitly mention <strong>Broker Rental</strong> (list/rent/unlist) and <strong>Donate</strong> (broker/car/bike/gifts) flows; §16 Charity already covers in-app donate NEUR/AIBA.</li>
-</ul>
-<p><strong>Recommendation (P2):</strong> Add one short subsection or bullet for &quot;Rent a broker&quot; and &quot;Donate broker/car/bike/gifts&quot; in Marketplace or a dedicated &quot;Donate (broker/car/bike)&quot; subsection.</p>
-<h3>3.4 API-CONTRACT.md</h3>
-<ul>
-<li><strong>Gap (from GAP-AUDIT):</strong> Trainer share-event, analytics, leaderboard period; optional extensions when productised.</li>
-</ul>
-<p><strong>Recommendation (P2):</strong> When adding trainer viral share or seasonal leaderboard, add the corresponding API to API-CONTRACT.</p>
-<h3>3.5 FEATURE-PLANS.md</h3>
-<ul>
-<li><strong>Recommendation (P2):</strong> Short subsection on extensibility when prioritised.</li>
-</ul>
-<h3>3.6 README.md (docs index)</h3>
-<ul>
-</ul>
-<p><strong>Recommendation (P1):</strong> Add a row or subsection &quot;Deep feature docs&quot; with links to these four (and future ones).</p>
-<h3>3.7 Deployment and env docs</h3>
-<ul>
-<li><strong>Other files:</strong> <code>deployment.md</code>, <code>VERCEL-ENV-GUIDE.md</code>, <code>VERCEL-DEPLOY-SETUP.md</code> may overlap and cause confusion.</li>
-</ul>
-<p><strong>Recommendation (P2):</strong> Prefer <strong>DEPLOYMENT-AND-ENV.md</strong> as canonical; add a line at the top of the others: &quot;See DEPLOYMENT-AND-ENV.md for the full checklist,&quot; or merge and redirect.</p>
-<h3>3.8 Dates and freshness</h3>
-<ul>
-</ul>
-<hr/>
-<h2>4. Prioritised action list</h2>
-<table>
-<thead><tr>
-<th>Prio</th>
-<th>Action</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>P0</strong></td>
-<td>None (no blocking gaps identified).</td>
-</tr>
-<tr>
-<td><strong>P1</strong></td>
-<td>Extend GAME-FUNCTIONALITY §12 with broker-rental, predict, trainers, tournaments, global-boss, donate, premium, p2p-aiba, breeding, game-modes, treasury, oracle; add car/bike per-endpoint lines.</td>
-</tr>
-<tr>
-<td><strong>P1</strong></td>
-<td>Add &quot;Deep feature docs&quot; to README.md linking BROKERS, ARENAS, CAR-RACING, MARKETPLACE (and future deep docs).</td>
-</tr>
-<tr>
-<td><strong>P1</strong></td>
-<td>Add BIKE-RACING-DEEP-EXPLANATION.md (and optionally BROKER-RENTAL-DEEP-EXPLANATION.md) for parity.</td>
-</tr>
-<tr>
-<td><strong>P2</strong></td>
-<td>USER-GUIDE: explicit Broker Rental and Donate (broker/car/bike/gifts) in Marketplace or dedicated subsection.</td>
-</tr>
-<tr>
-<td><strong>P2</strong></td>
-<td>Canonical deployment doc: DEPLOYMENT-AND-ENV.md; point other deployment/vercel docs to it.</td>
-</tr>
-<tr>
-<td><strong>P2</strong></td>
-<td>Optional: contract test miniapp API paths vs backend routes.</td>
-</tr>
-<tr>
-<td><strong>P2</strong></td>
-<td>Optional: UX pass for error/empty states in key flows.</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>5. References</h2>
-<ul>
-<li><strong>SHIP-READY-GAP-CLOSURE.md</strong> — Implemented fixes (predict, staking, admin, miniapp).</li>
-<li><strong>API-CONTRACT.md</strong> — Full API specification (source of truth for endpoints).</li>
-<li><strong>GAME-FUNCTIONALITY.md</strong> — Battle engine, economy, API mapping §12.</li>
-<li><strong>DOCS-STRUCTURE.md</strong> — Markdown as source of truth; <code>print/</code> build.</li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>GAPS SCAN REPORT — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>GAPS SCAN REPORT</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Gaps Scan Report — App &amp; Docs</h1>
+            <p>
+                <strong>Date:</strong> 2026-02-15 <strong>Scope:</strong> One full pass over app (miniapp + backend) and
+                docs to record gaps; prioritised with recommended actions.
+            </p>
+            <hr />
+            <h2>1. Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Count</th>
+                        <th>Priority focus</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Docs gaps</strong></td>
+                        <td>15+</td>
+                        <td>Missing deep docs, GAME-FUNCTIONALITY §12 incomplete, README index</td>
+                    </tr>
+                    <tr>
+                        <td><strong>App–docs alignment</strong></td>
+                        <td>6</td>
+                        <td>API-CONTRACT vs GAME-FUNCTIONALITY, deployment doc duplication</td>
+                    </tr>
+                    <tr>
+                        <td><strong>App behaviour</strong></td>
+                        <td>4</td>
+                        <td>Error/empty states, config-driven copy (already improved in SHIP-READY)</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                Existing gap material: <strong>GAP-AUDIT.md</strong> (docs vs code),
+                <strong>SHIP-READY-GAP-CLOSURE.md</strong> (implemented fixes). This report consolidates and extends
+                that with a single scan artifact.
+            </p>
+            <hr />
+            <h2>2. App Gaps</h2>
+            <h3>2.1 API coverage (backend vs frontend)</h3>
+            <ul>
+                <li>
+                    <strong>Gap:</strong> No automated test that asserts every <code>api.get</code>/<code
+                        >api.post</code
+                    >
+                    path used by the miniapp has a matching mounted route. Recommendation: add a small contract test
+                    (miniapp list of used paths vs backend router list).
+                </li>
+            </ul>
+            <h3>2.2 Error and empty states</h3>
+            <ul>
+                <li>
+                    <strong>Remaining:</strong> Some flows may still show generic errors or blank content; worth a UX
+                    pass for &quot;no brokers&quot;, &quot;no listings&quot;, &quot;race failed&quot;, &quot;staking
+                    unavailable&quot; etc. (P2).
+                </li>
+            </ul>
+            <h3>2.3 Config-driven copy</h3>
+            <ul>
+                <li>
+                    <strong>Remaining:</strong> Any feature that shows hardcoded &quot;coming soon&quot; or outdated
+                    text should eventually be driven by config or feature flags (P2).
+                </li>
+            </ul>
+            <hr />
+            <h2>3. Docs Gaps</h2>
+            <h3>3.1 Missing “deep” explanation docs</h3>
+            <p>
+                The following have <strong>no</strong> dedicated deep doc (cf. BROKERS, ARENAS, CAR-RACING,
+                MARKETPLACE):
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>In API-CONTRACT</th>
+                        <th>In GAME-FUNCTIONALITY</th>
+                        <th>Deep doc</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Bike Racing</td>
+                        <td>✓ (car-racing sibling)</td>
+                        <td>§12.3 (one line)</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>AI Assets + Asset Marketplace</td>
+                        <td>✓</td>
+                        <td>§12.4 (one line)</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>University</td>
+                        <td>✓</td>
+                        <td>§12.4 (one line)</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Staking / Yield Vault</td>
+                        <td>✓</td>
+                        <td>§12.4 (one line)</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>DAO / Governance</td>
+                        <td>✓</td>
+                        <td>§12.4 (one line)</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Realms / Missions / Mentors</td>
+                        <td>✓</td>
+                        <td>§12.4 (one line)</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Predict</td>
+                        <td>✓</td>
+                        <td>Not in §12 table</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Trainers</td>
+                        <td>✓</td>
+                        <td>Mentioned elsewhere</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Tournaments</td>
+                        <td>✓</td>
+                        <td>Not in §12 table</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Global Boss</td>
+                        <td>✓</td>
+                        <td>Not in §12 table</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Referrals</td>
+                        <td>✓</td>
+                        <td>§12.4 (one line)</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Gifts / P2P AIBA</td>
+                        <td>✓</td>
+                        <td>§12.4 (one line)</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Donate (broker/car/bike/gifts)</td>
+                        <td>✓</td>
+                        <td>Not in §12 table</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Multiverse / NFT</td>
+                        <td>✓</td>
+                        <td>§12.4 (one line)</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Premium</td>
+                        <td>✓</td>
+                        <td>Not in §12 table</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Daily / Combo</td>
+                        <td>✓</td>
+                        <td>§12.4 (one line)</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Ads</td>
+                        <td>✓ (or comms)</td>
+                        <td>Tasks/ads</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Broker Rental</td>
+                        <td>✓</td>
+                        <td>Not in §12 table</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Breeding</td>
+                        <td>✓</td>
+                        <td>Not in §12 table</td>
+                        <td><strong>Missing</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                <strong>Recommendation (P1):</strong> Add at least <strong>Bike Racing</strong> and
+                <strong>Broker Rental</strong> deep docs (parity with Car Racing and Marketplace). Optionally add
+                <strong>Staking</strong>, <strong>DAO</strong>, <strong>Predict</strong>,
+                <strong>Trainers</strong> next.
+            </p>
+            <h3>3.2 GAME-FUNCTIONALITY.md §12 API mapping incomplete</h3>
+            <ul>
+                <li>
+                    <strong>§12.4</strong> does not explicitly list: <code>/api/broker-rental</code>,
+                    <code>/api/predict</code>, <code>/api/trainers</code>, <code>/api/tournaments</code>,
+                    <code>/api/global-boss</code>, <code>/api/donate</code>, <code>/api/premium</code>,
+                    <code>/api/p2p-aiba</code>, <code>/api/breeding</code>, <code>/api/game-modes</code>,
+                    <code>/api/treasury</code>, <code>/api/oracle</code>.
+                </li>
+            </ul>
+            <p>
+                <strong>Recommendation (P1):</strong> Extend §12.3 with a short table of car-racing and bike-racing
+                endpoints (from API-CONTRACT or routes). Extend §12.4 with a row per area: broker-rental, predict,
+                trainers, tournaments, global-boss, donate, premium, p2p-aiba, breeding, game-modes, treasury, oracle.
+            </p>
+            <h3>3.3 USER-GUIDE.md</h3>
+            <ul>
+                <li>
+                    <strong>Gap:</strong> Section 9 (Marketplace) could explicitly mention
+                    <strong>Broker Rental</strong> (list/rent/unlist) and
+                    <strong>Donate</strong> (broker/car/bike/gifts) flows; §16 Charity already covers in-app donate
+                    NEUR/AIBA.
+                </li>
+            </ul>
+            <p>
+                <strong>Recommendation (P2):</strong> Add one short subsection or bullet for &quot;Rent a broker&quot;
+                and &quot;Donate broker/car/bike/gifts&quot; in Marketplace or a dedicated &quot;Donate
+                (broker/car/bike)&quot; subsection.
+            </p>
+            <h3>3.4 API-CONTRACT.md</h3>
+            <ul>
+                <li>
+                    <strong>Gap (from GAP-AUDIT):</strong> Trainer share-event, analytics, leaderboard period; optional
+                    extensions when productised.
+                </li>
+            </ul>
+            <p>
+                <strong>Recommendation (P2):</strong> When adding trainer viral share or seasonal leaderboard, add the
+                corresponding API to API-CONTRACT.
+            </p>
+            <h3>3.5 FEATURE-PLANS.md</h3>
+            <ul>
+                <li><strong>Recommendation (P2):</strong> Short subsection on extensibility when prioritised.</li>
+            </ul>
+            <h3>3.6 README.md (docs index)</h3>
+            <ul></ul>
+            <p>
+                <strong>Recommendation (P1):</strong> Add a row or subsection &quot;Deep feature docs&quot; with links
+                to these four (and future ones).
+            </p>
+            <h3>3.7 Deployment and env docs</h3>
+            <ul>
+                <li>
+                    <strong>Other files:</strong> <code>deployment.md</code>, <code>VERCEL-ENV-GUIDE.md</code>,
+                    <code>VERCEL-DEPLOY-SETUP.md</code> may overlap and cause confusion.
+                </li>
+            </ul>
+            <p>
+                <strong>Recommendation (P2):</strong> Prefer <strong>DEPLOYMENT-AND-ENV.md</strong> as canonical; add a
+                line at the top of the others: &quot;See DEPLOYMENT-AND-ENV.md for the full checklist,&quot; or merge
+                and redirect.
+            </p>
+            <h3>3.8 Dates and freshness</h3>
+            <ul></ul>
+            <hr />
+            <h2>4. Prioritised action list</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Prio</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>P0</strong></td>
+                        <td>None (no blocking gaps identified).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>P1</strong></td>
+                        <td>
+                            Extend GAME-FUNCTIONALITY §12 with broker-rental, predict, trainers, tournaments,
+                            global-boss, donate, premium, p2p-aiba, breeding, game-modes, treasury, oracle; add car/bike
+                            per-endpoint lines.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>P1</strong></td>
+                        <td>
+                            Add &quot;Deep feature docs&quot; to README.md linking BROKERS, ARENAS, CAR-RACING,
+                            MARKETPLACE (and future deep docs).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>P1</strong></td>
+                        <td>
+                            Add BIKE-RACING-DEEP-EXPLANATION.md (and optionally BROKER-RENTAL-DEEP-EXPLANATION.md) for
+                            parity.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>P2</strong></td>
+                        <td>
+                            USER-GUIDE: explicit Broker Rental and Donate (broker/car/bike/gifts) in Marketplace or
+                            dedicated subsection.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>P2</strong></td>
+                        <td>
+                            Canonical deployment doc: DEPLOYMENT-AND-ENV.md; point other deployment/vercel docs to it.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>P2</strong></td>
+                        <td>Optional: contract test miniapp API paths vs backend routes.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>P2</strong></td>
+                        <td>Optional: UX pass for error/empty states in key flows.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>5. References</h2>
+            <ul>
+                <li>
+                    <strong>SHIP-READY-GAP-CLOSURE.md</strong> — Implemented fixes (predict, staking, admin, miniapp).
+                </li>
+                <li><strong>API-CONTRACT.md</strong> — Full API specification (source of truth for endpoints).</li>
+                <li><strong>GAME-FUNCTIONALITY.md</strong> — Battle engine, economy, API mapping §12.</li>
+                <li><strong>DOCS-STRUCTURE.md</strong> — Markdown as source of truth; <code>print/</code> build.</li>
+            </ul>
+        </div>
+    </body>
 </html>

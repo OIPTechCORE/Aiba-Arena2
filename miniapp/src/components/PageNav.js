@@ -8,7 +8,12 @@ import { useRouter } from 'next/navigation';
  * Use on every page so the user can always return to where they were or to Home.
  * Card-based, modular, fits the futuristic design system.
  */
-export function PageNav({ className = '', showPrevious = true, labelPrevious = '← Back to Previous', labelHome = '← Back to Home' }) {
+export function PageNav({
+    className = '',
+    showPrevious = true,
+    labelPrevious = '← Back to Previous',
+    labelHome = '← Back to Home',
+}) {
     const router = useRouter();
 
     const goBack = () => {

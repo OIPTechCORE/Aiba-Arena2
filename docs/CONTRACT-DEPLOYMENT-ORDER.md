@@ -27,6 +27,7 @@ Scripts live in `scripts/` and `tact.config.json` defines projects.
 ## 3) Backend env required for claims
 
 Set these in backend:
+
 - `ARENA_VAULT_ADDRESS`
 - `AIBA_JETTON_MASTER`
 - `ORACLE_PRIVATE_KEY_HEX` or `ORACLE_SIGNER_URL`

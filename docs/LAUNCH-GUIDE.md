@@ -29,20 +29,21 @@
 
 **Vercel:** Backend project → **Settings** → **Environment Variables**
 
-| Variable | Value | How to get |
-|----------|-------|------------|
-| **MONGO_URI** | `mongodb+srv://user:pass@cluster.mongodb.net/aiba_arena?retryWrites=true&w=majority` | [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) → Create cluster → Connect → Copy URI, replace `<password>` |
-| **APP_ENV** | `prod` | — |
-| **CORS_ORIGIN** | `https://aiba-arena2-miniapp.vercel.app,https://aiba-arena2-admin-panel.vercel.app` | Your miniapp + admin URLs (comma-separated, no spaces) |
-| **TELEGRAM_BOT_TOKEN** | `7123456789:AAH...` | [@BotFather](https://t.me/BotFather) → `/newbot` → Copy token |
-| **TELEGRAM_INITDATA_MAX_AGE_SECONDS** | `600` | Recommended: 5-15 minutes |
-| **ADMIN_JWT_SECRET** | `[32+ random chars]` | Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| **ADMIN_EMAIL** | `admin@yourdomain.com` | Your admin login email |
-| **ADMIN_PASSWORD_HASH** | `$2b$10$...` | Bcrypt hash: `node -e "const bcrypt=require('bcrypt'); bcrypt.hash('YOUR_PASSWORD', 10).then(h=>console.log(h))"` |
-| **BATTLE_SEED_SECRET** | `[32+ random chars]` | Different from ADMIN_JWT_SECRET |
-| **PUBLIC_BASE_URL** | `https://aiba-arena2-backend.vercel.app` | Your backend URL (no trailing slash) |
+| Variable                              | Value                                                                                | How to get                                                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| **MONGO_URI**                         | `mongodb+srv://user:pass@cluster.mongodb.net/aiba_arena?retryWrites=true&w=majority` | [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) → Create cluster → Connect → Copy URI, replace `<password>`  |
+| **APP_ENV**                           | `prod`                                                                               | —                                                                                                                 |
+| **CORS_ORIGIN**                       | `https://aiba-arena2-miniapp.vercel.app,https://aiba-arena2-admin-panel.vercel.app`  | Your miniapp + admin URLs (comma-separated, no spaces)                                                            |
+| **TELEGRAM_BOT_TOKEN**                | `7123456789:AAH...`                                                                  | [@BotFather](https://t.me/BotFather) → `/newbot` → Copy token                                                     |
+| **TELEGRAM_INITDATA_MAX_AGE_SECONDS** | `600`                                                                                | Recommended: 5-15 minutes                                                                                         |
+| **ADMIN_JWT_SECRET**                  | `[32+ random chars]`                                                                 | Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`                              |
+| **ADMIN_EMAIL**                       | `admin@yourdomain.com`                                                               | Your admin login email                                                                                            |
+| **ADMIN_PASSWORD_HASH**               | `$2b$10$...`                                                                         | Bcrypt hash: `node -e "const bcrypt=require('bcrypt'); bcrypt.hash('YOUR_PASSWORD', 10).then(h=>console.log(h))"` |
+| **BATTLE_SEED_SECRET**                | `[32+ random chars]`                                                                 | Different from ADMIN_JWT_SECRET                                                                                   |
+| **PUBLIC_BASE_URL**                   | `https://aiba-arena2-backend.vercel.app`                                             | Your backend URL (no trailing slash)                                                                              |
 
 **Generate secrets:**
+
 ```bash
 # ADMIN_JWT_SECRET and BATTLE_SEED_SECRET
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -72,10 +73,10 @@ node -e "const bcrypt=require('bcrypt'); bcrypt.hash('YOUR_PASSWORD', 10).then(h
 
 **Vercel:** Miniapp project → **Settings** → **Environment Variables**
 
-| Variable | Value |
-|----------|-------|
+| Variable                    | Value                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------- |
 | **NEXT_PUBLIC_BACKEND_URL** | `https://aiba-arena2-backend.vercel.app` ← **Your backend URL** (NOT miniapp URL!) |
-| **NEXT_PUBLIC_APP_URL** | `https://aiba-arena2-miniapp.vercel.app` ← Optional |
+| **NEXT_PUBLIC_APP_URL**     | `https://aiba-arena2-miniapp.vercel.app` ← Optional                                |
 
 ⚠️ **CRITICAL:** `NEXT_PUBLIC_BACKEND_URL` must be your **backend** URL, not the miniapp URL. Wrong value → 404/508 errors.
 
@@ -99,12 +100,14 @@ node -e "const bcrypt=require('bcrypt'); bcrypt.hash('YOUR_PASSWORD', 10).then(h
 ### 3.2 Set Menu Button / Web App URL
 
 **Option A: Menu Button**
+
 1. In BotFather, send `/mybots` → Select your bot
 2. **Bot Settings** → **Menu Button** → **Configure Menu Button**
 3. **Button Text:** e.g., "Open App"
 4. **URL:** `https://aiba-arena2-miniapp.vercel.app`
 
 **Option B: Web App URL**
+
 1. In BotFather, send `/mybots` → Select your bot
 2. **Bot Settings** → **Web App**
 3. Set URL: `https://aiba-arena2-miniapp.vercel.app`
@@ -129,9 +132,10 @@ curl https://your-backend-url.vercel.app/health
 ### 4.3 API Calls Work
 
 **Browser DevTools → Network tab:**
+
 - Requests to `/api/economy/me`, `/api/game-modes`, `/api/tasks` should:
-  - Go to **backend** URL (not miniapp URL)
-  - Return 200 or 401 (not 404)
+    - Go to **backend** URL (not miniapp URL)
+    - Return 200 or 401 (not 404)
 
 ### 4.4 Core Flow Test
 
@@ -147,24 +151,31 @@ curl https://your-backend-url.vercel.app/health
 **Set up daily cron job** to distribute MemeFi rewards:
 
 **Vercel Cron (recommended):**
+
 1. Create `vercel.json` in repo root (if not exists):
+
 ```json
 {
-  "crons": [{
-    "path": "/api/memefi/cron/daily-rewards",
-    "schedule": "0 0 * * *"
-  }]
+    "crons": [
+        {
+            "path": "/api/memefi/cron/daily-rewards",
+            "schedule": "0 0 * * *"
+        }
+    ]
 }
 ```
+
 2. Add header authentication in backend route or use `CRON_SECRET` env var
 
 **Or external scheduler:**
+
 - Call `POST https://your-backend-url.vercel.app/api/memefi/cron/daily-rewards` daily
 - Header: `x-cron-secret: YOUR_CRON_SECRET` (set `CRON_SECRET` in backend env)
 
 ### 5.2 Seed Redemption Products
 
 **Admin panel or API:**
+
 ```bash
 POST https://your-backend-url.vercel.app/api/admin/redemption/seed
 # Headers: Authorization: Bearer <admin-jwt-token>
@@ -175,12 +186,14 @@ Creates default products: school_fee_discount_10, lms_premium_1m, exam_prep_unlo
 ### 5.3 Monitoring
 
 **Health check script:**
+
 ```bash
 # Set BACKEND_URL env var
 node scripts/health-check.js
 ```
 
 **Or set up Vercel monitoring:**
+
 - Uptime checks for `/health` endpoint
 - Alert on failures
 
@@ -188,13 +201,13 @@ node scripts/health-check.js
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| **404 on `/api/economy/me`** | Set `NEXT_PUBLIC_BACKEND_URL` in miniapp to backend URL. Redeploy. |
-| **508 on `/api/brokers/starter`** | `NEXT_PUBLIC_BACKEND_URL` is set to miniapp URL (wrong). Change to backend URL. |
-| **Backend won't start** | Check logs for `PROD_READINESS_FAILED`. Set all required env vars. |
-| **CORS errors** | `CORS_ORIGIN` in backend must include exact miniapp origin. Redeploy backend. |
-| **401 / Telegram auth** | Open miniapp from Telegram bot. Or ensure `TELEGRAM_INITDATA_MAX_AGE_SECONDS` is reasonable (600). |
+| Problem                           | Solution                                                                                           |
+| --------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **404 on `/api/economy/me`**      | Set `NEXT_PUBLIC_BACKEND_URL` in miniapp to backend URL. Redeploy.                                 |
+| **508 on `/api/brokers/starter`** | `NEXT_PUBLIC_BACKEND_URL` is set to miniapp URL (wrong). Change to backend URL.                    |
+| **Backend won't start**           | Check logs for `PROD_READINESS_FAILED`. Set all required env vars.                                 |
+| **CORS errors**                   | `CORS_ORIGIN` in backend must include exact miniapp origin. Redeploy backend.                      |
+| **401 / Telegram auth**           | Open miniapp from Telegram bot. Or ensure `TELEGRAM_INITDATA_MAX_AGE_SECONDS` is reasonable (600). |
 
 **Detailed troubleshooting:** [DEEP-ASSESSMENT-APP.md](DEEP-ASSESSMENT-APP.md)
 
@@ -249,11 +262,13 @@ Post-Launch (Optional)
 ## 🎉 You're Launched!
 
 Once all checks pass:
+
 - ✅ App is live and usable
 - ✅ Users can open from Telegram bot
 - ✅ Core flow works (create broker → run battle → earn rewards)
 
 **Next steps:**
+
 - Monitor health endpoint
 - Set up MemeFi daily rewards cron
 - Configure monitoring/alerting
@@ -263,16 +278,17 @@ Once all checks pass:
 
 ## Quick Reference URLs
 
-| Service | URL |
-|---------|-----|
-| **Miniapp** | https://aiba-arena2-miniapp.vercel.app |
-| **Admin Panel** | https://aiba-arena2-admin-panel.vercel.app |
-| **Backend** | https://aiba-arena2-backend.vercel.app (your actual URL) |
-| **Backend Health** | https://your-backend-url.vercel.app/health |
+| Service            | URL                                                      |
+| ------------------ | -------------------------------------------------------- |
+| **Miniapp**        | https://aiba-arena2-miniapp.vercel.app                   |
+| **Admin Panel**    | https://aiba-arena2-admin-panel.vercel.app               |
+| **Backend**        | https://aiba-arena2-backend.vercel.app (your actual URL) |
+| **Backend Health** | https://your-backend-url.vercel.app/health               |
 
 ---
 
 **Need help?** See:
+
 - [LAUNCH-TODAY-ASSESSMENT.md](LAUNCH-TODAY-ASSESSMENT.md) — Detailed assessment
 - [DEPLOYMENT-AND-ENV.md](DEPLOYMENT-AND-ENV.md) — Full env guide
 - [PRODUCTION-ENV-VERCEL.md](PRODUCTION-ENV-VERCEL.md) — Copy-paste env values

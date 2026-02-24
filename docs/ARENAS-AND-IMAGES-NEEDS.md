@@ -10,9 +10,9 @@
 
 - **Arenas** are **game modes** (GameMode model: key, name, arena, league, energy, cooldown, entry fees, reward multipliers, rules). See [ARENAS-DEEP-EXPLANATION.md](ARENAS-DEEP-EXPLANATION.md).
 - **Admin panel → Game Modes** already acts as your “arena studio”:
-  - List all modes: `GET /api/admin/game-modes`
-  - Create mode: `POST /api/admin/game-modes` (key, name, arena, league, enabled)
-  - Toggle enabled: `PATCH /api/admin/game-modes/:id` (enabled)
+    - List all modes: `GET /api/admin/game-modes`
+    - Create mode: `POST /api/admin/game-modes` (key, name, arena, league, enabled)
+    - Toggle enabled: `PATCH /api/admin/game-modes/:id` (enabled)
 - Default modes are seeded in `backend/db.js` (e.g. prediction, simulation, strategyWars, guildWars, arbitrage × rookie/pro/elite). Admins can add or edit via the admin UI.
 
 So you **already have** a place to manage arena/mode configuration. You do **not** need a separate “Arena Studio” app for that.
@@ -50,9 +50,9 @@ So the app works **without** a central images file. You do **not** need one to r
 
 ## 3. Summary
 
-| Need | Required? | What you have | Consider adding if… |
-|------|------------|----------------|----------------------|
-| **Studio for arenas** | No | Admin panel → Game Modes (create/edit/toggle modes) | You add per-arena artwork, 3D scenes, or heavy rule tuning with preview. |
-| **Images file** | No | Icon and broker images used inline; no central manifest | You add many per-arena/per-feature images or want one place to manage asset paths. |
+| Need                  | Required? | What you have                                           | Consider adding if…                                                                |
+| --------------------- | --------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **Studio for arenas** | No        | Admin panel → Game Modes (create/edit/toggle modes)     | You add per-arena artwork, 3D scenes, or heavy rule tuning with preview.           |
+| **Images file**       | No        | Icon and broker images used inline; no central manifest | You add many per-arena/per-feature images or want one place to manage asset paths. |
 
 Both are **optional** enhancements, not requirements for the app today.

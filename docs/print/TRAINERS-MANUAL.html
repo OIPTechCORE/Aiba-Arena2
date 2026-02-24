@@ -1,502 +1,600 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>TRAINERS MANUAL — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>TRAINERS MANUAL</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>AIBA Arena — Trainers Manual</h1>
-<h2>Deepest, Holistic, Exhaustive &amp; Systematic Guide for Trainers &amp; Influencers</h2>
-<p><strong>Version:</strong> 1.0 <strong>Scope:</strong> Train new users, ambassadors, community managers, and influencers. Nothing omitted.</p>
-<hr/>
-<h2>Table of Contents</h2>
-<ol>
-<li><a href="#2-product-deep-dive">Product Deep Dive</a></li>
-<li><a href="#3-user-journeys-step-by-step">User Journeys (Step-by-Step)</a></li>
-<li><a href="#4-features-checklist-everything">Features Checklist (Everything)</a></li>
-<li><a href="#5-economy--rewards-complete">Economy &amp; Rewards (Complete)</a></li>
-<li><a href="#6-referral--viral-mechanics">Referral &amp; Viral Mechanics</a></li>
-<li><a href="#7-common-questions--answers">Common Questions &amp; Answers</a></li>
-<li><a href="#8-objection-handling">Objection Handling</a></li>
-<li><a href="#9-influencer-categories--tailoring">Influencer Categories &amp; Tailoring</a></li>
-<li><a href="#10-dos-and-donts">Do's and Don'ts</a></li>
-<li><a href="#11-scripts--talking-points">Scripts &amp; Talking Points</a></li>
-<li><a href="#12-quick-reference-card">Quick Reference Card</a></li>
-</ol>
-<hr/>
-<h2>1. Introduction &amp; Philosophy</h2>
-<h3>1.0 Trainer Portal (Digital Access)</h3>
-<ul>
-<li><strong>Global Trainers Network</strong> — Browse all approved trainers worldwide (public, no login required). Sort by impact, referred, recruited, rewards. Connect via &quot;Apply with CODE&quot; links.</li>
-<li><strong>Global Trainers Leaderboard</strong> — Rank trainers by impact, referred, recruited, or rewards (public). Top trainers highlighted.</li>
-<li><strong>Trainer Dashboard</strong> — Approved trainers only: profile editor (displayName, bio, specialty, region), impact stats, claim rewards, viral recruitment link.</li>
-<li>Apply to become a trainer (Telegram auth). Viral recruitment: share your link — others apply with <code>?ref=YOUR_CODE</code>; you earn when they get approved.</li>
-<li>Rewards: 5 AIBA per referred user (3+ battles); 20 AIBA per trainer you recruit (on approval). Config: <code>trainerRewardAibaPerUser</code>, <code>trainerRewardAibaPerRecruitedTrainer</code>. Claim from portal.</li>
-<li>Super Admin approves trainers at /admin. API: <code>GET /api/trainers/me</code>, <code>network</code>, <code>leaderboard</code>; <code>PATCH /profile</code>; <code>POST /apply</code>, <code>claim-rewards</code>, <code>register-use</code>.</li>
-</ul>
-<h3>1.1 What is AIBA Arena?</h3>
-<p>AIBA Arena is a <strong>Telegram Mini App</strong> where users:</p>
-<ul>
-<li>Compete in <strong>arenas</strong> (prediction, simulation, strategy wars, arbitrage, guild wars)</li>
-<li>Earn <strong>NEUR</strong> (in-game fuel) and <strong>AIBA</strong> (rewards token, withdrawable on TON)</li>
-<li>Join <strong>guilds</strong>, race cars/bikes, stake NFTs, participate in tournaments &amp; global boss raids</li>
-</ul>
-<h3>1.2 Core Value Propositions</h3>
-<ul>
-<li><strong>Telegram-native</strong> — No app store; instant access</li>
-<li><strong>TON ecosystem</strong> — AIBA on-chain, TON for premium actions</li>
-<li><strong>Social &amp; viral</strong> — Referrals, guilds, leaderboards, share after battle</li>
-</ul>
-<h3>1.3 Trainer Mindset</h3>
-<ul>
-<li><strong>Show, don't tell</strong> — Demo in-app if possible</li>
-<li><strong>Match audience</strong> — Crypto natives vs casual gamers need different angles</li>
-</ul>
-<hr/>
-<h2>2. Product Deep Dive</h2>
-<h3>2.1 Brokers</h3>
-<table>
-<thead><tr>
-<th>Concept</th>
-<th>Explanation</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>What</strong></td>
-<td>AI agents with INT, SPD, RISK (0–100 each)</td>
-</tr>
-<tr>
-<td><strong>Create</strong></td>
-<td>Starter (free), or TON/AIBA for more</td>
-</tr>
-<tr>
-<td><strong>Actions</strong></td>
-<td>Combine (merge stats), mint NFT, list on market, deposit to guild</td>
-</tr>
-<tr>
-<td><strong>Energy</strong></td>
-<td>10 per broker; spent per battle; regenerates over time</td>
-</tr>
-</tbody></table>
-<h3>2.2 Arenas</h3>
-<table>
-<thead><tr>
-<th>Arena</th>
-<th>Focus</th>
-<th>Best For</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Prediction</strong></td>
-<td>INT-weighted</td>
-<td>High-INT brokers</td>
-</tr>
-<tr>
-<td><strong>Simulation</strong></td>
-<td>SPD-weighted</td>
-<td>High-SPD brokers</td>
-</tr>
-<tr>
-<td><strong>Strategy Wars</strong></td>
-<td>INT + SPD</td>
-<td>Balanced</td>
-</tr>
-<tr>
-<td><strong>Arbitrage</strong></td>
-<td>Mixed</td>
-<td>Risk-takers</td>
-</tr>
-<tr>
-<td><strong>Guild Wars</strong></td>
-<td>Guild vs guild</td>
-<td>Guild members; rewards to guild</td>
-</tr>
-</tbody></table>
-<h3>2.3 Leagues</h3>
-<p>Rookie → Pro → Elite. Higher leagues = better rewards and stricter entry.</p>
-<h3>2.4 Rewards</h3>
-<ul>
-<li><strong>AIBA</strong> — Off-chain credits → claim on-chain to TON wallet</li>
-<li><strong>Stars</strong> — Telegram-style in-app; earned per battle</li>
-<li><strong>Diamonds</strong> — Rare; first win bonus</li>
-</ul>
-<hr/>
-<h2>3. User Journeys (Step-by-Step)</h2>
-<h3>3.1 First-Time User (0–5 min)</h3>
-<ol>
-<li>See cinematic intro (skip OK)</li>
-<li><strong>Home</strong> tab: see balances (0), grid of features</li>
-<li><strong>Brokers</strong> → &quot;New broker&quot; (free starter)</li>
-<li><strong>Arenas</strong> or <strong>Brokers</strong> → Pick arena → <strong>Run battle</strong></li>
-<li>See victory card: Score, AIBA, Stars</li>
-<li>Repeat battles; watch balances grow</li>
-</ol>
-<h3>3.2 Power User (Day 1–7)</h3>
-<ol>
-<li>Use <strong>referrals</strong> → share link, earn when friends join</li>
-<li><strong>Combine</strong> brokers to improve stats</li>
-<li><strong>Market</strong> → list/buy brokers</li>
-<li><strong>Guilds</strong> → create or join; Guild Wars</li>
-<li><strong>Wallet</strong> → connect TON, claim AIBA on-chain</li>
-</ol>
-<h3>3.3 Advanced (Week 2+)</h3>
-<ol>
-<li><strong>Global Boss</strong> — run battles to deal damage; share reward when defeated</li>
-<li><strong>Broker Rental</strong> — list or rent brokers</li>
-<li><strong>Breeding</strong> — combine 2 brokers → 1 (cost 200 AIBA)</li>
-<li><strong>Premium</strong> — pay TON for 2× battle rewards</li>
-<li><strong>Streaks &amp; Daily Combo</strong> — login/battle streaks; spend AIBA for combo bonus</li>
-</ol>
-<hr/>
-<h2>4. Features Checklist (Everything)</h2>
-<table>
-<thead><tr>
-<th>Feature</th>
-<th>Tab</th>
-<th>One-Line</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Brokers</td>
-<td>Brokers</td>
-<td>Create, combine, mint NFT</td>
-</tr>
-<tr>
-<td>Arenas</td>
-<td>Arenas</td>
-<td>5 modes; run battle</td>
-</tr>
-<tr>
-<td>Market</td>
-<td>Market</td>
-<td>List/buy brokers, Stars Store, rental</td>
-</tr>
-<tr>
-<td>Referrals</td>
-<td>Referrals</td>
-<td>Share link; tiered rewards (10=2×, 100=5×)</td>
-</tr>
-<tr>
-<td>Guilds</td>
-<td>Guilds</td>
-<td>Create, join, Guild Wars</td>
-</tr>
-<tr>
-<td>Tournaments</td>
-<td>Tournaments</td>
-<td>Enter with broker; prize pool</td>
-</tr>
-<tr>
-<td>Global Boss</td>
-<td>Global Boss</td>
-<td>Community raid; damage = score</td>
-</tr>
-<tr>
-<td>Car Racing</td>
-<td>Car Racing</td>
-<td>Create/buy car; enter races</td>
-</tr>
-<tr>
-<td>Bike Racing</td>
-<td>Bike Racing</td>
-<td>Create/buy bike; enter races</td>
-</tr>
-<tr>
-<td>Tasks</td>
-<td>Tasks</td>
-<td>Personalized missions; rewards</td>
-</tr>
-<tr>
-<td>Leaderboard</td>
-<td>Leaderboard</td>
-<td>By score, AIBA, NEUR, battles</td>
-</tr>
-<tr>
-<td>University</td>
-<td>University</td>
-<td>Guide courses; badges</td>
-</tr>
-<tr>
-<td>Charity</td>
-<td>Charity</td>
-<td>Donate NEUR/AIBA</td>
-</tr>
-<tr>
-<td>Wallet</td>
-<td>Wallet</td>
-<td>NEUR, AIBA, Stars, Diamonds, daily, staking, DAO, vault</td>
-</tr>
-<tr>
-<td>Updates</td>
-<td>Updates</td>
-<td>News, FAQs</td>
-</tr>
-<tr>
-<td>Trainers</td>
-<td>/trainer</td>
-<td>Network, leaderboard, dashboard; viral recruitment; 5 AIBA/user, 20 AIBA/recruited</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>5. Economy &amp; Rewards (Complete)</h2>
-<h3>5.1 Earning Paths</h3>
-<table>
-<thead><tr>
-<th>Path</th>
-<th>Typical Amount</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Battle win</td>
-<td>score × 2 AIBA (base) × mode mult × streak/premium</td>
-</tr>
-<tr>
-<td>Daily claim</td>
-<td>NEUR (config)</td>
-</tr>
-<tr>
-<td>Referral (referrer)</td>
-<td>10 AIBA base; 2× at 10 refs; 5× at 100</td>
-</tr>
-<tr>
-<td>Referral (referee)</td>
-<td>5 AIBA base</td>
-</tr>
-<tr>
-<td>Staking</td>
-<td>15% APY on AIBA</td>
-</tr>
-<tr>
-<td>NFT staking</td>
-<td>12% APY; 5 AIBA/day</td>
-</tr>
-<tr>
-<td>Marketplace sell</td>
-<td>97% of sale (3% fee)</td>
-</tr>
-<tr>
-<td>Tournament top 4</td>
-<td>Share of pool</td>
-</tr>
-<tr>
-<td>Global Boss</td>
-<td>Proportional to damage when boss falls</td>
-</tr>
-</tbody></table>
-<h3>5.2 Spending</h3>
-<table>
-<thead><tr>
-<th>Action</th>
-<th>Cost</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Combine brokers</td>
-<td>50 NEUR</td>
-</tr>
-<tr>
-<td>Mint broker NFT</td>
-<td>100 AIBA</td>
-</tr>
-<tr>
-<td>Create broker (TON)</td>
-<td>1 TON (config)</td>
-</tr>
-<tr>
-<td>Premium</td>
-<td>~5 TON (config) for 30 days</td>
-</tr>
-<tr>
-<td>Breed</td>
-<td>200 AIBA</td>
-</tr>
-<tr>
-<td>Create guild</td>
-<td>TON if not top leaderboard</td>
-</tr>
-<tr>
-<td>Car/Bike create</td>
-<td>TON or AIBA</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>6. Referral &amp; Viral Mechanics</h2>
-<h3>6.1 Referral Loop</h3>
-<ul>
-<li>Both get bonuses (NEUR + AIBA)</li>
-<li><strong>Tiered:</strong> 10 refs = 2× bonus; 100 refs = 5×</li>
-<li><strong>Invite 3 to unlock</strong> — premium arena perks</li>
-</ul>
-<h3>6.2 Share Triggers</h3>
-<ul>
-<li>Referrals tab — &quot;Share via Telegram&quot;</li>
-<li>Copy link / copy message</li>
-</ul>
-<h3>6.3 K-Factor</h3>
-<ul>
-<li>Target K &gt; 0.3 for viral growth</li>
-<li>Example: 3 invites × 15% convert = 0.45</li>
-</ul>
-<hr/>
-<h2>7. Common Questions &amp; Answers</h2>
-<p><strong>Q: Is AIBA a real token?</strong> A: Yes. AIBA is a TON Jetton. You earn credits in-app and claim them on-chain to your wallet.</p>
-<p><strong>Q: Do I need a wallet to play?</strong> A: No for playing. Yes for withdrawing AIBA on-chain.</p>
-<p><strong>Q: What are NEUR and AIBA?</strong> A: NEUR = in-game fuel (train, combine). AIBA = rewards token (withdrawable).</p>
-<p><strong>Q: How do I get my first broker?</strong> A: Brokers tab → &quot;New broker&quot; (free starter).</p>
-<p><strong>Q: What’s the best arena?</strong> A: Depends on broker stats. High INT → prediction; high SPD → simulation.</p>
-<p><strong>Q: How do I earn more?</strong> A: Battles, referrals, daily claim, staking, tournaments, Global Boss, marketplace.</p>
-<p><strong>Q: Are there 3D arenas?</strong> A: Arena modes exist. 3D visualization is planned; currently battles show score/rewards.</p>
-<hr/>
-<h2>8. Objection Handling</h2>
-<table>
-<thead><tr>
-<th>Objection</th>
-<th>Response</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>&quot;Seems complicated&quot;</td>
-<td>&quot;Core loop is simple: create broker → run battle → earn. Everything else is optional.&quot;</td>
-</tr>
-<tr>
-<td>&quot;I don't understand crypto&quot;</td>
-<td>&quot;You can play without a wallet. Connect when you want to withdraw.&quot;</td>
-</tr>
-<tr>
-<td>&quot;Is it a scam?&quot;</td>
-<td>&quot;Open-source, on TON. You earn in-app and withdraw to your own wallet.&quot;</td>
-</tr>
-<tr>
-<td>&quot;I have no time&quot;</td>
-<td>&quot;One battle = 10 seconds. Daily claim + a few battles = 2 min/day.&quot;</td>
-</tr>
-<tr>
-<td>&quot;What if I lose?&quot;</td>
-<td>&quot;You still earn NEUR/AIBA on wins. Losses don't cost; energy regenerates.&quot;</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>9. Influencer Categories &amp; Tailoring</h2>
-<table>
-<thead><tr>
-<th>Category</th>
-<th>Angle</th>
-<th>Key Message</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Crypto / DeFi</strong></td>
-<td>Play-to-earn, TON, on-chain rewards</td>
-<td>&quot;Earn AIBA, withdraw to TON. Real token, real rewards.&quot;</td>
-</tr>
-<tr>
-<td><strong>Gaming</strong></td>
-<td>Battles, progression, guilds</td>
-<td>&quot;AI brokers in battle arenas. Guild wars, tournaments, global boss.&quot;</td>
-</tr>
-<tr>
-<td><strong>Trading / Finance</strong></td>
-<td>Simulated trading, arbitrage arena</td>
-<td>&quot;Train AI brokers. Prediction, arbitrage, strategy wars.&quot;</td>
-</tr>
-<tr>
-<td><strong>Casual / Viral</strong></td>
-<td>Simple fun, referrals, share</td>
-<td>&quot;Play in Telegram. Share, invite friends, earn together.&quot;</td>
-</tr>
-<tr>
-<td><strong>NFT / Collectors</strong></td>
-<td>Mint brokers, stake NFTs</td>
-<td>&quot;Own broker NFTs. Stake to earn AIBA daily.&quot;</td>
-</tr>
-<tr>
-<td><strong>Community / DAO</strong></td>
-<td>Guilds, governance, charity</td>
-<td>&quot;Create guilds, vote on proposals, donate to causes.&quot;</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>10. Do's and Don'ts</h2>
-<h3>Do</h3>
-<ul>
-<li>Emphasize Telegram convenience (no app store)</li>
-<li>Show referral link and tiered bonuses</li>
-<li>Mention TON and on-chain withdrawal</li>
-<li>Tailor message to audience (gamer vs crypto)</li>
-</ul>
-<h3>Don't</h3>
-<ul>
-<li>Call it &quot;investment&quot; (it's a game with rewards)</li>
-<li>Skip the free starter broker step</li>
-<li>Ignore guilds / tournaments / global boss for engaged users</li>
-</ul>
-<hr/>
-<h2>11. Scripts &amp; Talking Points</h2>
-<h3>30-Second Pitch</h3>
-<blockquote><p>&quot;AIBA Arena is a Telegram game where you own AI brokers that compete in battles. Run a battle, earn NEUR and AIBA. AIBA is a real token on TON — withdraw to your wallet. Refer friends for bonuses. It's play-to-earn, simple, and all inside Telegram.&quot;</p></blockquote>
-<h3>60-Second Pitch</h3>
-<blockquote><p>&quot;AIBA Arena runs inside Telegram — no app store. You create or buy AI brokers with stats like intelligence, speed, risk. They compete in arenas: prediction, simulation, arbitrage, guild wars. Each battle earns you NEUR and AIBA. NEUR is in-game fuel; AIBA is the rewards token you can withdraw on-chain to your TON wallet. There are guilds, car and bike racing, tournaments, a global boss raid, and referrals — invite friends, get 2× at 10 refs and 5× at 100. Daily rewards, staking, and a marketplace round it out. Everything in one Telegram Mini App.&quot;</p></blockquote>
-<h3>One-Liner Options</h3>
-<ul>
-<li>&quot;Play-to-earn in Telegram. AI brokers, real rewards.&quot;</li>
-<li>&quot;Battle arenas. Guild wars. AIBA on TON.&quot;</li>
-</ul>
-<hr/>
-<h2>12. Quick Reference Card</h2>
-<table>
-<thead><tr>
-<th>Item</th>
-<th>Value</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Platform</td>
-<td>Telegram Mini App</td>
-</tr>
-<tr>
-<td>Chain</td>
-<td>TON</td>
-</tr>
-<tr>
-<td>Tokens</td>
-<td>NEUR (fuel), AIBA (rewards)</td>
-</tr>
-<tr>
-<td>First broker</td>
-<td>Free (Brokers → New broker)</td>
-</tr>
-<tr>
-<td>Core loop</td>
-<td>Broker → Arena → Battle → Earn</td>
-</tr>
-<tr>
-<td>Withdraw</td>
-<td>Wallet → Vault → Claim (TonConnect)</td>
-</tr>
-<tr>
-<td>Referral bonus</td>
-<td>10 refs = 2×, 100 refs = 5×</td>
-</tr>
-<tr>
-<td>Invite to unlock</td>
-<td>3 refs = premium arena perks</td>
-</tr>
-</tbody></table>
-<hr/>
-<hr/>
-<h2>Related</h2>
-<ul>
-<li><a href="./REPORTS-MONITORING.md">REPORTS-MONITORING.md</a> — Cross-validation of reports vs codebase</li>
-<li><a href="./USER-GUIDE.md">USER-GUIDE.md</a> — User flow, tabs, troubleshooting</li>
-<li><a href="./API-AND-READINESS-AUDIT.md">API-AND-READINESS-AUDIT.md</a> — API mapping (including trainers routes)</li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>TRAINERS MANUAL — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>TRAINERS MANUAL</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>AIBA Arena — Trainers Manual</h1>
+            <h2>Deepest, Holistic, Exhaustive &amp; Systematic Guide for Trainers &amp; Influencers</h2>
+            <p>
+                <strong>Version:</strong> 1.0 <strong>Scope:</strong> Train new users, ambassadors, community managers,
+                and influencers. Nothing omitted.
+            </p>
+            <hr />
+            <h2>Table of Contents</h2>
+            <ol>
+                <li><a href="#2-product-deep-dive">Product Deep Dive</a></li>
+                <li><a href="#3-user-journeys-step-by-step">User Journeys (Step-by-Step)</a></li>
+                <li><a href="#4-features-checklist-everything">Features Checklist (Everything)</a></li>
+                <li><a href="#5-economy--rewards-complete">Economy &amp; Rewards (Complete)</a></li>
+                <li><a href="#6-referral--viral-mechanics">Referral &amp; Viral Mechanics</a></li>
+                <li><a href="#7-common-questions--answers">Common Questions &amp; Answers</a></li>
+                <li><a href="#8-objection-handling">Objection Handling</a></li>
+                <li><a href="#9-influencer-categories--tailoring">Influencer Categories &amp; Tailoring</a></li>
+                <li><a href="#10-dos-and-donts">Do's and Don'ts</a></li>
+                <li><a href="#11-scripts--talking-points">Scripts &amp; Talking Points</a></li>
+                <li><a href="#12-quick-reference-card">Quick Reference Card</a></li>
+            </ol>
+            <hr />
+            <h2>1. Introduction &amp; Philosophy</h2>
+            <h3>1.0 Trainer Portal (Digital Access)</h3>
+            <ul>
+                <li>
+                    <strong>Global Trainers Network</strong> — Browse all approved trainers worldwide (public, no login
+                    required). Sort by impact, referred, recruited, rewards. Connect via &quot;Apply with CODE&quot;
+                    links.
+                </li>
+                <li>
+                    <strong>Global Trainers Leaderboard</strong> — Rank trainers by impact, referred, recruited, or
+                    rewards (public). Top trainers highlighted.
+                </li>
+                <li>
+                    <strong>Trainer Dashboard</strong> — Approved trainers only: profile editor (displayName, bio,
+                    specialty, region), impact stats, claim rewards, viral recruitment link.
+                </li>
+                <li>
+                    Apply to become a trainer (Telegram auth). Viral recruitment: share your link — others apply with
+                    <code>?ref=YOUR_CODE</code>; you earn when they get approved.
+                </li>
+                <li>
+                    Rewards: 5 AIBA per referred user (3+ battles); 20 AIBA per trainer you recruit (on approval).
+                    Config: <code>trainerRewardAibaPerUser</code>, <code>trainerRewardAibaPerRecruitedTrainer</code>.
+                    Claim from portal.
+                </li>
+                <li>
+                    Super Admin approves trainers at /admin. API: <code>GET /api/trainers/me</code>,
+                    <code>network</code>, <code>leaderboard</code>; <code>PATCH /profile</code>;
+                    <code>POST /apply</code>, <code>claim-rewards</code>, <code>register-use</code>.
+                </li>
+            </ul>
+            <h3>1.1 What is AIBA Arena?</h3>
+            <p>AIBA Arena is a <strong>Telegram Mini App</strong> where users:</p>
+            <ul>
+                <li>
+                    Compete in <strong>arenas</strong> (prediction, simulation, strategy wars, arbitrage, guild wars)
+                </li>
+                <li>
+                    Earn <strong>NEUR</strong> (in-game fuel) and <strong>AIBA</strong> (rewards token, withdrawable on
+                    TON)
+                </li>
+                <li>
+                    Join <strong>guilds</strong>, race cars/bikes, stake NFTs, participate in tournaments &amp; global
+                    boss raids
+                </li>
+            </ul>
+            <h3>1.2 Core Value Propositions</h3>
+            <ul>
+                <li><strong>Telegram-native</strong> — No app store; instant access</li>
+                <li><strong>TON ecosystem</strong> — AIBA on-chain, TON for premium actions</li>
+                <li><strong>Social &amp; viral</strong> — Referrals, guilds, leaderboards, share after battle</li>
+            </ul>
+            <h3>1.3 Trainer Mindset</h3>
+            <ul>
+                <li><strong>Show, don't tell</strong> — Demo in-app if possible</li>
+                <li><strong>Match audience</strong> — Crypto natives vs casual gamers need different angles</li>
+            </ul>
+            <hr />
+            <h2>2. Product Deep Dive</h2>
+            <h3>2.1 Brokers</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Concept</th>
+                        <th>Explanation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>What</strong></td>
+                        <td>AI agents with INT, SPD, RISK (0–100 each)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Create</strong></td>
+                        <td>Starter (free), or TON/AIBA for more</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Actions</strong></td>
+                        <td>Combine (merge stats), mint NFT, list on market, deposit to guild</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Energy</strong></td>
+                        <td>10 per broker; spent per battle; regenerates over time</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.2 Arenas</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Arena</th>
+                        <th>Focus</th>
+                        <th>Best For</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Prediction</strong></td>
+                        <td>INT-weighted</td>
+                        <td>High-INT brokers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Simulation</strong></td>
+                        <td>SPD-weighted</td>
+                        <td>High-SPD brokers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Strategy Wars</strong></td>
+                        <td>INT + SPD</td>
+                        <td>Balanced</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Arbitrage</strong></td>
+                        <td>Mixed</td>
+                        <td>Risk-takers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Guild Wars</strong></td>
+                        <td>Guild vs guild</td>
+                        <td>Guild members; rewards to guild</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>2.3 Leagues</h3>
+            <p>Rookie → Pro → Elite. Higher leagues = better rewards and stricter entry.</p>
+            <h3>2.4 Rewards</h3>
+            <ul>
+                <li><strong>AIBA</strong> — Off-chain credits → claim on-chain to TON wallet</li>
+                <li><strong>Stars</strong> — Telegram-style in-app; earned per battle</li>
+                <li><strong>Diamonds</strong> — Rare; first win bonus</li>
+            </ul>
+            <hr />
+            <h2>3. User Journeys (Step-by-Step)</h2>
+            <h3>3.1 First-Time User (0–5 min)</h3>
+            <ol>
+                <li>See cinematic intro (skip OK)</li>
+                <li><strong>Home</strong> tab: see balances (0), grid of features</li>
+                <li><strong>Brokers</strong> → &quot;New broker&quot; (free starter)</li>
+                <li><strong>Arenas</strong> or <strong>Brokers</strong> → Pick arena → <strong>Run battle</strong></li>
+                <li>See victory card: Score, AIBA, Stars</li>
+                <li>Repeat battles; watch balances grow</li>
+            </ol>
+            <h3>3.2 Power User (Day 1–7)</h3>
+            <ol>
+                <li>Use <strong>referrals</strong> → share link, earn when friends join</li>
+                <li><strong>Combine</strong> brokers to improve stats</li>
+                <li><strong>Market</strong> → list/buy brokers</li>
+                <li><strong>Guilds</strong> → create or join; Guild Wars</li>
+                <li><strong>Wallet</strong> → connect TON, claim AIBA on-chain</li>
+            </ol>
+            <h3>3.3 Advanced (Week 2+)</h3>
+            <ol>
+                <li><strong>Global Boss</strong> — run battles to deal damage; share reward when defeated</li>
+                <li><strong>Broker Rental</strong> — list or rent brokers</li>
+                <li><strong>Breeding</strong> — combine 2 brokers → 1 (cost 200 AIBA)</li>
+                <li><strong>Premium</strong> — pay TON for 2× battle rewards</li>
+                <li><strong>Streaks &amp; Daily Combo</strong> — login/battle streaks; spend AIBA for combo bonus</li>
+            </ol>
+            <hr />
+            <h2>4. Features Checklist (Everything)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Tab</th>
+                        <th>One-Line</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Brokers</td>
+                        <td>Brokers</td>
+                        <td>Create, combine, mint NFT</td>
+                    </tr>
+                    <tr>
+                        <td>Arenas</td>
+                        <td>Arenas</td>
+                        <td>5 modes; run battle</td>
+                    </tr>
+                    <tr>
+                        <td>Market</td>
+                        <td>Market</td>
+                        <td>List/buy brokers, Stars Store, rental</td>
+                    </tr>
+                    <tr>
+                        <td>Referrals</td>
+                        <td>Referrals</td>
+                        <td>Share link; tiered rewards (10=2×, 100=5×)</td>
+                    </tr>
+                    <tr>
+                        <td>Guilds</td>
+                        <td>Guilds</td>
+                        <td>Create, join, Guild Wars</td>
+                    </tr>
+                    <tr>
+                        <td>Tournaments</td>
+                        <td>Tournaments</td>
+                        <td>Enter with broker; prize pool</td>
+                    </tr>
+                    <tr>
+                        <td>Global Boss</td>
+                        <td>Global Boss</td>
+                        <td>Community raid; damage = score</td>
+                    </tr>
+                    <tr>
+                        <td>Car Racing</td>
+                        <td>Car Racing</td>
+                        <td>Create/buy car; enter races</td>
+                    </tr>
+                    <tr>
+                        <td>Bike Racing</td>
+                        <td>Bike Racing</td>
+                        <td>Create/buy bike; enter races</td>
+                    </tr>
+                    <tr>
+                        <td>Tasks</td>
+                        <td>Tasks</td>
+                        <td>Personalized missions; rewards</td>
+                    </tr>
+                    <tr>
+                        <td>Leaderboard</td>
+                        <td>Leaderboard</td>
+                        <td>By score, AIBA, NEUR, battles</td>
+                    </tr>
+                    <tr>
+                        <td>University</td>
+                        <td>University</td>
+                        <td>Guide courses; badges</td>
+                    </tr>
+                    <tr>
+                        <td>Charity</td>
+                        <td>Charity</td>
+                        <td>Donate NEUR/AIBA</td>
+                    </tr>
+                    <tr>
+                        <td>Wallet</td>
+                        <td>Wallet</td>
+                        <td>NEUR, AIBA, Stars, Diamonds, daily, staking, DAO, vault</td>
+                    </tr>
+                    <tr>
+                        <td>Updates</td>
+                        <td>Updates</td>
+                        <td>News, FAQs</td>
+                    </tr>
+                    <tr>
+                        <td>Trainers</td>
+                        <td>/trainer</td>
+                        <td>Network, leaderboard, dashboard; viral recruitment; 5 AIBA/user, 20 AIBA/recruited</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>5. Economy &amp; Rewards (Complete)</h2>
+            <h3>5.1 Earning Paths</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Path</th>
+                        <th>Typical Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Battle win</td>
+                        <td>score × 2 AIBA (base) × mode mult × streak/premium</td>
+                    </tr>
+                    <tr>
+                        <td>Daily claim</td>
+                        <td>NEUR (config)</td>
+                    </tr>
+                    <tr>
+                        <td>Referral (referrer)</td>
+                        <td>10 AIBA base; 2× at 10 refs; 5× at 100</td>
+                    </tr>
+                    <tr>
+                        <td>Referral (referee)</td>
+                        <td>5 AIBA base</td>
+                    </tr>
+                    <tr>
+                        <td>Staking</td>
+                        <td>15% APY on AIBA</td>
+                    </tr>
+                    <tr>
+                        <td>NFT staking</td>
+                        <td>12% APY; 5 AIBA/day</td>
+                    </tr>
+                    <tr>
+                        <td>Marketplace sell</td>
+                        <td>97% of sale (3% fee)</td>
+                    </tr>
+                    <tr>
+                        <td>Tournament top 4</td>
+                        <td>Share of pool</td>
+                    </tr>
+                    <tr>
+                        <td>Global Boss</td>
+                        <td>Proportional to damage when boss falls</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>5.2 Spending</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Combine brokers</td>
+                        <td>50 NEUR</td>
+                    </tr>
+                    <tr>
+                        <td>Mint broker NFT</td>
+                        <td>100 AIBA</td>
+                    </tr>
+                    <tr>
+                        <td>Create broker (TON)</td>
+                        <td>1 TON (config)</td>
+                    </tr>
+                    <tr>
+                        <td>Premium</td>
+                        <td>~5 TON (config) for 30 days</td>
+                    </tr>
+                    <tr>
+                        <td>Breed</td>
+                        <td>200 AIBA</td>
+                    </tr>
+                    <tr>
+                        <td>Create guild</td>
+                        <td>TON if not top leaderboard</td>
+                    </tr>
+                    <tr>
+                        <td>Car/Bike create</td>
+                        <td>TON or AIBA</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>6. Referral &amp; Viral Mechanics</h2>
+            <h3>6.1 Referral Loop</h3>
+            <ul>
+                <li>Both get bonuses (NEUR + AIBA)</li>
+                <li><strong>Tiered:</strong> 10 refs = 2× bonus; 100 refs = 5×</li>
+                <li><strong>Invite 3 to unlock</strong> — premium arena perks</li>
+            </ul>
+            <h3>6.2 Share Triggers</h3>
+            <ul>
+                <li>Referrals tab — &quot;Share via Telegram&quot;</li>
+                <li>Copy link / copy message</li>
+            </ul>
+            <h3>6.3 K-Factor</h3>
+            <ul>
+                <li>Target K &gt; 0.3 for viral growth</li>
+                <li>Example: 3 invites × 15% convert = 0.45</li>
+            </ul>
+            <hr />
+            <h2>7. Common Questions &amp; Answers</h2>
+            <p>
+                <strong>Q: Is AIBA a real token?</strong> A: Yes. AIBA is a TON Jetton. You earn credits in-app and
+                claim them on-chain to your wallet.
+            </p>
+            <p><strong>Q: Do I need a wallet to play?</strong> A: No for playing. Yes for withdrawing AIBA on-chain.</p>
+            <p>
+                <strong>Q: What are NEUR and AIBA?</strong> A: NEUR = in-game fuel (train, combine). AIBA = rewards
+                token (withdrawable).
+            </p>
+            <p>
+                <strong>Q: How do I get my first broker?</strong> A: Brokers tab → &quot;New broker&quot; (free
+                starter).
+            </p>
+            <p>
+                <strong>Q: What’s the best arena?</strong> A: Depends on broker stats. High INT → prediction; high SPD →
+                simulation.
+            </p>
+            <p>
+                <strong>Q: How do I earn more?</strong> A: Battles, referrals, daily claim, staking, tournaments, Global
+                Boss, marketplace.
+            </p>
+            <p>
+                <strong>Q: Are there 3D arenas?</strong> A: Arena modes exist. 3D visualization is planned; currently
+                battles show score/rewards.
+            </p>
+            <hr />
+            <h2>8. Objection Handling</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Objection</th>
+                        <th>Response</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>&quot;Seems complicated&quot;</td>
+                        <td>
+                            &quot;Core loop is simple: create broker → run battle → earn. Everything else is
+                            optional.&quot;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>&quot;I don't understand crypto&quot;</td>
+                        <td>&quot;You can play without a wallet. Connect when you want to withdraw.&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>&quot;Is it a scam?&quot;</td>
+                        <td>&quot;Open-source, on TON. You earn in-app and withdraw to your own wallet.&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>&quot;I have no time&quot;</td>
+                        <td>&quot;One battle = 10 seconds. Daily claim + a few battles = 2 min/day.&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>&quot;What if I lose?&quot;</td>
+                        <td>&quot;You still earn NEUR/AIBA on wins. Losses don't cost; energy regenerates.&quot;</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>9. Influencer Categories &amp; Tailoring</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Angle</th>
+                        <th>Key Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Crypto / DeFi</strong></td>
+                        <td>Play-to-earn, TON, on-chain rewards</td>
+                        <td>&quot;Earn AIBA, withdraw to TON. Real token, real rewards.&quot;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gaming</strong></td>
+                        <td>Battles, progression, guilds</td>
+                        <td>&quot;AI brokers in battle arenas. Guild wars, tournaments, global boss.&quot;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Trading / Finance</strong></td>
+                        <td>Simulated trading, arbitrage arena</td>
+                        <td>&quot;Train AI brokers. Prediction, arbitrage, strategy wars.&quot;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Casual / Viral</strong></td>
+                        <td>Simple fun, referrals, share</td>
+                        <td>&quot;Play in Telegram. Share, invite friends, earn together.&quot;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NFT / Collectors</strong></td>
+                        <td>Mint brokers, stake NFTs</td>
+                        <td>&quot;Own broker NFTs. Stake to earn AIBA daily.&quot;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Community / DAO</strong></td>
+                        <td>Guilds, governance, charity</td>
+                        <td>&quot;Create guilds, vote on proposals, donate to causes.&quot;</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>10. Do's and Don'ts</h2>
+            <h3>Do</h3>
+            <ul>
+                <li>Emphasize Telegram convenience (no app store)</li>
+                <li>Show referral link and tiered bonuses</li>
+                <li>Mention TON and on-chain withdrawal</li>
+                <li>Tailor message to audience (gamer vs crypto)</li>
+            </ul>
+            <h3>Don't</h3>
+            <ul>
+                <li>Call it &quot;investment&quot; (it's a game with rewards)</li>
+                <li>Skip the free starter broker step</li>
+                <li>Ignore guilds / tournaments / global boss for engaged users</li>
+            </ul>
+            <hr />
+            <h2>11. Scripts &amp; Talking Points</h2>
+            <h3>30-Second Pitch</h3>
+            <blockquote>
+                <p>
+                    &quot;AIBA Arena is a Telegram game where you own AI brokers that compete in battles. Run a battle,
+                    earn NEUR and AIBA. AIBA is a real token on TON — withdraw to your wallet. Refer friends for
+                    bonuses. It's play-to-earn, simple, and all inside Telegram.&quot;
+                </p>
+            </blockquote>
+            <h3>60-Second Pitch</h3>
+            <blockquote>
+                <p>
+                    &quot;AIBA Arena runs inside Telegram — no app store. You create or buy AI brokers with stats like
+                    intelligence, speed, risk. They compete in arenas: prediction, simulation, arbitrage, guild wars.
+                    Each battle earns you NEUR and AIBA. NEUR is in-game fuel; AIBA is the rewards token you can
+                    withdraw on-chain to your TON wallet. There are guilds, car and bike racing, tournaments, a global
+                    boss raid, and referrals — invite friends, get 2× at 10 refs and 5× at 100. Daily rewards, staking,
+                    and a marketplace round it out. Everything in one Telegram Mini App.&quot;
+                </p>
+            </blockquote>
+            <h3>One-Liner Options</h3>
+            <ul>
+                <li>&quot;Play-to-earn in Telegram. AI brokers, real rewards.&quot;</li>
+                <li>&quot;Battle arenas. Guild wars. AIBA on TON.&quot;</li>
+            </ul>
+            <hr />
+            <h2>12. Quick Reference Card</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Platform</td>
+                        <td>Telegram Mini App</td>
+                    </tr>
+                    <tr>
+                        <td>Chain</td>
+                        <td>TON</td>
+                    </tr>
+                    <tr>
+                        <td>Tokens</td>
+                        <td>NEUR (fuel), AIBA (rewards)</td>
+                    </tr>
+                    <tr>
+                        <td>First broker</td>
+                        <td>Free (Brokers → New broker)</td>
+                    </tr>
+                    <tr>
+                        <td>Core loop</td>
+                        <td>Broker → Arena → Battle → Earn</td>
+                    </tr>
+                    <tr>
+                        <td>Withdraw</td>
+                        <td>Wallet → Vault → Claim (TonConnect)</td>
+                    </tr>
+                    <tr>
+                        <td>Referral bonus</td>
+                        <td>10 refs = 2×, 100 refs = 5×</td>
+                    </tr>
+                    <tr>
+                        <td>Invite to unlock</td>
+                        <td>3 refs = premium arena perks</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <hr />
+            <h2>Related</h2>
+            <ul>
+                <li>
+                    <a href="./REPORTS-MONITORING.md">REPORTS-MONITORING.md</a> — Cross-validation of reports vs
+                    codebase
+                </li>
+                <li><a href="./USER-GUIDE.md">USER-GUIDE.md</a> — User flow, tabs, troubleshooting</li>
+                <li>
+                    <a href="./API-AND-READINESS-AUDIT.md">API-AND-READINESS-AUDIT.md</a> — API mapping (including
+                    trainers routes)
+                </li>
+            </ul>
+        </div>
+    </body>
 </html>

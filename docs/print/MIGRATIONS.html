@@ -1,51 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>MIGRATIONS — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>MIGRATIONS</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Database Migrations</h1>
-<p>This project uses MongoDB. A migration runner is provided to run ordered migrations and record completion in the database.</p>
-<h2>Migration runner</h2>
-<ul>
-<li><strong>Migrations dir:</strong> <code>backend/migrations/</code></li>
-<li><strong>Tracking:</strong> Completed migrations are stored in the <code>migration_runs</code> collection (field <code>migrationId</code>, <code>runAt</code>).</li>
-</ul>
-<h3>Running migrations</h3>
-<p>From the <strong>project root</strong> with <code>MONGO_URI</code> (or <code>MONGODB_URI</code>) set:</p>
-<pre><code>node scripts/run-migrations.js</code></pre>
-<p>Or use the npm script (from project root):</p>
-<pre><code>npm run migrate</code></pre>
-<p>(Add to root <code>package.json</code>: <code>&quot;migrate&quot;: &quot;node scripts/run-migrations.js&quot;</code> if desired.)</p>
-<h3>Adding a migration</h3>
-<ol>
-<li>Export a <code>run(mongoose)</code> function. The runner passes the same <code>mongoose</code> instance used to connect.</li>
-</ol>
-<p>Example:</p>
-<pre><code>// backend/migrations/002_add_foo_index.js
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>MIGRATIONS — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>MIGRATIONS</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Database Migrations</h1>
+            <p>
+                This project uses MongoDB. A migration runner is provided to run ordered migrations and record
+                completion in the database.
+            </p>
+            <h2>Migration runner</h2>
+            <ul>
+                <li><strong>Migrations dir:</strong> <code>backend/migrations/</code></li>
+                <li>
+                    <strong>Tracking:</strong> Completed migrations are stored in the
+                    <code>migration_runs</code> collection (field <code>migrationId</code>, <code>runAt</code>).
+                </li>
+            </ul>
+            <h3>Running migrations</h3>
+            <p>From the <strong>project root</strong> with <code>MONGO_URI</code> (or <code>MONGODB_URI</code>) set:</p>
+            <pre><code>node scripts/run-migrations.js</code></pre>
+            <p>Or use the npm script (from project root):</p>
+            <pre><code>npm run migrate</code></pre>
+            <p>
+                (Add to root <code>package.json</code>:
+                <code>&quot;migrate&quot;: &quot;node scripts/run-migrations.js&quot;</code> if desired.)
+            </p>
+            <h3>Adding a migration</h3>
+            <ol>
+                <li>
+                    Export a <code>run(mongoose)</code> function. The runner passes the same
+                    <code>mongoose</code> instance used to connect.
+                </li>
+            </ol>
+            <p>Example:</p>
+            <pre><code>// backend/migrations/002_add_foo_index.js
 const SomeModel = require('../models/SomeModel');
 async function run(mongoose) {
     await SomeModel.collection.createIndex({ foo: 1 });
 }
 module.exports = { run };</code></pre>
-<p>Migrations run in <strong>filename order</strong>. Already-run migrations (present in <code>migration_runs</code>) are skipped.</p>
-<h2>Recommended approach</h2>
-<ol>
-<li>Deploy code that can read both old + new shapes.</li>
-<li>Run the migration runner or a one‑off script.</li>
-<li>Remove legacy fallbacks in a later release.</li>
-</ol>
-<h2>One‑off scripts</h2>
-<p>For ad‑hoc changes you can still run a standalone script (e.g. from <code>scripts/</code>), then document it. Example:</p>
-<pre><code>// scripts/migrate-add-battle-index.js
+            <p>
+                Migrations run in <strong>filename order</strong>. Already-run migrations (present in
+                <code>migration_runs</code>) are skipped.
+            </p>
+            <h2>Recommended approach</h2>
+            <ol>
+                <li>Deploy code that can read both old + new shapes.</li>
+                <li>Run the migration runner or a one‑off script.</li>
+                <li>Remove legacy fallbacks in a later release.</li>
+            </ol>
+            <h2>One‑off scripts</h2>
+            <p>
+                For ad‑hoc changes you can still run a standalone script (e.g. from <code>scripts/</code>), then
+                document it. Example:
+            </p>
+            <pre><code>// scripts/migrate-add-battle-index.js
 const mongoose = require('mongoose');
 const Battle = require('../backend/models/Battle');
 async function run() {
@@ -57,12 +75,12 @@ run().catch((err) =&gt; {
     console.error(err);
     process.exit(1);
 });</code></pre>
-<p>Run: <code>node scripts/migrate-add-battle-index.js</code></p>
-<h2>Operational notes</h2>
-<ul>
-<li>Prefer small, idempotent steps.</li>
-<li>Migration runner records migration IDs and execution timestamps in <code>migration_runs</code>.</li>
-</ul>
-  </div>
-</body>
+            <p>Run: <code>node scripts/migrate-add-battle-index.js</code></p>
+            <h2>Operational notes</h2>
+            <ul>
+                <li>Prefer small, idempotent steps.</li>
+                <li>Migration runner records migration IDs and execution timestamps in <code>migration_runs</code>.</li>
+            </ul>
+        </div>
+    </body>
 </html>

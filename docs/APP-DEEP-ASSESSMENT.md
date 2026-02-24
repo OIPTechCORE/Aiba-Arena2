@@ -7,31 +7,31 @@
 
 ## Your exact console errors → cause and fix
 
-| What you see | Cause | Action |
-|--------------|--------|--------|
-| **css2:1 Failed to load resource: net::ERR_NETWORK_CHANGED** | Network changed (Wi‑Fi/cellular/VPN) during load. | Ignore or refresh. |
-| **chrome-extension://…content_reporter.js: Uncaught SyntaxError: Unexpected token 'export'** | A **browser extension** injects a script that uses ESM but runs as classic script. | Not your app. Ignore, or test in Incognito with extensions disabled. |
-| **404** on `/api/economy/me`, `/api/daily/status`, `/api/referrals/me`, `/api/referrals/top`, `/api/game-modes`, `/api/tasks` | Requests are **not reaching your backend** (wrong host or backend not deployed). | Set **NEXT_PUBLIC_BACKEND_URL** in Vercel miniapp to your backend URL. Redeploy miniapp. See checklist below. |
-| **508** on `/api/brokers/mine`, `/api/brokers/starter` | **Loop detected**: often because backend URL is set to the **miniapp** URL, so proxy calls miniapp → proxy → miniapp → … | Set **NEXT_PUBLIC_BACKEND_URL** to the **backend** URL only (e.g. `https://aiba-arena2-backend.vercel.app`). Never the miniapp URL. Redeploy. |
+| What you see                                                                                                                  | Cause                                                                                                                    | Action                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **css2:1 Failed to load resource: net::ERR_NETWORK_CHANGED**                                                                  | Network changed (Wi‑Fi/cellular/VPN) during load.                                                                        | Ignore or refresh.                                                                                                                            |
+| **chrome-extension://…content_reporter.js: Uncaught SyntaxError: Unexpected token 'export'**                                  | A **browser extension** injects a script that uses ESM but runs as classic script.                                       | Not your app. Ignore, or test in Incognito with extensions disabled.                                                                          |
+| **404** on `/api/economy/me`, `/api/daily/status`, `/api/referrals/me`, `/api/referrals/top`, `/api/game-modes`, `/api/tasks` | Requests are **not reaching your backend** (wrong host or backend not deployed).                                         | Set **NEXT_PUBLIC_BACKEND_URL** in Vercel miniapp to your backend URL. Redeploy miniapp. See checklist below.                                 |
+| **508** on `/api/brokers/mine`, `/api/brokers/starter`                                                                        | **Loop detected**: often because backend URL is set to the **miniapp** URL, so proxy calls miniapp → proxy → miniapp → … | Set **NEXT_PUBLIC_BACKEND_URL** to the **backend** URL only (e.g. `https://aiba-arena2-backend.vercel.app`). Never the miniapp URL. Redeploy. |
 
 ---
 
 ## First things to check (fix for 404 and 508)
 
 1. **Vercel → Miniapp project → Settings → Environment Variables**
-   - **NEXT_PUBLIC_BACKEND_URL** = your **backend** URL (e.g. `https://aiba-arena2-backend.vercel.app`).
-   - No trailing slash. Must **not** be the miniapp URL.
+    - **NEXT_PUBLIC_BACKEND_URL** = your **backend** URL (e.g. `https://aiba-arena2-backend.vercel.app`).
+    - No trailing slash. Must **not** be the miniapp URL.
 
 2. **Backend**
-   - Backend project is deployed and latest deployment is **Ready**.
-   - **CORS_ORIGIN** in backend includes the miniapp origin (e.g. `https://aiba-arena2-miniapp.vercel.app`).
+    - Backend project is deployed and latest deployment is **Ready**.
+    - **CORS_ORIGIN** in backend includes the miniapp origin (e.g. `https://aiba-arena2-miniapp.vercel.app`).
 
 3. **Redeploy**
-   - After changing env, **redeploy the miniapp** (NEXT_PUBLIC_* is baked at build time).
+    - After changing env, **redeploy the miniapp** (NEXT*PUBLIC*\* is baked at build time).
 
 4. **Verify**
-   - Open miniapp → Network tab. Calls to `/api/economy/me`, `/api/tasks`, etc. should go to `https://your-backend.vercel.app/...` and return 200 or 401, not 404.  
-   - Broker calls go to same-origin then proxy to backend; they must not return 508.
+    - Open miniapp → Network tab. Calls to `/api/economy/me`, `/api/tasks`, etc. should go to `https://your-backend.vercel.app/...` and return 200 or 401, not 404.
+    - Broker calls go to same-origin then proxy to backend; they must not return 508.
 
 ---
 

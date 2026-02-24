@@ -13,7 +13,9 @@ export function LegalConsent() {
         try {
             if (typeof window === 'undefined') return;
             const inIframe = window.self !== window.top;
-            const previewParam = typeof window.location !== 'undefined' && new URLSearchParams(window.location.search).get('preview') === '1';
+            const previewParam =
+                typeof window.location !== 'undefined' &&
+                new URLSearchParams(window.location.search).get('preview') === '1';
             if (inIframe || previewParam) return;
             const agreed = localStorage.getItem(STORAGE_KEY_AGREED);
             const declined = localStorage.getItem(STORAGE_KEY_DECLINED);
@@ -42,14 +44,21 @@ export function LegalConsent() {
     return (
         <div className="legal-consent-overlay" role="dialog" aria-modal="true" aria-labelledby="legal-consent-title">
             <div className="legal-consent-card">
-                <h2 id="legal-consent-title" className="legal-consent-title">Welcome to AIBA Arena</h2>
+                <h2 id="legal-consent-title" className="legal-consent-title">
+                    Welcome to AIBA Arena
+                </h2>
                 <p className="legal-consent-text">
-                    Before you continue, please read and accept our terms. By using the app you agree to our data practices and rules of use.
+                    Before you continue, please read and accept our terms. By using the app you agree to our data
+                    practices and rules of use.
                 </p>
                 <div className="legal-consent-links">
-                    <Link href="/privacy" className="legal-consent-link">Privacy Policy</Link>
+                    <Link href="/privacy" className="legal-consent-link">
+                        Privacy Policy
+                    </Link>
                     <span className="legal-consent-sep">·</span>
-                    <Link href="/terms" className="legal-consent-link">Terms of Service</Link>
+                    <Link href="/terms" className="legal-consent-link">
+                        Terms of Service
+                    </Link>
                 </div>
                 <p className="legal-consent-hint">You can read these anytime in Settings or from the links below.</p>
                 <div className="legal-consent-actions">

@@ -1,79 +1,89 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>API AUDIT GAPS FIXED — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>API AUDIT GAPS FIXED</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>API &amp; Docs Audit — Gaps Fixed</h1>
-<p><strong>Date:</strong> Feb 2025 <strong>Scope:</strong> Global scan of docs, APIs, endpoints for gaps, issues, and errors.</p>
-<hr/>
-<h2>Fixes Applied</h2>
-<h3>1. API-CONTRACT.md</h3>
-<ul>
-<li><strong>Bike Racing</strong>: Same expansion — full racing API documented.</li>
-<li><strong>Referrals use</strong>: Clarified <code>wallet_required</code> 403 when referee has no wallet connected.</li>
-</ul>
-<h3>2. SUPER-ADMIN-WALLETS.md</h3>
-<ul>
-<li><strong>Cancelled stakes</strong>: Clarified AIBA fee → Treasury model; env reserved for future TON-based fee.</li>
-</ul>
-<h3>3. GAME-FUNCTIONALITY.md</h3>
-<ul>
-</ul>
-<h3>4. API-AND-READINESS-AUDIT.md</h3>
-<ul>
-</ul>
-<hr/>
-<h2>Verified (No Changes Needed)</h2>
-<table>
-<thead><tr>
-<th>Area</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>Announcements</td>
-<td><code>{ items, unreadCount }</code> — frontend handles via api unwrap</td>
-</tr>
-<tr>
-<td>Guilds /list, /mine, /top</td>
-<td>Implemented; route order correct</td>
-</tr>
-<tr>
-<td>Broker rental /list</td>
-<td>Present</td>
-</tr>
-<tr>
-<td>Staking min/max, periods</td>
-<td>Backend + frontend aligned</td>
-</tr>
-<tr>
-<td>Response envelope</td>
-<td>Miniapp api.js unwraps <code>{ ok, data }</code></td>
-</tr>
-<tr>
-<td>Referrals wallet check</td>
-<td>Backend enforces; <code>wallet_required</code> returned</td>
-</tr>
-<tr>
-<td>Car/Bike racing endpoints</td>
-<td>All used by miniapp exist in backend</td>
-</tr>
-</tbody></table>
-<hr/>
-<h2>Related</h2>
-<ul>
-<li><strong>SUPER-ADMIN-WALLETS.md</strong> — Env vars, config keys, APIs</li>
-<li><strong>UNIFIED-COMMS-ECOSYSTEM.md</strong> — Phases 3–4, collapsible FAQ</li>
-</ul>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>API AUDIT GAPS FIXED — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>API AUDIT GAPS FIXED</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>API &amp; Docs Audit — Gaps Fixed</h1>
+            <p>
+                <strong>Date:</strong> Feb 2025 <strong>Scope:</strong> Global scan of docs, APIs, endpoints for gaps,
+                issues, and errors.
+            </p>
+            <hr />
+            <h2>Fixes Applied</h2>
+            <h3>1. API-CONTRACT.md</h3>
+            <ul>
+                <li><strong>Bike Racing</strong>: Same expansion — full racing API documented.</li>
+                <li>
+                    <strong>Referrals use</strong>: Clarified <code>wallet_required</code> 403 when referee has no
+                    wallet connected.
+                </li>
+            </ul>
+            <h3>2. SUPER-ADMIN-WALLETS.md</h3>
+            <ul>
+                <li>
+                    <strong>Cancelled stakes</strong>: Clarified AIBA fee → Treasury model; env reserved for future
+                    TON-based fee.
+                </li>
+            </ul>
+            <h3>3. GAME-FUNCTIONALITY.md</h3>
+            <ul></ul>
+            <h3>4. API-AND-READINESS-AUDIT.md</h3>
+            <ul></ul>
+            <hr />
+            <h2>Verified (No Changes Needed)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Area</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Announcements</td>
+                        <td><code>{ items, unreadCount }</code> — frontend handles via api unwrap</td>
+                    </tr>
+                    <tr>
+                        <td>Guilds /list, /mine, /top</td>
+                        <td>Implemented; route order correct</td>
+                    </tr>
+                    <tr>
+                        <td>Broker rental /list</td>
+                        <td>Present</td>
+                    </tr>
+                    <tr>
+                        <td>Staking min/max, periods</td>
+                        <td>Backend + frontend aligned</td>
+                    </tr>
+                    <tr>
+                        <td>Response envelope</td>
+                        <td>Miniapp api.js unwraps <code>{ ok, data }</code></td>
+                    </tr>
+                    <tr>
+                        <td>Referrals wallet check</td>
+                        <td>Backend enforces; <code>wallet_required</code> returned</td>
+                    </tr>
+                    <tr>
+                        <td>Car/Bike racing endpoints</td>
+                        <td>All used by miniapp exist in backend</td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr />
+            <h2>Related</h2>
+            <ul>
+                <li><strong>SUPER-ADMIN-WALLETS.md</strong> — Env vars, config keys, APIs</li>
+                <li><strong>UNIFIED-COMMS-ECOSYSTEM.md</strong> — Phases 3–4, collapsible FAQ</li>
+            </ul>
+        </div>
+    </body>
 </html>

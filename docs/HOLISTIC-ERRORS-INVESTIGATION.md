@@ -18,10 +18,10 @@
 
 ## 1. Builds
 
-| App | Command | Result |
-|-----|---------|--------|
-| Miniapp | `cd miniapp && npm run build` | ✅ Compiles; static generation OK |
-| Admin | `cd admin-panel && npm run build` | ✅ Compiles; static generation OK |
+| App     | Command                           | Result                            |
+| ------- | --------------------------------- | --------------------------------- |
+| Miniapp | `cd miniapp && npm run build`     | ✅ Compiles; static generation OK |
+| Admin   | `cd admin-panel && npm run build` | ✅ Compiles; static generation OK |
 
 **Versions:** Miniapp uses Next 15 + React 19; admin-panel uses Next 14 + React 18.
 
@@ -32,9 +32,9 @@
 - **Command:** `npm run lint` (root) → `prettier --check .`
 - **Result:** Many `[warn]` (files not formatted). No Prettier config change was made; formatting can be normalized with `npx prettier --write .` when desired.
 - **Errors (3 files):** Prettier reported **HTML syntax errors** in generated files:
-  - `docs/print/DOCS-STRUCTURE.html`: Nested `</em>` inside `<code>` (from `**\`docs/*.md\`**` — asterisk interpreted as italic).
-  - `docs/print/GAME-FUNCTIONALITY.html`: Same pattern for `/api/assets/*`, `/api/asset-marketplace/*`.
-  - `docs/print/REPORTS-MONITORING.html`: Same for `*2`, `*1.5` in table cell.
+    - `docs/print/DOCS-STRUCTURE.html`: Nested `</em>` inside `<code>` (from `**\`docs/\*.md\`\*\*` — asterisk interpreted as italic).
+    - `docs/print/GAME-FUNCTIONALITY.html`: Same pattern for `/api/assets/*`, `/api/asset-marketplace/*`.
+    - `docs/print/REPORTS-MONITORING.html`: Same for `*2`, `*1.5` in table cell.
 
 **Source fixes applied:** In `docs/DOCS-STRUCTURE.md`, `docs/GAME-FUNCTIONALITY.md`, and `docs/REPORTS-MONITORING.md`, asterisks used in paths or math were escaped or moved into code so the print-docs build no longer produces invalid nesting. **Regenerate** with `npm run build:print-docs` after pulling.
 
@@ -99,15 +99,15 @@ and inspect the stack to see which model still declares a duplicate index for `t
 
 ## 8. Checklist (post-investigation)
 
-| Item | Status |
-|------|--------|
-| Miniapp build | ✅ |
-| Admin build | ✅ |
-| Backend API tests | ✅ 12/12 |
-| Mongoose duplicate indexes | ✅ Reduced; trace if needed for remaining |
-| Prettier HTML errors in docs/print | ✅ Source .md fixed; regenerate HTML |
-| Root error boundary in miniapp | Optional |
-| .env.example for miniapp/admin | Optional |
+| Item                               | Status                                    |
+| ---------------------------------- | ----------------------------------------- |
+| Miniapp build                      | ✅                                        |
+| Admin build                        | ✅                                        |
+| Backend API tests                  | ✅ 12/12                                  |
+| Mongoose duplicate indexes         | ✅ Reduced; trace if needed for remaining |
+| Prettier HTML errors in docs/print | ✅ Source .md fixed; regenerate HTML      |
+| Root error boundary in miniapp     | Optional                                  |
+| .env.example for miniapp/admin     | Optional                                  |
 
 Regenerate print docs after doc changes:  
 `npm run build:print-docs`

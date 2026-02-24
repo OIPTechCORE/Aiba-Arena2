@@ -82,9 +82,9 @@
 
 ## Emoji Shortcuts
 
-- 🎮 Game / Play  
-- ⚡ Speed / Instant  
-- 💰 Earn / Rewards  
-- 🏟️ Arena / Battle  
-- 🤖 AI / Broker  
-- 🔗 Link / Connect  
+- 🎮 Game / Play
+- ⚡ Speed / Instant
+- 💰 Earn / Rewards
+- 🏟️ Arena / Battle
+- 🤖 AI / Broker
+- 🔗 Link / Connect

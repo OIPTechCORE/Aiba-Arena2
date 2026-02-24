@@ -7,7 +7,8 @@ const ADMIN_URL = 'https://aiba-arena2-admin-panel.vercel.app';
 const DEFAULT_BACKEND_URL = 'https://aiba-arena2-backend.vercel.app';
 
 function getBackendUrl() {
-    if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_BACKEND_URL) return process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_BACKEND_URL)
+        return process.env.NEXT_PUBLIC_BACKEND_URL;
     if (typeof window !== 'undefined' && window.location?.origin === ADMIN_URL) return DEFAULT_BACKEND_URL;
     return 'http://localhost:5000';
 }
@@ -219,7 +220,11 @@ export default function AdminHome() {
         setOracleMsg('Running…');
         try {
             const res = await api.post('/api/admin/oracle/update');
-            setOracleMsg(res.data?.ok ? `Updated. AIBA/TON: ${res.data.oracleAibaPerTon ?? '—'}` : (res.data?.error || 'Update failed.'));
+            setOracleMsg(
+                res.data?.ok
+                    ? `Updated. AIBA/TON: ${res.data.oracleAibaPerTon ?? '—'}`
+                    : res.data?.error || 'Update failed.',
+            );
             await fetchOracleStatus();
         } catch (e) {
             setOracleMsg(getAdminErrorMessage(e, 'Update failed.'));
@@ -256,7 +261,11 @@ export default function AdminHome() {
         setEconomyAutoMsg('Running…');
         try {
             const res = await api.post('/api/admin/economy-automation/run');
-            setEconomyAutoMsg(res.data?.adjusted ? `Cap adjusted: ${res.data.cap ?? res.data.dailyCapAiba ?? '—'} AIBA` : (res.data?.message || 'No change.'));
+            setEconomyAutoMsg(
+                res.data?.adjusted
+                    ? `Cap adjusted: ${res.data.cap ?? res.data.dailyCapAiba ?? '—'} AIBA`
+                    : res.data?.message || 'No change.',
+            );
             await fetchEconomyAutomation();
         } catch (e) {
             setEconomyAutoMsg(getAdminErrorMessage(e, 'Run failed.'));
@@ -456,7 +465,10 @@ export default function AdminHome() {
         setBadgeMsg('');
         const telegramId = badgeTelegramId.trim();
         if (!telegramId) return;
-        const badges = badgeList.split(/[\s,]+/).map((s) => s.trim()).filter(Boolean);
+        const badges = badgeList
+            .split(/[\s,]+/)
+            .map((s) => s.trim())
+            .filter(Boolean);
         try {
             await api.post('/api/admin/mod/user-badges', { telegramId, badges });
             setBadgeMsg('Badges updated.');
@@ -739,23 +751,42 @@ export default function AdminHome() {
     };
     const createTournament = async () => {
         setTournamentMsg('');
-        if (!tournamentName.trim()) { setTournamentMsg('Name required.'); return; }
+        if (!tournamentName.trim()) {
+            setTournamentMsg('Name required.');
+            return;
+        }
         try {
-            await api.post('/api/admin/tournaments', { name: tournamentName.trim(), arena: tournamentArena, maxEntries: Number(tournamentMaxEntries) || 16, entryCostAiba: Number(tournamentEntryCost) || 0 });
+            await api.post('/api/admin/tournaments', {
+                name: tournamentName.trim(),
+                arena: tournamentArena,
+                maxEntries: Number(tournamentMaxEntries) || 16,
+                entryCostAiba: Number(tournamentEntryCost) || 0,
+            });
             setTournamentMsg('Tournament created.');
             setTournamentName('');
-        } catch (e) { setTournamentMsg(getAdminErrorMessage(e, 'Create failed.')); }
+        } catch (e) {
+            setTournamentMsg(getAdminErrorMessage(e, 'Create failed.'));
+        }
     };
     const createGlobalBoss = async () => {
         setGlobalBossMsg('');
-        if (!bossName.trim() || !bossHp) { setGlobalBossMsg('Name and HP required.'); return; }
+        if (!bossName.trim() || !bossHp) {
+            setGlobalBossMsg('Name and HP required.');
+            return;
+        }
         try {
-            await api.post('/api/admin/global-boss', { name: bossName.trim(), totalHp: Number(bossHp) || 10000, rewardPoolAiba: Number(bossRewardPool) || 0 });
+            await api.post('/api/admin/global-boss', {
+                name: bossName.trim(),
+                totalHp: Number(bossHp) || 10000,
+                rewardPoolAiba: Number(bossRewardPool) || 0,
+            });
             setGlobalBossMsg('Boss created.');
             setBossName('');
             setBossHp('10000');
             setBossRewardPool('1000');
-        } catch (e) { setGlobalBossMsg(getAdminErrorMessage(e, 'Create failed.')); }
+        } catch (e) {
+            setGlobalBossMsg(getAdminErrorMessage(e, 'Create failed.'));
+        }
     };
     const fetchPredictEvents = async () => {
         try {
@@ -768,14 +799,22 @@ export default function AdminHome() {
     };
     const createPredictEvent = async () => {
         setPredictMsg('');
-        if (!predictBrokerA.trim() || !predictBrokerB.trim()) { setPredictMsg('Broker A and B IDs required.'); return; }
+        if (!predictBrokerA.trim() || !predictBrokerB.trim()) {
+            setPredictMsg('Broker A and B IDs required.');
+            return;
+        }
         try {
-            await api.post('/api/admin/predict/events', { brokerAId: predictBrokerA.trim(), brokerBId: predictBrokerB.trim() });
+            await api.post('/api/admin/predict/events', {
+                brokerAId: predictBrokerA.trim(),
+                brokerBId: predictBrokerB.trim(),
+            });
             setPredictMsg('Event created.');
             setPredictBrokerA('');
             setPredictBrokerB('');
             await fetchPredictEvents();
-        } catch (e) { setPredictMsg(getAdminErrorMessage(e, 'Create failed.')); }
+        } catch (e) {
+            setPredictMsg(getAdminErrorMessage(e, 'Create failed.'));
+        }
     };
     const resolvePredictEvent = async (id) => {
         setPredictMsg('');
@@ -783,7 +822,9 @@ export default function AdminHome() {
             await api.post(`/api/admin/predict/events/${id}/resolve`);
             setPredictMsg('Event resolved.');
             await fetchPredictEvents();
-        } catch (e) { setPredictMsg(getAdminErrorMessage(e, 'Resolve failed.')); }
+        } catch (e) {
+            setPredictMsg(getAdminErrorMessage(e, 'Resolve failed.'));
+        }
     };
     const fetchTrainers = async () => {
         try {
@@ -815,7 +856,9 @@ export default function AdminHome() {
         try {
             await api.patch(`/api/admin/support/${id}`, { status });
             await fetchSupportRequests();
-        } catch (e) { setSupportMsg(getAdminErrorMessage(e, 'Update failed.')); }
+        } catch (e) {
+            setSupportMsg(getAdminErrorMessage(e, 'Update failed.'));
+        }
     };
     const fetchAdminStats = async () => {
         try {
@@ -954,7 +997,8 @@ export default function AdminHome() {
                 if (tab === 'governance') await fetchGovProposals();
                 if (tab === 'charity') await Promise.all([fetchCharityCampaigns(), fetchCharityStats()]);
                 if (tab === 'comms') await fetchAnnouncements();
-                if (tab === 'referrals') await Promise.all([fetchReferralStats(), fetchReferralList(), fetchReferralUses()]);
+                if (tab === 'referrals')
+                    await Promise.all([fetchReferralStats(), fetchReferralList(), fetchReferralUses()]);
                 if (tab === 'university') await fetchUniversityAll();
                 if (tab === 'brokers') await fetchMintJobs();
                 if (tab === 'tournaments') setTournamentMsg('');
@@ -984,7 +1028,14 @@ export default function AdminHome() {
                 {globalError ? (
                     <p className="admin-auth-error" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span>{globalError}</span>
-                        <button type="button" onClick={() => setGlobalError('')} style={{ padding: '2px 8px', fontSize: 12 }} aria-label="Dismiss">Dismiss</button>
+                        <button
+                            type="button"
+                            onClick={() => setGlobalError('')}
+                            style={{ padding: '2px 8px', fontSize: 12 }}
+                            aria-label="Dismiss"
+                        >
+                            Dismiss
+                        </button>
                     </p>
                 ) : null}
             </header>
@@ -1001,44 +1052,78 @@ export default function AdminHome() {
                             Backend must be running. Use ADMIN_EMAIL and ADMIN_PASSWORD from backend/.env.
                         </p>
                         <div className="admin-login-form">
-                        <label className="admin-label">Email</label>
-                        <input
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="admin@example.com"
-                            type="email"
-                            className="admin-input"
-                            autoComplete="email"
-                        />
-                        <label className="admin-label">Password</label>
-                        <div className="admin-password-wrap">
+                            <label className="admin-label">Email</label>
                             <input
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Enter password"
-                                type={showPassword ? 'text' : 'password'}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="admin@example.com"
+                                type="email"
                                 className="admin-input"
-                                autoComplete="current-password"
+                                autoComplete="email"
                             />
-                            <button
-                                type="button"
-                                className={`admin-password-toggle${showPassword ? ' is-visible' : ''}`}
-                                onClick={() => setShowPassword((s) => !s)}
-                                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                                title={showPassword ? 'Hide password' : 'Show password'}
-                            >
-                                {showPassword ? (
-                                    <><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg><span className="admin-password-toggle__label">Hide</span></>
-                                ) : (
-                                    <><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg><span className="admin-password-toggle__label">Show</span></>
-                                )}
+                            <label className="admin-label">Password</label>
+                            <div className="admin-password-wrap">
+                                <input
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    className="admin-input"
+                                    autoComplete="current-password"
+                                />
+                                <button
+                                    type="button"
+                                    className={`admin-password-toggle${showPassword ? ' is-visible' : ''}`}
+                                    onClick={() => setShowPassword((s) => !s)}
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                    title={showPassword ? 'Hide password' : 'Show password'}
+                                >
+                                    {showPassword ? (
+                                        <>
+                                            <svg
+                                                width="18"
+                                                height="18"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                aria-hidden
+                                            >
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                                <line x1="1" y1="1" x2="23" y2="23" />
+                                            </svg>
+                                            <span className="admin-password-toggle__label">Hide</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg
+                                                width="18"
+                                                height="18"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                aria-hidden
+                                            >
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                            <span className="admin-password-toggle__label">Show</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                            <p className="admin-password-hint">
+                                Click <strong>Show</strong> / <strong>Hide</strong> to reveal or mask your password
+                            </p>
+                            <button onClick={login} className="admin-btn admin-btn--primary admin-login-btn">
+                                Sign in
                             </button>
-                        </div>
-                        <p className="admin-password-hint">Click <strong>Show</strong> / <strong>Hide</strong> to reveal or mask your password</p>
-                        <button onClick={login} className="admin-btn admin-btn--primary admin-login-btn">
-                            Sign in
-                        </button>
-                        {authError ? <div className="admin-auth-error">{authError}</div> : null}
+                            {authError ? <div className="admin-auth-error">{authError}</div> : null}
                         </div>
                     </div>
                 </div>
@@ -1047,53 +1132,185 @@ export default function AdminHome() {
                     <nav className="admin-tabs" role="tablist">
                         <div className="admin-tabs-group">
                             <span className="admin-tabs-group__label">Core</span>
-                            <button onClick={() => setTab('tasks')} className={`admin-tab ${tab === 'tasks' ? 'is-active' : ''}`}>Tasks</button>
-                            <button onClick={() => setTab('ads')} className={`admin-tab ${tab === 'ads' ? 'is-active' : ''}`}>Ads</button>
-                            <button onClick={() => setTab('modes')} className={`admin-tab ${tab === 'modes' ? 'is-active' : ''}`}>Modes</button>
-                            <button onClick={() => setTab('economy')} className={`admin-tab ${tab === 'economy' ? 'is-active' : ''}`}>Economy</button>
-                            <button onClick={() => setTab('mod')} className={`admin-tab ${tab === 'mod' ? 'is-active' : ''}`}>Mod</button>
-                            <button onClick={() => setTab('stats')} className={`admin-tab ${tab === 'stats' ? 'is-active' : ''}`}>Stats</button>
+                            <button
+                                onClick={() => setTab('tasks')}
+                                className={`admin-tab ${tab === 'tasks' ? 'is-active' : ''}`}
+                            >
+                                Tasks
+                            </button>
+                            <button
+                                onClick={() => setTab('ads')}
+                                className={`admin-tab ${tab === 'ads' ? 'is-active' : ''}`}
+                            >
+                                Ads
+                            </button>
+                            <button
+                                onClick={() => setTab('modes')}
+                                className={`admin-tab ${tab === 'modes' ? 'is-active' : ''}`}
+                            >
+                                Modes
+                            </button>
+                            <button
+                                onClick={() => setTab('economy')}
+                                className={`admin-tab ${tab === 'economy' ? 'is-active' : ''}`}
+                            >
+                                Economy
+                            </button>
+                            <button
+                                onClick={() => setTab('mod')}
+                                className={`admin-tab ${tab === 'mod' ? 'is-active' : ''}`}
+                            >
+                                Mod
+                            </button>
+                            <button
+                                onClick={() => setTab('stats')}
+                                className={`admin-tab ${tab === 'stats' ? 'is-active' : ''}`}
+                            >
+                                Stats
+                            </button>
                         </div>
                         <div className="admin-tabs-group">
                             <span className="admin-tabs-group__label">Treasury</span>
-                            <button onClick={() => setTab('treasury')} className={`admin-tab ${tab === 'treasury' ? 'is-active' : ''}`}>Treasury</button>
-                            <button onClick={() => setTab('treasuryOps')} className={`admin-tab ${tab === 'treasuryOps' ? 'is-active' : ''}`}>Treasury Ops</button>
-                            <button onClick={() => setTab('realms')} className={`admin-tab ${tab === 'realms' ? 'is-active' : ''}`}>Realms</button>
-                            <button onClick={() => setTab('marketplace')} className={`admin-tab ${tab === 'marketplace' ? 'is-active' : ''}`}>Marketplace</button>
+                            <button
+                                onClick={() => setTab('treasury')}
+                                className={`admin-tab ${tab === 'treasury' ? 'is-active' : ''}`}
+                            >
+                                Treasury
+                            </button>
+                            <button
+                                onClick={() => setTab('treasuryOps')}
+                                className={`admin-tab ${tab === 'treasuryOps' ? 'is-active' : ''}`}
+                            >
+                                Treasury Ops
+                            </button>
+                            <button
+                                onClick={() => setTab('realms')}
+                                className={`admin-tab ${tab === 'realms' ? 'is-active' : ''}`}
+                            >
+                                Realms
+                            </button>
+                            <button
+                                onClick={() => setTab('marketplace')}
+                                className={`admin-tab ${tab === 'marketplace' ? 'is-active' : ''}`}
+                            >
+                                Marketplace
+                            </button>
                         </div>
                         <div className="admin-tabs-group">
                             <span className="admin-tabs-group__label">Governance</span>
-                            <button onClick={() => setTab('governance')} className={`admin-tab ${tab === 'governance' ? 'is-active' : ''}`}>Governance</button>
-                            <button onClick={() => setTab('dao')} className={`admin-tab ${tab === 'dao' ? 'is-active' : ''}`}>DAO</button>
+                            <button
+                                onClick={() => setTab('governance')}
+                                className={`admin-tab ${tab === 'governance' ? 'is-active' : ''}`}
+                            >
+                                Governance
+                            </button>
+                            <button
+                                onClick={() => setTab('dao')}
+                                className={`admin-tab ${tab === 'dao' ? 'is-active' : ''}`}
+                            >
+                                DAO
+                            </button>
                         </div>
                         <div className="admin-tabs-group">
                             <span className="admin-tabs-group__label">Community</span>
-                            <button onClick={() => setTab('charity')} className={`admin-tab ${tab === 'charity' ? 'is-active' : ''}`}>Charity</button>
-                            <button onClick={() => setTab('comms')} className={`admin-tab ${tab === 'comms' ? 'is-active' : ''}`}>Comms</button>
-                            <button onClick={() => setTab('university')} className={`admin-tab ${tab === 'university' ? 'is-active' : ''}`}>University</button>
-                            <button onClick={() => setTab('referrals')} className={`admin-tab ${tab === 'referrals' ? 'is-active' : ''}`}>Referrals</button>
+                            <button
+                                onClick={() => setTab('charity')}
+                                className={`admin-tab ${tab === 'charity' ? 'is-active' : ''}`}
+                            >
+                                Charity
+                            </button>
+                            <button
+                                onClick={() => setTab('comms')}
+                                className={`admin-tab ${tab === 'comms' ? 'is-active' : ''}`}
+                            >
+                                Comms
+                            </button>
+                            <button
+                                onClick={() => setTab('university')}
+                                className={`admin-tab ${tab === 'university' ? 'is-active' : ''}`}
+                            >
+                                University
+                            </button>
+                            <button
+                                onClick={() => setTab('referrals')}
+                                className={`admin-tab ${tab === 'referrals' ? 'is-active' : ''}`}
+                            >
+                                Referrals
+                            </button>
                         </div>
                         <div className="admin-tabs-group">
                             <span className="admin-tabs-group__label">Events</span>
-                            <button onClick={() => setTab('tournaments')} className={`admin-tab ${tab === 'tournaments' ? 'is-active' : ''}`}>Tournaments</button>
-                            <button onClick={() => setTab('globalBoss')} className={`admin-tab ${tab === 'globalBoss' ? 'is-active' : ''}`}>Global Boss</button>
-                            <button onClick={() => setTab('predict')} className={`admin-tab ${tab === 'predict' ? 'is-active' : ''}`}>Predict</button>
-                            <button onClick={() => setTab('trainers')} className={`admin-tab ${tab === 'trainers' ? 'is-active' : ''}`}>Trainers</button>
+                            <button
+                                onClick={() => setTab('tournaments')}
+                                className={`admin-tab ${tab === 'tournaments' ? 'is-active' : ''}`}
+                            >
+                                Tournaments
+                            </button>
+                            <button
+                                onClick={() => setTab('globalBoss')}
+                                className={`admin-tab ${tab === 'globalBoss' ? 'is-active' : ''}`}
+                            >
+                                Global Boss
+                            </button>
+                            <button
+                                onClick={() => setTab('predict')}
+                                className={`admin-tab ${tab === 'predict' ? 'is-active' : ''}`}
+                            >
+                                Predict
+                            </button>
+                            <button
+                                onClick={() => setTab('trainers')}
+                                className={`admin-tab ${tab === 'trainers' ? 'is-active' : ''}`}
+                            >
+                                Trainers
+                            </button>
                         </div>
                         <div className="admin-tabs-group">
                             <span className="admin-tabs-group__label">Ops</span>
-                            <button onClick={() => setTab('support')} className={`admin-tab ${tab === 'support' ? 'is-active' : ''}`}>Support</button>
-                            <button onClick={() => setTab('brokers')} className={`admin-tab ${tab === 'brokers' ? 'is-active' : ''}`}>Mint jobs</button>
+                            <button
+                                onClick={() => setTab('support')}
+                                className={`admin-tab ${tab === 'support' ? 'is-active' : ''}`}
+                            >
+                                Support
+                            </button>
+                            <button
+                                onClick={() => setTab('brokers')}
+                                className={`admin-tab ${tab === 'brokers' ? 'is-active' : ''}`}
+                            >
+                                Mint jobs
+                            </button>
                         </div>
                         <div className="admin-tabs-group">
                             <span className="admin-tabs-group__label">System</span>
-                            <button onClick={() => setTab('oracle')} className={`admin-tab ${tab === 'oracle' ? 'is-active' : ''}`}>Oracle</button>
-                            <button onClick={() => setTab('audit')} className={`admin-tab ${tab === 'audit' ? 'is-active' : ''}`}>Audit</button>
-                            <button onClick={() => setTab('economyAutomation')} className={`admin-tab ${tab === 'economyAutomation' ? 'is-active' : ''}`}>Econ Auto</button>
-                            <button onClick={() => setTab('multiverse')} className={`admin-tab ${tab === 'multiverse' ? 'is-active' : ''}`}>Multiverse</button>
+                            <button
+                                onClick={() => setTab('oracle')}
+                                className={`admin-tab ${tab === 'oracle' ? 'is-active' : ''}`}
+                            >
+                                Oracle
+                            </button>
+                            <button
+                                onClick={() => setTab('audit')}
+                                className={`admin-tab ${tab === 'audit' ? 'is-active' : ''}`}
+                            >
+                                Audit
+                            </button>
+                            <button
+                                onClick={() => setTab('economyAutomation')}
+                                className={`admin-tab ${tab === 'economyAutomation' ? 'is-active' : ''}`}
+                            >
+                                Econ Auto
+                            </button>
+                            <button
+                                onClick={() => setTab('multiverse')}
+                                className={`admin-tab ${tab === 'multiverse' ? 'is-active' : ''}`}
+                            >
+                                Multiverse
+                            </button>
                         </div>
                         <div className="admin-tabs__spacer" />
-                        <button onClick={logout} className="admin-tab admin-tab--logout">Logout</button>
+                        <button onClick={logout} className="admin-tab admin-tab--logout">
+                            Logout
+                        </button>
                     </nav>
 
                     <main className="admin-content">
@@ -1162,7 +1379,9 @@ export default function AdminHome() {
                         {tab === 'ads' ? (
                             <div className="admin-card">
                                 <h2 className="admin-card__title">Ads</h2>
-                                <p className="admin-card__hint">Manage between-battles ads. Image URL and optional link.</p>
+                                <p className="admin-card__hint">
+                                    Manage between-battles ads. Image URL and optional link.
+                                </p>
                                 <div className="admin-action-row">
                                     <button onClick={fetchAds} disabled={loadingAds} className="admin-btn">
                                         {loadingAds ? 'Loading…' : 'Refresh'}
@@ -1273,7 +1492,8 @@ export default function AdminHome() {
                                     </button>
                                 </div>
                                 <p style={{ color: '#666', fontSize: 12, marginTop: 6 }}>
-                                    Arena <strong>arbitrage</strong> is available; defaults also seed arbitrage/rookie, arbitrage-pro, arbitrage-elite on first DB connect.
+                                    Arena <strong>arbitrage</strong> is available; defaults also seed arbitrage/rookie,
+                                    arbitrage-pro, arbitrage-elite on first DB connect.
                                 </p>
                                 {modesError ? <p style={{ color: 'crimson' }}>{modesError}</p> : null}
                                 <div style={{ marginTop: 12 }}>
@@ -1311,7 +1531,10 @@ export default function AdminHome() {
                             <>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                                     <button
-                                        onClick={() => { fetchEconomy(); fetchEconomyDay(); }}
+                                        onClick={() => {
+                                            fetchEconomy();
+                                            fetchEconomyDay();
+                                        }}
                                         disabled={loadingEconomy}
                                         style={{ padding: '8px 12px' }}
                                     >
@@ -1322,6 +1545,52 @@ export default function AdminHome() {
                                     </button>
                                 </div>
                                 {economyError ? <p style={{ color: 'crimson' }}>{economyError}</p> : null}
+                                {economyConfigObj ? (
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #e0e0e0',
+                                            borderRadius: 8,
+                                            background: '#f8f9fa',
+                                        }}
+                                    >
+                                        <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                                            Staking — Min AIBA (Super Admin)
+                                        </div>
+                                        <div
+                                            style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}
+                                        >
+                                            <label style={{ fontSize: 13 }}>Minimum stake AIBA:</label>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                value={economyConfigObj.stakingMinAiba ?? 1000}
+                                                onChange={(e) => {
+                                                    const v = Number(e.target.value);
+                                                    if (Number.isFinite(v) && v >= 1) {
+                                                        setEconomyConfigObj((c) =>
+                                                            c ? { ...c, stakingMinAiba: v } : null,
+                                                        );
+                                                        setEconomyJson((j) => {
+                                                            try {
+                                                                const o = JSON.parse(j || '{}');
+                                                                o.stakingMinAiba = v;
+                                                                return JSON.stringify(o, null, 2);
+                                                            } catch {
+                                                                return j;
+                                                            }
+                                                        });
+                                                    }
+                                                }}
+                                                style={{ width: 100, padding: '6px 8px' }}
+                                            />
+                                            <span style={{ fontSize: 12, color: '#666' }}>
+                                                AIBA (flexible + locked). Apply via Save below or edit JSON.
+                                            </span>
+                                        </div>
+                                    </div>
+                                ) : null}
                                 {economyDay && economyConfigObj ? (
                                     <div
                                         style={{
@@ -1332,11 +1601,20 @@ export default function AdminHome() {
                                             background: '#fafafa',
                                         }}
                                     >
-                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>Emission dashboard (today UTC)</div>
-                                        <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
-                                            Day: {economyDay.day} · Window: {economyConfigObj.emissionStartHourUtc ?? 0}:00–{economyConfigObj.emissionEndHourUtc ?? 24}:00 UTC
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>
+                                            Emission dashboard (today UTC)
                                         </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+                                        <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+                                            Day: {economyDay.day} · Window: {economyConfigObj.emissionStartHourUtc ?? 0}
+                                            :00–{economyConfigObj.emissionEndHourUtc ?? 24}:00 UTC
+                                        </div>
+                                        <div
+                                            style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                                                gap: 12,
+                                            }}
+                                        >
                                             <div>
                                                 <div style={{ fontWeight: 600 }}>AIBA</div>
                                                 <div style={{ fontSize: 13 }}>
@@ -1358,7 +1636,8 @@ export default function AdminHome() {
                                                 <div style={{ fontSize: 13 }}>{economyDay.spentNeur ?? 0}</div>
                                             </div>
                                         </div>
-                                        {economyDay.emittedAibaByArena && Object.keys(economyDay.emittedAibaByArena).length > 0 ? (
+                                        {economyDay.emittedAibaByArena &&
+                                        Object.keys(economyDay.emittedAibaByArena).length > 0 ? (
                                             <div style={{ marginTop: 10, fontSize: 12 }}>
                                                 <div style={{ fontWeight: 600 }}>AIBA by arena</div>
                                                 <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
@@ -1384,12 +1663,19 @@ export default function AdminHome() {
                                     }}
                                 />
                                 <div style={{ color: '#666', fontSize: 12, marginTop: 8 }}>
-                                    Tip: edit <code>baseRewardAibaPerScore</code>, <code>baseRewardNeurPerScore</code>, caps,
-                                    <code>dailyCap*ByArena</code> maps, <code>starRewardPerBattle</code> (Stars per battle),
+                                    Tip: edit <code>stakingMinAiba</code> (min AIBA to stake; use quick-edit above or
+                                    here), <code>baseRewardAibaPerScore</code>, <code>baseRewardNeurPerScore</code>,
+                                    caps,
+                                    <code>dailyCap*ByArena</code> maps, <code>starRewardPerBattle</code> (Stars per
+                                    battle),
                                     <code>diamondRewardFirstWin</code> (Diamonds on first win),
-                                    <code>topLeaderBadgeTopN</code> (top N by score get &quot;top_leader&quot; badge; synced every 6h or via Moderation),
-                                    <code>courseCompletionBadgeMintCostTonNano</code> (Course completion badge mint cost in TON; value in nanoTON, e.g. 10000000000 = 10 TON; default 10 TON),
-                                    and <code>fullCourseCompletionCertificateMintCostTonNano</code> (Full course completion certificate mint cost in TON; value in nanoTON, e.g. 15000000000 = 15 TON; default 15 TON).
+                                    <code>topLeaderBadgeTopN</code> (top N by score get &quot;top_leader&quot; badge;
+                                    synced every 6h or via Moderation),
+                                    <code>courseCompletionBadgeMintCostTonNano</code> (Course completion badge mint cost
+                                    in TON; value in nanoTON, e.g. 10000000000 = 10 TON; default 10 TON), and{' '}
+                                    <code>fullCourseCompletionCertificateMintCostTonNano</code> (Full course completion
+                                    certificate mint cost in TON; value in nanoTON, e.g. 15000000000 = 15 TON; default
+                                    15 TON).
                                 </div>
                             </>
                         ) : null}
@@ -1453,7 +1739,9 @@ export default function AdminHome() {
 
                                     <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>User detail (lookup)</div>
-                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                        <div
+                                            style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}
+                                        >
                                             <input
                                                 value={userDetailTelegramId}
                                                 onChange={(e) => setUserDetailTelegramId(e.target.value)}
@@ -1464,21 +1752,55 @@ export default function AdminHome() {
                                                 Look up
                                             </button>
                                         </div>
-                                        {userDetailError ? <p style={{ marginTop: 8, color: 'crimson' }}>{userDetailError}</p> : null}
+                                        {userDetailError ? (
+                                            <p style={{ marginTop: 8, color: 'crimson' }}>{userDetailError}</p>
+                                        ) : null}
                                         {userDetail ? (
-                                            <div style={{ marginTop: 10, padding: 10, background: '#f9f9f9', borderRadius: 8, fontSize: 13 }}>
-                                                <div><strong>Username</strong>: {userDetail.username || '—'}</div>
-                                                <div><strong>Stars</strong>: {userDetail.starsBalance ?? 0} · <strong>Diamonds</strong>: {userDetail.diamondsBalance ?? 0}</div>
-                                                <div><strong>Badges</strong>: {Array.isArray(userDetail.badges) && userDetail.badges.length ? userDetail.badges.join(', ') : '—'}</div>
-                                                {userDetail.firstWinDiamondAwardedAt ? <div style={{ color: '#666' }}>First-win diamond awarded at: {new Date(userDetail.firstWinDiamondAwardedAt).toISOString()}</div> : null}
-                                                {userDetail.bannedUntil ? <div style={{ color: '#b45309' }}>Banned until: {new Date(userDetail.bannedUntil).toISOString()} — {userDetail.bannedReason || ''}</div> : null}
+                                            <div
+                                                style={{
+                                                    marginTop: 10,
+                                                    padding: 10,
+                                                    background: '#f9f9f9',
+                                                    borderRadius: 8,
+                                                    fontSize: 13,
+                                                }}
+                                            >
+                                                <div>
+                                                    <strong>Username</strong>: {userDetail.username || '—'}
+                                                </div>
+                                                <div>
+                                                    <strong>Stars</strong>: {userDetail.starsBalance ?? 0} ·{' '}
+                                                    <strong>Diamonds</strong>: {userDetail.diamondsBalance ?? 0}
+                                                </div>
+                                                <div>
+                                                    <strong>Badges</strong>:{' '}
+                                                    {Array.isArray(userDetail.badges) && userDetail.badges.length
+                                                        ? userDetail.badges.join(', ')
+                                                        : '—'}
+                                                </div>
+                                                {userDetail.firstWinDiamondAwardedAt ? (
+                                                    <div style={{ color: '#666' }}>
+                                                        First-win diamond awarded at:{' '}
+                                                        {new Date(userDetail.firstWinDiamondAwardedAt).toISOString()}
+                                                    </div>
+                                                ) : null}
+                                                {userDetail.bannedUntil ? (
+                                                    <div style={{ color: '#b45309' }}>
+                                                        Banned until: {new Date(userDetail.bannedUntil).toISOString()} —{' '}
+                                                        {userDetail.bannedReason || ''}
+                                                    </div>
+                                                ) : null}
                                             </div>
                                         ) : null}
                                     </div>
 
                                     <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
-                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>User profile badges (X-style)</div>
-                                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                        <div style={{ fontWeight: 700, marginBottom: 8 }}>
+                                            User profile badges (X-style)
+                                        </div>
+                                        <div
+                                            style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}
+                                        >
                                             <input
                                                 value={badgeTelegramId}
                                                 onChange={(e) => setBadgeTelegramId(e.target.value)}
@@ -1495,18 +1817,34 @@ export default function AdminHome() {
                                                 Set badges
                                             </button>
                                         </div>
-                                        {badgeMsg ? <p style={{ marginTop: 8, color: badgeMsg.startsWith('Failed') ? 'crimson' : '#333' }}>{badgeMsg}</p> : null}
+                                        {badgeMsg ? (
+                                            <p
+                                                style={{
+                                                    marginTop: 8,
+                                                    color: badgeMsg.startsWith('Failed') ? 'crimson' : '#333',
+                                                }}
+                                            >
+                                                {badgeMsg}
+                                            </p>
+                                        ) : null}
                                     </div>
 
                                     <div style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Top leader badge sync</div>
                                         <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>
-                                            Awards &quot;top_leader&quot; badge to top N users by total score (N = economy config <code>topLeaderBadgeTopN</code>). Also runs every 6 hours.
+                                            Awards &quot;top_leader&quot; badge to top N users by total score (N =
+                                            economy config <code>topLeaderBadgeTopN</code>). Also runs every 6 hours.
                                         </p>
-                                        <button onClick={syncTopLeaderBadges} disabled={syncingTopLeader} style={{ padding: '8px 12px' }}>
+                                        <button
+                                            onClick={syncTopLeaderBadges}
+                                            disabled={syncingTopLeader}
+                                            style={{ padding: '8px 12px' }}
+                                        >
                                             {syncingTopLeader ? 'Syncing…' : 'Sync now'}
                                         </button>
-                                        {syncTopLeaderMsg ? <span style={{ marginLeft: 8, color: '#333' }}>{syncTopLeaderMsg}</span> : null}
+                                        {syncTopLeaderMsg ? (
+                                            <span style={{ marginLeft: 8, color: '#333' }}>{syncTopLeaderMsg}</span>
+                                        ) : null}
                                     </div>
 
                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -1595,17 +1933,39 @@ export default function AdminHome() {
 
                         {tab === 'stats' ? (
                             <>
-                                <button onClick={fetchAdminStats} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <button onClick={fetchAdminStats} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
                                 {adminStats ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8, maxWidth: 480 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                            maxWidth: 480,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Dashboard stats</div>
                                         <div style={{ display: 'grid', gap: 8, fontSize: 14 }}>
-                                            <div>DAU (today): <strong>{adminStats.dau ?? 0}</strong></div>
-                                            <div>Total users: <strong>{adminStats.totalUsers ?? 0}</strong></div>
-                                            <div>Total battles: <strong>{adminStats.totalBattles ?? 0}</strong></div>
-                                            <div>Battles today: <strong>{adminStats.battlesToday ?? 0}</strong></div>
-                                            <div>Today emitted AIBA: <strong>{adminStats.todayEmittedAiba ?? 0}</strong></div>
-                                            <div>Today emitted NEUR: <strong>{adminStats.todayEmittedNeur ?? 0}</strong></div>
+                                            <div>
+                                                DAU (today): <strong>{adminStats.dau ?? 0}</strong>
+                                            </div>
+                                            <div>
+                                                Total users: <strong>{adminStats.totalUsers ?? 0}</strong>
+                                            </div>
+                                            <div>
+                                                Total battles: <strong>{adminStats.totalBattles ?? 0}</strong>
+                                            </div>
+                                            <div>
+                                                Battles today: <strong>{adminStats.battlesToday ?? 0}</strong>
+                                            </div>
+                                            <div>
+                                                Today emitted AIBA: <strong>{adminStats.todayEmittedAiba ?? 0}</strong>
+                                            </div>
+                                            <div>
+                                                Today emitted NEUR: <strong>{adminStats.todayEmittedNeur ?? 0}</strong>
+                                            </div>
                                             <div style={{ color: '#666', fontSize: 12 }}>Day: {adminStats.day}</div>
                                         </div>
                                     </div>
@@ -1613,36 +1973,96 @@ export default function AdminHome() {
                                     <div style={{ marginTop: 12, color: '#666' }}>Load stats.</div>
                                 )}
                                 <div style={{ marginTop: 12, fontSize: 12 }}>
-                                    <a href={`${getBackendUrl()}/api/admin/economy/simulate?days=30`} target="_blank" rel="noopener noreferrer">Economy simulator (30 days)</a>
+                                    <a
+                                        href={`${getBackendUrl()}/api/admin/economy/simulate?days=30`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Economy simulator (30 days)
+                                    </a>
                                 </div>
                             </>
                         ) : null}
 
                         {tab === 'treasury' ? (
                             <>
-                                <button onClick={fetchTreasury} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <button onClick={fetchTreasury} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
                                 {treasuryData ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>DAO Treasury</div>
-                                        <div>Balance AIBA: {treasuryData.balanceAiba ?? 0} | NEUR: {treasuryData.balanceNeur ?? 0}</div>
-                                        <div style={{ fontSize: 12, color: '#666' }}>Paid out AIBA: {treasuryData.totalPaidOutAiba ?? 0} | NEUR: {treasuryData.totalPaidOutNeur ?? 0}</div>
+                                        <div>
+                                            Balance AIBA: {treasuryData.balanceAiba ?? 0} | NEUR:{' '}
+                                            {treasuryData.balanceNeur ?? 0}
+                                        </div>
+                                        <div style={{ fontSize: 12, color: '#666' }}>
+                                            Paid out AIBA: {treasuryData.totalPaidOutAiba ?? 0} | NEUR:{' '}
+                                            {treasuryData.totalPaidOutNeur ?? 0}
+                                        </div>
                                         <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-                                            <input type="number" id="treasury-aiba" placeholder="AIBA to add" style={{ padding: 8, width: 120 }} />
-                                            <input type="number" id="treasury-neur" placeholder="NEUR to add" style={{ padding: 8, width: 120 }} />
-                                            <button onClick={() => fundTreasury(Number(document.getElementById('treasury-aiba')?.value || 0), Number(document.getElementById('treasury-neur')?.value || 0))} style={{ padding: '8px 12px' }}>Fund</button>
+                                            <input
+                                                type="number"
+                                                id="treasury-aiba"
+                                                placeholder="AIBA to add"
+                                                style={{ padding: 8, width: 120 }}
+                                            />
+                                            <input
+                                                type="number"
+                                                id="treasury-neur"
+                                                placeholder="NEUR to add"
+                                                style={{ padding: 8, width: 120 }}
+                                            />
+                                            <button
+                                                onClick={() =>
+                                                    fundTreasury(
+                                                        Number(document.getElementById('treasury-aiba')?.value || 0),
+                                                        Number(document.getElementById('treasury-neur')?.value || 0),
+                                                    )
+                                                }
+                                                style={{ padding: '8px 12px' }}
+                                            >
+                                                Fund
+                                            </button>
                                         </div>
                                     </div>
                                 ) : null}
                                 {reserveData ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Stability reserve</div>
-                                        <div>AIBA: {reserveData.aibaBalance ?? 0} | NEUR: {reserveData.neurBalance ?? 0}</div>
+                                        <div>
+                                            AIBA: {reserveData.aibaBalance ?? 0} | NEUR: {reserveData.neurBalance ?? 0}
+                                        </div>
                                     </div>
                                 ) : null}
                                 {buybackData ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Buyback pool</div>
-                                        <div>AIBA: {buybackData.aibaBalance ?? 0} | NEUR: {buybackData.neurBalance ?? 0} | Total bought back: {buybackData.totalBoughtBackAiba ?? 0}</div>
+                                        <div>
+                                            AIBA: {buybackData.aibaBalance ?? 0} | NEUR: {buybackData.neurBalance ?? 0}{' '}
+                                            | Total bought back: {buybackData.totalBoughtBackAiba ?? 0}
+                                        </div>
                                     </div>
                                 ) : null}
                             </>
@@ -1650,21 +2070,50 @@ export default function AdminHome() {
 
                         {tab === 'realms' ? (
                             <>
-                                <button onClick={fetchRealms} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <button onClick={fetchRealms} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
                                 <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Create / Update Realm</div>
                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                        <input value={realmKey} onChange={(e) => setRealmKey(e.target.value)} placeholder="realm key" style={{ padding: 8 }} />
-                                        <input value={realmName} onChange={(e) => setRealmName(e.target.value)} placeholder="realm name" style={{ padding: 8 }} />
-                                        <input value={realmLevel} onChange={(e) => setRealmLevel(e.target.value)} type="number" min="1" max="3" placeholder="level" style={{ padding: 8, width: 80 }} />
-                                        <button onClick={upsertRealm} style={{ padding: '8px 12px' }}>Save</button>
+                                        <input
+                                            value={realmKey}
+                                            onChange={(e) => setRealmKey(e.target.value)}
+                                            placeholder="realm key"
+                                            style={{ padding: 8 }}
+                                        />
+                                        <input
+                                            value={realmName}
+                                            onChange={(e) => setRealmName(e.target.value)}
+                                            placeholder="realm name"
+                                            style={{ padding: 8 }}
+                                        />
+                                        <input
+                                            value={realmLevel}
+                                            onChange={(e) => setRealmLevel(e.target.value)}
+                                            type="number"
+                                            min="1"
+                                            max="3"
+                                            placeholder="level"
+                                            style={{ padding: 8, width: 80 }}
+                                        />
+                                        <button onClick={upsertRealm} style={{ padding: '8px 12px' }}>
+                                            Save
+                                        </button>
                                     </div>
                                 </div>
                                 <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
                                     {realms.map((r) => (
-                                        <div key={r.key} style={{ padding: 10, border: '1px solid #f2f2f2', borderRadius: 8 }}>
-                                            <div style={{ fontWeight: 600 }}>{r.name} ({r.key})</div>
-                                            <div style={{ color: '#666', fontSize: 12 }}>Level {r.level} · active {String(r.active)}</div>
+                                        <div
+                                            key={r.key}
+                                            style={{ padding: 10, border: '1px solid #f2f2f2', borderRadius: 8 }}
+                                        >
+                                            <div style={{ fontWeight: 600 }}>
+                                                {r.name} ({r.key})
+                                            </div>
+                                            <div style={{ color: '#666', fontSize: 12 }}>
+                                                Level {r.level} · active {String(r.active)}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -1673,8 +2122,18 @@ export default function AdminHome() {
 
                         {tab === 'marketplace' ? (
                             <>
-                                <button onClick={fetchMarketMetrics} style={{ padding: '8px 12px' }}>Refresh</button>
-                                <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8, maxWidth: 420 }}>
+                                <button onClick={fetchMarketMetrics} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
+                                <div
+                                    style={{
+                                        marginTop: 12,
+                                        padding: 12,
+                                        border: '1px solid #eee',
+                                        borderRadius: 8,
+                                        maxWidth: 420,
+                                    }}
+                                >
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Marketplace metrics</div>
                                     <div>Active listings: {marketMetrics?.activeListings ?? 0}</div>
                                     <div>Sold listings: {marketMetrics?.soldListings ?? 0}</div>
@@ -1685,19 +2144,68 @@ export default function AdminHome() {
 
                         {tab === 'treasuryOps' ? (
                             <>
-                                <button onClick={fetchTreasuryOpsMetrics} style={{ padding: '8px 12px' }}>Refresh</button>
-                                <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8, maxWidth: 420 }}>
+                                <button onClick={fetchTreasuryOpsMetrics} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
+                                <div
+                                    style={{
+                                        marginTop: 12,
+                                        padding: 12,
+                                        border: '1px solid #eee',
+                                        borderRadius: 8,
+                                        maxWidth: 420,
+                                    }}
+                                >
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Treasury ops summary</div>
                                     <div>Burn: {treasuryOpsSummary?.burn ?? 0}</div>
                                     <div>Treasury: {treasuryOpsSummary?.treasury ?? 0}</div>
                                     <div>Rewards: {treasuryOpsSummary?.rewards ?? 0}</div>
                                     <div>Staking: {treasuryOpsSummary?.staking ?? 0}</div>
-                                    <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #eee', color: 'var(--accent-gold)' }}>
-                                        <strong>Cancelled Stakes (Super Admin)</strong>: {treasuryOpsSummary?.staking_cancel_early_fee ?? 0} AIBA
+                                    <div
+                                        style={{
+                                            marginTop: 8,
+                                            paddingTop: 8,
+                                            borderTop: '1px solid #eee',
+                                            color: 'var(--accent-gold)',
+                                        }}
+                                    >
+                                        <strong>Cancelled Stakes (Super Admin)</strong>:{' '}
+                                        {treasuryOpsSummary?.staking_cancel_early_fee ?? 0} AIBA
                                     </div>
-                                    {treasuryOpsSummary && Object.keys(treasuryOpsSummary).filter((k) => !['burn', 'treasury', 'rewards', 'staking', 'staking_cancel_early_fee'].includes(k)).length > 0 ? (
-                                        <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #eee', fontSize: 12, color: '#666' }}>
-                                            Other: {Object.entries(treasuryOpsSummary).filter(([k]) => !['burn', 'treasury', 'rewards', 'staking', 'staking_cancel_early_fee'].includes(k)).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+                                    {treasuryOpsSummary &&
+                                    Object.keys(treasuryOpsSummary).filter(
+                                        (k) =>
+                                            ![
+                                                'burn',
+                                                'treasury',
+                                                'rewards',
+                                                'staking',
+                                                'staking_cancel_early_fee',
+                                            ].includes(k),
+                                    ).length > 0 ? (
+                                        <div
+                                            style={{
+                                                marginTop: 8,
+                                                paddingTop: 8,
+                                                borderTop: '1px solid #eee',
+                                                fontSize: 12,
+                                                color: '#666',
+                                            }}
+                                        >
+                                            Other:{' '}
+                                            {Object.entries(treasuryOpsSummary)
+                                                .filter(
+                                                    ([k]) =>
+                                                        ![
+                                                            'burn',
+                                                            'treasury',
+                                                            'rewards',
+                                                            'staking',
+                                                            'staking_cancel_early_fee',
+                                                        ].includes(k),
+                                                )
+                                                .map(([k, v]) => `${k}: ${v}`)
+                                                .join(' · ')}
                                         </div>
                                     ) : null}
                                 </div>
@@ -1706,18 +2214,28 @@ export default function AdminHome() {
 
                         {tab === 'governance' ? (
                             <>
-                                <button onClick={fetchGovProposals} style={{ padding: '8px 12px' }}>Refresh</button>
+                                <button onClick={fetchGovProposals} style={{ padding: '8px 12px' }}>
+                                    Refresh
+                                </button>
                                 <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
                                     {govProposals.length === 0 ? (
                                         <div style={{ color: '#666' }}>No proposals.</div>
                                     ) : (
                                         govProposals.map((p) => (
-                                            <div key={p._id} style={{ padding: 10, border: '1px solid #f2f2f2', borderRadius: 8 }}>
+                                            <div
+                                                key={p._id}
+                                                style={{ padding: 10, border: '1px solid #f2f2f2', borderRadius: 8 }}
+                                            >
                                                 <div style={{ fontWeight: 600 }}>{p.title}</div>
                                                 <div style={{ color: '#666', fontSize: 12 }}>{p.description}</div>
-                                                <div style={{ color: '#999', fontSize: 12, marginTop: 4 }}>status: {p.status}</div>
+                                                <div style={{ color: '#999', fontSize: 12, marginTop: 4 }}>
+                                                    status: {p.status}
+                                                </div>
                                                 {p.status === 'voting' ? (
-                                                    <button onClick={() => executeProposal(p._id)} style={{ padding: '6px 10px', marginTop: 8 }}>
+                                                    <button
+                                                        onClick={() => executeProposal(p._id)}
+                                                        style={{ padding: '6px 10px', marginTop: 8 }}
+                                                    >
                                                         Execute
                                                     </button>
                                                 ) : null}
@@ -1730,23 +2248,58 @@ export default function AdminHome() {
 
                         {tab === 'charity' ? (
                             <>
-                                <button onClick={fetchCharityCampaigns} style={{ padding: '8px 12px' }}>Refresh campaigns</button>
-                                <button onClick={fetchCharityStats} style={{ padding: '8px 12px' }}>Refresh stats</button>
-                                <button onClick={fetchCharityDonations} style={{ padding: '8px 12px' }}>List donations</button>
-                                {charityMsg ? <span style={{ marginLeft: 12, color: '#066' }}>{charityMsg}</span> : null}
+                                <button onClick={fetchCharityCampaigns} style={{ padding: '8px 12px' }}>
+                                    Refresh campaigns
+                                </button>
+                                <button onClick={fetchCharityStats} style={{ padding: '8px 12px' }}>
+                                    Refresh stats
+                                </button>
+                                <button onClick={fetchCharityDonations} style={{ padding: '8px 12px' }}>
+                                    List donations
+                                </button>
+                                {charityMsg ? (
+                                    <span style={{ marginLeft: 12, color: '#066' }}>{charityMsg}</span>
+                                ) : null}
                                 {charityStats ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Charity stats</div>
-                                        <div>Total raised NEUR: {charityStats.totalRaisedNeur ?? 0} | AIBA: {charityStats.totalRaisedAiba ?? 0}</div>
-                                        <div>Total donors: {charityStats.totalDonors ?? 0} | Campaigns: {charityStats.campaignCount ?? 0}</div>
+                                        <div>
+                                            Total raised NEUR: {charityStats.totalRaisedNeur ?? 0} | AIBA:{' '}
+                                            {charityStats.totalRaisedAiba ?? 0}
+                                        </div>
+                                        <div>
+                                            Total donors: {charityStats.totalDonors ?? 0} | Campaigns:{' '}
+                                            {charityStats.campaignCount ?? 0}
+                                        </div>
                                     </div>
                                 ) : null}
                                 <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Create campaign</div>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-                                        <input value={charityNewName} onChange={(e) => setCharityNewName(e.target.value)} placeholder="Name" style={{ padding: 8, minWidth: 160 }} />
-                                        <input value={charityNewDesc} onChange={(e) => setCharityNewDesc(e.target.value)} placeholder="Description" style={{ padding: 8, minWidth: 200 }} />
-                                        <select value={charityNewCause} onChange={(e) => setCharityNewCause(e.target.value)} style={{ padding: 8 }}>
+                                        <input
+                                            value={charityNewName}
+                                            onChange={(e) => setCharityNewName(e.target.value)}
+                                            placeholder="Name"
+                                            style={{ padding: 8, minWidth: 160 }}
+                                        />
+                                        <input
+                                            value={charityNewDesc}
+                                            onChange={(e) => setCharityNewDesc(e.target.value)}
+                                            placeholder="Description"
+                                            style={{ padding: 8, minWidth: 200 }}
+                                        />
+                                        <select
+                                            value={charityNewCause}
+                                            onChange={(e) => setCharityNewCause(e.target.value)}
+                                            style={{ padding: 8 }}
+                                        >
                                             <option value="education">education</option>
                                             <option value="environment">environment</option>
                                             <option value="health">health</option>
@@ -1754,44 +2307,108 @@ export default function AdminHome() {
                                             <option value="community">community</option>
                                             <option value="other">other</option>
                                         </select>
-                                        <input type="number" value={charityNewGoalNeur} onChange={(e) => setCharityNewGoalNeur(e.target.value)} placeholder="Goal NEUR" style={{ padding: 8, width: 100 }} />
-                                        <input type="number" value={charityNewGoalAiba} onChange={(e) => setCharityNewGoalAiba(e.target.value)} placeholder="Goal AIBA" style={{ padding: 8, width: 100 }} />
-                                        <select value={charityNewStatus} onChange={(e) => setCharityNewStatus(e.target.value)} style={{ padding: 8 }}>
+                                        <input
+                                            type="number"
+                                            value={charityNewGoalNeur}
+                                            onChange={(e) => setCharityNewGoalNeur(e.target.value)}
+                                            placeholder="Goal NEUR"
+                                            style={{ padding: 8, width: 100 }}
+                                        />
+                                        <input
+                                            type="number"
+                                            value={charityNewGoalAiba}
+                                            onChange={(e) => setCharityNewGoalAiba(e.target.value)}
+                                            placeholder="Goal AIBA"
+                                            style={{ padding: 8, width: 100 }}
+                                        />
+                                        <select
+                                            value={charityNewStatus}
+                                            onChange={(e) => setCharityNewStatus(e.target.value)}
+                                            style={{ padding: 8 }}
+                                        >
                                             <option value="draft">draft</option>
                                             <option value="active">active</option>
                                         </select>
-                                        <button onClick={createCharityCampaign} style={{ padding: '8px 12px' }}>Create</button>
+                                        <button onClick={createCharityCampaign} style={{ padding: '8px 12px' }}>
+                                            Create
+                                        </button>
                                     </div>
                                 </div>
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Campaigns</div>
                                     {charityCampaigns.map((c) => (
-                                        <div key={c._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8, marginTop: 8 }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                                        <div
+                                            key={c._id}
+                                            style={{
+                                                padding: 12,
+                                                border: '1px solid #eee',
+                                                borderRadius: 8,
+                                                marginTop: 8,
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    flexWrap: 'wrap',
+                                                    gap: 8,
+                                                }}
+                                            >
                                                 <div>
                                                     <strong>{c.name}</strong> — {c.cause} · status: {c.status}
-                                                    <div style={{ fontSize: 12, color: '#666' }}>Raised: {c.raisedNeur ?? 0} NEUR, {c.raisedAiba ?? 0} AIBA · {c.donorCount ?? 0} donors</div>
+                                                    <div style={{ fontSize: 12, color: '#666' }}>
+                                                        Raised: {c.raisedNeur ?? 0} NEUR, {c.raisedAiba ?? 0} AIBA ·{' '}
+                                                        {c.donorCount ?? 0} donors
+                                                    </div>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                                                     {c.status === 'active' ? (
-                                                        <button onClick={() => closeCharityCampaign(c._id)} style={{ padding: '6px 10px' }}>Close</button>
+                                                        <button
+                                                            onClick={() => closeCharityCampaign(c._id)}
+                                                            style={{ padding: '6px 10px' }}
+                                                        >
+                                                            Close
+                                                        </button>
                                                     ) : null}
                                                     {c.status === 'ended' || c.status === 'funded' ? (
-                                                        <button onClick={() => disburseCharityCampaign(c._id)} style={{ padding: '6px 10px' }}>Mark disbursed</button>
+                                                        <button
+                                                            onClick={() => disburseCharityCampaign(c._id)}
+                                                            style={{ padding: '6px 10px' }}
+                                                        >
+                                                            Mark disbursed
+                                                        </button>
                                                     ) : null}
-                                                    <button onClick={() => updateCharityCampaign(c._id, { status: 'active' })} style={{ padding: '6px 10px' }} disabled={c.status === 'active'}>Set active</button>
+                                                    <button
+                                                        onClick={() =>
+                                                            updateCharityCampaign(c._id, { status: 'active' })
+                                                        }
+                                                        style={{ padding: '6px 10px' }}
+                                                        disabled={c.status === 'active'}
+                                                    >
+                                                        Set active
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
-                                    {charityCampaigns.length === 0 ? <div style={{ color: '#666' }}>No campaigns. Create one above.</div> : null}
+                                    {charityCampaigns.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No campaigns. Create one above.</div>
+                                    ) : null}
                                 </div>
                                 {charityDonations.length > 0 ? (
                                     <div style={{ marginTop: 12 }}>
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Recent donations</div>
                                         {charityDonations.slice(0, 50).map((d) => (
-                                            <div key={d._id} style={{ fontSize: 12, padding: 6, borderBottom: '1px solid #eee' }}>
-                                                {d.telegramId} → {typeof d.campaignId === 'object' && d.campaignId?.name ? d.campaignId.name : d.campaignId} · {d.amountNeur ?? 0} NEUR, {d.amountAiba ?? 0} AIBA · {d.donatedAt ? new Date(d.donatedAt).toISOString().slice(0, 19) : ''}
+                                            <div
+                                                key={d._id}
+                                                style={{ fontSize: 12, padding: 6, borderBottom: '1px solid #eee' }}
+                                            >
+                                                {d.telegramId} →{' '}
+                                                {typeof d.campaignId === 'object' && d.campaignId?.name
+                                                    ? d.campaignId.name
+                                                    : d.campaignId}{' '}
+                                                · {d.amountNeur ?? 0} NEUR, {d.amountAiba ?? 0} AIBA ·{' '}
+                                                {d.donatedAt ? new Date(d.donatedAt).toISOString().slice(0, 19) : ''}
                                             </div>
                                         ))}
                                     </div>
@@ -1802,39 +2419,90 @@ export default function AdminHome() {
                         {tab === 'comms' ? (
                             <>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                    <button onClick={fetchAnnouncements} style={{ padding: '8px 12px' }}>Refresh</button>
+                                    <button onClick={fetchAnnouncements} style={{ padding: '8px 12px' }}>
+                                        Refresh
+                                    </button>
                                     {commsMsg ? <span style={{ color: '#066' }}>{commsMsg}</span> : null}
                                 </div>
                                 <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Create announcement</div>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-                                        <input value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} placeholder="Title" style={{ padding: 8, minWidth: 200 }} />
-                                        <select value={announcementType} onChange={(e) => setAnnouncementType(e.target.value)} style={{ padding: 8 }}>
+                                        <input
+                                            value={announcementTitle}
+                                            onChange={(e) => setAnnouncementTitle(e.target.value)}
+                                            placeholder="Title"
+                                            style={{ padding: 8, minWidth: 200 }}
+                                        />
+                                        <select
+                                            value={announcementType}
+                                            onChange={(e) => setAnnouncementType(e.target.value)}
+                                            style={{ padding: 8 }}
+                                        >
                                             <option value="announcement">announcement</option>
                                             <option value="maintenance">maintenance</option>
                                             <option value="status">status</option>
                                         </select>
-                                        <input value={announcementLink} onChange={(e) => setAnnouncementLink(e.target.value)} placeholder="Link (optional)" style={{ padding: 8, minWidth: 220 }} />
+                                        <input
+                                            value={announcementLink}
+                                            onChange={(e) => setAnnouncementLink(e.target.value)}
+                                            placeholder="Link (optional)"
+                                            style={{ padding: 8, minWidth: 220 }}
+                                        />
                                         <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                            <input type="checkbox" checked={announcementActive} onChange={(e) => setAnnouncementActive(e.target.checked)} />
+                                            <input
+                                                type="checkbox"
+                                                checked={announcementActive}
+                                                onChange={(e) => setAnnouncementActive(e.target.checked)}
+                                            />
                                             Active
                                         </label>
-                                        <button onClick={createAnnouncement} style={{ padding: '8px 12px' }} disabled={!announcementTitle.trim()}>Create</button>
+                                        <button
+                                            onClick={createAnnouncement}
+                                            style={{ padding: '8px 12px' }}
+                                            disabled={!announcementTitle.trim()}
+                                        >
+                                            Create
+                                        </button>
                                     </div>
-                                    <textarea value={announcementBody} onChange={(e) => setAnnouncementBody(e.target.value)} placeholder="Body (optional)" rows={3} style={{ marginTop: 8, width: '100%', padding: 8 }} />
+                                    <textarea
+                                        value={announcementBody}
+                                        onChange={(e) => setAnnouncementBody(e.target.value)}
+                                        placeholder="Body (optional)"
+                                        rows={3}
+                                        style={{ marginTop: 8, width: '100%', padding: 8 }}
+                                    />
                                 </div>
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Announcements</div>
-                                    {announcements.length === 0 ? <div style={{ color: '#666' }}>No announcements.</div> : (
+                                    {announcements.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No announcements.</div>
+                                    ) : (
                                         <div style={{ display: 'grid', gap: 8 }}>
                                             {announcements.map((a) => (
-                                                <div key={a._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                                <div
+                                                    key={a._id}
+                                                    style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}
+                                                >
                                                     <div style={{ fontWeight: 600 }}>{a.title}</div>
-                                                    <div style={{ fontSize: 12, color: '#666' }}>{a.type} · active: {String(a.active)} · {a.publishedAt ? new Date(a.publishedAt).toLocaleString() : '—'}</div>
-                                                    {a.body ? <div style={{ marginTop: 6, fontSize: 13 }}>{a.body.slice(0, 200)}{a.body.length > 200 ? '…' : ''}</div> : null}
+                                                    <div style={{ fontSize: 12, color: '#666' }}>
+                                                        {a.type} · active: {String(a.active)} ·{' '}
+                                                        {a.publishedAt ? new Date(a.publishedAt).toLocaleString() : '—'}
+                                                    </div>
+                                                    {a.body ? (
+                                                        <div style={{ marginTop: 6, fontSize: 13 }}>
+                                                            {a.body.slice(0, 200)}
+                                                            {a.body.length > 200 ? '…' : ''}
+                                                        </div>
+                                                    ) : null}
                                                     <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-                                                        <button onClick={() => broadcastAnnouncement(a._id)} disabled={!!broadcastingId} style={{ padding: '6px 10px' }}>
-                                                            {broadcastingId === a._id ? 'Sending…' : 'Broadcast to Telegram'}
+                                                        <button
+                                                            onClick={() => broadcastAnnouncement(a._id)}
+                                                            disabled={!!broadcastingId}
+                                                            style={{ padding: '6px 10px' }}
+                                                        >
+                                                            {broadcastingId === a._id
+                                                                ? 'Sending…'
+                                                                : 'Broadcast to Telegram'}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1848,38 +2516,76 @@ export default function AdminHome() {
                         {tab === 'university' ? (
                             <>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                    <button onClick={fetchUniversityAll} style={{ padding: '8px 12px' }}>Refresh</button>
+                                    <button onClick={fetchUniversityAll} style={{ padding: '8px 12px' }}>
+                                        Refresh
+                                    </button>
                                 </div>
                                 {universityStats ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>University stats</div>
-                                        <div>Total courses: {universityStats.totalCourses ?? 0} · Total modules: {universityStats.totalModules ?? 0}</div>
-                                        <div>Users with progress: {universityStats.usersWithProgress ?? 0} · Graduates (badge): {universityStats.graduates ?? 0}</div>
+                                        <div>
+                                            Total courses: {universityStats.totalCourses ?? 0} · Total modules:{' '}
+                                            {universityStats.totalModules ?? 0}
+                                        </div>
+                                        <div>
+                                            Users with progress: {universityStats.usersWithProgress ?? 0} · Graduates
+                                            (badge): {universityStats.graduates ?? 0}
+                                        </div>
                                     </div>
                                 ) : null}
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Courses (read-only)</div>
-                                    {universityCourses.length === 0 ? <div style={{ color: '#666' }}>No courses loaded.</div> : (
+                                    {universityCourses.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No courses loaded.</div>
+                                    ) : (
                                         <div style={{ display: 'grid', gap: 8 }}>
                                             {universityCourses.map((c) => (
-                                                <div key={c.id} style={{ padding: 10, border: '1px solid #eee', borderRadius: 8 }}>
+                                                <div
+                                                    key={c.id}
+                                                    style={{ padding: 10, border: '1px solid #eee', borderRadius: 8 }}
+                                                >
                                                     <strong>{c.title}</strong> — {c.moduleCount ?? 0} modules
-                                                    {Array.isArray(c.modules) ? <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{c.modules.map((m) => m.title).join(' · ')}</div> : null}
+                                                    {Array.isArray(c.modules) ? (
+                                                        <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
+                                                            {c.modules.map((m) => m.title).join(' · ')}
+                                                        </div>
+                                                    ) : null}
                                                 </div>
                                             ))}
                                         </div>
                                     )}
                                 </div>
                                 <div style={{ marginTop: 12 }}>
-                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Graduates (users with university_graduate badge)</div>
-                                    {universityGraduates.length === 0 ? <div style={{ color: '#666' }}>No graduates yet.</div> : (
+                                    <div style={{ fontWeight: 700, marginBottom: 8 }}>
+                                        Graduates (users with university_graduate badge)
+                                    </div>
+                                    {universityGraduates.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No graduates yet.</div>
+                                    ) : (
                                         <div style={{ display: 'grid', gap: 6 }}>
                                             {universityGraduates.slice(0, 50).map((u, i) => (
-                                                <div key={u.telegramId || i} style={{ fontSize: 13, padding: 6, borderBottom: '1px solid #eee' }}>
-                                                    {u.telegramId} · {u.username || '—'} {u.graduatedAt ? ` · ${new Date(u.graduatedAt).toISOString().slice(0, 10)}` : ''}
+                                                <div
+                                                    key={u.telegramId || i}
+                                                    style={{ fontSize: 13, padding: 6, borderBottom: '1px solid #eee' }}
+                                                >
+                                                    {u.telegramId} · {u.username || '—'}{' '}
+                                                    {u.graduatedAt
+                                                        ? ` · ${new Date(u.graduatedAt).toISOString().slice(0, 10)}`
+                                                        : ''}
                                                 </div>
                                             ))}
-                                            {universityGraduates.length > 50 ? <div style={{ color: '#666', fontSize: 12 }}>… and {universityGraduates.length - 50} more</div> : null}
+                                            {universityGraduates.length > 50 ? (
+                                                <div style={{ color: '#666', fontSize: 12 }}>
+                                                    … and {universityGraduates.length - 50} more
+                                                </div>
+                                            ) : null}
                                         </div>
                                     )}
                                 </div>
@@ -1889,17 +2595,38 @@ export default function AdminHome() {
                         {tab === 'referrals' ? (
                             <>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                    <button onClick={() => { fetchReferralStats(); fetchReferralList(); fetchReferralUses(); }} style={{ padding: '8px 12px' }}>Refresh</button>
+                                    <button
+                                        onClick={() => {
+                                            fetchReferralStats();
+                                            fetchReferralList();
+                                            fetchReferralUses();
+                                        }}
+                                        style={{ padding: '8px 12px' }}
+                                    >
+                                        Refresh
+                                    </button>
                                 </div>
                                 {referralStats ? (
-                                    <div style={{ marginTop: 12, padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            padding: 12,
+                                            border: '1px solid #eee',
+                                            borderRadius: 8,
+                                        }}
+                                    >
                                         <div style={{ fontWeight: 700, marginBottom: 8 }}>Referral stats</div>
-                                        <div>Active codes: {referralStats.totalActiveCodes ?? 0} · Total uses: {referralStats.totalReferralUses ?? 0}</div>
+                                        <div>
+                                            Active codes: {referralStats.totalActiveCodes ?? 0} · Total uses:{' '}
+                                            {referralStats.totalReferralUses ?? 0}
+                                        </div>
                                         {referralStats.topReferrers?.length > 0 ? (
                                             <div style={{ marginTop: 8, fontSize: 12 }}>
                                                 <div style={{ fontWeight: 600 }}>Top referrers</div>
                                                 {referralStats.topReferrers.map((r, i) => (
-                                                    <div key={r.ownerTelegramId} style={{ padding: 4 }}>#{i + 1} {r.username || r.ownerTelegramId} — {r.uses ?? 0} uses</div>
+                                                    <div key={r.ownerTelegramId} style={{ padding: 4 }}>
+                                                        #{i + 1} {r.username || r.ownerTelegramId} — {r.uses ?? 0} uses
+                                                    </div>
                                                 ))}
                                             </div>
                                         ) : null}
@@ -1907,12 +2634,28 @@ export default function AdminHome() {
                                 ) : null}
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>All referral codes</div>
-                                    {referralList.length === 0 ? <div style={{ color: '#666' }}>No codes.</div> : (
+                                    {referralList.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No codes.</div>
+                                    ) : (
                                         <div style={{ display: 'grid', gap: 8 }}>
                                             {referralList.map((r) => (
-                                                <div key={r._id} style={{ padding: 10, border: '1px solid #eee', borderRadius: 8 }}>
-                                                    <div><strong>{r.code}</strong> · owner: {r.ownerTelegramId} · uses: {r.uses ?? 0}/{r.maxUses ?? 1000} · {r.active ? 'active' : 'inactive'}</div>
-                                                    {r.active ? <button onClick={() => deactivateReferral(r._id)} style={{ padding: '4px 8px', marginTop: 4 }}>Deactivate</button> : null}
+                                                <div
+                                                    key={r._id}
+                                                    style={{ padding: 10, border: '1px solid #eee', borderRadius: 8 }}
+                                                >
+                                                    <div>
+                                                        <strong>{r.code}</strong> · owner: {r.ownerTelegramId} · uses:{' '}
+                                                        {r.uses ?? 0}/{r.maxUses ?? 1000} ·{' '}
+                                                        {r.active ? 'active' : 'inactive'}
+                                                    </div>
+                                                    {r.active ? (
+                                                        <button
+                                                            onClick={() => deactivateReferral(r._id)}
+                                                            style={{ padding: '4px 8px', marginTop: 4 }}
+                                                        >
+                                                            Deactivate
+                                                        </button>
+                                                    ) : null}
                                                 </div>
                                             ))}
                                         </div>
@@ -1920,11 +2663,17 @@ export default function AdminHome() {
                                 </div>
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Recent uses</div>
-                                    {referralUses.length === 0 ? <div style={{ color: '#666' }}>No uses.</div> : (
+                                    {referralUses.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No uses.</div>
+                                    ) : (
                                         <div style={{ fontSize: 12 }}>
                                             {referralUses.slice(0, 30).map((u) => (
                                                 <div key={u._id} style={{ padding: 4, borderBottom: '1px solid #eee' }}>
-                                                    {u.code} · referrer: {u.referrerTelegramId} → referee: {u.refereeTelegramId} · {u.createdAt ? new Date(u.createdAt).toISOString().slice(0, 19) : ''}
+                                                    {u.code} · referrer: {u.referrerTelegramId} → referee:{' '}
+                                                    {u.refereeTelegramId} ·{' '}
+                                                    {u.createdAt
+                                                        ? new Date(u.createdAt).toISOString().slice(0, 19)
+                                                        : ''}
                                                 </div>
                                             ))}
                                         </div>
@@ -1936,26 +2685,89 @@ export default function AdminHome() {
                         {tab === 'brokers' ? (
                             <>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                    <button onClick={fetchMintJobs} style={{ padding: '8px 12px' }}>Refresh</button>
+                                    <button onClick={fetchMintJobs} style={{ padding: '8px 12px' }}>
+                                        Refresh
+                                    </button>
                                 </div>
-                                {mintJobMsg ? <p style={{ marginTop: 8, color: mintJobMsg.startsWith('Job') ? '#066' : 'crimson' }}>{mintJobMsg}</p> : null}
+                                {mintJobMsg ? (
+                                    <p
+                                        style={{
+                                            marginTop: 8,
+                                            color: mintJobMsg.startsWith('Job') ? '#066' : 'crimson',
+                                        }}
+                                    >
+                                        {mintJobMsg}
+                                    </p>
+                                ) : null}
                                 <div style={{ marginTop: 12 }}>
                                     <div style={{ fontWeight: 700, marginBottom: 8 }}>Pending broker mint jobs</div>
-                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>Complete each job by entering the NFT collection and item address after minting on-chain.</p>
-                                    {mintJobs.length === 0 ? <div style={{ color: '#666' }}>No pending jobs.</div> : (
+                                    <p style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>
+                                        Complete each job by entering the NFT collection and item address after minting
+                                        on-chain.
+                                    </p>
+                                    {mintJobs.length === 0 ? (
+                                        <div style={{ color: '#666' }}>No pending jobs.</div>
+                                    ) : (
                                         <div style={{ display: 'grid', gap: 12 }}>
                                             {mintJobs.map((j) => (
-                                                <div key={j._id} style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}>
-                                                    <div><strong>Broker:</strong> {j.brokerId} · created: {j.createdAt ? new Date(j.createdAt).toISOString().slice(0, 19) : ''}</div>
+                                                <div
+                                                    key={j._id}
+                                                    style={{ padding: 12, border: '1px solid #eee', borderRadius: 8 }}
+                                                >
+                                                    <div>
+                                                        <strong>Broker:</strong> {j.brokerId} · created:{' '}
+                                                        {j.createdAt
+                                                            ? new Date(j.createdAt).toISOString().slice(0, 19)
+                                                            : ''}
+                                                    </div>
                                                     {mintJobCompleteId === j._id ? (
-                                                        <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                                            <input value={mintJobNftCollection} onChange={(e) => setMintJobNftCollection(e.target.value)} placeholder="NFT collection address" style={{ padding: 8, minWidth: 300 }} />
-                                                            <input value={mintJobNftItem} onChange={(e) => setMintJobNftItem(e.target.value)} placeholder="NFT item address" style={{ padding: 8, minWidth: 300 }} />
-                                                            <button onClick={() => completeMintJob(j._id)} style={{ padding: '8px 12px' }}>Complete</button>
-                                                            <button onClick={() => { setMintJobCompleteId(''); setMintJobNftCollection(''); setMintJobNftItem(''); }} style={{ padding: '8px 12px' }}>Cancel</button>
+                                                        <div
+                                                            style={{
+                                                                marginTop: 8,
+                                                                display: 'flex',
+                                                                gap: 8,
+                                                                flexWrap: 'wrap',
+                                                                alignItems: 'center',
+                                                            }}
+                                                        >
+                                                            <input
+                                                                value={mintJobNftCollection}
+                                                                onChange={(e) =>
+                                                                    setMintJobNftCollection(e.target.value)
+                                                                }
+                                                                placeholder="NFT collection address"
+                                                                style={{ padding: 8, minWidth: 300 }}
+                                                            />
+                                                            <input
+                                                                value={mintJobNftItem}
+                                                                onChange={(e) => setMintJobNftItem(e.target.value)}
+                                                                placeholder="NFT item address"
+                                                                style={{ padding: 8, minWidth: 300 }}
+                                                            />
+                                                            <button
+                                                                onClick={() => completeMintJob(j._id)}
+                                                                style={{ padding: '8px 12px' }}
+                                                            >
+                                                                Complete
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setMintJobCompleteId('');
+                                                                    setMintJobNftCollection('');
+                                                                    setMintJobNftItem('');
+                                                                }}
+                                                                style={{ padding: '8px 12px' }}
+                                                            >
+                                                                Cancel
+                                                            </button>
                                                         </div>
                                                     ) : (
-                                                        <button onClick={() => setMintJobCompleteId(j._id)} style={{ padding: '6px 10px', marginTop: 8 }}>Complete job</button>
+                                                        <button
+                                                            onClick={() => setMintJobCompleteId(j._id)}
+                                                            style={{ padding: '6px 10px', marginTop: 8 }}
+                                                        >
+                                                            Complete job
+                                                        </button>
                                                     )}
                                                 </div>
                                             ))}
@@ -1968,34 +2780,86 @@ export default function AdminHome() {
                         {tab === 'dao' ? (
                             <div className="admin-card">
                                 <h3 className="admin-card__title">DAO proposals</h3>
-                                <p className="admin-card__hint">Close active proposals or execute treasury_payout proposals. Close is required before execute.</p>
+                                <p className="admin-card__hint">
+                                    Close active proposals or execute treasury_payout proposals. Close is required
+                                    before execute.
+                                </p>
                                 <div className="admin-action-row">
                                     <button onClick={fetchDaoProposals}>Refresh</button>
-                                    {daoMsg ? <span style={{ color: daoMsg.startsWith('Proposal') ? 'var(--accent-green)' : 'var(--accent-red)' }}>{daoMsg}</span> : null}
+                                    {daoMsg ? (
+                                        <span
+                                            style={{
+                                                color: daoMsg.startsWith('Proposal')
+                                                    ? 'var(--accent-green)'
+                                                    : 'var(--accent-red)',
+                                            }}
+                                        >
+                                            {daoMsg}
+                                        </span>
+                                    ) : null}
                                 </div>
                                 {daoProposals.length === 0 ? (
                                     <div style={{ color: 'var(--text-muted)' }}>No proposals.</div>
                                 ) : (
                                     <div style={{ display: 'grid', gap: 12 }}>
                                         {daoProposals.map((p) => (
-                                            <div key={p._id} className="admin-card" style={{ marginBottom: 0, padding: 16 }}>
-                                                <div style={{ fontWeight: 600, marginBottom: 4 }}>{p.title || '(Untitled)'}</div>
-                                                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>{p.description?.slice(0, 200)}{(p.description?.length || 0) > 200 ? '…' : ''}</div>
+                                            <div
+                                                key={p._id}
+                                                className="admin-card"
+                                                style={{ marginBottom: 0, padding: 16 }}
+                                            >
+                                                <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                                                    {p.title || '(Untitled)'}
+                                                </div>
+                                                <div
+                                                    style={{
+                                                        fontSize: 13,
+                                                        color: 'var(--text-muted)',
+                                                        marginBottom: 8,
+                                                    }}
+                                                >
+                                                    {p.description?.slice(0, 200)}
+                                                    {(p.description?.length || 0) > 200 ? '…' : ''}
+                                                </div>
                                                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                                                    status: <strong>{p.status}</strong> · type: {p.type || '—'} · votes: {p.votesFor ?? 0} for / {p.votesAgainst ?? 0} against (total {p.totalVotes ?? 0})
-                                                    {p.recipientTelegramId ? ` · recipient: ${p.recipientTelegramId}` : ''}
+                                                    status: <strong>{p.status}</strong> · type: {p.type || '—'} · votes:{' '}
+                                                    {p.votesFor ?? 0} for / {p.votesAgainst ?? 0} against (total{' '}
+                                                    {p.totalVotes ?? 0})
+                                                    {p.recipientTelegramId
+                                                        ? ` · recipient: ${p.recipientTelegramId}`
+                                                        : ''}
                                                     {p.amountAiba ? ` · amount: ${p.amountAiba} AIBA` : ''}
                                                 </div>
-                                                <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                                <div
+                                                    style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}
+                                                >
                                                     {p.status === 'active' ? (
                                                         <>
-                                                            <button onClick={() => closeDaoProposal(p._id)}>Close proposal</button>
+                                                            <button onClick={() => closeDaoProposal(p._id)}>
+                                                                Close proposal
+                                                            </button>
                                                             {p.type === 'treasury_payout' ? (
-                                                                <button onClick={() => executeDaoProposal(p._id)} style={{ background: 'rgba(34, 197, 94, 0.2)', borderColor: 'var(--accent-green)' }}>Execute</button>
+                                                                <button
+                                                                    onClick={() => executeDaoProposal(p._id)}
+                                                                    style={{
+                                                                        background: 'rgba(34, 197, 94, 0.2)',
+                                                                        borderColor: 'var(--accent-green)',
+                                                                    }}
+                                                                >
+                                                                    Execute
+                                                                </button>
                                                             ) : null}
                                                         </>
                                                     ) : p.status === 'closed' && p.type === 'treasury_payout' ? (
-                                                        <button onClick={() => executeDaoProposal(p._id)} style={{ background: 'rgba(34, 197, 94, 0.2)', borderColor: 'var(--accent-green)' }}>Execute</button>
+                                                        <button
+                                                            onClick={() => executeDaoProposal(p._id)}
+                                                            style={{
+                                                                background: 'rgba(34, 197, 94, 0.2)',
+                                                                borderColor: 'var(--accent-green)',
+                                                            }}
+                                                        >
+                                                            Execute
+                                                        </button>
                                                     ) : null}
                                                 </div>
                                             </div>
@@ -2008,21 +2872,42 @@ export default function AdminHome() {
                         {tab === 'oracle' ? (
                             <div className="admin-card">
                                 <h3 className="admin-card__title">Oracle</h3>
-                                <p className="admin-card__hint">AIBA/TON exchange rate. Run update to fetch latest from external source.</p>
+                                <p className="admin-card__hint">
+                                    AIBA/TON exchange rate. Run update to fetch latest from external source.
+                                </p>
                                 <div className="admin-action-row">
                                     <button onClick={fetchOracleStatus}>Refresh status</button>
                                     <button onClick={runOracleUpdate}>Run update</button>
-                                    {oracleMsg ? <span style={{ marginLeft: 8, color: 'var(--accent-gold)' }}>{oracleMsg}</span> : null}
+                                    {oracleMsg ? (
+                                        <span style={{ marginLeft: 8, color: 'var(--accent-gold)' }}>{oracleMsg}</span>
+                                    ) : null}
                                 </div>
                                 {oracleStatus ? (
-                                    <div style={{ padding: 16, background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-sm)', marginTop: 12 }}>
-                                        <div><strong>AIBA per TON:</strong> {oracleStatus.oracleAibaPerTon ?? oracleStatus.aibaPerTon ?? '—'}</div>
+                                    <div
+                                        style={{
+                                            padding: 16,
+                                            background: 'rgba(0,0,0,0.2)',
+                                            borderRadius: 'var(--radius-sm)',
+                                            marginTop: 12,
+                                        }}
+                                    >
+                                        <div>
+                                            <strong>AIBA per TON:</strong>{' '}
+                                            {oracleStatus.oracleAibaPerTon ?? oracleStatus.aibaPerTon ?? '—'}
+                                        </div>
                                         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                                            Last updated: {(oracleStatus.oracleLastUpdatedAt ?? oracleStatus.updatedAt) ? new Date(oracleStatus.oracleLastUpdatedAt ?? oracleStatus.updatedAt).toISOString() : '—'}
+                                            Last updated:{' '}
+                                            {(oracleStatus.oracleLastUpdatedAt ?? oracleStatus.updatedAt)
+                                                ? new Date(
+                                                      oracleStatus.oracleLastUpdatedAt ?? oracleStatus.updatedAt,
+                                                  ).toISOString()
+                                                : '—'}
                                         </div>
                                     </div>
                                 ) : (
-                                    <div style={{ color: 'var(--text-muted)' }}>No status yet. Run update to fetch.</div>
+                                    <div style={{ color: 'var(--text-muted)' }}>
+                                        No status yet. Run update to fetch.
+                                    </div>
                                 )}
                             </div>
                         ) : null}
@@ -2037,11 +2922,34 @@ export default function AdminHome() {
                                 {auditItems.length === 0 ? (
                                     <div style={{ color: 'var(--text-muted)' }}>No audit entries.</div>
                                 ) : (
-                                    <div style={{ display: 'grid', gap: 8, maxHeight: 400, overflowY: 'auto', marginTop: 12 }}>
+                                    <div
+                                        style={{
+                                            display: 'grid',
+                                            gap: 8,
+                                            maxHeight: 400,
+                                            overflowY: 'auto',
+                                            marginTop: 12,
+                                        }}
+                                    >
                                         {auditItems.map((a) => (
-                                            <div key={a._id} style={{ padding: 10, background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-sm)', fontSize: 13 }}>
-                                                <div><strong>{a.action}</strong> · {a.adminEmail ?? a.adminId ?? '—'}</div>
-                                                <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>{a.details ? JSON.stringify(a.details).slice(0, 120) : ''} · {a.createdAt ? new Date(a.createdAt).toISOString().slice(0, 19) : ''}</div>
+                                            <div
+                                                key={a._id}
+                                                style={{
+                                                    padding: 10,
+                                                    background: 'rgba(0,0,0,0.2)',
+                                                    borderRadius: 'var(--radius-sm)',
+                                                    fontSize: 13,
+                                                }}
+                                            >
+                                                <div>
+                                                    <strong>{a.action}</strong> · {a.adminEmail ?? a.adminId ?? '—'}
+                                                </div>
+                                                <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>
+                                                    {a.details ? JSON.stringify(a.details).slice(0, 120) : ''} ·{' '}
+                                                    {a.createdAt
+                                                        ? new Date(a.createdAt).toISOString().slice(0, 19)
+                                                        : ''}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -2052,19 +2960,40 @@ export default function AdminHome() {
                         {tab === 'economyAutomation' ? (
                             <div className="admin-card">
                                 <h3 className="admin-card__title">Economy automation</h3>
-                                <p className="admin-card__hint">Adjusts daily AIBA cap based on treasury balance. Run manually or wait for scheduled job.</p>
+                                <p className="admin-card__hint">
+                                    Adjusts daily AIBA cap based on treasury balance. Run manually or wait for scheduled
+                                    job.
+                                </p>
                                 <div className="admin-action-row">
                                     <button onClick={fetchEconomyAutomation}>Refresh</button>
                                     <button onClick={runEconomyAutomation}>Run now</button>
-                                    {economyAutoMsg ? <span style={{ marginLeft: 8, color: 'var(--accent-gold)' }}>{economyAutoMsg}</span> : null}
+                                    {economyAutoMsg ? (
+                                        <span style={{ marginLeft: 8, color: 'var(--accent-gold)' }}>
+                                            {economyAutoMsg}
+                                        </span>
+                                    ) : null}
                                 </div>
                                 {economyAllocation ? (
-                                    <div style={{ padding: 16, background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-sm)', marginTop: 12 }}>
-                                        <div><strong>Daily cap (AIBA):</strong> {economyAllocation.dailyCapAiba ?? economyAllocation.dailyCap ?? '—'}</div>
-                                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Treasury / allocation info may appear here.</div>
+                                    <div
+                                        style={{
+                                            padding: 16,
+                                            background: 'rgba(0,0,0,0.2)',
+                                            borderRadius: 'var(--radius-sm)',
+                                            marginTop: 12,
+                                        }}
+                                    >
+                                        <div>
+                                            <strong>Daily cap (AIBA):</strong>{' '}
+                                            {economyAllocation.dailyCapAiba ?? economyAllocation.dailyCap ?? '—'}
+                                        </div>
+                                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                                            Treasury / allocation info may appear here.
+                                        </div>
                                     </div>
                                 ) : (
-                                    <div style={{ color: 'var(--text-muted)' }}>No allocation data. Run to refresh.</div>
+                                    <div style={{ color: 'var(--text-muted)' }}>
+                                        No allocation data. Run to refresh.
+                                    </div>
                                 )}
                             </div>
                         ) : null}
@@ -2081,9 +3010,19 @@ export default function AdminHome() {
                                 ) : (
                                     <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
                                         {multiverseUniverses.map((u) => (
-                                            <div key={u._id || u.key} style={{ padding: 14, background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-sm)' }}>
+                                            <div
+                                                key={u._id || u.key}
+                                                style={{
+                                                    padding: 14,
+                                                    background: 'rgba(0,0,0,0.2)',
+                                                    borderRadius: 'var(--radius-sm)',
+                                                }}
+                                            >
                                                 <div style={{ fontWeight: 600 }}>{u.name ?? u.key ?? u._id}</div>
-                                                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>key: {u.key ?? u._id} · level: {u.level ?? '—'} · active: {String(u.active ?? true)}</div>
+                                                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                                                    key: {u.key ?? u._id} · level: {u.level ?? '—'} · active:{' '}
+                                                    {String(u.active ?? true)}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>

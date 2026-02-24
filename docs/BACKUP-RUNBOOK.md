@@ -25,6 +25,7 @@ mongodump --uri="$MONGODB_URI" --out=backups/mongodb-$(date +%Y%m%d) --gzip
 **Suggested schedule:** Daily (cron) or before deploys.
 
 **Cron example (daily at 2:00 AM):**
+
 ```bash
 0 2 * * * cd /path/to/aiba-arena && source .env 2>/dev/null; mongodump --uri="$MONGODB_URI" --out=backups/mongodb-$(date +\%Y\%m\%d) --gzip 2>/dev/null || true
 ```
@@ -48,16 +49,17 @@ mongorestore \
 
 **Never commit secrets.** Store backups in a secure, encrypted location.
 
-| Asset | Location | Backup |
-|-------|----------|--------|
+| Asset                    | Location             | Backup                                       |
+| ------------------------ | -------------------- | -------------------------------------------- |
 | `ORACLE_PRIVATE_KEY_HEX` | Secret manager / env | Export to encrypted vault; rotate if exposed |
-| `ADMIN_JWT_SECRET` | Secret manager / env | Same |
-| `ADMIN_PASSWORD_HASH` | Secret manager / env | Same |
-| `TELEGRAM_BOT_TOKEN` | Secret manager / env | Same |
-| `BATTLE_SEED_SECRET` | Secret manager / env | Same |
-| TON wallet mnemonics | Secure storage | Encrypted backup; separate from runtime |
+| `ADMIN_JWT_SECRET`       | Secret manager / env | Same                                         |
+| `ADMIN_PASSWORD_HASH`    | Secret manager / env | Same                                         |
+| `TELEGRAM_BOT_TOKEN`     | Secret manager / env | Same                                         |
+| `BATTLE_SEED_SECRET`     | Secret manager / env | Same                                         |
+| TON wallet mnemonics     | Secure storage       | Encrypted backup; separate from runtime      |
 
 **Procedure:**
+
 1. Export secrets from your secret manager (e.g. AWS Secrets Manager, HashiCorp Vault).
 2. Store in encrypted archive (e.g. `gpg -c secrets-backup.env`).
 3. Store archive in secure, off-site location.
@@ -70,11 +72,13 @@ mongorestore \
 **Scope:** Deployed contract addresses, operator keys, vault config.
 
 **What to back up:**
+
 - `.env` or deployment config with contract addresses (AIBA token, vault, marketplace, etc.)
 - Blueprint/deploy scripts output (addresses)
 - Oracle/operator public keys
 
 **Procedure:**
+
 1. Export `*.env` (without secrets) or deployment manifest with addresses.
 2. Version in private repo or secure doc.
 3. After any redeploy, update and re-backup.
@@ -86,6 +90,7 @@ mongorestore \
 **Scope:** Backend, miniapp, admin, contracts source.
 
 **Procedure:**
+
 - Use Git. Tag releases (`v1.2.3`).
 - Backup private repos to secondary provider or archive.
 - Keep `package-lock.json` / `yarn.lock` / `pnpm-lock.yaml` in repo for reproducible installs.

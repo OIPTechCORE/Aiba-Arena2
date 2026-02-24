@@ -1,30 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>deployment — Aiba Arena Docs</title>
-  <link rel="stylesheet" href="../print.css"/>
-</head>
-<body>
-  <div class="doc-header">
-    <h1>deployment</h1>
-    <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
-  </div>
-  <div class="doc-body">
-<h1>Deployment (Testnet baseline)</h1>
-<p>Legacy deployment overview. <strong>See <a href="DEPLOYMENT-AND-ENV.md">DEPLOYMENT-AND-ENV.md</a> for the current deployment and environment guide</strong> (localhost, Vercel, Telegram, security, mainnet readiness).</p>
-<hr/>
-<h2>Components</h2>
-<ul>
-</ul>
-<hr/>
-<h2>Backend (Render/Railway)</h2>
-<p><strong>Minimum env for testnet</strong>: <code>MONGO_URI</code>, <code>TELEGRAM_BOT_TOKEN</code>, Super Admin wallets, <code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code>, <code>BATTLE_SEED_SECRET</code>, <code>ADMIN_JWT_SECRET</code>, <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD_HASH</code>, <code>CORS_ORIGIN</code> (required in prod).</p>
-<p><strong>Monitoring</strong>: <code>GET /health</code>, <code>GET /metrics</code> (Prometheus).</p>
-<hr/>
-<h2>Miniapp + Admin (Vercel)</h2>
-<p>See <strong>DEPLOYMENT-AND-ENV.md</strong> for full Vercel setup.</p>
-  </div>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>deployment — Aiba Arena Docs</title>
+        <link rel="stylesheet" href="../print.css" />
+    </head>
+    <body>
+        <div class="doc-header">
+            <h1>deployment</h1>
+            <p class="doc-meta no-print"><a href="index.html">← All docs</a></p>
+        </div>
+        <div class="doc-body">
+            <h1>Deployment (Testnet baseline)</h1>
+            <p>
+                Legacy deployment overview.
+                <strong
+                    >See <a href="DEPLOYMENT-AND-ENV.md">DEPLOYMENT-AND-ENV.md</a> for the current deployment and
+                    environment guide</strong
+                >
+                (localhost, Vercel, Telegram, security, mainnet readiness).
+            </p>
+            <hr />
+            <h2>Components</h2>
+            <ul></ul>
+            <hr />
+            <h2>Backend (Render/Railway)</h2>
+            <p>
+                <strong>Minimum env for testnet</strong>: <code>MONGO_URI</code>, <code>TELEGRAM_BOT_TOKEN</code>, Super
+                Admin wallets, <code>TELEGRAM_INITDATA_MAX_AGE_SECONDS</code>, <code>BATTLE_SEED_SECRET</code>,
+                <code>ADMIN_JWT_SECRET</code>, <code>ADMIN_EMAIL</code>, <code>ADMIN_PASSWORD_HASH</code>,
+                <code>CORS_ORIGIN</code> (required in prod).
+            </p>
+            <p><strong>Monitoring</strong>: <code>GET /health</code>, <code>GET /metrics</code> (Prometheus).</p>
+            <hr />
+            <h2>Miniapp + Admin (Vercel)</h2>
+            <p>See <strong>DEPLOYMENT-AND-ENV.md</strong> for full Vercel setup.</p>
+        </div>
+    </body>
 </html>

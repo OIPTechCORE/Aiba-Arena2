@@ -19,7 +19,14 @@ describe('AiAssetMarketplaceEscrowJetton', () => {
 
     it('creates a listing', async () => {
         const escrow = blockchain.openContract(
-            await AiAssetMarketplaceEscrowJetton.fromInit(owner.address, owner.address, owner.address, treasury.address, 300n, 0n),
+            await AiAssetMarketplaceEscrowJetton.fromInit(
+                owner.address,
+                owner.address,
+                owner.address,
+                treasury.address,
+                300n,
+                0n,
+            ),
         );
         await escrow.send(owner.getSender(), { value: toNano('0.2') }, null);
 

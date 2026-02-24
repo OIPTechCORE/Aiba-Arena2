@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 
+// Enable production readiness for security
 const { enforceProductionReadiness } = require('./security/productionReadiness');
 const { requestId } = require('./middleware/requestId');
 const { rateLimit } = require('./middleware/rateLimit');
@@ -24,8 +25,9 @@ function createApp() {
     );
     app.use(express.json({ limit: process.env.JSON_BODY_LIMIT || '1mb' }));
 
-    // Basic global rate limit (IP-based). More specific per-route limits can be layered on top.
-    app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.RATE_LIMIT_PER_MINUTE || 600) || 600 }));
+    // Enable rate limiting for security
+    app.use(rateLimit);
+    // app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.RATE_LIMIT_PER_MINUTE || 600) || 600 }));
 
     app.use('/api/wallet', require('./routes/wallet'));
     app.use('/api/game', require('./routes/game'));
@@ -58,6 +60,7 @@ function createApp() {
     app.use('/api/admin/stats', require('./routes/adminStats'));
     app.use('/api/admin/memefi', require('./routes/adminMemefi'));
     app.use('/api/admin/redemption', require('./routes/adminRedemption'));
+    app.use('/api/admin', require('./routes/adminSchools'));
     app.use('/api/battle', require('./routes/battle'));
     app.use('/api/brokers', require('./routes/brokers'));
     app.use('/api/vault', require('./routes/vault'));
@@ -98,12 +101,27 @@ function createApp() {
     app.use('/api/breeding', require('./routes/breeding'));
     app.use('/api/trainers', require('./routes/trainers'));
     app.use('/api/admin/trainers', require('./routes/adminTrainers'));
+    app.use('/api/admin/external-apps', require('./routes/adminExternalApps'));
+    app.use('/api/admin/intro-screens', require('./routes/adminIntroScreens'));
+    app.use('/api/admin/daily-habits', require('./routes/adminDailyHabits'));
+    app.use('/api/admin/competitions', require('./routes/adminCompetitions'));
+    app.use('/api/admin/social-shares', require('./routes/adminSocialShares'));
+    app.use('/api/admin/emotional-investments', require('./routes/adminEmotionalInvestments'));
+    
+    // Public API routes
+    app.use('/api/daily-habits', require('./routes/dailyHabits'));
+    app.use('/api/competitions', require('./routes/competitions'));
+    app.use('/api/social-shares', require('./routes/socialShares'));
+    app.use('/api/emotional-investments', require('./routes/emotionalInvestments'));
+
     app.use('/api/p2p-aiba', require('./routes/p2pAiba'));
     app.use('/api/donate', require('./routes/donate'));
     app.use('/api/predict', require('./routes/predict'));
     app.use('/api/admin/predict', require('./routes/adminPredict'));
+    app.use('/api/schools', require('./routes/schools'));
     app.use('/api/memefi', require('./routes/memefi'));
     app.use('/api/redemption', require('./routes/redemption'));
+    app.use('/api/partner', require('./routes/partnerRedemption'));
 
     // Comms status moved to /api/comms router
 
