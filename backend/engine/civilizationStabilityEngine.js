@@ -150,9 +150,11 @@ class PowerDiffusionLayer {
       const topHolders = users
         .sort((a, b) => (b.governance.authority || 0) - (a.governance.authority || 0))
         .slice(0, Math.floor(users.length * 0.01)); // Top 1%
+      
+      const topHoldersAuthority = topHolders
         .reduce((sum, user) => sum + (user.governance.authority || 0), 0);
       
-      const powerConcentrationIndex = totalAuthority > 0 ? topHolders / totalAuthority : 0;
+      const powerConcentrationIndex = totalAuthority > 0 ? topHoldersAuthority / totalAuthority : 0;
       const governanceDiversity = 1 - (councilMembers / users.length);
       
       return {
