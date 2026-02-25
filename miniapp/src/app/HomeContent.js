@@ -7,6 +7,7 @@ import { createApi, getBackendUrl, getErrorMessage } from '../lib/api';
 import { getTelegramUserUnsafe, shareViaTelegram } from '../lib/telegram';
 import { TabBackNav } from '../components/TabBackNav';
 import { AgentFab } from '../components/AgentFab';
+import InfinityBadges from '../components/InfinityBadges';
 
 const IS_DEV = typeof window !== 'undefined' ? getBackendUrl().includes('localhost') : true;
 
@@ -837,6 +838,13 @@ const HERO_BY_TAB = {
         buttonLabel: 'View',
         buttonAction: 'scroll',
     },
+    infinityBadges: {
+        title: 'INFINITY BADGES',
+        sub: 'Collect, equip, and showcase your achievements across digital universe. Beautifully designed badges with infinite progression.',
+        hint: 'Leadership, Organizer, Rank, Profile, Achievement badges. Trade, gift, and showcase your collection.',
+        buttonLabel: 'View',
+        buttonAction: 'scroll',
+    },
     tournaments: {
         title: 'TOURNAMENTS',
         sub: 'Enter AIBA tournaments. Compete, win prizes from the pool.',
@@ -990,6 +998,7 @@ const TAB_LIST = [
     { id: 'referrals', label: 'Referrals', Icon: IconShare },
     { id: 'trainers', label: 'Trainers', Icon: IconTrainer, gridStyle: 'trainers' },
     { id: 'guilds', label: 'Guilds', Icon: IconGuilds },
+    { id: 'infinityBadges', label: 'Infinity Badges', Icon: IconTrophy, badge: 'NEW' },
     { id: 'multiverse', label: 'Multiverse', Icon: IconMultiverse },
     { id: 'nftGallery', label: 'NFT Gallery', Icon: IconMultiverse, badge: 'NEW' },
     { id: 'coe', label: 'CoE', Icon: IconCoe, badge: 'NEW' },
@@ -12541,6 +12550,14 @@ export default function HomePage() {
                             <IconWallet /> Wallet &amp; more
                         </button>
                     </div>
+                </section>
+
+                {/* ─── Infinity Badges ─────────────────────────────────────── */}
+                <section
+                    className={`tab-panel ${tab === 'infinityBadges' ? 'is-active' : ''}`}
+                    aria-hidden={tab !== 'infinityBadges'}
+                >
+                    <InfinityBadges />
                 </section>
 
                 {/* ─── Wallet ─────────────────────────────────────────────────── */}
