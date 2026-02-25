@@ -122,6 +122,10 @@ function createApp() {
     app.use('/api/memefi', require('./routes/memefi'));
     app.use('/api/redemption', require('./routes/redemption'));
     app.use('/api/partner', require('./routes/partnerRedemption'));
+    
+    // Civilization Stability Engine (CSE) routes
+    app.use('/api/cse', require('./routes/civilizationStabilityEngine'));
+    app.use('/api/cse', require('./routes/cseDashboard'));
 
     // Comms status moved to /api/comms router
 
