@@ -129,6 +129,9 @@ function createApp() {
 
     // Comms status moved to /api/comms router
 
+    // Infinity Badge System routes
+    app.use('/api/infinity-badges', require('./routes/infinityBadges'));
+
     // Prometheus metrics endpoint (for monitoring/alerting)
     app.get('/metrics', metricsHandler);
     app.get('/health', (_req, res) => res.json({ ok: true }));
