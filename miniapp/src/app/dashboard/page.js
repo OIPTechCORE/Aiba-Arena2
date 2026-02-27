@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 
@@ -129,55 +131,57 @@ const Dashboard = () => {
                 </div>
 
                 {/* Recent Activity */}
-                <div className="mt-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">🔥 Recent Activity</h2>
-                    <div className="space-y-4">
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <div className="flex items-center">
-                                <span className="text-2xl mr-3">🌟</span>
-                                <div>
-                                    <h4 className="font-semibold text-gray-900">Habit Streak Milestone!</h4>
-                                    <p className="text-sm text-gray-600">You maintained a 30-day streak in your wellness habit</p>
-                                    <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
+                {activeTab === 'overview' && (
+                    <div className="mt-8">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">🔥 Recent Activity</h2>
+                        <div className="space-y-4">
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <div className="flex items-center">
+                                    <span className="text-2xl mr-3">🌟</span>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900">Habit Streak Milestone!</h4>
+                                        <p className="text-sm text-gray-600">You maintained a 30-day streak in your wellness habit</p>
+                                        <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div className="flex items-center">
-                                <span className="text-2xl mr-3">🏆</span>
-                                <div>
-                                    <h4 className="font-semibold text-gray-900">Competition Victory!</h4>
-                                    <p className="text-sm text-gray-600">You reached level 15 in the endless racing competition</p>
-                                    <p className="text-xs text-gray-500 mt-1">5 hours ago</p>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div className="flex items-center">
+                                    <span className="text-2xl mr-3">🏆</span>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900">Competition Victory!</h4>
+                                        <p className="text-sm text-gray-600">You reached level 15 in the endless racing competition</p>
+                                        <p className="text-xs text-gray-500 mt-1">5 hours ago</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <div className="flex items-center">
-                                <span className="text-2xl mr-3">🌐</span>
-                                <div>
-                                    <h4 className="font-semibold text-gray-900">Viral Achievement!</h4>
-                                    <p className="text-sm text-gray-600">Your achievement share reached 1000+ engagement</p>
-                                    <p className="text-xs text-gray-500 mt-1">1 day ago</p>
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <div className="flex items-center">
+                                    <span className="text-2xl mr-3">🌐</span>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900">Viral Achievement!</h4>
+                                        <p className="text-sm text-gray-600">Your achievement share reached 1000+ engagement</p>
+                                        <p className="text-xs text-gray-500 mt-1">1 day ago</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                            <div className="flex items-center">
-                                <span className="text-2xl mr-3">💪</span>
-                                <div>
-                                    <h4 className="font-semibold text-gray-900">Emotional Breakthrough!</h4>
-                                    <p className="text-sm text-gray-600">Your learning goal investment showed significant emotional growth</p>
-                                    <p className="text-xs text-gray-500 mt-1">3 days ago</p>
+                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                <div className="flex items-center">
+                                    <span className="text-2xl mr-3">💪</span>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900">Emotional Breakthrough!</h4>
+                                        <p className="text-sm text-gray-600">Your learning goal investment showed significant emotional growth</p>
+                                        <p className="text-xs text-gray-500 mt-1">3 days ago</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
