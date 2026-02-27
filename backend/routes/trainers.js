@@ -192,10 +192,24 @@ router.get('/recruit-link', async (req, res) => {
 // POST /api/trainers/apply — apply to become trainer (telegram auth). Optional ref=inviter trainer code.
 router.post('/apply', requireTelegram, async (req, res) => {
     try {
+        console.log('[TRAINER APPLY] Request received:', {
+            telegramId: req.telegramId,
+            body: req.body,
+            query: req.query,
+            timestamp: new Date().toISOString()
+        });
+        
         const telegramId = String(req.telegramId || '');
+        if (!telegramId) {
+            console.error('[TRAINER APPLY] Missing telegramId');
+            return res.status(400).json({ error: 'telegramId required' });
+        }
+        
         const ref = String(req.body?.ref || req.query?.ref || '')
             .trim()
             .toUpperCase();
+            
+        console.log('[TRAINER APPLY] Processing application:', { telegramId, ref });
         const existing = await Trainer.findOne({ telegramId });
         if (existing) {
             return res.json({
@@ -248,8 +262,24 @@ router.post('/apply', requireTelegram, async (req, res) => {
             url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://aiba-arena2-miniapp.vercel.app'}/trainer?ref=${trainer.code}`,
         });
     } catch (err) {
-        console.error('Trainer apply error:', err);
-        res.status(500).json({ error: 'internal server error' });
+        console.error('[TRAINER APPLY] Error details:', {
+            error: err.message,
+            stack: err.stack,
+            name: err.name,
+            telegramId: req.telegramId,
+            body: req.body,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Send more specific error if possible
+        const errorMessage = err.name === 'ValidationError' 
+            ? 'Validation failed: ' + Object.values(err.errors).map(e => e.message).join(', ')
+            : err.message || 'internal server error';
+            
+        res.status(500).json({ 
+            error: errorMessage,
+            requestId: req.requestId || 'unknown'
+        });
     }
 });
 

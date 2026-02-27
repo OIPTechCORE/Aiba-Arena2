@@ -35,6 +35,16 @@ export function getBackendUrl() {
     }
 
     // 3. Fallback: localhost for local dev (only if not in production context)
+    // Check if we're in local development environment
+    const isLocalDev = typeof window !== 'undefined' && 
+        (window.location.hostname === 'localhost' || 
+         window.location.hostname === '127.0.0.1' || 
+         window.location.hostname.includes('localhost'));
+    
+    if (isLocalDev) {
+        return 'http://localhost:5000';
+    }
+    
     return process.env?.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 }
 
